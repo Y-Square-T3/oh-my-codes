@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// bin/oh-my-opencode.js
+// bin/oh-my-codes.js
 // Wrapper script that detects platform and spawns the correct binary
 
 import { spawnSync } from "node:child_process";
@@ -74,9 +74,9 @@ function getSignalExitCode(signal) {
 function getPackageBaseName() {
   try {
     const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-    return packageJson.name || "oh-my-opencode";
+    return packageJson.name || "oh-my-codes";
   } catch {
-    return "oh-my-opencode";
+    return "oh-my-codes";
   }
 }
 
@@ -96,7 +96,7 @@ function main() {
       packageBaseName,
     });
   } catch (error) {
-    console.error(`\noh-my-opencode: ${error.message}\n`);
+    console.error(`\noh-my-codes: ${error.message}\n`);
     process.exit(1);
   }
 
@@ -111,7 +111,7 @@ function main() {
     .filter((entry) => entry !== null);
 
   if (resolvedBinaries.length === 0) {
-    console.error(`\noh-my-opencode: Platform binary not installed.`);
+    console.error(`\noh-my-codes: Platform binary not installed.`);
     console.error(`\nYour platform: ${platform}-${arch}${libcFamily === "musl" ? "-musl" : ""}`);
     console.error(`Expected packages (in order): ${packageCandidates.join(", ")}`);
     console.error(`\nTo fix, run:`);
@@ -131,7 +131,7 @@ function main() {
         continue;
       }
 
-      console.error(`\noh-my-opencode: Failed to execute binary.`);
+      console.error(`\noh-my-codes: Failed to execute binary.`);
       console.error(`Error: ${result.error.message}\n`);
       process.exit(2);
     }
