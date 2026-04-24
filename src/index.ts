@@ -135,7 +135,7 @@ const pluginModule: PluginModule = {
 export default pluginModule
 
 export type {
-  OhMyOpenCodeConfig,
+  OhMyCodesConfig,
   AgentName,
   AgentOverrideConfig,
   AgentOverrides,

@@ -1,8 +1,8 @@
 import { z } from "zod"
-import { OhMyOpenCodeConfigSchema } from "../src/config/schema"
+import { OhMyCodesConfigSchema } from "../src/config/schema"
 
-export function createOhMyOpenCodeJsonSchema(): Record<string, unknown> {
-  const jsonSchema = z.toJSONSchema(OhMyOpenCodeConfigSchema, {
+export function createOhMyCodesJsonSchema(): Record<string, unknown> {
+  const jsonSchema = z.toJSONSchema(OhMyCodesConfigSchema, {
     target: "draft-7",
     unrepresentable: "any",
   }) as Record<string, unknown>

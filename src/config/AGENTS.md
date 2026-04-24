@@ -4,13 +4,13 @@
 
 ## OVERVIEW
 
-32 schema files composing `OhMyOpenCodeConfigSchema`. Zod v4 validation with `safeParse()`. All fields optional — omitted fields use plugin defaults.
+32 schema files composing `OhMyCodesConfigSchema`. Zod v4 validation with `safeParse()`. All fields optional — omitted fields use plugin defaults.
 
 ## SCHEMA TREE
 
 ```
 config/schema/
-├── oh-my-codes-config.ts    # ROOT: OhMyOpenCodeConfigSchema (composes all below)
+├── oh-my-codes-config.ts    # ROOT: OhMyCodesConfigSchema (composes all below)
 ├── agent-names.ts              # BuiltinAgentNameSchema (11), OverridableAgentNameSchema (14)
 ├── agent-overrides.ts          # AgentOverrideConfigSchema (21 fields per agent)
 ├── categories.ts               # 8 built-in + custom categories

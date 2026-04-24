@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from "bun:test"
 
-import { OhMyOpenCodeConfigSchema } from "../schema"
+import { OhMyCodesConfigSchema } from "../schema"
 import type { FallbackModelObject } from "./fallback-models"
 import { FallbackModelsSchema } from "./fallback-models"
 
@@ -43,7 +43,7 @@ describe("FallbackModelsSchema", () => {
   })
 })
 
-describe("OhMyOpenCodeConfigSchema fallback_models", () => {
+describe("OhMyCodesConfigSchema fallback_models", () => {
   test("accepts object array fallback_models under agents", () => {
     // given
     const fallbackModels: FallbackModelObject[] = [
@@ -62,7 +62,7 @@ describe("OhMyOpenCodeConfigSchema fallback_models", () => {
     }
 
     // when
-    const result = OhMyOpenCodeConfigSchema.safeParse(config)
+    const result = OhMyCodesConfigSchema.safeParse(config)
 
     // then
     expect(result.success).toBe(true)
@@ -89,7 +89,7 @@ describe("OhMyOpenCodeConfigSchema fallback_models", () => {
     }
 
     // when
-    const result = OhMyOpenCodeConfigSchema.safeParse(config)
+    const result = OhMyCodesConfigSchema.safeParse(config)
 
     // then
     expect(result.success).toBe(true)

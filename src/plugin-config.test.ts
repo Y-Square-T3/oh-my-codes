@@ -4,12 +4,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import * as shared from "./shared"
 import { mergeConfigs, parseConfigPartially } from "./plugin-config";
-import { OhMyOpenCodeConfigSchema, type OhMyOpenCodeConfig } from "./config";
+import { OhMyCodesConfigSchema, type OhMyCodesConfig } from "./config";
 
 const tempDirs: string[] = []
 
-function createConfig(config: Partial<OhMyOpenCodeConfig>): OhMyOpenCodeConfig {
-  return OhMyOpenCodeConfigSchema.parse(config)
+function createConfig(config: Partial<OhMyCodesConfig>): OhMyCodesConfig {
+  return OhMyCodesConfigSchema.parse(config)
 }
 
 async function importFreshPluginConfigModule(): Promise<typeof import("./plugin-config")> {
@@ -164,7 +164,7 @@ describe("parseConfigPartially", () => {
     //#then should accept the hook name so runtime and schema stay aligned
 
     it("should accept unknown disabled_hooks values for forward compatibility", () => {
-      const result = OhMyOpenCodeConfigSchema.safeParse({
+      const result = OhMyCodesConfigSchema.safeParse({
         disabled_hooks: ["future-hook-name"],
       });
 
@@ -383,7 +383,7 @@ describe("loadPluginConfig", () => {
     process.env.OPENCODE_CONFIG_DIR = userConfigDir
 
     // when
-    let config: OhMyOpenCodeConfig
+    let config: OhMyCodesConfig
     try {
       const fresh = await importFreshPluginConfigModule()
       config = fresh.loadPluginConfig(projectDir, {})

@@ -2,7 +2,7 @@
 
 import { describe, test, expect, spyOn, beforeEach, afterEach, mock } from "bun:test"
 import type { CategoryConfig } from "../config/schema"
-import type { OhMyOpenCodeConfig } from "../config"
+import type { OhMyCodesConfig } from "../config"
 import { getAgentDisplayName, getAgentListDisplayName, getAgentRuntimeName } from "../shared/agent-display-names"
 import { resolveCategoryConfig } from "./category-config-resolver"
 
@@ -29,7 +29,7 @@ async function importFreshConfigHandlerModule(): Promise<typeof import("./config
   return import(`./config-handler?test=${Date.now()}-${Math.random()}`)
 }
 
-function createPluginConfig(overrides: Partial<OhMyOpenCodeConfig> = {}): OhMyOpenCodeConfig {
+function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig {
   return {
     git_master: {
       commit_footer: true,
@@ -1619,7 +1619,7 @@ describe("Agent merge priority — project-local overrides global", () => {
       },
     })
 
-    const pluginConfig: OhMyOpenCodeConfig = {}
+    const pluginConfig: OhMyCodesConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-7",
       agent: {},
@@ -1659,7 +1659,7 @@ describe("Agent merge priority — project-local overrides global", () => {
       },
     })
 
-    const pluginConfig: OhMyOpenCodeConfig = {}
+    const pluginConfig: OhMyCodesConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-7",
       agent: {},
@@ -1699,7 +1699,7 @@ describe("Agent merge priority — project-local overrides global", () => {
       },
     })
 
-    const pluginConfig: OhMyOpenCodeConfig = {}
+    const pluginConfig: OhMyCodesConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-7",
       agent: {},
@@ -1747,7 +1747,7 @@ describe("Agent merge priority — project-local overrides global", () => {
       },
     })
 
-    const pluginConfig: OhMyOpenCodeConfig = {}
+    const pluginConfig: OhMyCodesConfig = {}
     const config: Record<string, unknown> = {
       model: "anthropic/claude-opus-4-7",
       agent: {},

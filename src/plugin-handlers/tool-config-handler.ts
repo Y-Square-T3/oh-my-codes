@@ -1,4 +1,4 @@
-import type { OhMyOpenCodeConfig } from "../config";
+import type { OhMyCodesConfig } from "../config";
 import { getAgentDisplayName, getAgentListDisplayName } from "../shared/agent-display-names";
 import { isTaskSystemEnabled } from "../shared";
 
@@ -23,7 +23,7 @@ function agentByKey(agentResult: Record<string, unknown>, key: string): AgentWit
 
 export function applyToolConfig(params: {
   config: Record<string, unknown>;
-  pluginConfig: OhMyOpenCodeConfig;
+  pluginConfig: OhMyCodesConfig;
   agentResult: Record<string, unknown>;
 }): void {
   const taskSystemEnabled = isTaskSystemEnabled(params.pluginConfig)

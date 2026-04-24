@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { OhMyOpenCodeConfigSchema, type OhMyOpenCodeConfig } from "./config";
+import { OhMyCodesConfigSchema, type OhMyCodesConfig } from "./config";
 import {
   log,
   deepMerge,
@@ -47,8 +47,8 @@ const PARTIAL_STRING_ARRAY_KEYS = new Set([
 
 export function parseConfigPartially(
   rawConfig: Record<string, unknown>
-): OhMyOpenCodeConfig | null {
-  const fullResult = OhMyOpenCodeConfigSchema.safeParse(rawConfig);
+): OhMyCodesConfig | null {
+  const fullResult = OhMyCodesConfigSchema.safeParse(rawConfig);
   if (fullResult.success) {
     return fullResult.data;
   }
@@ -65,7 +65,7 @@ export function parseConfigPartially(
       continue;
     }
 
-    const sectionResult = OhMyOpenCodeConfigSchema.safeParse({ [key]: rawConfig[key] });
+    const sectionResult = OhMyCodesConfigSchema.safeParse({ [key]: rawConfig[key] });
     if (sectionResult.success) {
       const parsed = sectionResult.data as Record<string, unknown>;
       if (parsed[key] !== undefined) {
@@ -86,13 +86,13 @@ export function parseConfigPartially(
     log("Partial config loaded - invalid sections skipped:", invalidSections);
   }
 
-  return partialConfig as OhMyOpenCodeConfig;
+  return partialConfig as OhMyCodesConfig;
 }
 
 export function loadConfigFromPath(
   configPath: string,
   _ctx: unknown
-): OhMyOpenCodeConfig | null {
+): OhMyCodesConfig | null {
   try {
     if (fs.existsSync(configPath)) {
       const content = fs.readFileSync(configPath, "utf-8");
@@ -100,7 +100,7 @@ export function loadConfigFromPath(
 
       migrateConfigFile(configPath, rawConfig);
 
-      const result = OhMyOpenCodeConfigSchema.safeParse(rawConfig);
+      const result = OhMyCodesConfigSchema.safeParse(rawConfig);
 
       if (result.success) {
         log(`Config loaded from ${configPath}`, { agents: result.data.agents });
@@ -133,9 +133,9 @@ export function loadConfigFromPath(
 }
 
 export function mergeConfigs(
-  base: OhMyOpenCodeConfig,
-  override: OhMyOpenCodeConfig
-): OhMyOpenCodeConfig {
+  base: OhMyCodesConfig,
+  override: OhMyCodesConfig
+): OhMyCodesConfig {
   return {
     ...base,
     ...override,
@@ -196,7 +196,7 @@ export function mergeConfigs(
 export function loadPluginConfig(
   directory: string,
   ctx: unknown
-): OhMyOpenCodeConfig {
+): OhMyCodesConfig {
   // User-level config path - prefer .jsonc over .json
   const configDir = getOpenCodeConfigDir({ binary: "opencode" });
   const userDetected = detectPluginConfigFile(configDir);
@@ -267,11 +267,11 @@ export function loadPluginConfig(
     )
   }
 
-  let config: OhMyOpenCodeConfig =
-    userConfig ?? OhMyOpenCodeConfigSchema.parse({});
+  let config: OhMyCodesConfig =
+    userConfig ?? OhMyCodesConfigSchema.parse({});
 
   // Override with project config
-  const defaultGitMaster = OhMyOpenCodeConfigSchema.parse({}).git_master
+  const defaultGitMaster = OhMyCodesConfigSchema.parse({}).git_master
   const projectConfig = loadConfigFromPath(projectConfigPath, ctx);
   const projectGitMasterOverrides = loadExplicitGitMasterOverrides(projectConfigPath)
 

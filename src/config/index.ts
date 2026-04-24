@@ -1,9 +1,9 @@
 export {
-  OhMyOpenCodeConfigSchema,
+  OhMyCodesConfigSchema,
 } from "./schema"
 
 export type {
-  OhMyOpenCodeConfig,
+  OhMyCodesConfig,
   AgentOverrideConfig,
   AgentOverrides,
   McpName,

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
 import { tool } from "@opencode-ai/plugin"
 
-import type { OhMyOpenCodeConfig } from "../config"
+import type { OhMyCodesConfig } from "../config"
 import * as openclawRuntimeDispatch from "../openclaw/runtime-dispatch"
 import type { ToolsRecord } from "./types"
 
@@ -54,7 +54,7 @@ const toolFactories: NonNullable<Parameters<typeof createToolRegistry>[0]["toolF
   createHashlineEditTool: mock(() => fakeTool),
 }
 
-function createPluginConfig(overrides: Partial<OhMyOpenCodeConfig> = {}): OhMyOpenCodeConfig {
+function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig {
   return {
     git_master: {
       commit_footer: false,

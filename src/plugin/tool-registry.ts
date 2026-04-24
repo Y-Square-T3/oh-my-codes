@@ -4,7 +4,7 @@ import type { SkillLoadOptions } from "../tools/skill/types"
 import type {
   AvailableCategory,
 } from "../agents/dynamic-agent-prompt-builder"
-import type { OhMyOpenCodeConfig } from "../config"
+import type { OhMyCodesConfig } from "../config"
 import { isInteractiveBashEnabled } from "../create-runtime-tmux-config"
 import * as openclawRuntimeDispatch from "../openclaw/runtime-dispatch"
 import type { PluginContext, ToolsRecord } from "./types"
@@ -143,7 +143,7 @@ export function trimToolsToCap(filteredTools: ToolsRecord, maxTools: number): vo
 
 export function createToolRegistry(args: {
   ctx: PluginContext
-  pluginConfig: OhMyOpenCodeConfig
+  pluginConfig: OhMyCodesConfig
   managers: Pick<Managers, "backgroundManager" | "tmuxSessionManager" | "skillMcpManager" | "modelFallbackControllerAccessor">
   skillContext: SkillContext
   availableCategories: AvailableCategory[]

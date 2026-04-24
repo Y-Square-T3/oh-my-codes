@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach, mock } from "bun:test"
-import type { RuntimeFallbackConfig, OhMyOpenCodeConfig } from "../../config"
+import type { RuntimeFallbackConfig, OhMyCodesConfig } from "../../config"
 import * as loggerModule from "../../shared/logger"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 
@@ -73,7 +73,7 @@ describe("runtime-fallback", () => {
     }
   }
 
-  function createMockPluginConfigWithCategoryFallback(fallbackModels: string[]): OhMyOpenCodeConfig {
+  function createMockPluginConfigWithCategoryFallback(fallbackModels: string[]): OhMyCodesConfig {
     return {
       git_master: {
         commit_footer: true,
@@ -93,7 +93,7 @@ describe("runtime-fallback", () => {
     model: string,
     fallbackModels: string[],
     variant?: string,
-  ): OhMyOpenCodeConfig {
+  ): OhMyCodesConfig {
     return {
       git_master: {
         commit_footer: true,
@@ -2359,7 +2359,7 @@ describe("runtime-fallback", () => {
   })
 
   describe("fallback models configuration", () => {
-    function createMockPluginConfigWithAgentFallback(agentName: string, fallbackModels: string[]): OhMyOpenCodeConfig {
+    function createMockPluginConfigWithAgentFallback(agentName: string, fallbackModels: string[]): OhMyCodesConfig {
       return {
         git_master: {
           commit_footer: true,

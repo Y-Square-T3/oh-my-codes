@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { applyToolConfig } from "./tool-config-handler"
-import type { OhMyOpenCodeConfig } from "../config"
+import type { OhMyCodesConfig } from "../config"
 import { getAgentDisplayName } from "../shared/agent-display-names"
 
 function createParams(overrides: {
@@ -18,7 +18,7 @@ function createParams(overrides: {
     pluginConfig: {
       experimental: overrides.taskSystem === undefined ? undefined : { task_system: overrides.taskSystem },
       disabled_tools: overrides.disabledTools,
-    } as OhMyOpenCodeConfig,
+    } as OhMyCodesConfig,
     agentResult: agentResult as Record<string, unknown>,
   }
 }

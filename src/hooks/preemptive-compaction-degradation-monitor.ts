@@ -1,4 +1,4 @@
-import type { OhMyOpenCodeConfig } from "../config"
+import type { OhMyCodesConfig } from "../config"
 import { log } from "../shared/logger"
 import { resolveNoTextTailFromSession } from "./preemptive-compaction-no-text-tail"
 import { resolveCompactionModel } from "./shared/compaction-model-resolver"
@@ -66,7 +66,7 @@ async function withTimeout<TValue>(
 export function createPostCompactionDegradationMonitor(args: {
   client: ClientLike
   directory: string
-  pluginConfig: OhMyOpenCodeConfig
+  pluginConfig: OhMyCodesConfig
   tokenCache: Map<string, CompactionTargetState>
   compactionInProgress: Set<string>
 }) {

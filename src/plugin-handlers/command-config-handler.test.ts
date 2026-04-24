@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import * as builtinCommands from "../features/builtin-commands";
 import * as commandLoader from "../features/claude-code-command-loader";
 import * as skillLoader from "../features/opencode-skill-loader";
-import type { OhMyOpenCodeConfig } from "../config";
+import type { OhMyCodesConfig } from "../config";
 import type { PluginComponents } from "./plugin-components-loader";
 import { applyCommandConfig } from "./command-config-handler";
 import {
@@ -24,7 +24,7 @@ function createPluginComponents(): PluginComponents {
   };
 }
 
-function createPluginConfig(): OhMyOpenCodeConfig {
+function createPluginConfig(): OhMyCodesConfig {
   return {
     git_master: {
       commit_footer: true,

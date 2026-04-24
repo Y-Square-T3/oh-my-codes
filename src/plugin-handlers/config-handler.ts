@@ -1,4 +1,4 @@
-import type { OhMyOpenCodeConfig } from "../config";
+import type { OhMyCodesConfig } from "../config";
 import { setAdditionalAllowedMcpEnvVars } from "../features/claude-code-mcp-loader";
 import type { ModelCacheState } from "../plugin-state";
 import { log } from "../shared";
@@ -14,7 +14,7 @@ export { resolveCategoryConfig } from "./category-config-resolver";
 
 export interface ConfigHandlerDeps {
   ctx: { directory: string; client?: any };
-  pluginConfig: OhMyOpenCodeConfig;
+  pluginConfig: OhMyCodesConfig;
   modelCacheState: ModelCacheState;
 }
 

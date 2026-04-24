@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { createOhMyOpenCodeJsonSchema } from "./build-schema-document"
+import { createOhMyCodesJsonSchema } from "./build-schema-document"
 
 const SCHEMA_OUTPUT_PATH = "assets/oh-my-codes.schema.json"
 const DIST_SCHEMA_OUTPUT_PATH = "dist/oh-my-codes.schema.json"
@@ -7,7 +7,7 @@ const DIST_SCHEMA_OUTPUT_PATH = "dist/oh-my-codes.schema.json"
 async function main() {
   console.log("Generating JSON Schema...")
 
-  const finalSchema = createOhMyOpenCodeJsonSchema()
+  const finalSchema = createOhMyCodesJsonSchema()
   await Bun.write(SCHEMA_OUTPUT_PATH, JSON.stringify(finalSchema, null, 2))
   await Bun.write(DIST_SCHEMA_OUTPUT_PATH, JSON.stringify(finalSchema, null, 2))
 

@@ -24,7 +24,7 @@ import { TmuxConfigSchema } from "./tmux"
 import { StartWorkConfigSchema } from "./start-work"
 import { WebsearchConfigSchema } from "./websearch"
 
-export const OhMyOpenCodeConfigSchema = z.object({
+export const OhMyCodesConfigSchema = z.object({
   $schema: z.string().optional(),
   /** Enable new task system (default: false) */
   new_task_system_enabled: z.boolean().optional(),
@@ -78,4 +78,4 @@ export const OhMyOpenCodeConfigSchema = z.object({
   _migrations: z.array(z.string()).optional(),
 })
 
-export type OhMyCodesConfig = z.infer<typeof OhMyOpenCodeConfigSchema>
+export type OhMyCodesConfig = z.infer<typeof OhMyCodesConfigSchema>
