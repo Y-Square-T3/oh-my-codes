@@ -226,7 +226,7 @@ Available categories: ${allCategoryNames}`,
 
 Configure in one of:
 1. OpenCode: Set "model" in opencode.json
-2. Oh-My-OpenCode: Set category model in ${CONFIG_BASENAME}.json
+2. Oh-My-Codes: Set category model in ${CONFIG_BASENAME}.json
 3. Provider: Connect a provider with available models
 
 Current category: ${args.category}
