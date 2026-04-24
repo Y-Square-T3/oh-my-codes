@@ -619,7 +619,7 @@ describe("sisyphus-task", () => {
        )
        
        // then proceeds without error - uses fallback chain
-       expect(result).not.toContain("oh-my-opencode requires a default model")
+       expect(result).not.toContain("oh-my-codes requires a default model")
     }, { timeout: 10000 })
 
     test("returns clear error when no model can be resolved", async () => {
@@ -3920,7 +3920,7 @@ describe("sisyphus-task", () => {
     }, { timeout: 20000 })
 
     test("agentOverrides model takes priority over matchedAgent.model (#1357)", async () => {
-      // given - user configured oracle to use a specific model in oh-my-opencode.json
+      // given - user configured oracle to use a specific model in oh-my-codes.json
       const { createDelegateTask } = require("./tools")
       let promptBody: any
 

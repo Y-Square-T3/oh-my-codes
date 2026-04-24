@@ -16,11 +16,11 @@ describe("migrateLegacyConfigFile", () => {
     rmSync(testDir, { recursive: true, force: true })
   })
 
-  describe("#given oh-my-opencode.jsonc exists but oh-my-openagent.jsonc does not", () => {
+  describe("#given oh-my-codes.jsonc exists but oh-my-openagent.jsonc does not", () => {
     describe("#when migrating the config file", () => {
       it("#then writes oh-my-openagent.jsonc and renames the legacy file to a backup", () => {
-        const legacyPath = join(testDir, "oh-my-opencode.jsonc")
-        const backupPath = join(testDir, "oh-my-opencode.jsonc.bak")
+        const legacyPath = join(testDir, "oh-my-codes.jsonc")
+        const backupPath = join(testDir, "oh-my-codes.jsonc.bak")
         writeFileSync(legacyPath, '{ "agents": {} }')
 
         const result = migrateLegacyConfigFile(legacyPath)
@@ -35,10 +35,10 @@ describe("migrateLegacyConfigFile", () => {
     })
   })
 
-  describe("#given oh-my-opencode.json exists but oh-my-openagent.json does not", () => {
+  describe("#given oh-my-codes.json exists but oh-my-openagent.json does not", () => {
     describe("#when migrating the config file", () => {
       it("#then copies to oh-my-openagent.json", () => {
-        const legacyPath = join(testDir, "oh-my-opencode.json")
+        const legacyPath = join(testDir, "oh-my-codes.json")
         writeFileSync(legacyPath, '{ "agents": {} }')
 
         const result = migrateLegacyConfigFile(legacyPath)
@@ -52,7 +52,7 @@ describe("migrateLegacyConfigFile", () => {
   describe("#given oh-my-openagent.jsonc already exists", () => {
     describe("#when attempting migration", () => {
       it("#then returns false and does not overwrite", () => {
-        const legacyPath = join(testDir, "oh-my-opencode.jsonc")
+        const legacyPath = join(testDir, "oh-my-codes.jsonc")
         const canonicalPath = join(testDir, "oh-my-openagent.jsonc")
         writeFileSync(legacyPath, '{ "old": true }')
         writeFileSync(canonicalPath, '{ "new": true }')
@@ -68,7 +68,7 @@ describe("migrateLegacyConfigFile", () => {
   describe("#given the file does not exist", () => {
     describe("#when attempting migration", () => {
       it("#then returns false", () => {
-        const result = migrateLegacyConfigFile(join(testDir, "oh-my-opencode.jsonc"))
+        const result = migrateLegacyConfigFile(join(testDir, "oh-my-codes.jsonc"))
 
         expect(result).toBe(false)
       })
@@ -91,7 +91,7 @@ describe("migrateLegacyConfigFile", () => {
   describe("#given canonical write succeeds but archive fails", () => {
     describe("#when migrating the config file", () => {
       it("#then returns true", () => {
-        const legacyPath = join(testDir, "oh-my-opencode.jsonc")
+        const legacyPath = join(testDir, "oh-my-codes.jsonc")
         const backupPath = `${legacyPath}.bak`
         const canonicalPath = join(testDir, "oh-my-openagent.jsonc")
         writeFileSync(legacyPath, '{ "agents": {} }')

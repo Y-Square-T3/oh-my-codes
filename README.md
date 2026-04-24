@@ -1,7 +1,7 @@
 > [!TIP]
 > **Building in Public**
 >
-> The maintainer builds and maintains oh-my-opencode in real-time with Jobdori, an AI assistant built on a heavily customized fork of OpenClaw.
+> The maintainer builds and maintains oh-my-codes in real-time with Jobdori, an AI assistant built on a heavily customized fork of OpenClaw.
 > Every feature, every fix, every issue triage — live in our Discord.
 >
 > [![Building in Public](./.github/assets/building-in-public.png)](https://discord.gg/PUwSMR9XNk)
@@ -16,18 +16,18 @@
 > [!TIP]
 > Be with us!
 >
-> | [<img alt="Discord link" src="https://img.shields.io/discord/1452487457085063218?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=flat-square" width="156px" />](https://discord.gg/PUwSMR9XNk) | Join our [Discord community](https://discord.gg/PUwSMR9XNk) to connect with contributors and fellow `oh-my-opencode` users. |
+> | [<img alt="Discord link" src="https://img.shields.io/discord/1452487457085063218?color=5865F2&label=discord&labelColor=black&logo=discord&logoColor=white&style=flat-square" width="156px" />](https://discord.gg/PUwSMR9XNk) | Join our [Discord community](https://discord.gg/PUwSMR9XNk) to connect with contributors and fellow `oh-my-codes` users. |
 > | :-----| :----- |
-> | [<img alt="X link" src="https://img.shields.io/badge/Follow-%40justsisyphus-00CED1?style=flat-square&logo=x&labelColor=black" width="156px" />](https://x.com/justsisyphus) | News and updates for `oh-my-opencode` used to be posted on my X account. <br /> Since it was suspended mistakenly, [@justsisyphus](https://x.com/justsisyphus) now posts updates on my behalf. |
+> | [<img alt="X link" src="https://img.shields.io/badge/Follow-%40justsisyphus-00CED1?style=flat-square&logo=x&labelColor=black" width="156px" />](https://x.com/justsisyphus) | News and updates for `oh-my-codes` used to be posted on my X account. <br /> Since it was suspended mistakenly, [@justsisyphus](https://x.com/justsisyphus) now posts updates on my behalf. |
 > | [<img alt="GitHub Follow" src="https://img.shields.io/github/followers/code-yeongyu?style=flat-square&logo=github&labelColor=black&color=24292f" width="156px" />](https://github.com/code-yeongyu) | Follow [@code-yeongyu](https://github.com/code-yeongyu) on GitHub for more projects. |
 
 <!-- <CENTERED SECTION FOR GITHUB DISPLAY> -->
 
 <div align="center">
 
-[![Oh My OpenCode](./.github/assets/hero.jpg)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-opencode)
+[![Oh My OpenCode](./.github/assets/hero.jpg)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-codes)
 
-[![Preview](./.github/assets/omo.png)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-opencode)
+[![Preview](./.github/assets/omo.png)](https://github.com/code-yeongyu/oh-my-openagent#oh-my-codes)
 
 
 </div>
@@ -41,7 +41,7 @@
 <div align="center">
 
 [![GitHub Release](https://img.shields.io/github/v/release/code-yeongyu/oh-my-openagent?color=369eff&labelColor=black&logo=github&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/releases)
-[![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fohmyopenagent.com%2Fapi%2Fnpm-downloads&style=flat-square)](https://www.npmjs.com/package/oh-my-opencode)
+[![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fohmyopenagent.com%2Fapi%2Fnpm-downloads&style=flat-square)](https://www.npmjs.com/package/oh-my-codes)
 [![GitHub Contributors](https://img.shields.io/github/contributors/code-yeongyu/oh-my-openagent?color=c4f042&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/graphs/contributors)
 [![GitHub Forks](https://img.shields.io/github/forks/code-yeongyu/oh-my-openagent?color=8ae8ff&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/network/members)
 [![GitHub Stars](https://img.shields.io/github/stars/code-yeongyu/oh-my-openagent?color=ffcb47&labelColor=black&style=flat-square)](https://github.com/code-yeongyu/oh-my-openagent/stargazers)
@@ -65,7 +65,7 @@
 
 > "I converted a 45k line tauri app into a SaaS web app overnight using Ohmyopencode and ralph loop. Started with interview me prompt, asked it for ratings and recommendations on the questions. It was amazing to watch it work and to wake up this morning to a mostly working website!" - [James Hargis](https://x.com/hargabyte/status/2007299688261882202)
 
-> "use oh-my-opencode, you will never go back" <br/>- [d0t3ch](https://x.com/d0t3ch/status/2001685618200580503)
+> "use oh-my-codes, you will never go back" <br/>- [d0t3ch](https://x.com/d0t3ch/status/2001685618200580503)
 
 > "I haven't really been able to articulate exactly what makes it so great yet, but the development experience has reached a completely different dimension." - [
 苔硯:こけすずり](https://x.com/kokesuzuri/status/2008532913961529372?s=20)
@@ -97,7 +97,7 @@ Install OmO. Type `ultrawork`. Done.
 Copy and paste this prompt to your LLM agent (Claude Code, AmpCode, Cursor, etc.):
 
 ```
-Install and configure oh-my-opencode by following the instructions here:
+Install and configure oh-my-codes by following the instructions here:
 https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
 ```
 
@@ -111,7 +111,7 @@ Fetch the installation guide and follow it:
 curl -s https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/refs/heads/dev/docs/guide/installation.md
 ```
 
-**Note**: Use the published package and binary name `oh-my-opencode`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`, while legacy `oh-my-opencode` entries still load with a warning. Plugin config files still commonly use `oh-my-opencode.json` or `oh-my-opencode.jsonc`, and both legacy and renamed basenames are recognized during the transition.
+**Note**: Use the published package and binary name `oh-my-codes`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`, while legacy `oh-my-codes` entries still load with a warning. Plugin config files still commonly use `oh-my-codes.json` or `oh-my-codes.jsonc`, and both legacy and renamed basenames are recognized during the transition.
 
 Anonymous telemetry is enabled by default to help improve install and runtime reliability. It uses PostHog with a hashed installation identifier, never the raw hostname, and can be disabled with `OMO_SEND_ANONYMOUS_TELEMETRY=0` or `OMO_DISABLE_POSTHOG=1`. See [Privacy Policy](docs/legal/privacy-policy.md) and [Terms of Service](docs/legal/terms-of-service.md).
 
@@ -269,19 +269,19 @@ Add your own: `.opencode/skills/*/SKILL.md` or `~/.config/opencode/skills/*/SKIL
 
 ---
 
-> **New to oh-my-opencode?** Read the **[Overview](docs/guide/overview.md)** to understand what you have, or check the **[Orchestration Guide](docs/guide/orchestration.md)** for how agents collaborate.
+> **New to oh-my-codes?** Read the **[Overview](docs/guide/overview.md)** to understand what you have, or check the **[Orchestration Guide](docs/guide/orchestration.md)** for how agents collaborate.
 
 ## Uninstallation
 
-To remove oh-my-opencode:
+To remove oh-my-codes:
 
 1. **Remove the plugin from your OpenCode config**
 
-   Edit `~/.config/opencode/opencode.json` (or `opencode.jsonc`) and remove either `"oh-my-openagent"` or the legacy `"oh-my-opencode"` entry from the `plugin` array:
+   Edit `~/.config/opencode/opencode.json` (or `opencode.jsonc`) and remove either `"oh-my-openagent"` or the legacy `"oh-my-codes"` entry from the `plugin` array:
 
    ```bash
    # Using jq
-   jq '.plugin = [.plugin[] | select(. != "oh-my-openagent" and . != "oh-my-opencode")]' \
+   jq '.plugin = [.plugin[] | select(. != "oh-my-openagent" and . != "oh-my-codes")]' \
        ~/.config/opencode/opencode.json > /tmp/oc.json && \
        mv /tmp/oc.json ~/.config/opencode/opencode.json
    ```
@@ -291,11 +291,11 @@ To remove oh-my-opencode:
    ```bash
    # Remove plugin config files recognized during the compatibility window
    rm -f ~/.config/opencode/oh-my-openagent.jsonc ~/.config/opencode/oh-my-openagent.json \
-         ~/.config/opencode/oh-my-opencode.jsonc ~/.config/opencode/oh-my-opencode.json
+         ~/.config/opencode/oh-my-codes.jsonc ~/.config/opencode/oh-my-codes.json
 
    # Remove project config (if exists)
    rm -f .opencode/oh-my-openagent.jsonc .opencode/oh-my-openagent.json \
-         .opencode/oh-my-opencode.jsonc .opencode/oh-my-opencode.json
+         .opencode/oh-my-codes.jsonc .opencode/oh-my-codes.json
    ```
 
 3. **Verify removal**
@@ -321,7 +321,7 @@ See full [Features Documentation](docs/reference/features.md).
 - **Built-in MCPs**: websearch (Exa), context7 (docs), grep_app (GitHub search)
 - **Session Tools**: List, read, search, and analyze session history
 - **Productivity Features**: Ralph Loop, Todo Enforcer, Comment Checker, Think Mode, and more
-- **Doctor Command**: Built-in diagnostics (`bunx oh-my-opencode doctor`) verify plugin registration, config, models, and environment
+- **Doctor Command**: Built-in diagnostics (`bunx oh-my-codes doctor`) verify plugin registration, config, models, and environment
 - **Model Fallbacks**: `fallback_models` can mix plain model strings with per-fallback object settings in the same array
 - **File Prompts**: Load prompts from files with `file://` support in agent configurations
 - **Session Recovery**: Automatic recovery from session errors, context window limits, and API failures
@@ -334,7 +334,7 @@ Opinionated defaults, adjustable if you insist.
 See [Configuration Documentation](docs/reference/configuration.md).
 
 **Quick Overview:**
-- **Config Locations**: The compatibility layer recognizes both `oh-my-openagent.json[c]` and legacy `oh-my-opencode.json[c]` plugin config files. Existing installs still commonly use the legacy basename.
+- **Config Locations**: The compatibility layer recognizes both `oh-my-openagent.json[c]` and legacy `oh-my-codes.json[c]` plugin config files. Existing installs still commonly use the legacy basename.
 - **JSONC Support**: Comments and trailing commas supported
 - **Agents**: Override models, temperatures, prompts, and permissions for any agent
 - **Built-in Skills**: `playwright` (browser automation), `git-master` (atomic commits)

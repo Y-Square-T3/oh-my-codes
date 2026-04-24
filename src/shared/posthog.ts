@@ -57,7 +57,7 @@ function getPostHogHost(): string {
 
 function getSharedProperties(source: PostHogSource): NonNullable<PostHogCaptureEvent["properties"]> {
   return {
-    platform: "oh-my-opencode",
+    platform: "oh-my-codes",
     package_name: PUBLISHED_PACKAGE_NAME,
     plugin_name: PLUGIN_NAME,
     package_version: packageJson.version,

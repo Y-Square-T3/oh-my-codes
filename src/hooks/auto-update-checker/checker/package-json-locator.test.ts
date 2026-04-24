@@ -15,9 +15,9 @@ describe("findPackageJsonUp", () => {
     rmSync(workdir, { recursive: true, force: true })
   })
 
-  it("finds a package.json whose name is the canonical oh-my-opencode", () => {
+  it("finds a package.json whose name is the canonical oh-my-codes", () => {
     const pkgPath = join(workdir, "package.json")
-    writeFileSync(pkgPath, JSON.stringify({ name: "oh-my-opencode", version: "3.16.0" }))
+    writeFileSync(pkgPath, JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }))
 
     const found = findPackageJsonUp(workdir)
 

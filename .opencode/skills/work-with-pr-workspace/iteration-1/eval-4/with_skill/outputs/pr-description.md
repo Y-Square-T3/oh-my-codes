@@ -29,7 +29,7 @@ Closes #100
 Enabled by default. Disable with:
 
 ```jsonc
-// .opencode/oh-my-opencode.jsonc
+// .opencode/oh-my-codes.jsonc
 {
   "disabled_mcps": ["arxiv"]
 }

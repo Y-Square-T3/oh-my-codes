@@ -30,7 +30,7 @@ describe("auto-update-checker constants", () => {
   it("ACCEPTED_PACKAGE_NAMES contains both the canonical and aliased npm names (GH-3257)", async () => {
     const { ACCEPTED_PACKAGE_NAMES } = await import(`./constants?test=${Date.now()}`)
 
-    expect(ACCEPTED_PACKAGE_NAMES).toContain("oh-my-opencode")
+    expect(ACCEPTED_PACKAGE_NAMES).toContain("oh-my-codes")
     expect(ACCEPTED_PACKAGE_NAMES).toContain("oh-my-openagent")
   })
 

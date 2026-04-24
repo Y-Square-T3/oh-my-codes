@@ -25,24 +25,24 @@ describe("plugin-identity constants", () => {
   })
 
   describe("LOG_FILENAME", () => {
-    it("equals oh-my-opencode.log", () => {
+    it("equals oh-my-codes.log", () => {
       // given
 
       // when
 
       // then
-      expect(LOG_FILENAME).toBe("oh-my-opencode.log")
+      expect(LOG_FILENAME).toBe("oh-my-codes.log")
     })
   })
 
   describe("CACHE_DIR_NAME", () => {
-    it("equals oh-my-opencode", () => {
+    it("equals oh-my-codes", () => {
       // given
 
       // when
 
       // then
-      expect(CACHE_DIR_NAME).toBe("oh-my-opencode")
+      expect(CACHE_DIR_NAME).toBe("oh-my-codes")
     })
   })
 })

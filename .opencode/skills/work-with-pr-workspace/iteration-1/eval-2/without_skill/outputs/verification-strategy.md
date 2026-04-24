@@ -87,7 +87,7 @@ mkdir -p .sisyphus/plans
 echo '# Plan\n- [ ] Task 1' > .sisyphus/plans/test.md
 
 # Start opencode - atlas hook should NOT crash when session.idle fires
-# Verify /tmp/oh-my-opencode.log shows normal continuation behavior
+# Verify /tmp/oh-my-codes.log shows normal continuation behavior
 ```
 
 Also test the extreme case:

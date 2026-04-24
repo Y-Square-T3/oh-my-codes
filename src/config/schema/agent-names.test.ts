@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { OhMyOpenCodeConfigSchema } from "./oh-my-opencode-config"
+import { OhMyOpenCodeConfigSchema } from "./oh-my-codes-config"
 
 describe("OhMyOpenCodeConfigSchema disabled_skills", () => {
   test("accepts review-work and ai-slop-remover", () => {

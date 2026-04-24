@@ -16,7 +16,7 @@ describe("detectCurrentConfig - single package detection", () => {
   beforeEach(() => {
     testConfigDir = join(tmpdir(), `omo-detect-config-${Date.now()}-${Math.random().toString(36).slice(2)}`)
     testConfigPath = join(testConfigDir, "opencode.json")
-    testOmoConfigPath = join(testConfigDir, "oh-my-opencode.json")
+    testOmoConfigPath = join(testConfigDir, "oh-my-codes.json")
 
     mkdirSync(testConfigDir, { recursive: true })
     process.env.OPENCODE_CONFIG_DIR = testConfigDir
@@ -31,7 +31,7 @@ describe("detectCurrentConfig - single package detection", () => {
 
   it("detects both legacy and canonical plugin entries", () => {
     // given
-    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-opencode", "oh-my-openagent@3.11.0"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-codes", "oh-my-openagent@3.11.0"] }, null, 2) + "\n", "utf-8")
 
     // when
     const result = detectCurrentConfig()
@@ -53,7 +53,7 @@ describe("detectCurrentConfig - single package detection", () => {
 
   it("detects OpenCode Go from the existing omo config", () => {
     // given
-    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-opencode"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2) + "\n", "utf-8")
     writeFileSync(testOmoConfigPath, JSON.stringify({ agents: { atlas: { model: "opencode-go/kimi-k2.5" } } }, null, 2) + "\n", "utf-8")
 
     // when
@@ -99,7 +99,7 @@ describe("addPluginToOpenCodeConfig - single package writes", () => {
 
   it("upgrades a bare legacy plugin entry to canonical", async () => {
     // given
-    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-opencode"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2) + "\n", "utf-8")
 
     // when
     const result = await addPluginToOpenCodeConfig("3.11.0")
@@ -113,7 +113,7 @@ describe("addPluginToOpenCodeConfig - single package writes", () => {
   it("updates a version-pinned legacy entry to the requested version", async () => {
     // given
     const getPluginNameWithVersionSpy = spyOn(pluginNameWithVersion, "getPluginNameWithVersion").mockResolvedValue("oh-my-openagent@3.16.0")
-    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-opencode@3.15.0"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-codes@3.15.0"] }, null, 2) + "\n", "utf-8")
 
     // when
     const result = await addPluginToOpenCodeConfig("3.16.0")
@@ -127,7 +127,7 @@ describe("addPluginToOpenCodeConfig - single package writes", () => {
 
   it("removes stale legacy entry when canonical and legacy entries both exist", async () => {
     // given
-    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-openagent", "oh-my-opencode"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-openagent", "oh-my-codes"] }, null, 2) + "\n", "utf-8")
 
     // when
     const result = await addPluginToOpenCodeConfig("3.11.0")
@@ -173,7 +173,7 @@ describe("addPluginToOpenCodeConfig - single package writes", () => {
   it("rewrites quoted jsonc plugin field in place", async () => {
     // given
     testConfigPath = join(testConfigDir, "opencode.jsonc")
-    writeFileSync(testConfigPath, '{\n  "plugin": ["oh-my-opencode"]\n}\n', "utf-8")
+    writeFileSync(testConfigPath, '{\n  "plugin": ["oh-my-codes"]\n}\n', "utf-8")
 
     // when
     const result = await addPluginToOpenCodeConfig("3.11.0")
@@ -182,6 +182,6 @@ describe("addPluginToOpenCodeConfig - single package writes", () => {
     expect(result.success).toBe(true)
     const savedContent = readFileSync(testConfigPath, "utf-8")
     expect(savedContent.includes('"plugin": [\n    "oh-my-openagent"\n  ]')).toBe(true)
-    expect(savedContent.includes("oh-my-opencode")).toBe(false)
+    expect(savedContent.includes("oh-my-codes")).toBe(false)
   })
 })

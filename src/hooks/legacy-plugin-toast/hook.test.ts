@@ -80,11 +80,11 @@ describe("createLegacyPluginToastHook", () => {
       mockCheckForLegacyPluginEntry.mockReturnValue({
         hasLegacyEntry: true,
         hasCanonicalEntry: false,
-        legacyEntries: ["oh-my-opencode"],
+        legacyEntries: ["oh-my-codes"],
       })
       mockAutoMigrate.mockReturnValue({
         migrated: true,
-        from: "oh-my-opencode",
+        from: "oh-my-codes",
         to: "oh-my-openagent",
         configPath: "/tmp/opencode.json",
       })
@@ -110,7 +110,7 @@ describe("createLegacyPluginToastHook", () => {
       mockCheckForLegacyPluginEntry.mockReturnValue({
         hasLegacyEntry: true,
         hasCanonicalEntry: false,
-        legacyEntries: ["oh-my-opencode"],
+        legacyEntries: ["oh-my-codes"],
       })
       mockAutoMigrate.mockReturnValue({
         migrated: false,
@@ -140,11 +140,11 @@ describe("createLegacyPluginToastHook", () => {
       mockCheckForLegacyPluginEntry.mockReturnValue({
         hasLegacyEntry: true,
         hasCanonicalEntry: false,
-        legacyEntries: ["oh-my-opencode"],
+        legacyEntries: ["oh-my-codes"],
       })
       mockAutoMigrate.mockReturnValue({
         migrated: true,
-        from: "oh-my-opencode",
+        from: "oh-my-codes",
         to: "oh-my-openagent",
         configPath: "/tmp/opencode.json",
       })
@@ -169,7 +169,7 @@ describe("createLegacyPluginToastHook", () => {
       mockCheckForLegacyPluginEntry.mockReturnValue({
         hasLegacyEntry: true,
         hasCanonicalEntry: false,
-        legacyEntries: ["oh-my-opencode"],
+        legacyEntries: ["oh-my-codes"],
       })
       const hook = createLegacyPluginToastHook(createMockCtx(), {
         checkForLegacyPluginEntry: mockCheckForLegacyPluginEntry,
@@ -191,7 +191,7 @@ describe("createLegacyPluginToastHook", () => {
       mockCheckForLegacyPluginEntry.mockReturnValue({
         hasLegacyEntry: true,
         hasCanonicalEntry: false,
-        legacyEntries: ["oh-my-opencode"],
+        legacyEntries: ["oh-my-codes"],
       })
       const hook = createLegacyPluginToastHook(createMockCtx(), {
         checkForLegacyPluginEntry: mockCheckForLegacyPluginEntry,

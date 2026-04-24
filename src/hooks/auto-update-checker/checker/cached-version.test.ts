@@ -33,7 +33,7 @@ describe("getCachedVersion (GH-3257)", () => {
   beforeEach(() => {
     cacheRoot = mkdtempSync(join(tmpdir(), "omo-cached-version-"))
     mockState.candidates = [
-      join(cacheRoot, "node_modules", "oh-my-opencode", "package.json"),
+      join(cacheRoot, "node_modules", "oh-my-codes", "package.json"),
       join(cacheRoot, "node_modules", "oh-my-openagent", "package.json"),
     ]
   })
@@ -43,17 +43,17 @@ describe("getCachedVersion (GH-3257)", () => {
     mockState.candidates = []
   })
 
-  it("returns the version when the package is installed under oh-my-opencode", () => {
-    const pkgDir = join(cacheRoot, "node_modules", "oh-my-opencode")
+  it("returns the version when the package is installed under oh-my-codes", () => {
+    const pkgDir = join(cacheRoot, "node_modules", "oh-my-codes")
     mkdirSync(pkgDir, { recursive: true })
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ name: "oh-my-opencode", version: "3.16.0" }))
+    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }))
 
     expect(getCachedVersion()).toBe("3.16.0")
   })
 
   it("returns the version when the package is installed under oh-my-openagent", () => {
     // GH-3257: npm users who install the aliased `oh-my-openagent` package get
-    // node_modules/oh-my-openagent/package.json, not the canonical oh-my-opencode
+    // node_modules/oh-my-openagent/package.json, not the canonical oh-my-codes
     // path. The cached version resolver must check both.
     const pkgDir = join(cacheRoot, "node_modules", "oh-my-openagent")
     mkdirSync(pkgDir, { recursive: true })
@@ -62,10 +62,10 @@ describe("getCachedVersion (GH-3257)", () => {
     expect(getCachedVersion()).toBe("3.16.0")
   })
 
-  it("prefers oh-my-opencode when both are installed", () => {
-    const legacyDir = join(cacheRoot, "node_modules", "oh-my-opencode")
+  it("prefers oh-my-codes when both are installed", () => {
+    const legacyDir = join(cacheRoot, "node_modules", "oh-my-codes")
     mkdirSync(legacyDir, { recursive: true })
-    writeFileSync(join(legacyDir, "package.json"), JSON.stringify({ name: "oh-my-opencode", version: "3.16.0" }))
+    writeFileSync(join(legacyDir, "package.json"), JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }))
 
     const aliasDir = join(cacheRoot, "node_modules", "oh-my-openagent")
     mkdirSync(aliasDir, { recursive: true })

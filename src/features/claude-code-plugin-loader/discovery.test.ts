@@ -105,7 +105,7 @@ describe("discoverInstalledPlugins", () => {
       JSON.stringify({
         version: 2,
         plugins: {
-          "file:///D:/configs/user-configs/.config/opencode/node_modules/oh-my-opencode@latest": [
+          "file:///D:/configs/user-configs/.config/opencode/node_modules/oh-my-codes@latest": [
             {
               scope: "user",
               installPath,
@@ -129,7 +129,7 @@ describe("discoverInstalledPlugins", () => {
     //#then
     expect(discovered.errors).toHaveLength(0)
     expect(discovered.plugins).toHaveLength(1)
-    expect(discovered.plugins[0]?.name).toBe("oh-my-opencode")
+    expect(discovered.plugins[0]?.name).toBe("oh-my-codes")
   })
 
   it("derives canonical package name from npm plugin keys", async () => {

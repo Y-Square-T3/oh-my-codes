@@ -11,7 +11,7 @@ export const PACKAGE_NAME = PUBLISHED_PACKAGE_NAME
 /**
  * All package names the canonical plugin may be published under.
  *
- * The package is published to npm as both `oh-my-opencode` (legacy canonical)
+ * The package is published to npm as both `oh-my-codes` (legacy canonical)
  * and `oh-my-openagent` (current canonical). Any code that *reads* an
  * installed package.json or walks up from an import path must accept both,
  * because the installed name depends on which package the user added to

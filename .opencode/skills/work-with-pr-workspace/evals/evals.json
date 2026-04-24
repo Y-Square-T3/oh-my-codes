@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I need to add a `max_background_agents` config option to oh-my-opencode that limits how many background agents can run simultaneously. It should be in the plugin config schema with a default of 5. Add validation and make sure the background manager respects it. Create a PR for this.",
+      "prompt": "I need to add a `max_background_agents` config option to oh-my-codes that limits how many background agents can run simultaneously. It should be in the plugin config schema with a default of 5. Add validation and make sure the background manager respects it. Create a PR for this.",
       "expected_output": "Agent creates worktree, implements config option with schema validation, adds tests, creates PR, iterates through verification gates until merged",
       "files": [],
       "assertions": [

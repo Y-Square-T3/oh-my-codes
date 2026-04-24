@@ -101,7 +101,7 @@ jobs:
         run: |
           VERSION="$RAW_VERSION"
           if [ -z "$VERSION" ]; then
-            PREV=$(curl -s https://registry.npmjs.org/oh-my-opencode/latest | jq -r '.version // "0.0.0"')
+            PREV=$(curl -s https://registry.npmjs.org/oh-my-codes/latest | jq -r '.version // "0.0.0"')
             BASE="${PREV%%-*}"
             IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
             case "$BUMP" in
@@ -136,10 +136,10 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-opencode/${VERSION}")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-codes/${VERSION}")
           if [ "$STATUS" = "200" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
-            echo "✓ oh-my-opencode@${VERSION} already published"
+            echo "✓ oh-my-codes@${VERSION} already published"
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
@@ -166,7 +166,7 @@ jobs:
           bunx tsc --emitDeclarationOnly
           bun run build:schema
 
-      - name: Publish oh-my-opencode
+      - name: Publish oh-my-codes
         if: steps.check.outputs.skip != 'true'
         env:
           DIST_TAG: ${{ steps.version.outputs.dist_tag }}
@@ -206,7 +206,7 @@ jobs:
             .version = $v |
             .optionalDependencies = (
               .optionalDependencies | to_entries |
-              map(.key = (.key | sub("^oh-my-opencode-"; "oh-my-openagent-")) | .value = $v) |
+              map(.key = (.key | sub("^oh-my-codes-"; "oh-my-openagent-")) | .value = $v) |
               from_entries
             )
           ' package.json > tmp.json && mv tmp.json package.json
