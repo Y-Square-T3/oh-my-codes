@@ -78,4 +78,4 @@ export const OhMyOpenCodeConfigSchema = z.object({
   _migrations: z.array(z.string()).optional(),
 })
 
-export type OhMyOpenCodeConfig = z.infer<typeof OhMyOpenCodeConfigSchema>
+export type OhMyCodesConfig = z.infer<typeof OhMyOpenCodeConfigSchema>
