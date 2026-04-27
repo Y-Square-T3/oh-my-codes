@@ -1,32 +1,31 @@
-import type { OhMyCodesConfig, HookName } from "../../config"
+import type { HookName, OhMyCodesConfig } from "../../config"
 import type { ModelFallbackControllerAccessor } from "../../hooks/model-fallback"
 import type { ModelCacheState } from "../../plugin-state"
 import type { PluginContext } from "../types"
 
 import {
-  createContextWindowMonitorHook,
-  createSessionRecoveryHook,
-  createSessionNotification,
-  createThinkModeHook,
-  createModelFallbackHook,
+  createAgentUsageReminderHook,
   createAnthropicContextWindowLimitRecoveryHook,
   createAutoUpdateCheckerHook,
-  createAgentUsageReminderHook,
-  createNonInteractiveEnvHook,
-  createInteractiveBashSessionHook,
-  createRalphLoopHook,
-  createEditErrorRecoveryHook,
+  createContextWindowMonitorHook,
   createDelegateTaskRetryHook,
-  createTaskResumeInfoHook,
-  createStartWorkHook,
-  createPrometheusMdOnlyHook,
-  createSisyphusJuniorNotepadHook,
-  createNoSisyphusGptHook,
+  createEditErrorRecoveryHook,
+  createInteractiveBashSessionHook,
+  createModelFallbackHook,
   createNoHephaestusNonGptHook,
-  createQuestionLabelTruncatorHook,
+  createNonInteractiveEnvHook,
+  createNoSisyphusGptHook,
   createPreemptiveCompactionHook,
+  createPrometheusMdOnlyHook,
+  createQuestionLabelTruncatorHook,
+  createRalphLoopHook,
   createRuntimeFallbackHook,
-  createLegacyPluginToastHook,
+  createSessionNotification,
+  createSessionRecoveryHook,
+  createSisyphusJuniorNotepadHook,
+  createStartWorkHook,
+  createTaskResumeInfoHook,
+  createThinkModeHook,
 } from "../../hooks"
 import { createAnthropicEffortHook } from "../../hooks/anthropic-effort"
 import {
@@ -71,7 +70,6 @@ export type SessionHooks = {
   taskResumeInfo: ReturnType<typeof createTaskResumeInfoHook> | null
   anthropicEffort: ReturnType<typeof createAnthropicEffortHook> | null
   runtimeFallback: ReturnType<typeof createRuntimeFallbackHook> | null
-  legacyPluginToast: ReturnType<typeof createLegacyPluginToastHook> | null
 }
 
 export function createSessionHooks(args: {
@@ -322,10 +320,6 @@ export function createSessionHooks(args: {
       )
     : null
 
-  const legacyPluginToast = isHookEnabled("legacy-plugin-toast")
-    ? safeHook("legacy-plugin-toast", () => createLegacyPluginToastHook(ctx))
-    : null
-
   return {
     contextWindowMonitor,
     preemptiveCompaction,
@@ -350,6 +344,5 @@ export function createSessionHooks(args: {
     taskResumeInfo,
     anthropicEffort,
     runtimeFallback,
-    legacyPluginToast,
   }
 }

@@ -92,4 +92,3 @@ export {
 export { createReadImageResizerHook } from "./read-image-resizer"
 export { createTodoDescriptionOverrideHook } from "./todo-description-override"
 export { createWebFetchRedirectGuardHook } from "./webfetch-redirect-guard"
-export { createLegacyPluginToastHook } from "./legacy-plugin-toast"

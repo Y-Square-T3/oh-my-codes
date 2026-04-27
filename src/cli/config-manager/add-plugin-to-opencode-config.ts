@@ -1,14 +1,14 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import type { ConfigMergeResult } from "../types"
-import { PLUGIN_NAME, LEGACY_PLUGIN_NAME } from "../../shared"
+import { PLUGIN_NAME } from "../../shared"
 import { backupConfigFile } from "./backup-config"
 import { getConfigDir } from "./config-context"
 import { ensureConfigDirectoryExists } from "./ensure-config-directory-exists"
 import { formatErrorWithSuggestion } from "./format-error-with-suggestion"
 import { detectConfigFormat } from "./opencode-config-format"
 import {
-  parseOpenCodeConfigFileWithError,
   type OpenCodeConfig,
+  parseOpenCodeConfigFileWithError,
 } from "./parse-opencode-config-file"
 import { getPluginNameWithVersion } from "./plugin-name-with-version"
 import {
@@ -60,11 +60,7 @@ export async function addPluginToOpenCodeConfig(
     )
     const otherPlugins = plugins.filter(
       (plugin) =>
-        !(plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`)) &&
-        !(
-          plugin === LEGACY_PLUGIN_NAME ||
-          plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`)
-        ),
+        !(plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`)),
     )
 
     const existingEntry = canonicalEntries[0]

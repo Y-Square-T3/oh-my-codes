@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from "node:fs"
 
-import { MIN_OPENCODE_VERSION, CHECK_IDS, CHECK_NAMES } from "../constants"
+import { CHECK_IDS, CHECK_NAMES, MIN_OPENCODE_VERSION } from "../constants"
 import type { CheckResult, DoctorIssue, SystemInfo } from "../types"
 import {
+  compareVersions,
   findOpenCodeBinary,
   getOpenCodeVersion,
-  compareVersions,
 } from "./system-binary"
 import { getPluginInfo } from "./system-plugin"
 import {
@@ -15,9 +15,8 @@ import {
 } from "./system-loaded-version"
 import { parseJsonc } from "../../../shared"
 import {
-  PUBLISHED_PACKAGE_NAME,
   PLUGIN_NAME,
-  LEGACY_PLUGIN_NAME,
+  PUBLISHED_PACKAGE_NAME,
 } from "../../../shared/plugin-identity"
 
 interface SystemCheckDeps {
@@ -142,26 +141,6 @@ export async function checkSystem(
       severity: "error",
       affects: ["all agents"],
     })
-  }
-
-  if (pluginInfo.entry && !pluginInfo.isLocalDev) {
-    const isLegacyName =
-      pluginInfo.entry === LEGACY_PLUGIN_NAME ||
-      pluginInfo.entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
-
-    if (isLegacyName) {
-      const suggestedEntry = pluginInfo.entry.replace(
-        LEGACY_PLUGIN_NAME,
-        PLUGIN_NAME,
-      )
-      issues.push({
-        title: "Using legacy package name",
-        description: `Your opencode.json references "${LEGACY_PLUGIN_NAME}" which has been renamed to "${PLUGIN_NAME}". The old name may stop working in a future release.`,
-        fix: `Update your opencode.json plugin entry: "${pluginInfo.entry}" → "${suggestedEntry}"`,
-        severity: "warning",
-        affects: ["plugin loading"],
-      })
-    }
   }
 
   if (

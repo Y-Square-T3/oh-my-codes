@@ -4,10 +4,7 @@ import * as fs from "node:fs"
 import * as os from "node:os"
 import * as path from "node:path"
 import { PACKAGE_NAME } from "../constants"
-import {
-  LEGACY_PLUGIN_NAME,
-  PLUGIN_NAME,
-} from "../../../shared/plugin-identity"
+import { PLUGIN_NAME } from "../../../shared/plugin-identity"
 
 type PluginEntryResult = {
   entry: string
@@ -146,24 +143,6 @@ describe("findPluginEntry", () => {
     expect(execution.status).toBe(0)
     const pluginInfo = JSON.parse(execution.stdout.trim()) as PluginEntryResult
     expect(pluginInfo?.entry).toBe(PLUGIN_NAME)
-    expect(pluginInfo?.isPinned).toBe(false)
-    expect(pluginInfo?.pinnedVersion).toBeNull()
-  })
-
-  test("finds legacy plugin entry", async () => {
-    // #given legacy plugin entry is configured
-    fs.writeFileSync(
-      configPath,
-      JSON.stringify({ plugin: [LEGACY_PLUGIN_NAME] }),
-    )
-
-    // #when plugin entry is detected
-    const execution = runFindPluginEntry(temporaryDirectory)
-
-    // #then legacy entry is returned
-    expect(execution.status).toBe(0)
-    const pluginInfo = JSON.parse(execution.stdout.trim()) as PluginEntryResult
-    expect(pluginInfo?.entry).toBe(LEGACY_PLUGIN_NAME)
     expect(pluginInfo?.isPinned).toBe(false)
     expect(pluginInfo?.pinnedVersion).toBeNull()
   })

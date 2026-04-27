@@ -1,6 +1,5 @@
 export const PLUGIN_NAME = "oh-my-codes"
-export const LEGACY_PLUGIN_NAME = "oh-my-codes"
-export const PUBLISHED_PACKAGE_NAME = LEGACY_PLUGIN_NAME
+export const PUBLISHED_PACKAGE_NAME = "oh-my-codes"
 export const ACCEPTED_PACKAGE_NAMES = [
   PUBLISHED_PACKAGE_NAME,
   PLUGIN_NAME,

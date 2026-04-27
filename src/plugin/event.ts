@@ -13,9 +13,9 @@ import {
 import {
   clearPendingModelFallback,
   clearSessionFallbackChain,
-  setSessionFallbackChain,
-  setPendingModelFallback,
   type ModelFallbackHook,
+  setPendingModelFallback,
+  setSessionFallbackChain,
 } from "../hooks/model-fallback/hook"
 import { getRawFallbackModels } from "../hooks/runtime-fallback/fallback-models"
 import {
@@ -282,11 +282,6 @@ export function createEventHandler(args: {
     await runEventHookSafely(
       "autoUpdateChecker",
       hooks.autoUpdateChecker?.event,
-      input,
-    )
-    await runEventHookSafely(
-      "legacyPluginToast",
-      hooks.legacyPluginToast?.event,
       input,
     )
     await runEventHookSafely(

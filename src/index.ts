@@ -16,11 +16,7 @@ import { createPluginInterface } from "./plugin-interface"
 import { loadPluginConfig } from "./plugin-config"
 import { createModelCacheState } from "./plugin-state"
 import { createFirstMessageVariantGate } from "./shared/first-message-variant"
-import {
-  injectServerAuthIntoClient,
-  log,
-  logLegacyPluginStartupWarning,
-} from "./shared"
+import { injectServerAuthIntoClient, log } from "./shared"
 import {
   detectExternalSkillPlugin,
   getSkillPluginConflictWarning,
@@ -33,7 +29,6 @@ const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
   log("[oh-my-openagent] ENTRY - plugin loading", {
     directory: input.directory,
   })
-  logLegacyPluginStartupWarning()
 
   const skillPluginCheck = detectExternalSkillPlugin(input.directory)
   if (skillPluginCheck.detected && skillPluginCheck.pluginName) {

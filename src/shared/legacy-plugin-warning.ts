@@ -3,7 +3,7 @@ import { join } from "node:path"
 
 import { parseJsoncSafe } from "./jsonc-parser"
 import { getOpenCodeConfigPaths } from "./opencode-config-dir"
-import { LEGACY_PLUGIN_NAME, PLUGIN_NAME } from "./plugin-identity"
+import { PLUGIN_NAME } from "./plugin-identity"
 
 interface OpenCodeConfig {
   plugin?: string[]
@@ -35,12 +35,6 @@ function getOpenCodeConfigPath(overrideConfigDir?: string): string | null {
   return null
 }
 
-function isLegacyPluginEntry(entry: string): boolean {
-  return (
-    entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
-  )
-}
-
 function isCanonicalPluginEntry(entry: string): boolean {
   return entry === PLUGIN_NAME || entry.startsWith(`${PLUGIN_NAME}@`)
 }
@@ -70,17 +64,14 @@ export function checkForLegacyPluginEntry(
       }
     }
 
-    const legacyEntries = (parseResult.data.plugin ?? []).filter(
-      isLegacyPluginEntry,
-    )
     const hasCanonicalEntry = (parseResult.data.plugin ?? []).some(
       isCanonicalPluginEntry,
     )
 
     return {
-      hasLegacyEntry: legacyEntries.length > 0,
+      hasLegacyEntry: false,
       hasCanonicalEntry,
-      legacyEntries,
+      legacyEntries: [],
       configPath,
     }
   } catch {

@@ -1,10 +1,9 @@
 import { existsSync, readFileSync } from "node:fs"
 
 import {
-  LEGACY_PLUGIN_NAME,
-  PLUGIN_NAME,
   getOpenCodeConfigPaths,
   parseJsonc,
+  PLUGIN_NAME,
 } from "../../../shared"
 
 export interface PluginInfo {
@@ -33,11 +32,7 @@ function parsePluginVersion(entry: string): string | null {
     if (!value || value === "latest") return null
     return value
   }
-  if (entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)) {
-    const value = entry.slice(LEGACY_PLUGIN_NAME.length + 1)
-    if (!value || value === "latest") return null
-    return value
-  }
+
   return null
 }
 
@@ -48,16 +43,8 @@ function findPluginEntry(
     if (entry === PLUGIN_NAME || entry.startsWith(`${PLUGIN_NAME}@`)) {
       return { entry, isLocalDev: false }
     }
-    if (
-      entry === LEGACY_PLUGIN_NAME ||
-      entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
-    ) {
-      return { entry, isLocalDev: false }
-    }
-    if (
-      entry.startsWith("file://") &&
-      (entry.includes(PLUGIN_NAME) || entry.includes(LEGACY_PLUGIN_NAME))
-    ) {
+
+    if (entry.startsWith("file://") && entry.includes(PLUGIN_NAME)) {
       return { entry, isLocalDev: true }
     }
   }
