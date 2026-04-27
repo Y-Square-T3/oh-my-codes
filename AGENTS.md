@@ -4,7 +4,7 @@
 
 ## OVERVIEW
 
-OpenCode plugin (npm: `oh-my-codes`, dual-published as `oh-my-openagent` during transition) extending Claude Code with 11 agents, 52 lifecycle hooks, 26 tools, 3-tier MCP system (built-in + .mcp.json + skill-embedded), Hashline LINE#ID edit tool, IntentGate classifier, and Claude Code compatibility. 1766 TypeScript source files, 377k LOC, 104 barrel index.ts files. Entry: `src/index.ts` → 5-step init (loadConfig → createManagers → createTools → createHooks → createPluginInterface).
+OpenCode plugin (npm: `oh-my-codes`) extending Claude Code with 11 agents, 52 lifecycle hooks, 26 tools, 3-tier MCP system (built-in + .mcp.json + skill-embedded), Hashline LINE#ID edit tool, IntentGate classifier, and Claude Code compatibility. 1766 TypeScript source files, 377k LOC, 104 barrel index.ts files. Entry: `src/index.ts` → 5-step init (loadConfig → createManagers → createTools → createHooks → createPluginInterface).
 
 ## STRUCTURE
 
@@ -112,7 +112,7 @@ Fields: agents (14 overridable, 21 fields each), categories (8 built-in + custom
 - **Module structure**: index.ts barrel exports, no catch-all files (utils.ts, helpers.ts banned), 200 LOC soft limit
 - **Imports**: relative within module, barrel imports across modules (`import { log } from "./shared"`)
 - **No path aliases**: no `@/` -- relative imports only
-- **Dual package**: `oh-my-codes` + `oh-my-openagent` published simultaneously (transition period)
+
 
 ## ANTI-PATTERNS
 
@@ -146,7 +146,7 @@ bunx oh-my-codes run     # Non-interactive session
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | ci.yml | push/PR to master/dev | Tests (split: mock-heavy isolated + batch), typecheck, build, schema auto-commit |
-| publish.yml | manual dispatch | Version bump, dual npm publish (oh-my-codes + oh-my-openagent), platform binaries, GitHub release |
+| publish.yml | manual dispatch | Version bump, npm publish (oh-my-codes), platform binaries, GitHub release |
 | publish-platform.yml | called by publish | 11 platform binaries via bun compile (darwin/linux/windows) |
 | sisyphus-agent.yml | @mention / dispatch | AI agent handles issues/PRs |
 | refresh-model-capabilities.yml | weekly schedule / dispatch | Auto-refresh model capabilities from models.dev API |
