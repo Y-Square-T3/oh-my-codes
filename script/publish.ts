@@ -2,7 +2,6 @@
 
 import { Command } from "commander"
 import { $ } from "bun"
-import { existsSync } from "node:fs"
 import { join } from "node:path"
 
 const PLATFORM_PACKAGES = [
@@ -18,6 +17,8 @@ const PLATFORM_PACKAGES = [
   "windows-x64",
   "windows-x64-baseline",
 ]
+
+const PACKAGE_NAME = "oh-my-codes"
 
 interface PublishResult {
   success: boolean
@@ -39,51 +40,6 @@ function getDistTag(version: string): string | null {
   const prerelease = version.split("-")[1]
   const tag = prerelease?.split(".")[0]
   return tag || "next"
-}
-
-async function renamePackageJson(
-  pkgPath: string,
-  oldName: string,
-  newName: string,
-): Promise<void> {
-  const content = await Bun.file(pkgPath).text()
-  const updated = content.replace(new RegExp(`"${oldName}"`, "g"), `"${newName}"`)
-  await Bun.write(pkgPath, updated)
-}
-
-async function renameAllPackages(
-  baseName: string,
-  newBaseName: string,
-): Promise<void> {
-  const mainPkgPath = new URL("../package.json", import.meta.url).pathname
-  const mainContent = await Bun.file(mainPkgPath).text()
-  const pkgJson = JSON.parse(mainContent)
-  const currentVersion = pkgJson.version
-
-  console.log(`Renaming packages to ${newBaseName}@${currentVersion}...`)
-
-  for (const platform of PLATFORM_PACKAGES) {
-    const oldPlatformName = `${baseName}-${platform}`
-    const newPlatformName = `${newBaseName}-${platform}`
-    const pkgPath = new URL(`../packages/${platform}/package.json`, import.meta.url).pathname
-
-    if (existsSync(pkgPath)) {
-      await renamePackageJson(pkgPath, oldPlatformName, newPlatformName)
-      console.log(`  Renamed: packages/${platform}`)
-    } else {
-      console.warn(`  Warning: packages/${platform}/package.json not found`)
-    }
-  }
-
-  await renamePackageJson(mainPkgPath, baseName, newBaseName)
-  console.log(`  Renamed: package.json`)
-
-  for (const platform of PLATFORM_PACKAGES) {
-    const oldPlatformName = `${baseName}-${platform}`
-    const newPlatformName = `${newBaseName}-${platform}`
-    await renamePackageJson(mainPkgPath, oldPlatformName, newPlatformName)
-  }
-  console.log(`  Renamed: optionalDependencies in package.json`)
 }
 
 async function publishPackage(
@@ -129,8 +85,6 @@ async function publishPackage(
 }
 
 async function publishAllPackages(
-  baseName: string,
-  newBaseName: string,
   version: string,
   distTag: string | null,
   skipPlatform: boolean,
@@ -152,7 +106,7 @@ async function publishAllPackages(
 
       const publishPromises = batch.map(async (platform) => {
         const pkgDir = join(process.cwd(), "packages", platform)
-        const pkgName = `${newBaseName}-${platform}`
+        const pkgName = `${PACKAGE_NAME}-${platform}`
 
         console.log(`    Starting ${pkgName}...`)
         const result = await publishPackage(pkgDir, distTag, false, pkgName, version)
@@ -182,17 +136,17 @@ async function publishAllPackages(
   }
 
   console.log(`\nPublishing main package...`)
-  const mainResult = await publishPackage(process.cwd(), distTag, true, newBaseName, version)
+  const mainResult = await publishPackage(process.cwd(), distTag, true, PACKAGE_NAME, version)
 
   if (mainResult.success) {
     if (mainResult.alreadyPublished) {
-      console.log(`  ✓ ${newBaseName}@${version} (already published)`)
+      console.log(`  ✓ ${PACKAGE_NAME}@${version} (already published)`)
     } else {
-      console.log(`  ✓ ${newBaseName}@${version}`)
+      console.log(`  ✓ ${PACKAGE_NAME}@${version}`)
     }
   } else {
-    console.error(`  ✗ ${newBaseName} failed: ${mainResult.error}`)
-    throw new Error(`Failed to publish ${newBaseName}`)
+    console.error(`  ✗ ${PACKAGE_NAME} failed: ${mainResult.error}`)
+    throw new Error(`Failed to publish ${PACKAGE_NAME}`)
   }
 }
 
@@ -201,17 +155,13 @@ async function main() {
 
   program
     .name("publish")
-    .description("Publish oh-my-codes packages with custom naming")
-    .option("--name <name>", "Base package name (e.g., @myorg/my-matrix)")
+    .description("Publish oh-my-codes packages")
     .option("--dist-tag <tag>", "npm dist-tag (auto-detected from version if not specified)")
     .option("--skip-platform", "Skip publishing platform packages")
 
   program.parse(process.argv)
 
   const opts = program.opts()
-  const baseName = "oh-my-codes"
-  const newBaseName = opts.name ?? baseName
-
   const distTagOverride = opts.distTag
   const skipPlatform = opts.skipPlatform ?? false
 
@@ -220,7 +170,7 @@ async function main() {
   const pkgJson = JSON.parse(mainContent)
   const version = pkgJson.version
 
-  console.log(`=== Publishing oh-my-codes (rename to ${newBaseName}) ===\n`)
+  console.log(`=== Publishing ${PACKAGE_NAME} ===\n`)
   console.log(`Version: ${version}`)
   if (distTagOverride) {
     console.log(`Dist-tag: ${distTagOverride}`)
@@ -228,10 +178,9 @@ async function main() {
 
   const distTag = distTagOverride ?? getDistTag(version)
 
-  await renameAllPackages(baseName, newBaseName)
-  await publishAllPackages(baseName, newBaseName, version, distTag, skipPlatform)
+  await publishAllPackages(version, distTag, skipPlatform)
 
-  console.log(`\n=== Successfully published ${newBaseName}@${version} ===`)
+  console.log(`\n=== Successfully published ${PACKAGE_NAME}@${version} ===`)
 }
 
 main()
