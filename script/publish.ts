@@ -202,18 +202,18 @@ async function main() {
   program
     .name("publish")
     .description("Publish oh-my-codes packages with custom naming")
-    .requiredOption("--name <name>", "Base package name (e.g., @myorg/my-matrix)")
+    .option("--name <name>", "Base package name (e.g., @myorg/my-matrix)")
     .option("--dist-tag <tag>", "npm dist-tag (auto-detected from version if not specified)")
     .option("--skip-platform", "Skip publishing platform packages")
 
   program.parse(process.argv)
 
   const opts = program.opts()
-  const newBaseName = opts.name
+  const baseName = "oh-my-matrix"
+  const newBaseName = opts.name ?? baseName
+
   const distTagOverride = opts.distTag
   const skipPlatform = opts.skipPlatform ?? false
-
-  const baseName = "oh-my-matrix"
 
   const mainPkgPath = new URL("../package.json", import.meta.url).pathname
   const mainContent = await Bun.file(mainPkgPath).text()
