@@ -304,16 +304,6 @@ bunx oh-my-codes doctor --status
 bunx oh-my-codes doctor --json
 ```
 
-### "Using legacy package name" Warning
-
-The doctor warns if it finds an outdated plugin entry in `opencode.json`. Update the plugin array to use `oh-my-codes`:
-
-```bash
-# Migrate from oh-my-openagent to oh-my-codes
-jq '.plugin = (.plugin // [] | map(if . == "oh-my-openagent" then "oh-my-codes" else . end))' \
-  ~/.config/opencode/opencode.json > /tmp/opencode.json && mv /tmp/opencode.json ~/.config/opencode/opencode.json
-```
-
 ---
 
 ## refresh-model-capabilities
