@@ -6,20 +6,26 @@ import type { PluginInfo } from "./system-plugin"
 import type { OpenCodeBinaryInfo } from "./system-binary"
 import { checkSystem } from "./system"
 
-const mockFindOpenCodeBinary = mock<() => Promise<OpenCodeBinaryInfo | null>>(async () => ({
-  binary: "opencode",
-  path: "/usr/local/bin/opencode",
-}))
+const mockFindOpenCodeBinary = mock<() => Promise<OpenCodeBinaryInfo | null>>(
+  async () => ({
+    binary: "opencode",
+    path: "/usr/local/bin/opencode",
+  }),
+)
 const mockGetOpenCodeVersion = mock(async () => "1.0.200")
-const mockCompareVersions = mock((_leftVersion?: string, _rightVersion?: string) => true)
-const mockGetPluginInfo = mock((): PluginInfo => ({
-  registered: true,
-  entry: "oh-my-codes",
-  isPinned: false,
-  pinnedVersion: null,
-  configPath: null,
-  isLocalDev: false,
-}))
+const mockCompareVersions = mock(
+  (_leftVersion?: string, _rightVersion?: string) => true,
+)
+const mockGetPluginInfo = mock(
+  (): PluginInfo => ({
+    registered: true,
+    entry: "oh-my-codes",
+    isPinned: false,
+    pinnedVersion: null,
+    configPath: null,
+    isLocalDev: false,
+  }),
+)
 const mockGetLoadedPluginVersion = mock(() => ({
   cacheDir: "/Users/test/Library/Caches/opencode with spaces",
   cachePackagePath: "/tmp/package.json",
@@ -27,9 +33,10 @@ const mockGetLoadedPluginVersion = mock(() => ({
   expectedVersion: "3.0.0",
   loadedVersion: "3.1.0",
 }))
-const mockGetLatestPluginVersion = mock(async (_currentVersion: string | null) => null as string | null)
+const mockGetLatestPluginVersion = mock(
+  async (_currentVersion: string | null) => null as string | null,
+)
 const mockGetSuggestedInstallTag = mock(() => "latest")
-
 
 function createSystemDeps() {
   return {
@@ -85,8 +92,12 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      const mismatchIssue = result.issues.find((issue) => issue.title === "Loaded plugin version mismatch")
-      expect(mismatchIssue?.fix).toBe('Reinstall: cd "/Users/test/Library/Caches/opencode with spaces" && bun install')
+      const mismatchIssue = result.issues.find(
+        (issue) => issue.title === "Loaded plugin version mismatch",
+      )
+      expect(mismatchIssue?.fix).toBe(
+        'Reinstall: cd "/Users/test/Library/Caches/opencode with spaces" && bun install',
+      )
     })
 
     it("uses the loaded version channel for update fix command", async () => {
@@ -108,9 +119,11 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      const outdatedIssue = result.issues.find((issue) => issue.title === "Loaded plugin is outdated")
+      const outdatedIssue = result.issues.find(
+        (issue) => issue.title === "Loaded plugin is outdated",
+      )
       expect(outdatedIssue?.fix).toBe(
-        'Update: cd "/Users/test/Library/Caches/opencode with spaces" && bun add oh-my-codes@canary'
+        'Update: cd "/Users/test/Library/Caches/opencode with spaces" && bun add oh-my-codes@canary',
       )
     })
   })
@@ -131,10 +144,12 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      const legacyEntryIssue = result.issues.find((issue) => issue.title === "Using legacy package name")
+      const legacyEntryIssue = result.issues.find(
+        (issue) => issue.title === "Using legacy package name",
+      )
       expect(legacyEntryIssue?.severity).toBe("warning")
       expect(legacyEntryIssue?.fix).toBe(
-        'Update your opencode.json plugin entry: "oh-my-codes" → "oh-my-openagent"'
+        'Update your opencode.json plugin entry: "oh-my-codes" → "oh-my-openagent"',
       )
     })
 
@@ -153,10 +168,12 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      const legacyEntryIssue = result.issues.find((issue) => issue.title === "Using legacy package name")
+      const legacyEntryIssue = result.issues.find(
+        (issue) => issue.title === "Using legacy package name",
+      )
       expect(legacyEntryIssue?.severity).toBe("warning")
       expect(legacyEntryIssue?.fix).toBe(
-        'Update your opencode.json plugin entry: "oh-my-codes@3.0.0" → "oh-my-openagent@3.0.0"'
+        'Update your opencode.json plugin entry: "oh-my-codes@3.0.0" → "oh-my-openagent@3.0.0"',
       )
     })
 
@@ -175,7 +192,11 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      expect(result.issues.some((issue) => issue.title === "Using legacy package name")).toBe(false)
+      expect(
+        result.issues.some(
+          (issue) => issue.title === "Using legacy package name",
+        ),
+      ).toBe(false)
     })
 
     it("does not warn for a local-dev legacy entry", async () => {
@@ -193,7 +214,11 @@ describe("system check", () => {
       const result = await checkSystem(createSystemDeps())
 
       //#then
-      expect(result.issues.some((issue) => issue.title === "Using legacy package name")).toBe(false)
+      expect(
+        result.issues.some(
+          (issue) => issue.title === "Using legacy package name",
+        ),
+      ).toBe(false)
     })
   })
 })

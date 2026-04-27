@@ -47,7 +47,9 @@ export async function selectSessionInTui(
   }
 }
 
-type SelectSessionApi = (args: { body: { sessionID: string } }) => Promise<unknown>
+type SelectSessionApi = (args: {
+  body: { sessionID: string }
+}) => Promise<unknown>
 
 function getSelectSessionApi(client: unknown): SelectSessionApi | null {
   if (!isRecord(client)) {

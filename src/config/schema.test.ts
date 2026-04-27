@@ -42,7 +42,11 @@ describe("disabled_mcps schema", () => {
     // then
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.disabled_mcps).toEqual(["playwright", "sqlite", "custom-mcp"])
+      expect(result.data.disabled_mcps).toEqual([
+        "playwright",
+        "sqlite",
+        "custom-mcp",
+      ])
     }
   })
 
@@ -58,7 +62,11 @@ describe("disabled_mcps schema", () => {
     // then
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.disabled_mcps).toEqual(["context7", "playwright", "custom-server"])
+      expect(result.data.disabled_mcps).toEqual([
+        "context7",
+        "playwright",
+        "custom-server",
+      ])
     }
   })
 
@@ -313,9 +321,9 @@ describe("AgentOverrideConfigSchema", () => {
 
     test("accepts both model and category (deprecated usage)", () => {
       // given - category should take precedence at runtime, but both should validate
-      const config = { 
+      const config = {
         model: "openai/gpt-5.4",
-        category: "ultrabrain"
+        category: "ultrabrain",
       }
 
       // when
@@ -333,9 +341,9 @@ describe("AgentOverrideConfigSchema", () => {
   describe("combined fields", () => {
     test("accepts category with skills", () => {
       // given
-      const config = { 
+      const config = {
         category: "visual-engineering",
-        skills: ["frontend-ui-ux"]
+        skills: ["frontend-ui-ux"],
       }
 
       // when
@@ -351,11 +359,11 @@ describe("AgentOverrideConfigSchema", () => {
 
     test("accepts category with skills and other fields", () => {
       // given
-      const config = { 
+      const config = {
         category: "ultrabrain",
         skills: ["code-reviewer"],
         temperature: 0.3,
-        prompt_append: "Extra instructions"
+        prompt_append: "Extra instructions",
       }
 
       // when
@@ -437,7 +445,15 @@ describe("CategoryConfigSchema", () => {
 describe("BuiltinCategoryNameSchema", () => {
   test("accepts all builtin category names", () => {
     // given
-    const categories = ["visual-engineering", "ultrabrain", "artistry", "quick", "unspecified-low", "unspecified-high", "writing"]
+    const categories = [
+      "visual-engineering",
+      "ultrabrain",
+      "artistry",
+      "quick",
+      "unspecified-low",
+      "unspecified-high",
+      "writing",
+    ]
 
     // when / #then
     for (const cat of categories) {
@@ -490,7 +506,9 @@ describe("Sisyphus-Junior agent override", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.agents?.["sisyphus-junior"]).toBeDefined()
-      expect(result.data.agents?.["sisyphus-junior"]?.model).toBe("openai/gpt-5.4")
+      expect(result.data.agents?.["sisyphus-junior"]?.model).toBe(
+        "openai/gpt-5.4",
+      )
       expect(result.data.agents?.["sisyphus-junior"]?.temperature).toBe(0.2)
     }
   })
@@ -512,7 +530,7 @@ describe("Sisyphus-Junior agent override", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.agents?.["sisyphus-junior"]?.prompt_append).toBe(
-        "Additional instructions for sisyphus-junior"
+        "Additional instructions for sisyphus-junior",
       )
     }
   })
@@ -694,7 +712,9 @@ describe("OhMyCodesConfigSchema - browser_automation_engine", () => {
 
     // then
     expect(result.success).toBe(true)
-    expect(result.data?.browser_automation_engine?.provider).toBe("agent-browser")
+    expect(result.data?.browser_automation_engine?.provider).toBe(
+      "agent-browser",
+    )
   })
 
   test("accepts config without browser_automation_engine", () => {
@@ -718,7 +738,9 @@ describe("OhMyCodesConfigSchema - browser_automation_engine", () => {
 
     // then
     expect(result.success).toBe(true)
-    expect(result.data?.browser_automation_engine?.provider).toBe("playwright-cli")
+    expect(result.data?.browser_automation_engine?.provider).toBe(
+      "playwright-cli",
+    )
   })
 })
 
@@ -878,7 +900,6 @@ describe("ExperimentalConfigSchema feature flags", () => {
     //#then
     expect(result.success).toBe(false)
   })
-
 })
 
 describe("GitMasterConfigSchema", () => {

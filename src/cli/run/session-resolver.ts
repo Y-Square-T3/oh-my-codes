@@ -37,7 +37,9 @@ export async function resolveSession(options: {
 
     if (res.error) {
       console.error(
-        pc.yellow(`Session create attempt ${attempt}/${SESSION_CREATE_MAX_RETRIES} failed:`)
+        pc.yellow(
+          `Session create attempt ${attempt}/${SESSION_CREATE_MAX_RETRIES} failed:`,
+        ),
       )
       console.error(pc.dim(`  Error: ${serializeError(res.error)}`))
 
@@ -55,8 +57,8 @@ export async function resolveSession(options: {
 
     console.error(
       pc.yellow(
-        `Session create attempt ${attempt}/${SESSION_CREATE_MAX_RETRIES}: No session ID returned`
-      )
+        `Session create attempt ${attempt}/${SESSION_CREATE_MAX_RETRIES}: No session ID returned`,
+      ),
     )
 
     if (attempt < SESSION_CREATE_MAX_RETRIES) {

@@ -1,8 +1,18 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import { login } from "./login"
 import type { LoginDependencies } from "./login"
 
-const mockLogin = mock(() => Promise.resolve({ accessToken: "test-token", expiresAt: 1710000000 }))
+const mockLogin = mock(() =>
+  Promise.resolve({ accessToken: "test-token", expiresAt: 1710000000 }),
+)
 
 describe("login command", () => {
   let consoleErrorSpy: ReturnType<typeof spyOn>

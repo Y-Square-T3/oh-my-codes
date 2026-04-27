@@ -3,7 +3,10 @@
 import type { ToolContext } from "@opencode-ai/plugin/tool"
 import { describe, expect, test } from "bun:test"
 import type { BackgroundTask } from "../../features/background-agent"
-import { clearPendingStore, consumeToolMetadata } from "../../features/tool-metadata-store"
+import {
+  clearPendingStore,
+  consumeToolMetadata,
+} from "../../features/tool-metadata-store"
 import type { BackgroundOutputClient, BackgroundOutputManager } from "./clients"
 import { createBackgroundOutput } from "./create-background-output"
 
@@ -29,7 +32,7 @@ describe("createBackgroundOutput metadata", () => {
       status: "running",
     }
     const manager: BackgroundOutputManager = {
-      getTask: id => (id === task.id ? task : undefined),
+      getTask: (id) => (id === task.id ? task : undefined),
     }
     const client: BackgroundOutputClient = {
       session: {

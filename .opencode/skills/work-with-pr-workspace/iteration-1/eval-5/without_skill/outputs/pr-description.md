@@ -9,6 +9,7 @@
 The comment-checker hook's upstream Go binary (`go-claude-code-comment-checker`) flags ALL non-filtered comments as problematic. Its `AgentMemoFilter` regex `(?i)^[\s#/*-]*note:\s*\w` classifies any `Note:` comment as AI-generated "agent memo" slop, triggering an aggressive warning banner.
 
 This causes false positives for legitimate, widely-used comment patterns:
+
 ```typescript
 // Note: Thread-safe implementation required due to concurrent access
 // NOTE: See RFC 7231 section 6.5.4 for 404 semantics
@@ -26,11 +27,12 @@ Rather than waiting for an upstream binary fix, this PR adds a configurable **po
 3. **Behavior**: If ALL flagged comments are legitimate → suppress entire warning. If mixed → remove only the legitimate entries from the XML, keep the warning for actual slop.
 
 Users can customize via config:
+
 ```jsonc
 {
   "comment_checker": {
-    "allowed_comment_prefixes": ["note:", "todo:", "fixme:", "custom-prefix:"]
-  }
+    "allowed_comment_prefixes": ["note:", "todo:", "fixme:", "custom-prefix:"],
+  },
 }
 ```
 

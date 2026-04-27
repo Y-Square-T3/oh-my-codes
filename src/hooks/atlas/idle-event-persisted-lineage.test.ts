@@ -1,15 +1,33 @@
 declare const require: (name: string) => any
-const { afterEach, beforeEach, describe, expect, mock, test, afterAll } = require("bun:test")
+const {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} = require("bun:test")
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { randomUUID } from "node:crypto"
 
-import { clearBoulderState, readBoulderState, writeBoulderState } from "../../features/boulder-state"
-import { _resetForTesting, registerAgentName } from "../../features/claude-code-session-state"
+import {
+  clearBoulderState,
+  readBoulderState,
+  writeBoulderState,
+} from "../../features/boulder-state"
+import {
+  _resetForTesting,
+  registerAgentName,
+} from "../../features/claude-code-session-state"
 import type { BoulderState } from "../../features/boulder-state"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-persisted-lineage-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `atlas-persisted-lineage-storage-${randomUUID()}`,
+)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -30,7 +48,9 @@ mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => true,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createAtlasHook } = await import("./index")
 
@@ -56,7 +76,10 @@ describe("atlas hook idle-event persisted lineage", () => {
 
   function createHook(
     parentSessionIDs?: Record<string, string | undefined>,
-    messagesBySession?: Record<string, Array<{ info: { agent: string; providerID: string; modelID: string } }>>,
+    messagesBySession?: Record<
+      string,
+      Array<{ info: { agent: string; providerID: string; modelID: string } }>
+    >,
   ) {
     return createAtlasHook({
       directory: testDirectory,
@@ -68,7 +91,9 @@ describe("atlas hook idle-event persisted lineage", () => {
               parentID: parentSessionIDs?.[input.path.id],
             },
           }),
-          messages: async (input: { path: { id: string } }) => ({ data: messagesBySession?.[input.path.id] ?? [] }),
+          messages: async (input: { path: { id: string } }) => ({
+            data: messagesBySession?.[input.path.id] ?? [],
+          }),
           prompt: async (input: unknown) => {
             promptCalls.push(input)
             return { data: {} }
@@ -109,7 +134,9 @@ describe("atlas hook idle-event persisted lineage", () => {
       },
       {
         [descendantSessionID]: [
-          { info: { agent: "atlas", providerID: "openai", modelID: "gpt-5.4" } },
+          {
+            info: { agent: "atlas", providerID: "openai", modelID: "gpt-5.4" },
+          },
         ],
       },
     )
@@ -123,7 +150,9 @@ describe("atlas hook idle-event persisted lineage", () => {
     })
 
     // then
-    expect(readBoulderState(testDirectory)?.session_ids).not.toContain(descendantSessionID)
+    expect(readBoulderState(testDirectory)?.session_ids).not.toContain(
+      descendantSessionID,
+    )
     expect(promptCalls.length).toBe(0)
   })
 
@@ -144,7 +173,13 @@ describe("atlas hook idle-event persisted lineage", () => {
       },
       {
         [descendantSessionID]: [
-          { info: { agent: "sisyphus-junior", providerID: "openai", modelID: "gpt-5.4" } },
+          {
+            info: {
+              agent: "sisyphus-junior",
+              providerID: "openai",
+              modelID: "gpt-5.4",
+            },
+          },
         ],
       },
     )
@@ -181,7 +216,15 @@ describe("atlas hook idle-event persisted lineage", () => {
             throw new Error("session lookup failed")
           },
           messages: async () => ({
-            data: [{ info: { agent: "atlas", providerID: "openai", modelID: "gpt-5.4" } }],
+            data: [
+              {
+                info: {
+                  agent: "atlas",
+                  providerID: "openai",
+                  modelID: "gpt-5.4",
+                },
+              },
+            ],
           }),
           prompt: async (input: unknown) => {
             promptCalls.push(input)
@@ -225,7 +268,13 @@ describe("atlas hook idle-event persisted lineage", () => {
       },
       {
         [descendantSessionID]: [
-          { info: { agent: "sisyphus-junior", providerID: "openai", modelID: "gpt-5.4" } },
+          {
+            info: {
+              agent: "sisyphus-junior",
+              providerID: "openai",
+              modelID: "gpt-5.4",
+            },
+          },
         ],
       },
     )

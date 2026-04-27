@@ -16,7 +16,10 @@ function createInput(tool = "webfetch") {
   }
 }
 
-function createBeforeOutput(url: string, format: "markdown" | "text" | "html" = "markdown") {
+function createBeforeOutput(
+  url: string,
+  format: "markdown" | "text" | "html" = "markdown",
+) {
   return {
     args: {
       url,
@@ -33,20 +36,30 @@ function createAfterOutput(outputText: string) {
   }
 }
 
-function getHeaderValue(headers: RequestInit["headers"], key: string): string | undefined {
+function getHeaderValue(
+  headers: RequestInit["headers"],
+  key: string,
+): string | undefined {
   if (!headers) return undefined
   if (headers instanceof Headers) return headers.get(key) ?? undefined
   if (Array.isArray(headers)) {
-    const match = headers.find(([name]) => name.toLowerCase() === key.toLowerCase())
+    const match = headers.find(
+      ([name]) => name.toLowerCase() === key.toLowerCase(),
+    )
     return match?.[1]
   }
 
-  const match = Object.entries(headers).find(([name]) => name.toLowerCase() === key.toLowerCase())
+  const match = Object.entries(headers).find(
+    ([name]) => name.toLowerCase() === key.toLowerCase(),
+  )
   return typeof match?.[1] === "string" ? match[1] : undefined
 }
 
 function createFetchMock(
-  implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+  implementation: (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => Promise<Response>,
 ): typeof fetch {
   return Object.assign(implementation, {
     preconnect: Reflect.get(originalFetch, "preconnect"),
@@ -62,18 +75,20 @@ describe("createWebFetchRedirectGuardHook", () => {
     describe("#when the URL redirects once", () => {
       it("#then should replace args.url with the resolved final URL", async () => {
         const calls: FetchCall[] = []
-        globalThis.fetch = createFetchMock(async (input: RequestInfo | URL, init?: RequestInit) => {
-          calls.push({ url: String(input), init })
+        globalThis.fetch = createFetchMock(
+          async (input: RequestInfo | URL, init?: RequestInit) => {
+            calls.push({ url: String(input), init })
 
-          if (calls.length === 1) {
-            return new Response(null, {
-              status: 302,
-              headers: { Location: "https://example.com/final" },
-            })
-          }
+            if (calls.length === 1) {
+              return new Response(null, {
+                status: 302,
+                headers: { Location: "https://example.com/final" },
+              })
+            }
 
-          return new Response("ok", { status: 200 })
-        })
+            return new Response("ok", { status: 200 })
+          },
+        )
 
         const hook = createWebFetchRedirectGuardHook({} as never)
         const input = createInput()
@@ -82,27 +97,35 @@ describe("createWebFetchRedirectGuardHook", () => {
         await hook["tool.execute.before"](input, output)
 
         expect(output.args.url).toBe("https://example.com/final")
-        expect(getHeaderValue(calls[0]?.init?.headers, "accept")).toContain("text/markdown")
-        expect(getHeaderValue(calls[0]?.init?.headers, "user-agent")).toContain("Mozilla/5.0")
-        expect(getHeaderValue(calls[0]?.init?.headers, "accept-language")).toBe("en-US,en;q=0.9")
+        expect(getHeaderValue(calls[0]?.init?.headers, "accept")).toContain(
+          "text/markdown",
+        )
+        expect(getHeaderValue(calls[0]?.init?.headers, "user-agent")).toContain(
+          "Mozilla/5.0",
+        )
+        expect(getHeaderValue(calls[0]?.init?.headers, "accept-language")).toBe(
+          "en-US,en;q=0.9",
+        )
       })
     })
 
     describe("#when the redirect location is relative", () => {
       it("#then should resolve the location against the current URL", async () => {
         let callCount = 0
-        globalThis.fetch = createFetchMock(async (_input: RequestInfo | URL) => {
-          callCount += 1
+        globalThis.fetch = createFetchMock(
+          async (_input: RequestInfo | URL) => {
+            callCount += 1
 
-          if (callCount === 1) {
-            return new Response(null, {
-              status: 301,
-              headers: { Location: "/docs/final" },
-            })
-          }
+            if (callCount === 1) {
+              return new Response(null, {
+                status: 301,
+                headers: { Location: "/docs/final" },
+              })
+            }
 
-          return new Response("ok", { status: 200 })
-        })
+            return new Response("ok", { status: 200 })
+          },
+        )
 
         const hook = createWebFetchRedirectGuardHook({} as never)
         const input = createInput()
@@ -157,7 +180,9 @@ describe("createWebFetchRedirectGuardHook", () => {
       it("#then should keep the content unchanged", async () => {
         const hook = createWebFetchRedirectGuardHook({} as never)
         const input = createInput()
-        const output = createAfterOutput("This page explains why browsers hit too many redirects in some setups.")
+        const output = createAfterOutput(
+          "This page explains why browsers hit too many redirects in some setups.",
+        )
 
         await hook["tool.execute.after"](input, output)
 

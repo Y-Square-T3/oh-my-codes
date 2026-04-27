@@ -17,10 +17,13 @@ export class TmuxPollingManager {
     private client: OpencodeClient,
     private sessions: Map<string, TrackedSession>,
     private closeSessionById: (sessionId: string) => Promise<void>,
-    private retryPendingCloses?: () => Promise<void>
+    private retryPendingCloses?: () => Promise<void>,
   ) {}
 
-  handleEvent(event: { type: string; properties?: Record<string, unknown> }): void {
+  handleEvent(event: {
+    type: string
+    properties?: Record<string, unknown>
+  }): void {
     const sessionId = this.getEventSessionId(event)
     if (!sessionId) return
 
@@ -58,7 +61,10 @@ export class TmuxPollingManager {
       }
 
       const statusResult = await this.client.session.status({ path: undefined })
-      const allStatuses = normalizeSDKResponse(statusResult, {} as Record<string, { type: string }>)
+      const allStatuses = normalizeSDKResponse(
+        statusResult,
+        {} as Record<string, { type: string }>,
+      )
 
       log("[tmux-session-manager] pollSessions", {
         trackedSessions: Array.from(this.sessions.keys()),
@@ -78,7 +84,8 @@ export class TmuxPollingManager {
 
         const missingSince = !status ? now - tracked.lastSeenAt.getTime() : 0
         const missingTooLong = missingSince >= SESSION_MISSING_GRACE_MS
-        const isTimedOut = now - tracked.createdAt.getTime() > SESSION_TIMEOUT_MS
+        const isTimedOut =
+          now - tracked.createdAt.getTime() > SESSION_TIMEOUT_MS
         const elapsedMs = now - tracked.createdAt.getTime()
 
         let shouldCloseViaStability = false
@@ -90,18 +97,26 @@ export class TmuxPollingManager {
             tracked.stableIdlePolls = (tracked.stableIdlePolls ?? 0) + 1
 
             if (tracked.stableIdlePolls >= STABLE_POLLS_REQUIRED) {
-              const recheckResult = await this.client.session.status({ path: undefined })
-              const recheckStatuses = normalizeSDKResponse(recheckResult, {} as Record<string, { type: string }>)
+              const recheckResult = await this.client.session.status({
+                path: undefined,
+              })
+              const recheckStatuses = normalizeSDKResponse(
+                recheckResult,
+                {} as Record<string, { type: string }>,
+              )
               const recheckStatus = recheckStatuses[sessionId]
 
               if (recheckStatus?.type === "idle") {
                 shouldCloseViaStability = true
               } else {
                 tracked.stableIdlePolls = 0
-                log("[tmux-session-manager] stability reached but session not idle on recheck, resetting", {
-                  sessionId,
-                  recheckStatus: recheckStatus?.type,
-                })
+                log(
+                  "[tmux-session-manager] stability reached but session not idle on recheck, resetting",
+                  {
+                    sessionId,
+                    recheckStatus: recheckStatus?.type,
+                  },
+                )
               }
             }
           } else {
@@ -140,7 +155,9 @@ export class TmuxPollingManager {
         try {
           await this.retryPendingCloses()
         } catch (err) {
-          log("[tmux-session-manager] retry pending closes failed", { error: String(err) })
+          log("[tmux-session-manager] retry pending closes failed", {
+            error: String(err),
+          })
         }
       }
     } catch (err) {
@@ -150,7 +167,10 @@ export class TmuxPollingManager {
     }
   }
 
-  private getEventSessionId(event: { type: string; properties?: Record<string, unknown> }): string | undefined {
+  private getEventSessionId(event: {
+    type: string
+    properties?: Record<string, unknown>
+  }): string | undefined {
     const properties = event.properties
     if (!properties) return undefined
 
@@ -162,10 +182,10 @@ export class TmuxPollingManager {
     }
 
     if (
-      event.type === "message.part.updated"
-      || event.type === "message.part.delta"
-      || event.type === "message.part.removed"
-      || event.type === "message.removed"
+      event.type === "message.part.updated" ||
+      event.type === "message.part.delta" ||
+      event.type === "message.part.removed" ||
+      event.type === "message.removed"
     ) {
       const sessionId = properties.sessionID
       return typeof sessionId === "string" ? sessionId : undefined

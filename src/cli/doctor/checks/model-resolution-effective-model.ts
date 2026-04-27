@@ -4,7 +4,10 @@ function formatProviderChain(providers: string[]): string {
   return providers.join(" → ")
 }
 
-export function getEffectiveModel(requirement: ModelRequirement, userOverride?: string): string {
+export function getEffectiveModel(
+  requirement: ModelRequirement,
+  userOverride?: string,
+): string {
   if (userOverride) {
     return userOverride
   }
@@ -15,7 +18,10 @@ export function getEffectiveModel(requirement: ModelRequirement, userOverride?: 
   return `${firstEntry.providers[0]}/${firstEntry.model}`
 }
 
-export function buildEffectiveResolution(requirement: ModelRequirement, userOverride?: string): string {
+export function buildEffectiveResolution(
+  requirement: ModelRequirement,
+  userOverride?: string,
+): string {
   if (userOverride) {
     return `User override: ${userOverride}`
   }

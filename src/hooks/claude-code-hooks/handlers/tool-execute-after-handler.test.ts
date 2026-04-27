@@ -26,9 +26,12 @@ mock.module("../transcript", () => ({
   getTranscriptPath: () => "/tmp/transcript.jsonl",
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
-const { createToolExecuteAfterHandler } = await import("./tool-execute-after-handler")
+const { createToolExecuteAfterHandler } =
+  await import("./tool-execute-after-handler")
 
 describe("createToolExecuteAfterHandler", () => {
   beforeEach(() => {
@@ -46,7 +49,7 @@ describe("createToolExecuteAfterHandler", () => {
         },
         directory: "/repo",
       } as never,
-      { disabledHooks: ["PostToolUse"] }
+      { disabledHooks: ["PostToolUse"] },
     )
 
     await handler(
@@ -75,7 +78,7 @@ describe("createToolExecuteAfterHandler", () => {
             keep: false,
           },
         },
-      }
+      },
     )
 
     expect(appendTranscriptEntry).toHaveBeenCalledTimes(1)

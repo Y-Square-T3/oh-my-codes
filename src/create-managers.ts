@@ -51,7 +51,13 @@ export function createManagers(args: {
   backgroundNotificationHookEnabled: boolean
   deps?: Partial<CreateManagersDeps>
 }): Managers {
-  const { ctx, pluginConfig, tmuxConfig, modelCacheState, backgroundNotificationHookEnabled } = args
+  const {
+    ctx,
+    pluginConfig,
+    tmuxConfig,
+    modelCacheState,
+    backgroundNotificationHookEnabled,
+  } = args
   const deps = { ...defaultCreateManagersDeps, ...args.deps }
 
   if (tmuxConfig.enabled) {
@@ -62,7 +68,10 @@ export function createManagers(args: {
   deps.registerManagerForCleanupFn({
     shutdown: async () => {
       await tmuxSessionManager.cleanup().catch((error) => {
-        log("[create-managers] tmux cleanup error during process shutdown:", error)
+        log(
+          "[create-managers] tmux cleanup error during process shutdown:",
+          error,
+        )
       })
     },
   })
@@ -97,7 +106,9 @@ export function createManagers(args: {
             context: {
               sessionId: event.sessionID,
               projectPath: ctx.directory,
-              tmuxPaneId: tmuxSessionManager.getTrackedPaneId?.(event.sessionID) ?? process.env.TMUX_PANE,
+              tmuxPaneId:
+                tmuxSessionManager.getTrackedPaneId?.(event.sessionID) ??
+                process.env.TMUX_PANE,
             },
           })
         }
@@ -122,7 +133,8 @@ export function createManagers(args: {
     pluginConfig,
     modelCacheState,
   })
-  const modelFallbackControllerAccessor = createModelFallbackControllerAccessor()
+  const modelFallbackControllerAccessor =
+    createModelFallbackControllerAccessor()
 
   return {
     tmuxSessionManager,

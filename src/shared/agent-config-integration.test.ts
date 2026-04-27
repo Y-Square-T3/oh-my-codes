@@ -33,10 +33,16 @@ describe("Agent Config Integration", () => {
       expect(result.migrated).not.toHaveProperty("Momus - Plan Critic")
 
       // then - values are preserved
-      expect(result.migrated.sisyphus).toEqual({ model: "anthropic/claude-opus-4-7" })
-      expect(result.migrated.atlas).toEqual({ model: "anthropic/claude-opus-4-7" })
-      expect(result.migrated.prometheus).toEqual({ model: "anthropic/claude-opus-4-7" })
-      
+      expect(result.migrated.sisyphus).toEqual({
+        model: "anthropic/claude-opus-4-7",
+      })
+      expect(result.migrated.atlas).toEqual({
+        model: "anthropic/claude-opus-4-7",
+      })
+      expect(result.migrated.prometheus).toEqual({
+        model: "anthropic/claude-opus-4-7",
+      })
+
       // then - changed flag is true
       expect(result.changed).toBe(true)
     })
@@ -54,7 +60,7 @@ describe("Agent Config Integration", () => {
 
       // then - keys remain unchanged
       expect(result.migrated).toEqual(config)
-      
+
       // then - changed flag is false
       expect(result.changed).toBe(false)
     })
@@ -76,8 +82,10 @@ describe("Agent Config Integration", () => {
       expect(result.migrated).toHaveProperty("oracle")
       expect(result.migrated).toHaveProperty("prometheus")
       expect(result.migrated).toHaveProperty("librarian")
-      expect(Object.keys(result.migrated).every((key) => key === key.toLowerCase())).toBe(true)
-      
+      expect(
+        Object.keys(result.migrated).every((key) => key === key.toLowerCase()),
+      ).toBe(true)
+
       // then - changed flag is true
       expect(result.changed).toBe(true)
     })
@@ -86,7 +94,18 @@ describe("Agent Config Integration", () => {
   describe("Display name resolution", () => {
     test("returns correct display names for all builtin agents", () => {
       // given - lowercase config keys
-      const agents = ["sisyphus", "hephaestus", "prometheus", "atlas", "metis", "momus", "oracle", "librarian", "explore", "multimodal-looker"]
+      const agents = [
+        "sisyphus",
+        "hephaestus",
+        "prometheus",
+        "atlas",
+        "metis",
+        "momus",
+        "oracle",
+        "librarian",
+        "explore",
+        "multimodal-looker",
+      ]
 
       // when - display names are requested
       const displayNames = agents.map((agent) => getAgentDisplayName(agent))
@@ -106,7 +125,14 @@ describe("Agent Config Integration", () => {
 
     test("handles lowercase keys case-insensitively", () => {
       // given - various case formats of lowercase keys
-      const keys = ["Sisyphus", "Atlas", "SISYPHUS", "atlas", "prometheus", "PROMETHEUS"]
+      const keys = [
+        "Sisyphus",
+        "Atlas",
+        "SISYPHUS",
+        "atlas",
+        "prometheus",
+        "PROMETHEUS",
+      ]
 
       // when - display names are requested
       const displayNames = keys.map((key) => getAgentDisplayName(key))
@@ -146,7 +172,18 @@ describe("Agent Config Integration", () => {
 
     test("model requirements include all builtin agents", () => {
       // given - expected builtin agents
-      const expectedAgents = ["sisyphus", "hephaestus", "prometheus", "atlas", "metis", "momus", "oracle", "librarian", "explore", "multimodal-looker"]
+      const expectedAgents = [
+        "sisyphus",
+        "hephaestus",
+        "prometheus",
+        "atlas",
+        "metis",
+        "momus",
+        "oracle",
+        "librarian",
+        "explore",
+        "multimodal-looker",
+      ]
 
       // when - checking AGENT_MODEL_REQUIREMENTS
       const agentKeys = Object.keys(AGENT_MODEL_REQUIREMENTS)
@@ -193,8 +230,13 @@ describe("Agent Config Integration", () => {
       expect(prometheusDisplay).toBe("Prometheus - Plan Builder")
 
       // then - config values are preserved
-      expect(result.migrated.sisyphus).toEqual({ model: "anthropic/claude-opus-4-7", temperature: 0.1 })
-      expect(result.migrated.prometheus).toEqual({ model: "anthropic/claude-opus-4-7" })
+      expect(result.migrated.sisyphus).toEqual({
+        model: "anthropic/claude-opus-4-7",
+        temperature: 0.1,
+      })
+      expect(result.migrated.prometheus).toEqual({
+        model: "anthropic/claude-opus-4-7",
+      })
     })
 
     test("new config works without migration", () => {
@@ -209,7 +251,7 @@ describe("Agent Config Integration", () => {
 
       // then - config is unchanged
       expect(result.migrated).toEqual(newConfig)
-      
+
       // then - changed flag is false
       expect(result.changed).toBe(false)
 

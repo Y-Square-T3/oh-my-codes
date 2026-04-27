@@ -88,7 +88,10 @@ describe("getSystemMcpServerNames", () => {
         },
       },
     }
-    writeFileSync(join(TEST_DIR, ".claude", ".mcp.json"), JSON.stringify(mcpConfig))
+    writeFileSync(
+      join(TEST_DIR, ".claude", ".mcp.json"),
+      JSON.stringify(mcpConfig),
+    )
 
     const originalCwd = process.cwd()
     process.chdir(TEST_DIR)
@@ -140,23 +143,29 @@ describe("getSystemMcpServerNames", () => {
 
   it("removes a server name when a higher-precedence config disables it", async () => {
     // given
-    writeFileSync(join(TEST_HOME, ".claude.json"), JSON.stringify({
-      mcpServers: {
-        playwright: {
-          command: "npx",
-          args: ["@playwright/mcp@latest"],
+    writeFileSync(
+      join(TEST_HOME, ".claude.json"),
+      JSON.stringify({
+        mcpServers: {
+          playwright: {
+            command: "npx",
+            args: ["@playwright/mcp@latest"],
+          },
         },
-      },
-    }))
-    writeFileSync(join(TEST_DIR, ".mcp.json"), JSON.stringify({
-      mcpServers: {
-        playwright: {
-          command: "npx",
-          args: ["@playwright/mcp@latest"],
-          disabled: true,
+      }),
+    )
+    writeFileSync(
+      join(TEST_DIR, ".mcp.json"),
+      JSON.stringify({
+        mcpServers: {
+          playwright: {
+            command: "npx",
+            args: ["@playwright/mcp@latest"],
+            disabled: true,
+          },
         },
-      },
-    }))
+      }),
+    )
 
     const originalCwd = process.cwd()
     process.chdir(TEST_DIR)
@@ -173,109 +182,123 @@ describe("getSystemMcpServerNames", () => {
     }
   })
 
-   it("merges server names from multiple .mcp.json files", async () => {
-     // given
-     mkdirSync(join(TEST_DIR, ".claude"), { recursive: true })
-     
-     const projectMcp = {
-       mcpServers: {
-         playwright: { command: "npx", args: ["@playwright/mcp@latest"] },
-       },
-     }
-     const localMcp = {
-       mcpServers: {
-         memory: { command: "npx", args: ["-y", "@anthropic-ai/mcp-server-memory"] },
-       },
-     }
-     
-     writeFileSync(join(TEST_DIR, ".mcp.json"), JSON.stringify(projectMcp))
-     writeFileSync(join(TEST_DIR, ".claude", ".mcp.json"), JSON.stringify(localMcp))
+  it("merges server names from multiple .mcp.json files", async () => {
+    // given
+    mkdirSync(join(TEST_DIR, ".claude"), { recursive: true })
 
-     const originalCwd = process.cwd()
-     process.chdir(TEST_DIR)
-
-     try {
-       // when
-       const { getSystemMcpServerNames } = await import("./loader")
-       const names = getSystemMcpServerNames()
-
-       // then
-       expect(names.has("playwright")).toBe(true)
-       expect(names.has("memory")).toBe(true)
-     } finally {
-       process.chdir(originalCwd)
-     }
-   })
-
-    it("reads user-level MCP config from ~/.claude.json", async () => {
-      // given
-      const userConfigPath = join(TEST_HOME, ".claude.json")
-      const userMcpConfig = {
-        mcpServers: {
-          "user-server": {
-            command: "npx",
-            args: ["user-mcp-server"],
-          },
+    const projectMcp = {
+      mcpServers: {
+        playwright: { command: "npx", args: ["@playwright/mcp@latest"] },
+      },
+    }
+    const localMcp = {
+      mcpServers: {
+        memory: {
+          command: "npx",
+          args: ["-y", "@anthropic-ai/mcp-server-memory"],
         },
-      }
-      writeFileSync(userConfigPath, JSON.stringify(userMcpConfig))
+      },
+    }
 
-      const originalCwd = process.cwd()
-      process.chdir(TEST_DIR)
+    writeFileSync(join(TEST_DIR, ".mcp.json"), JSON.stringify(projectMcp))
+    writeFileSync(
+      join(TEST_DIR, ".claude", ".mcp.json"),
+      JSON.stringify(localMcp),
+    )
 
-      try {
-        // when
-        const { getSystemMcpServerNames } = await import("./loader")
-        const names = getSystemMcpServerNames()
+    const originalCwd = process.cwd()
+    process.chdir(TEST_DIR)
 
-        // then
-        expect(names.has("user-server")).toBe(true)
-      } finally {
-        process.chdir(originalCwd)
-      }
-    })
+    try {
+      // when
+      const { getSystemMcpServerNames } = await import("./loader")
+      const names = getSystemMcpServerNames()
 
-     it("reads both ~/.claude.json and ~/.claude/.mcp.json for user scope", async () => {
-       // given
-       const claudeDir = join(TEST_HOME, ".claude")
-       mkdirSync(claudeDir, { recursive: true })
+      // then
+      expect(names.has("playwright")).toBe(true)
+      expect(names.has("memory")).toBe(true)
+    } finally {
+      process.chdir(originalCwd)
+    }
+  })
 
-      writeFileSync(join(TEST_HOME, ".claude.json"), JSON.stringify({
+  it("reads user-level MCP config from ~/.claude.json", async () => {
+    // given
+    const userConfigPath = join(TEST_HOME, ".claude.json")
+    const userMcpConfig = {
+      mcpServers: {
+        "user-server": {
+          command: "npx",
+          args: ["user-mcp-server"],
+        },
+      },
+    }
+    writeFileSync(userConfigPath, JSON.stringify(userMcpConfig))
+
+    const originalCwd = process.cwd()
+    process.chdir(TEST_DIR)
+
+    try {
+      // when
+      const { getSystemMcpServerNames } = await import("./loader")
+      const names = getSystemMcpServerNames()
+
+      // then
+      expect(names.has("user-server")).toBe(true)
+    } finally {
+      process.chdir(originalCwd)
+    }
+  })
+
+  it("reads both ~/.claude.json and ~/.claude/.mcp.json for user scope", async () => {
+    // given
+    const claudeDir = join(TEST_HOME, ".claude")
+    mkdirSync(claudeDir, { recursive: true })
+
+    writeFileSync(
+      join(TEST_HOME, ".claude.json"),
+      JSON.stringify({
         mcpServers: {
           "server-from-claude-json": { command: "npx", args: ["server-a"] },
         },
-      }))
+      }),
+    )
 
-      writeFileSync(join(claudeDir, ".mcp.json"), JSON.stringify({
+    writeFileSync(
+      join(claudeDir, ".mcp.json"),
+      JSON.stringify({
         mcpServers: {
           "server-from-mcp-json": { command: "npx", args: ["server-b"] },
         },
-      }))
+      }),
+    )
 
-      const originalCwd = process.cwd()
-      process.chdir(TEST_DIR)
+    const originalCwd = process.cwd()
+    process.chdir(TEST_DIR)
 
-      try {
-        // when
-        const { getSystemMcpServerNames } = await import("./loader")
-        const names = getSystemMcpServerNames()
+    try {
+      // when
+      const { getSystemMcpServerNames } = await import("./loader")
+      const names = getSystemMcpServerNames()
 
-        // then
-        expect(names.has("server-from-claude-json")).toBe(true)
-        expect(names.has("server-from-mcp-json")).toBe(true)
-       } finally {
-         process.chdir(originalCwd)
-       }
-      })
+      // then
+      expect(names.has("server-from-claude-json")).toBe(true)
+      expect(names.has("server-from-mcp-json")).toBe(true)
+    } finally {
+      process.chdir(originalCwd)
+    }
+  })
 
-    it("ignores local-scope user MCP entries for other projects", async () => {
-      //#given
-      const otherProjectDir = join(TEST_DIR, "project-a")
-      const currentProjectDir = join(TEST_DIR, "project-b")
-      mkdirSync(otherProjectDir, { recursive: true })
-      mkdirSync(currentProjectDir, { recursive: true })
+  it("ignores local-scope user MCP entries for other projects", async () => {
+    //#given
+    const otherProjectDir = join(TEST_DIR, "project-a")
+    const currentProjectDir = join(TEST_DIR, "project-b")
+    mkdirSync(otherProjectDir, { recursive: true })
+    mkdirSync(currentProjectDir, { recursive: true })
 
-      writeFileSync(join(TEST_HOME, ".claude.json"), JSON.stringify({
+    writeFileSync(
+      join(TEST_HOME, ".claude.json"),
+      JSON.stringify({
         mcpServers: {
           playwright: {
             command: "npx",
@@ -294,24 +317,25 @@ describe("getSystemMcpServerNames", () => {
             args: ["memory-mcp"],
           },
         },
-      }))
+      }),
+    )
 
-      const originalCwd = process.cwd()
-      process.chdir(currentProjectDir)
+    const originalCwd = process.cwd()
+    process.chdir(currentProjectDir)
 
-      try {
-        //#when
-        const { getSystemMcpServerNames } = await import("./loader")
-        const names = getSystemMcpServerNames()
+    try {
+      //#when
+      const { getSystemMcpServerNames } = await import("./loader")
+      const names = getSystemMcpServerNames()
 
-        //#then
-        expect(names.has("playwright")).toBe(false)
-        expect(names.has("sqlite")).toBe(true)
-        expect(names.has("memory")).toBe(true)
-      } finally {
-        process.chdir(originalCwd)
-      }
-    })
+      //#then
+      expect(names.has("playwright")).toBe(false)
+      expect(names.has("sqlite")).toBe(true)
+      expect(names.has("memory")).toBe(true)
+    } finally {
+      process.chdir(originalCwd)
+    }
+  })
 })
 
 describe("loadMcpConfigs", () => {
@@ -358,9 +382,15 @@ describe("loadMcpConfigs", () => {
       expect(result.servers).not.toHaveProperty("playwright")
       expect(result.servers).not.toHaveProperty("sqlite")
       expect(result.servers).toHaveProperty("active")
-      expect(result.loadedServers.find((s) => s.name === "playwright")).toBeUndefined()
-      expect(result.loadedServers.find((s) => s.name === "sqlite")).toBeUndefined()
-      expect(result.loadedServers.find((s) => s.name === "active")).toBeDefined()
+      expect(
+        result.loadedServers.find((s) => s.name === "playwright"),
+      ).toBeUndefined()
+      expect(
+        result.loadedServers.find((s) => s.name === "sqlite"),
+      ).toBeUndefined()
+      expect(
+        result.loadedServers.find((s) => s.name === "active"),
+      ).toBeDefined()
     } finally {
       process.chdir(originalCwd)
     }

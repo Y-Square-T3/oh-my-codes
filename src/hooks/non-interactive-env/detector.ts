@@ -3,7 +3,10 @@ export function isNonInteractive(): boolean {
     return true
   }
 
-  if (process.env.OPENCODE_RUN === "true" || process.env.OPENCODE_NON_INTERACTIVE === "true") {
+  if (
+    process.env.OPENCODE_RUN === "true" ||
+    process.env.OPENCODE_NON_INTERACTIVE === "true"
+  ) {
     return true
   }
 

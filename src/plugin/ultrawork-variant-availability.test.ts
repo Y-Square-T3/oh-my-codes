@@ -94,7 +94,10 @@ describe("applyUltraworkModelOverrideOnMessage variant guard", () => {
         },
       },
     })
-    const dbOverrideSpy = spyOn(dbOverrideModule, "scheduleDeferredModelOverride").mockImplementation(() => {})
+    const dbOverrideSpy = spyOn(
+      dbOverrideModule,
+      "scheduleDeferredModelOverride",
+    ).mockImplementation(() => {})
 
     const config = {
       agents: {
@@ -147,7 +150,10 @@ describe("applyUltraworkModelOverrideOnMessage variant guard", () => {
         },
       },
     })
-    const dbOverrideSpy = spyOn(dbOverrideModule, "scheduleDeferredModelOverride").mockImplementation(() => {})
+    const dbOverrideSpy = spyOn(
+      dbOverrideModule,
+      "scheduleDeferredModelOverride",
+    ).mockImplementation(() => {})
 
     const config = {
       agents: {
@@ -180,7 +186,10 @@ describe("applyUltraworkModelOverrideOnMessage variant guard", () => {
     expect(output.message["variant"]).toBeUndefined()
     expect(output.message["thinking"]).toBeUndefined()
     expect(dbOverrideSpy).not.toHaveBeenCalled()
-    expect(output.message.model).toEqual({ providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+    expect(output.message.model).toEqual({
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    })
     dbOverrideSpy.mockRestore()
   })
 })

@@ -3,7 +3,10 @@
 import { afterEach, beforeEach, describe, expect, it as test } from "bun:test"
 
 import { MAX_STAGNATION_COUNT } from "./constants"
-import { createSessionStateStore, type SessionStateStore } from "./session-state"
+import {
+  createSessionStateStore,
+  type SessionStateStore,
+} from "./session-state"
 
 describe("createSessionStateStore regressions", () => {
   let sessionStateStore: SessionStateStore
@@ -35,7 +38,11 @@ describe("createSessionStateStore regressions", () => {
         }
 
         trackedState.abortDetectedAt = undefined
-        const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, todos)
+        const progressUpdate = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          todos,
+        )
 
         expect(progressUpdate.hasProgressed).toBe(false)
         expect(progressUpdate.progressSource).toBe("none")
@@ -61,7 +68,11 @@ describe("createSessionStateStore regressions", () => {
         sessionStateStore.trackContinuationProgress(sessionID, 2, firstTodos)
         state.awaitingPostInjectionProgressCheck = true
 
-        const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, reorderedTodos)
+        const progressUpdate = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          reorderedTodos,
+        )
 
         expect(progressUpdate.hasProgressed).toBe(false)
         expect(progressUpdate.progressSource).toBe("none")
@@ -93,9 +104,15 @@ describe("createSessionStateStore regressions", () => {
         }
 
         trackedState.abortDetectedAt = undefined
-        const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, todos)
+        const progressUpdate = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          todos,
+        )
 
-        expect(progressUpdate.previousStagnationCount).toBe(MAX_STAGNATION_COUNT)
+        expect(progressUpdate.previousStagnationCount).toBe(
+          MAX_STAGNATION_COUNT,
+        )
         expect(progressUpdate.hasProgressed).toBe(false)
         expect(progressUpdate.progressSource).toBe("none")
         expect(progressUpdate.stagnationCount).toBe(MAX_STAGNATION_COUNT)

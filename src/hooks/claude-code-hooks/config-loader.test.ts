@@ -1,10 +1,25 @@
-const { afterEach, beforeEach, describe, expect, mock, test } = require("bun:test")
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+const {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} = require("bun:test")
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { getOpenCodeConfigDir } from "../../shared"
 
-const { clearPluginExtendedConfigCache, loadPluginExtendedConfig } = await import("./config-loader")
+const { clearPluginExtendedConfigCache, loadPluginExtendedConfig } =
+  await import("./config-loader")
 
 describe("loadPluginExtendedConfig", () => {
   const originalDateNow = Date.now
@@ -19,8 +34,15 @@ describe("loadPluginExtendedConfig", () => {
     //#given
     originalWorkingDirectory = process.cwd()
     tempDirectory = mkdtempSync(join(tmpdir(), "omo-cc-plugin-project-config-"))
-    userConfigPath = join(getOpenCodeConfigDir({ binary: "opencode" }), "opencode-cc-plugin.json")
-    projectConfigPath = join(tempDirectory, ".opencode", "opencode-cc-plugin.json")
+    userConfigPath = join(
+      getOpenCodeConfigDir({ binary: "opencode" }),
+      "opencode-cc-plugin.json",
+    )
+    projectConfigPath = join(
+      tempDirectory,
+      ".opencode",
+      "opencode-cc-plugin.json",
+    )
     mkdirSync(getOpenCodeConfigDir({ binary: "opencode" }), { recursive: true })
     mkdirSync(join(tempDirectory, ".opencode"), { recursive: true })
     originalUserConfig = existsSync(userConfigPath)
@@ -97,7 +119,13 @@ describe("loadPluginExtendedConfig", () => {
 
   test("#given OPENCODE_CONFIG_DIR points at a profile dir after module import #when loading extended config #then it reads the profile config file", async () => {
     //#given
-    const profileConfigDir = join(tempDirectory, ".config", "opencode", "profiles", "today")
+    const profileConfigDir = join(
+      tempDirectory,
+      ".config",
+      "opencode",
+      "profiles",
+      "today",
+    )
     const profileConfigPath = join(profileConfigDir, "opencode-cc-plugin.json")
     mkdirSync(profileConfigDir, { recursive: true })
     process.env.OPENCODE_CONFIG_DIR = profileConfigDir

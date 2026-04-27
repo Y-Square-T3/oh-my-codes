@@ -41,12 +41,15 @@ export function extractErrorMessage(error: unknown): string | undefined {
       error,
       dataRaw,
       error["error"],
-      isRecord(dataRaw) ? (dataRaw as Record<string, unknown>)["error"] : undefined,
+      isRecord(dataRaw)
+        ? (dataRaw as Record<string, unknown>)["error"]
+        : undefined,
       error["cause"],
     ]
 
     for (const candidate of candidates) {
-      if (typeof candidate === "string" && candidate.length > 0) return candidate
+      if (typeof candidate === "string" && candidate.length > 0)
+        return candidate
       if (
         isRecord(candidate) &&
         typeof candidate["message"] === "string" &&
@@ -68,7 +71,9 @@ interface EventPropertiesLike {
   [key: string]: unknown
 }
 
-export function getSessionErrorMessage(properties: EventPropertiesLike): string | undefined {
+export function getSessionErrorMessage(
+  properties: EventPropertiesLike,
+): string | undefined {
   const errorRaw = properties["error"]
   if (!isRecord(errorRaw)) return undefined
 

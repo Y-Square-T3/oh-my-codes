@@ -26,7 +26,8 @@ describe("executeUserPromptSubmitHooks", () => {
     // given
     const ctx: UserPromptSubmitContext = {
       sessionId: "test-session",
-      prompt: "<user-prompt-submit-hook>previous output</user-prompt-submit-hook>",
+      prompt:
+        "<user-prompt-submit-hook>previous output</user-prompt-submit-hook>",
       parts: [
         {
           type: "text",

@@ -25,7 +25,9 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.part.delta",
@@ -60,7 +62,9 @@ describe("message.part.delta handling", () => {
     const ctx = createMockContext("ses_main")
     const state = createEventState()
     state.currentMessageRole = "user"
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const payload: EventPayload = {
       type: "message.part.updated",
       properties: {
@@ -75,7 +79,11 @@ describe("message.part.delta handling", () => {
 
     //#when
     const { handleMessagePartUpdated } = require("./event-handlers") as {
-      handleMessagePartUpdated: (ctx: RunContext, payload: EventPayload, state: ReturnType<typeof createEventState>) => void
+      handleMessagePartUpdated: (
+        ctx: RunContext,
+        payload: EventPayload,
+        state: ReturnType<typeof createEventState>,
+      ) => void
     }
     handleMessagePartUpdated(ctx, payload, state)
 
@@ -90,7 +98,9 @@ describe("message.part.delta handling", () => {
     const ctx = createMockContext("ses_main")
     const state = createEventState()
     state.agentColorsByName["Sisyphus - Ultraworker"] = "#00CED1"
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const payload: EventPayload = {
       type: "message.updated",
       properties: {
@@ -106,12 +116,18 @@ describe("message.part.delta handling", () => {
 
     //#when
     const { handleMessageUpdated } = require("./event-handlers") as {
-      handleMessageUpdated: (ctx: RunContext, payload: EventPayload, state: ReturnType<typeof createEventState>) => void
+      handleMessageUpdated: (
+        ctx: RunContext,
+        payload: EventPayload,
+        state: ReturnType<typeof createEventState>,
+      ) => void
     }
     handleMessageUpdated(ctx, payload, state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     expect(rendered).toContain("\u001b[38;2;0;206;209m")
     expect(rendered).toContain("claude-opus-4-7 (max)")
     expect(rendered).toContain("└─")
@@ -123,18 +139,30 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "think-1", sessionID: "ses_main", type: "reasoning", text: "" },
+          part: {
+            id: "think-1",
+            sessionID: "ses_main",
+            type: "reasoning",
+            text: "",
+          },
         },
       },
       {
@@ -143,7 +171,8 @@ describe("message.part.delta handling", () => {
           sessionID: "ses_main",
           partID: "think-1",
           field: "text",
-          delta: "Composing final summary in Korean with clear concise structure",
+          delta:
+            "Composing final summary in Korean with clear concise structure",
         },
       },
       {
@@ -167,7 +196,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const plain = stripAnsi(rendered)
     expect(plain).toContain("Thinking:")
     expect(plain).toContain("Composing final summary in Korean")
@@ -182,18 +213,30 @@ describe("message.part.delta handling", () => {
 
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "think-1", sessionID: "ses_main", type: "reasoning", text: "" },
+          part: {
+            id: "think-1",
+            sessionID: "ses_main",
+            type: "reasoning",
+            text: "",
+          },
         },
       },
       {
@@ -220,7 +263,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const plain = stripAnsi(rendered)
     expect(plain).toContain("Thinking:")
     expect(plain).toContain("Composing final summary")
@@ -237,18 +282,32 @@ describe("message.part.delta handling", () => {
 
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_assistant", sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_assistant",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "think-1", messageID: "msg_assistant", sessionID: "ses_main", type: "reasoning", text: "" },
+          part: {
+            id: "think-1",
+            messageID: "msg_assistant",
+            sessionID: "ses_main",
+            type: "reasoning",
+            text: "",
+          },
         },
       },
       {
@@ -287,7 +346,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const plain = stripAnsi(rendered)
     const renderCount = plain.split("Thinking:").length - 1
     expect(renderCount).toBe(1)
@@ -303,19 +364,34 @@ describe("message.part.delta handling", () => {
 
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
-    const longThinking = "This is a very long thinking stream that should never be truncated and must include final tail marker END-OF-THINKING-MARKER"
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
+    const longThinking =
+      "This is a very long thinking stream that should never be truncated and must include final tail marker END-OF-THINKING-MARKER"
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_assistant", sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_assistant",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "think-1", messageID: "msg_assistant", sessionID: "ses_main", type: "reasoning", text: "" },
+          part: {
+            id: "think-1",
+            messageID: "msg_assistant",
+            sessionID: "ses_main",
+            type: "reasoning",
+            text: "",
+          },
         },
       },
       {
@@ -334,7 +410,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     expect(rendered).toContain("END-OF-THINKING-MARKER")
 
     if (previous !== undefined) process.env.GITHUB_ACTIONS = previous
@@ -348,12 +426,21 @@ describe("message.part.delta handling", () => {
 
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_assistant", sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7", variant: "max" },
+          info: {
+            id: "msg_assistant",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+            variant: "max",
+          },
         },
       },
       {
@@ -372,7 +459,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     expect(rendered).toContain("  hello  \n  world")
 
     if (previous !== undefined) process.env.GITHUB_ACTIONS = previous
@@ -383,18 +472,32 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_user", sessionID: "ses_main", role: "user", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_user",
+            sessionID: "ses_main",
+            role: "user",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "part_user_text", messageID: "msg_user", sessionID: "ses_main", type: "text", text: "[search-mode] should not print" },
+          part: {
+            id: "part_user_text",
+            messageID: "msg_user",
+            sessionID: "ses_main",
+            type: "text",
+            text: "[search-mode] should not print",
+          },
         },
       },
       {
@@ -410,7 +513,13 @@ describe("message.part.delta handling", () => {
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_assistant", sessionID: "ses_main", role: "assistant", agent: "Sisyphus - Ultraworker", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_assistant",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus - Ultraworker",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
@@ -429,7 +538,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     expect(rendered.includes("[search-mode] should not print")).toBe(false)
     expect(rendered.includes("still should not print")).toBe(false)
     expect(rendered).toContain("assistant output")
@@ -440,7 +551,9 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const longTail = "END-OF-TOOL-OUTPUT-MARKER"
     const events: EventPayload[] = [
       {
@@ -465,7 +578,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     expect(rendered).toContain("→")
     expect(rendered).toContain("Read src/index.ts")
     expect(rendered).toContain("END-OF-TOOL-OUTPUT-MARKER")
@@ -476,7 +591,9 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.part.updated",
@@ -520,7 +637,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const headerCount = rendered.split("bun test").length - 1
     expect(headerCount).toBe(1)
     stdoutSpy.mockRestore()
@@ -530,7 +649,9 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "tool.execute",
@@ -558,7 +679,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const headerCount = rendered.split("bun test").length - 1
     expect(headerCount).toBe(1)
     stdoutSpy.mockRestore()
@@ -568,7 +691,9 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "tool.execute",
@@ -594,7 +719,11 @@ describe("message.part.delta handling", () => {
             sessionID: "ses_main",
             type: "tool",
             tool: "bash",
-            state: { status: "completed", input: { command: "bun test" }, output: "UNIQUE-OUTPUT-MARKER" },
+            state: {
+              status: "completed",
+              input: { command: "bun test" },
+              output: "UNIQUE-OUTPUT-MARKER",
+            },
           },
         },
       },
@@ -604,7 +733,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const outputCount = rendered.split("UNIQUE-OUTPUT-MARKER").length - 1
     expect(outputCount).toBe(1)
     stdoutSpy.mockRestore()
@@ -614,12 +745,20 @@ describe("message.part.delta handling", () => {
     //#given
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
     const events: EventPayload[] = [
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_1", sessionID: "ses_main", role: "assistant", agent: "Sisyphus", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_1",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
@@ -634,13 +773,24 @@ describe("message.part.delta handling", () => {
       {
         type: "message.updated",
         properties: {
-          info: { id: "msg_1", sessionID: "ses_main", role: "assistant", agent: "Sisyphus", modelID: "claude-opus-4-7" },
+          info: {
+            id: "msg_1",
+            sessionID: "ses_main",
+            role: "assistant",
+            agent: "Sisyphus",
+            modelID: "claude-opus-4-7",
+          },
         },
       },
       {
         type: "message.part.updated",
         properties: {
-          part: { id: "text-1", sessionID: "ses_main", type: "text", text: "Hello world" },
+          part: {
+            id: "text-1",
+            sessionID: "ses_main",
+            type: "text",
+            text: "Hello world",
+          },
         },
       },
     ]
@@ -649,7 +799,9 @@ describe("message.part.delta handling", () => {
     await processEvents(ctx, toAsyncIterable(events), state)
 
     //#then
-    const rendered = stdoutSpy.mock.calls.map((call) => String(call[0] ?? "")).join("")
+    const rendered = stdoutSpy.mock.calls
+      .map((call) => String(call[0] ?? ""))
+      .join("")
     const textCount = rendered.split("Hello world").length - 1
     expect(textCount).toBe(1)
     stdoutSpy.mockRestore()

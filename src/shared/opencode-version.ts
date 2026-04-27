@@ -43,7 +43,6 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
   return 0
 }
 
-
 export function getOpenCodeVersion(): string | null {
   if (cachedVersion !== NOT_CACHED) {
     return cachedVersion

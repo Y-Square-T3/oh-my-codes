@@ -22,26 +22,27 @@ tool.execute.after (read/write/edit/multiedit)
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `hook.ts` | `createRulesInjectorHook()` — wires cache + injector, handles tool events |
-| `injector.ts` | `createRuleInjectionProcessor()` — orchestrates find → cache → inject |
-| `finder.ts` | `findRuleFiles()` + `calculateDistance()` — locate AGENTS.md near target path |
-| `rule-file-finder.ts` | Walk directory tree to find AGENTS.md / .rules files |
-| `rule-file-scanner.ts` | Scan for rule files in a directory |
-| `matcher.ts` | Match file paths against rule file scope |
-| `rule-distance.ts` | Calculate path distance between file and rule file |
-| `project-root-finder.ts` | Find project root (stops at .git, package.json) |
-| `output-path.ts` | Extract file paths from tool output text |
-| `cache.ts` | `createSessionCacheStore()` — per-session injection dedup |
-| `storage.ts` | Persist injected paths across tool calls |
-| `parser.ts` | Parse rule file content |
-| `constants.ts` | Rule file names: `AGENTS.md`, `.rules`, `CLAUDE.md` |
-| `types.ts` | `RuleFile`, `InjectionResult`, `RuleFileScope` |
+| File                     | Purpose                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `hook.ts`                | `createRulesInjectorHook()` — wires cache + injector, handles tool events     |
+| `injector.ts`            | `createRuleInjectionProcessor()` — orchestrates find → cache → inject         |
+| `finder.ts`              | `findRuleFiles()` + `calculateDistance()` — locate AGENTS.md near target path |
+| `rule-file-finder.ts`    | Walk directory tree to find AGENTS.md / .rules files                          |
+| `rule-file-scanner.ts`   | Scan for rule files in a directory                                            |
+| `matcher.ts`             | Match file paths against rule file scope                                      |
+| `rule-distance.ts`       | Calculate path distance between file and rule file                            |
+| `project-root-finder.ts` | Find project root (stops at .git, package.json)                               |
+| `output-path.ts`         | Extract file paths from tool output text                                      |
+| `cache.ts`               | `createSessionCacheStore()` — per-session injection dedup                     |
+| `storage.ts`             | Persist injected paths across tool calls                                      |
+| `parser.ts`              | Parse rule file content                                                       |
+| `constants.ts`           | Rule file names: `AGENTS.md`, `.rules`, `CLAUDE.md`                           |
+| `types.ts`               | `RuleFile`, `InjectionResult`, `RuleFileScope`                                |
 
 ## RULE FILE DISCOVERY
 
 Priority (closest → farthest from target file):
+
 1. Same directory as target file
 2. Parent directories up to project root
 3. Project root itself

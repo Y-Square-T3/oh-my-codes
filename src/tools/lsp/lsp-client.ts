@@ -59,7 +59,11 @@ export class LSPClient extends LSPClientConnection {
     })
   }
 
-  async definition(filePath: string, line: number, character: number): Promise<unknown> {
+  async definition(
+    filePath: string,
+    line: number,
+    character: number,
+  ): Promise<unknown> {
     const absPath = resolve(filePath)
     await this.openFile(absPath)
     return this.sendRequest("textDocument/definition", {
@@ -68,7 +72,12 @@ export class LSPClient extends LSPClientConnection {
     })
   }
 
-  async references(filePath: string, line: number, character: number, includeDeclaration = true): Promise<unknown> {
+  async references(
+    filePath: string,
+    line: number,
+    character: number,
+    includeDeclaration = true,
+  ): Promise<unknown> {
     const absPath = resolve(filePath)
     await this.openFile(absPath)
     return this.sendRequest("textDocument/references", {
@@ -97,9 +106,12 @@ export class LSPClient extends LSPClientConnection {
     await new Promise((r) => setTimeout(r, 500))
 
     try {
-      const result = await this.sendRequest<{ items?: Diagnostic[] }>("textDocument/diagnostic", {
-        textDocument: { uri },
-      })
+      const result = await this.sendRequest<{ items?: Diagnostic[] }>(
+        "textDocument/diagnostic",
+        {
+          textDocument: { uri },
+        },
+      )
       if (result && typeof result === "object" && "items" in result) {
         return result as { items: Diagnostic[] }
       }
@@ -108,7 +120,11 @@ export class LSPClient extends LSPClientConnection {
     return { items: this.diagnosticsStore.get(uri) ?? [] }
   }
 
-  async prepareRename(filePath: string, line: number, character: number): Promise<unknown> {
+  async prepareRename(
+    filePath: string,
+    line: number,
+    character: number,
+  ): Promise<unknown> {
     const absPath = resolve(filePath)
     await this.openFile(absPath)
     return this.sendRequest("textDocument/prepareRename", {
@@ -117,7 +133,12 @@ export class LSPClient extends LSPClientConnection {
     })
   }
 
-  async rename(filePath: string, line: number, character: number, newName: string): Promise<unknown> {
+  async rename(
+    filePath: string,
+    line: number,
+    character: number,
+    newName: string,
+  ): Promise<unknown> {
     const absPath = resolve(filePath)
     await this.openFile(absPath)
     return this.sendRequest("textDocument/rename", {

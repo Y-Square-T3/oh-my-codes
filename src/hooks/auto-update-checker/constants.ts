@@ -46,7 +46,7 @@ export const INSTALLED_PACKAGE_JSON = path.join(
   CACHE_DIR,
   "node_modules",
   PACKAGE_NAME,
-  "package.json"
+  "package.json",
 )
 
 /**
@@ -54,5 +54,5 @@ export const INSTALLED_PACKAGE_JSON = path.join(
  * Readers should try each path in order and stop on the first success.
  */
 export const INSTALLED_PACKAGE_JSON_CANDIDATES = ACCEPTED_PACKAGE_NAMES.map(
-  name => path.join(CACHE_DIR, "node_modules", name, "package.json")
+  (name) => path.join(CACHE_DIR, "node_modules", name, "package.json"),
 )

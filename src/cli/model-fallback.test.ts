@@ -588,7 +588,9 @@ describe("generateModelConfig", () => {
       // #then librarian should have fallback_models
       expect(result.agents?.librarian?.model).toBe("openai/gpt-5.4-mini-fast")
       expect(result.agents?.librarian?.fallback_models).toBeDefined()
-      expect(result.agents?.librarian?.fallback_models?.length).toBeGreaterThan(0)
+      expect(result.agents?.librarian?.fallback_models?.length).toBeGreaterThan(
+        0,
+      )
     })
 
     test("librarian omits fallback_models when only ZAI is available", () => {
@@ -635,7 +637,9 @@ describe("generateModelConfig", () => {
       const result = generateModelConfig(config)
 
       // #then explore should use gateway-routed minimax (preferred over claude-haiku)
-      expect(result.agents?.explore?.model).toBe("vercel/minimax/minimax-m2.7-highspeed")
+      expect(result.agents?.explore?.model).toBe(
+        "vercel/minimax/minimax-m2.7-highspeed",
+      )
     })
 
     test("librarian uses vercel/minimax/minimax-m2.7 when only gateway available", () => {
@@ -646,7 +650,9 @@ describe("generateModelConfig", () => {
       const result = generateModelConfig(config)
 
       // #then librarian should use gateway-routed minimax (preferred over claude-haiku)
-      expect(result.agents?.librarian?.model).toBe("vercel/minimax/minimax-m2.7")
+      expect(result.agents?.librarian?.model).toBe(
+        "vercel/minimax/minimax-m2.7",
+      )
     })
 
     test("Hephaestus is created when only Vercel AI Gateway is available", () => {
@@ -682,7 +688,7 @@ describe("generateModelConfig", () => {
 
       // #then should include correct schema URL
       expect(result.$schema).toBe(
-        "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json"
+        "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json",
       )
     })
   })

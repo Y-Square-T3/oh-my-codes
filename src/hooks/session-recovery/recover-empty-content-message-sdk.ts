@@ -10,19 +10,19 @@ type ReplaceEmptyTextPartsAsync = (
   client: Client,
   sessionID: string,
   messageID: string,
-  replacementText: string
+  replacementText: string,
 ) => Promise<boolean>
 
 type InjectTextPartAsync = (
   client: Client,
   sessionID: string,
   messageID: string,
-  text: string
+  text: string,
 ) => Promise<boolean>
 
 type FindMessagesWithEmptyTextPartsFromSDK = (
   client: Client,
-  sessionID: string
+  sessionID: string,
 ) => Promise<string[]>
 
 export async function recoverEmptyContentMessageFromSDK(
@@ -35,20 +35,21 @@ export async function recoverEmptyContentMessageFromSDK(
     replaceEmptyTextPartsAsync: ReplaceEmptyTextPartsAsync
     injectTextPartAsync: InjectTextPartAsync
     findMessagesWithEmptyTextPartsFromSDK: FindMessagesWithEmptyTextPartsFromSDK
-  }
+  },
 ): Promise<boolean> {
   const targetIndex = extractMessageIndex(error)
   const failedID = failedAssistantMsg.info?.id
   let anySuccess = false
 
-  const messagesWithEmptyText = await dependencies.findMessagesWithEmptyTextPartsFromSDK(client, sessionID)
+  const messagesWithEmptyText =
+    await dependencies.findMessagesWithEmptyTextPartsFromSDK(client, sessionID)
   for (const messageID of messagesWithEmptyText) {
     if (
       await dependencies.replaceEmptyTextPartsAsync(
         client,
         sessionID,
         messageID,
-        dependencies.placeholderText
+        dependencies.placeholderText,
       )
     ) {
       anySuccess = true
@@ -59,35 +60,66 @@ export async function recoverEmptyContentMessageFromSDK(
 
   const thinkingOnlyIDs = findMessagesWithThinkingOnlyFromSDK(messages)
   for (const messageID of thinkingOnlyIDs) {
-    if (await dependencies.injectTextPartAsync(client, sessionID, messageID, dependencies.placeholderText)) {
+    if (
+      await dependencies.injectTextPartAsync(
+        client,
+        sessionID,
+        messageID,
+        dependencies.placeholderText,
+      )
+    ) {
       anySuccess = true
     }
   }
 
   if (targetIndex !== null) {
-    const targetMessageID = findEmptyMessageByIndexFromSDK(messages, targetIndex)
+    const targetMessageID = findEmptyMessageByIndexFromSDK(
+      messages,
+      targetIndex,
+    )
     if (targetMessageID) {
       if (
         await dependencies.replaceEmptyTextPartsAsync(
           client,
           sessionID,
           targetMessageID,
-          dependencies.placeholderText
+          dependencies.placeholderText,
         )
       ) {
         return true
       }
-      if (await dependencies.injectTextPartAsync(client, sessionID, targetMessageID, dependencies.placeholderText)) {
+      if (
+        await dependencies.injectTextPartAsync(
+          client,
+          sessionID,
+          targetMessageID,
+          dependencies.placeholderText,
+        )
+      ) {
         return true
       }
     }
   }
 
   if (failedID) {
-    if (await dependencies.replaceEmptyTextPartsAsync(client, sessionID, failedID, dependencies.placeholderText)) {
+    if (
+      await dependencies.replaceEmptyTextPartsAsync(
+        client,
+        sessionID,
+        failedID,
+        dependencies.placeholderText,
+      )
+    ) {
       return true
     }
-    if (await dependencies.injectTextPartAsync(client, sessionID, failedID, dependencies.placeholderText)) {
+    if (
+      await dependencies.injectTextPartAsync(
+        client,
+        sessionID,
+        failedID,
+        dependencies.placeholderText,
+      )
+    ) {
       return true
     }
   }
@@ -100,12 +132,19 @@ export async function recoverEmptyContentMessageFromSDK(
         client,
         sessionID,
         messageID,
-        dependencies.placeholderText
+        dependencies.placeholderText,
       )
     ) {
       anySuccess = true
     }
-    if (await dependencies.injectTextPartAsync(client, sessionID, messageID, dependencies.placeholderText)) {
+    if (
+      await dependencies.injectTextPartAsync(
+        client,
+        sessionID,
+        messageID,
+        dependencies.placeholderText,
+      )
+    ) {
       anySuccess = true
     }
   }
@@ -123,7 +162,11 @@ function sdkPartHasContent(part: SdkPart): boolean {
     return !!part.text?.trim()
   }
 
-  if (part.type === "tool" || part.type === "tool_use" || part.type === "tool_result") {
+  if (
+    part.type === "tool" ||
+    part.type === "tool_use" ||
+    part.type === "tool_result"
+  ) {
     return true
   }
 
@@ -134,16 +177,23 @@ function sdkMessageHasContent(message: MessageData): boolean {
   return (message.parts ?? []).some(sdkPartHasContent)
 }
 
-async function readMessagesFromSDK(client: Client, sessionID: string): Promise<MessageData[]> {
+async function readMessagesFromSDK(
+  client: Client,
+  sessionID: string,
+): Promise<MessageData[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    return normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    return normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
   } catch {
     return []
   }
 }
 
-function findMessagesWithThinkingOnlyFromSDK(messages: MessageData[]): string[] {
+function findMessagesWithThinkingOnlyFromSDK(
+  messages: MessageData[],
+): string[] {
   const result: string[] = []
 
   for (const msg of messages) {
@@ -175,7 +225,10 @@ function findEmptyMessagesFromSDK(messages: MessageData[]): string[] {
   return emptyIds
 }
 
-function findEmptyMessageByIndexFromSDK(messages: MessageData[], targetIndex: number): string | null {
+function findEmptyMessageByIndexFromSDK(
+  messages: MessageData[],
+  targetIndex: number,
+): string | null {
   const indicesToTry = [
     targetIndex,
     targetIndex - 1,

@@ -8,7 +8,10 @@ export interface PromptRetryOptions {
 
 export const PROMPT_TIMEOUT_MS = 120000
 
-export function createPromptTimeoutContext(args: PromptTimeoutArgs, timeoutMs: number): {
+export function createPromptTimeoutContext(
+  args: PromptTimeoutArgs,
+  timeoutMs: number,
+): {
   signal: AbortSignal
   wasTimedOut: () => boolean
   cleanup: () => void
@@ -25,7 +28,9 @@ export function createPromptTimeoutContext(args: PromptTimeoutArgs, timeoutMs: n
     if (args.signal.aborted) {
       timeoutController.abort(args.signal.reason)
     } else {
-      args.signal.addEventListener("abort", abortOnUpstreamSignal, { once: true })
+      args.signal.addEventListener("abort", abortOnUpstreamSignal, {
+        once: true,
+      })
     }
   }
 

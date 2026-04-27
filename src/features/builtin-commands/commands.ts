@@ -2,7 +2,11 @@ import type { CommandDefinition } from "../claude-code-command-loader"
 import { isAgentRegistered } from "../claude-code-session-state"
 import type { BuiltinCommandName, BuiltinCommands } from "./types"
 import { INIT_DEEP_TEMPLATE } from "./templates/init-deep"
-import { RALPH_LOOP_TEMPLATE, ULW_LOOP_TEMPLATE, CANCEL_RALPH_TEMPLATE } from "./templates/ralph-loop"
+import {
+  RALPH_LOOP_TEMPLATE,
+  ULW_LOOP_TEMPLATE,
+  CANCEL_RALPH_TEMPLATE,
+} from "./templates/ralph-loop"
 import { STOP_CONTINUATION_TEMPLATE } from "./templates/stop-continuation"
 import { REFACTOR_TEMPLATE } from "./templates/refactor"
 import { START_WORK_TEMPLATE } from "./templates/start-work"
@@ -13,7 +17,9 @@ interface LoadBuiltinCommandsOptions {
   useRegisteredAgents?: boolean
 }
 
-function resolveStartWorkAgent(options?: LoadBuiltinCommandsOptions): "atlas" | "sisyphus" {
+function resolveStartWorkAgent(
+  options?: LoadBuiltinCommandsOptions,
+): "atlas" | "sisyphus" {
   if (options?.useRegisteredAgents) {
     return isAgentRegistered("atlas") ? "atlas" : "sisyphus"
   }
@@ -36,28 +42,32 @@ $ARGUMENTS
 </user-request>`,
       argumentHint: "[--create-new] [--max-depth=N]",
     },
-     "ralph-loop": {
-       description: "(builtin) Start self-referential development loop until completion",
-       template: `<command-instruction>
+    "ralph-loop": {
+      description:
+        "(builtin) Start self-referential development loop until completion",
+      template: `<command-instruction>
 ${RALPH_LOOP_TEMPLATE}
 </command-instruction>
 
 <user-task>
 $ARGUMENTS
 </user-task>`,
-       argumentHint: '"task description" [--completion-promise=TEXT] [--max-iterations=N] [--strategy=reset|continue]',
-     },
-     "ulw-loop": {
-        description: "(builtin) Start ultrawork loop - continues until completion with ultrawork mode",
-        template: `<command-instruction>
+      argumentHint:
+        '"task description" [--completion-promise=TEXT] [--max-iterations=N] [--strategy=reset|continue]',
+    },
+    "ulw-loop": {
+      description:
+        "(builtin) Start ultrawork loop - continues until completion with ultrawork mode",
+      template: `<command-instruction>
 ${ULW_LOOP_TEMPLATE}
 </command-instruction>
 
 <user-task>
 $ARGUMENTS
 </user-task>`,
-        argumentHint: '"task description" [--completion-promise=TEXT] [--strategy=reset|continue]',
-      },
+      argumentHint:
+        '"task description" [--completion-promise=TEXT] [--strategy=reset|continue]',
+    },
     "cancel-ralph": {
       description: "(builtin) Cancel active Ralph Loop",
       template: `<command-instruction>
@@ -70,7 +80,8 @@ ${CANCEL_RALPH_TEMPLATE}
       template: `<command-instruction>
 ${REFACTOR_TEMPLATE}
 </command-instruction>`,
-      argumentHint: "<refactoring-target> [--scope=<file|module|project>] [--strategy=<safe|aggressive>]",
+      argumentHint:
+        "<refactoring-target> [--scope=<file|module|project>] [--strategy=<safe|aggressive>]",
     },
     "start-work": {
       description: "(builtin) Start Sisyphus work session from Prometheus plan",
@@ -90,13 +101,15 @@ $ARGUMENTS
       argumentHint: "[plan-name]",
     },
     "stop-continuation": {
-      description: "(builtin) Stop all continuation mechanisms (ralph loop, todo continuation, boulder) for this session",
+      description:
+        "(builtin) Stop all continuation mechanisms (ralph loop, todo continuation, boulder) for this session",
       template: `<command-instruction>
 ${STOP_CONTINUATION_TEMPLATE}
 </command-instruction>`,
     },
     "remove-ai-slops": {
-      description: "(builtin) Remove AI-generated code smells from branch changes and critically review the results",
+      description:
+        "(builtin) Remove AI-generated code smells from branch changes and critically review the results",
       template: `<command-instruction>
 ${REMOVE_AI_SLOPS_TEMPLATE}
 </command-instruction>
@@ -106,7 +119,8 @@ $ARGUMENTS
 </user-request>`,
     },
     handoff: {
-      description: "(builtin) Create a detailed context summary for continuing work in a new session",
+      description:
+        "(builtin) Create a detailed context summary for continuing work in a new session",
       template: `<command-instruction>
 ${HANDOFF_TEMPLATE}
 </command-instruction>

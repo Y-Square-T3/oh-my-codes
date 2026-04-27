@@ -3,7 +3,11 @@ import type { ToolContext } from "@opencode-ai/plugin/tool"
 import { BUILTIN_MCP_TOOL_HINTS, SKILL_MCP_DESCRIPTION } from "./constants"
 import { parseSkillMcpArguments } from "./parse-skill-mcp-arguments"
 import type { SkillMcpArgs } from "./types"
-import type { SkillMcpManager, SkillMcpClientInfo, SkillMcpServerContext } from "../../features/skill-mcp-manager"
+import type {
+  SkillMcpManager,
+  SkillMcpClientInfo,
+  SkillMcpServerContext,
+} from "../../features/skill-mcp-manager"
 import type { LoadedSkill } from "../../features/opencode-skill-loader/types"
 
 interface SkillMcpToolOptions {
@@ -17,8 +21,10 @@ type OperationType = { type: "tool" | "resource" | "prompt"; name: string }
 function validateOperationParams(args: SkillMcpArgs): OperationType {
   const operations: OperationType[] = []
   if (args.tool_name) operations.push({ type: "tool", name: args.tool_name })
-  if (args.resource_name) operations.push({ type: "resource", name: args.resource_name })
-  if (args.prompt_name) operations.push({ type: "prompt", name: args.prompt_name })
+  if (args.resource_name)
+    operations.push({ type: "resource", name: args.resource_name })
+  if (args.prompt_name)
+    operations.push({ type: "prompt", name: args.prompt_name })
 
   if (operations.length === 0) {
     throw new Error(
@@ -52,7 +58,10 @@ function validateOperationParams(args: SkillMcpArgs): OperationType {
 function findMcpServer(
   mcpName: string,
   skills: LoadedSkill[],
-): { skill: LoadedSkill; config: NonNullable<LoadedSkill["mcpConfig"]>[string] } | null {
+): {
+  skill: LoadedSkill
+  config: NonNullable<LoadedSkill["mcpConfig"]>[string]
+} | null {
   for (const skill of skills) {
     if (skill.mcpConfig && mcpName in skill.mcpConfig) {
       return { skill, config: skill.mcpConfig[mcpName] }
@@ -83,28 +92,43 @@ function formatBuiltinMcpHint(mcpName: string): string | null {
   )
 }
 
-export function applyGrepFilter(output: string, pattern: string | undefined): string {
+export function applyGrepFilter(
+  output: string,
+  pattern: string | undefined,
+): string {
   if (!pattern) return output
   try {
     const regex = new RegExp(pattern, "i")
     const lines = output.split("\n")
     const filtered = lines.filter((line) => regex.test(line))
-    return filtered.length > 0 ? filtered.join("\n") : `[grep] No lines matched pattern: ${pattern}`
+    return filtered.length > 0
+      ? filtered.join("\n")
+      : `[grep] No lines matched pattern: ${pattern}`
   } catch {
     return output
   }
 }
 
-export function createSkillMcpTool(options: SkillMcpToolOptions): ToolDefinition {
+export function createSkillMcpTool(
+  options: SkillMcpToolOptions,
+): ToolDefinition {
   const { manager, getLoadedSkills, getSessionID } = options
 
   return tool({
     description: SKILL_MCP_DESCRIPTION,
     args: {
-      mcp_name: tool.schema.string().describe("Name of the MCP server from skill config"),
+      mcp_name: tool.schema
+        .string()
+        .describe("Name of the MCP server from skill config"),
       tool_name: tool.schema.string().optional().describe("MCP tool to call"),
-      resource_name: tool.schema.string().optional().describe("MCP resource URI to read"),
-      prompt_name: tool.schema.string().optional().describe("MCP prompt to get"),
+      resource_name: tool.schema
+        .string()
+        .optional()
+        .describe("MCP resource URI to read"),
+      prompt_name: tool.schema
+        .string()
+        .optional()
+        .describe("MCP prompt to get"),
       arguments: tool.schema
         .union([tool.schema.string(), tool.schema.object({})])
         .optional()
@@ -112,7 +136,9 @@ export function createSkillMcpTool(options: SkillMcpToolOptions): ToolDefinition
       grep: tool.schema
         .string()
         .optional()
-        .describe("Regex pattern to filter output lines (only matching lines returned)"),
+        .describe(
+          "Regex pattern to filter output lines (only matching lines returned)",
+        ),
     },
     async execute(args: SkillMcpArgs, toolContext: ToolContext) {
       const operation = validateOperationParams(args)
@@ -156,12 +182,21 @@ export function createSkillMcpTool(options: SkillMcpToolOptions): ToolDefinition
       let output: string
       switch (operation.type) {
         case "tool": {
-          const result = await manager.callTool(info, context, operation.name, parsedArgs)
+          const result = await manager.callTool(
+            info,
+            context,
+            operation.name,
+            parsedArgs,
+          )
           output = JSON.stringify(result, null, 2)
           break
         }
         case "resource": {
-          const result = await manager.readResource(info, context, operation.name)
+          const result = await manager.readResource(
+            info,
+            context,
+            operation.name,
+          )
           output = JSON.stringify(result, null, 2)
           break
         }
@@ -170,7 +205,12 @@ export function createSkillMcpTool(options: SkillMcpToolOptions): ToolDefinition
           for (const [key, value] of Object.entries(parsedArgs)) {
             stringArgs[key] = String(value)
           }
-          const result = await manager.getPrompt(info, context, operation.name, stringArgs)
+          const result = await manager.getPrompt(
+            info,
+            context,
+            operation.name,
+            stringArgs,
+          )
           output = JSON.stringify(result, null, 2)
           break
         }

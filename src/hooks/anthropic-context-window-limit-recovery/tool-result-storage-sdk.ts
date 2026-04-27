@@ -28,11 +28,13 @@ interface SDKMessage {
 
 export async function findToolResultsBySizeFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<ToolResultInfo[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    })
     const results: ToolResultInfo[] = []
 
     for (const msg of messages) {
@@ -40,7 +42,12 @@ export async function findToolResultsBySizeFromSDK(
       if (!messageID || !msg.parts) continue
 
       for (const part of msg.parts) {
-        if (part.type === "tool" && part.state?.output && !part.state?.time?.compacted && part.tool) {
+        if (
+          part.type === "tool" &&
+          part.state?.output &&
+          !part.state?.time?.compacted &&
+          part.tool
+        ) {
           results.push({
             partPath: "",
             partId: part.id,
@@ -63,7 +70,7 @@ export async function truncateToolResultAsync(
   sessionID: string,
   messageID: string,
   partId: string,
-  part: SDKToolPart
+  part: SDKToolPart,
 ): Promise<{ success: boolean; toolName?: string; originalSize?: number }> {
   if (!part.state?.output) return { success: false }
 
@@ -83,22 +90,32 @@ export async function truncateToolResultAsync(
   }
 
   try {
-    const patched = await patchPart(client, sessionID, messageID, partId, updatedPart)
+    const patched = await patchPart(
+      client,
+      sessionID,
+      messageID,
+      partId,
+      updatedPart,
+    )
     if (!patched) return { success: false }
     return { success: true, toolName, originalSize }
   } catch (error) {
-    log("[context-window-recovery] truncateToolResultAsync failed", { error: String(error) })
+    log("[context-window-recovery] truncateToolResultAsync failed", {
+      error: String(error),
+    })
     return { success: false }
   }
 }
 
 export async function countTruncatedResultsFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<number> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    })
     let count = 0
 
     for (const msg of messages) {
@@ -116,7 +133,7 @@ export async function countTruncatedResultsFromSDK(
 
 export async function getTotalToolOutputSizeFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<number> {
   const results = await findToolResultsBySizeFromSDK(client, sessionID)
   return results.reduce((sum, result) => sum + result.outputSize, 0)

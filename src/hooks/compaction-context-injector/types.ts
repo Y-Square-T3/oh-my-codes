@@ -1,7 +1,9 @@
 export interface CompactionContextInjector {
   capture: (sessionID: string) => Promise<void>
   inject: (sessionID?: string) => string
-  event: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
+  event: (input: {
+    event: { type: string; properties?: unknown }
+  }) => Promise<void>
 }
 
 export type CompactionContextClient = {

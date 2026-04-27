@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test"
 async function importFreshReaders() {
   const token = `${Date.now()}-${Math.random()}`
-  const [{ readMessagesFromSDK, readMessages }, { readPartsFromSDK, readParts }] = await Promise.all([
+  const [
+    { readMessagesFromSDK, readMessages },
+    { readPartsFromSDK, readParts },
+  ] = await Promise.all([
     import(`./messages-reader?test=${token}`),
     import(`./parts-reader?test=${token}`),
   ])
@@ -35,7 +38,9 @@ describe("session-recovery storage SDK readers", () => {
   it("readPartsFromSDK returns empty array when fetch fails", async () => {
     //#given a client that throws on request
     const { readPartsFromSDK } = await importFreshReaders()
-    const client = createMockClient({}) as Parameters<typeof readPartsFromSDK>[0]
+    const client = createMockClient({}) as Parameters<
+      typeof readPartsFromSDK
+    >[0]
 
     //#when readPartsFromSDK is called
     const result = await readPartsFromSDK(client, "ses_test", "msg_test")

@@ -22,12 +22,17 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
 ```typescript
 export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   "visual-engineering": "Frontend, UI/UX, design, styling, animation",
-  ultrabrain: "Use ONLY for genuinely hard, logic-heavy tasks. Give clear goals only, not step-by-step instructions.",
+  ultrabrain:
+    "Use ONLY for genuinely hard, logic-heavy tasks. Give clear goals only, not step-by-step instructions.",
   deep: "Goal-oriented autonomous problem-solving. Thorough research before action. For hairy problems requiring deep understanding.",
-  artistry: "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
-  quick: "Trivial tasks - single file changes, typo fixes, simple modifications",
-  "unspecified-low": "Tasks that don't fit other categories, low effort required",
-  "unspecified-high": "Tasks that don't fit other categories, high effort required",
+  artistry:
+    "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
+  quick:
+    "Trivial tasks - single file changes, typo fixes, simple modifications",
+  "unspecified-low":
+    "Tasks that don't fit other categories, low effort required",
+  "unspecified-high":
+    "Tasks that don't fit other categories, high effort required",
   writing: "Documentation, prose, technical writing",
 }
 ```
@@ -113,7 +118,9 @@ export const PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS = `### REQUIRED OUTPU
 ...
 `
 
-function renderPlanAgentCategoryRows(categories: AvailableCategory[]): string[] {
+function renderPlanAgentCategoryRows(
+  categories: AvailableCategory[],
+): string[] {
   const sorted = [...categories].sort((a, b) => a.name.localeCompare(b.name))
   return sorted.map((category) => {
     const bestFor = category.description || category.name
@@ -123,16 +130,16 @@ function renderPlanAgentCategoryRows(categories: AvailableCategory[]): string[] 
 }
 
 function renderPlanAgentSkillRows(skills: AvailableSkill[]): string[] {
-   const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name))
-   return sorted.map((skill) => {
-     const domain = truncateDescription(skill.description).trim() || skill.name
-     return `| \`${skill.name}\` | ${domain} |`
-   })
- }
+  const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name))
+  return sorted.map((skill) => {
+    const domain = truncateDescription(skill.description).trim() || skill.name
+    return `| \`${skill.name}\` | ${domain} |`
+  })
+}
 
 export function buildPlanAgentSkillsSection(
   categories: AvailableCategory[] = [],
-  skills: AvailableSkill[] = []
+  skills: AvailableSkill[] = [],
 ): string {
   const categoryRows = renderPlanAgentCategoryRows(categories)
   const skillRows = renderPlanAgentSkillRows(skills)
@@ -155,7 +162,7 @@ ${skillRows.join("\n")}`
 
 export function buildPlanAgentSystemPrepend(
   categories: AvailableCategory[] = [],
-  skills: AvailableSkill[] = []
+  skills: AvailableSkill[] = [],
 ): string {
   return [
     PLAN_AGENT_SYSTEM_PREPEND_STATIC_BEFORE_SKILLS,
@@ -182,7 +189,9 @@ export const PLAN_AGENT_NAMES = ["plan"]
 export function isPlanAgent(agentName: string | undefined): boolean {
   if (!agentName) return false
   const lowerName = agentName.toLowerCase().trim()
-  return PLAN_AGENT_NAMES.some(name => lowerName === name || lowerName.includes(name))
+  return PLAN_AGENT_NAMES.some(
+    (name) => lowerName === name || lowerName.includes(name),
+  )
 }
 
 /**
@@ -200,7 +209,7 @@ export function isPlanFamily(category: string | undefined): boolean {
   if (!category) return false
   const lowerCategory = category.toLowerCase().trim()
   return PLAN_FAMILY_NAMES.some(
-    (name) => lowerCategory === name || lowerCategory.includes(name)
+    (name) => lowerCategory === name || lowerCategory.includes(name),
   )
 }
 ```
@@ -306,37 +315,37 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
 
 ```typescript
 export type FallbackEntry = {
-  providers: string[];
-  model: string;
-  variant?: string;
-};
+  providers: string[]
+  model: string
+  variant?: string
+}
 
 export type ModelRequirement = {
-  fallbackChain: FallbackEntry[];
-  variant?: string;
-  requiresModel?: string;
-  requiresAnyModel?: boolean;
-  requiresProvider?: string[];
-};
+  fallbackChain: FallbackEntry[]
+  variant?: string
+  requiresModel?: string
+  requiresAnyModel?: boolean
+  requiresProvider?: string[]
+}
 
 export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
   // ... unchanged, full agent entries stay here
-};
+}
 
 export { CATEGORY_MODEL_REQUIREMENTS } from "./category-model-requirements"
 ```
 
 ## Summary of Changes
 
-| File | Lines Before | Lines After | Action |
-|------|-------------|-------------|--------|
-| `constants.ts` | 654 | ~25 | Rewrite as barrel re-export |
-| `default-categories.ts` | - | ~15 | **NEW** |
-| `category-descriptions.ts` | - | ~12 | **NEW** |
-| `category-prompt-appends.ts` | - | ~280 | **NEW** (mostly exempt prompt text) |
-| `plan-agent-prompt.ts` | - | ~270 | **NEW** (mostly exempt prompt text) |
-| `plan-agent-identity.ts` | - | ~35 | **NEW** |
-| `model-requirements.ts` | 311 | ~165 | Remove CATEGORY_MODEL_REQUIREMENTS |
-| `category-model-requirements.ts` | - | ~150 | **NEW** |
+| File                             | Lines Before | Lines After | Action                              |
+| -------------------------------- | ------------ | ----------- | ----------------------------------- |
+| `constants.ts`                   | 654          | ~25         | Rewrite as barrel re-export         |
+| `default-categories.ts`          | -            | ~15         | **NEW**                             |
+| `category-descriptions.ts`       | -            | ~12         | **NEW**                             |
+| `category-prompt-appends.ts`     | -            | ~280        | **NEW** (mostly exempt prompt text) |
+| `plan-agent-prompt.ts`           | -            | ~270        | **NEW** (mostly exempt prompt text) |
+| `plan-agent-identity.ts`         | -            | ~35         | **NEW**                             |
+| `model-requirements.ts`          | 311          | ~165        | Remove CATEGORY_MODEL_REQUIREMENTS  |
+| `category-model-requirements.ts` | -            | ~150        | **NEW**                             |
 
 **Zero consumer files modified.** Backward compatibility maintained through barrel re-exports.

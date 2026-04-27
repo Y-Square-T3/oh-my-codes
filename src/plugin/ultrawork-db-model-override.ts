@@ -19,7 +19,11 @@ function tryUpdateMessageModel(
   const stmt = db.prepare(
     `UPDATE message SET data = json_set(data, '$.model.providerID', ?, '$.model.modelID', ?) WHERE id = ?`,
   )
-  const result = stmt.run(targetModel.providerID, targetModel.modelID, messageId)
+  const result = stmt.run(
+    targetModel.providerID,
+    targetModel.modelID,
+    messageId,
+  )
   if (result.changes === 0) return false
   if (variant) {
     db.prepare(
@@ -37,16 +41,25 @@ function retryViaMicrotask(
   attempt: number,
 ): void {
   if (attempt >= MAX_MICROTASK_RETRIES) {
-    log("[ultrawork-db-override] Exhausted microtask retries, falling back to setTimeout", {
-      messageId,
-      attempt,
-    })
+    log(
+      "[ultrawork-db-override] Exhausted microtask retries, falling back to setTimeout",
+      {
+        messageId,
+        attempt,
+      },
+    )
     setTimeout(() => {
       try {
         if (tryUpdateMessageModel(db, messageId, targetModel, variant)) {
-          log(`[ultrawork-db-override] setTimeout fallback succeeded: ${targetModel.providerID}/${targetModel.modelID}`, { messageId })
+          log(
+            `[ultrawork-db-override] setTimeout fallback succeeded: ${targetModel.providerID}/${targetModel.modelID}`,
+            { messageId },
+          )
         } else {
-          log("[ultrawork-db-override] setTimeout fallback failed - message not found", { messageId })
+          log(
+            "[ultrawork-db-override] setTimeout fallback failed - message not found",
+            { messageId },
+          )
         }
       } catch (error) {
         log("[ultrawork-db-override] setTimeout fallback failed with error", {
@@ -57,10 +70,13 @@ function retryViaMicrotask(
         try {
           db.close()
         } catch (error) {
-          log("[ultrawork-db-override] Failed to close DB after setTimeout fallback", {
-            messageId,
-            error: String(error),
-          })
+          log(
+            "[ultrawork-db-override] Failed to close DB after setTimeout fallback",
+            {
+              messageId,
+              error: String(error),
+            },
+          )
         }
       }
     }, 0)
@@ -72,7 +88,10 @@ function retryViaMicrotask(
 
     try {
       if (tryUpdateMessageModel(db, messageId, targetModel, variant)) {
-        log(`[ultrawork-db-override] Deferred DB update (attempt ${attempt}): ${targetModel.providerID}/${targetModel.modelID}`, { messageId })
+        log(
+          `[ultrawork-db-override] Deferred DB update (attempt ${attempt}): ${targetModel.providerID}/${targetModel.modelID}`,
+          { messageId },
+        )
         return
       }
 
@@ -89,11 +108,14 @@ function retryViaMicrotask(
         try {
           db.close()
         } catch (error) {
-          log("[ultrawork-db-override] Failed to close DB after deferred DB update", {
-            messageId,
-            attempt,
-            error: String(error),
-          })
+          log(
+            "[ultrawork-db-override] Failed to close DB after deferred DB update",
+            {
+              messageId,
+              attempt,
+              error: String(error),
+            },
+          )
         }
       }
     }
@@ -123,10 +145,13 @@ export function scheduleDeferredModelOverride(
     try {
       db = new Database(dbPath)
     } catch (error) {
-      log("[ultrawork-db-override] Failed to open DB, skipping deferred override", {
-        messageId,
-        error: String(error),
-      })
+      log(
+        "[ultrawork-db-override] Failed to open DB, skipping deferred override",
+        {
+          messageId,
+          error: String(error),
+        },
+      )
       return
     }
 

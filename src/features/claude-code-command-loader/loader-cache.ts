@@ -3,9 +3,14 @@ import { resolve } from "path"
 
 import type { CommandDefinition } from "./types"
 
-const commandLoaderCache = new Map<string, Promise<Record<string, CommandDefinition>>>()
+const commandLoaderCache = new Map<
+  string,
+  Promise<Record<string, CommandDefinition>>
+>()
 
-export async function getCommandLoaderCacheKey(directory?: string): Promise<string> {
+export async function getCommandLoaderCacheKey(
+  directory?: string,
+): Promise<string> {
   const resolvedDirectory = resolve(directory ?? process.cwd())
 
   try {

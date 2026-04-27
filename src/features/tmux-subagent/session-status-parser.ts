@@ -1,6 +1,8 @@
 type SessionStatus = { type: string }
 
-export function parseSessionStatusMap(data: unknown): Record<string, SessionStatus> {
+export function parseSessionStatusMap(
+  data: unknown,
+): Record<string, SessionStatus> {
   if (typeof data !== "object" || data === null) return {}
   const record = data as Record<string, unknown>
 

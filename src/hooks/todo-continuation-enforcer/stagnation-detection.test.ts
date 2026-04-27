@@ -62,7 +62,11 @@ describe("shouldStopForStagnation", () => {
 
         // when
         state.awaitingPostInjectionProgressCheck = true
-        const firstCycle = sessionStateStore.trackContinuationProgress(sessionID, 2, todos)
+        const firstCycle = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          todos,
+        )
 
         handleNonIdleEvent({
           eventType: "tool.execute.before",
@@ -76,7 +80,11 @@ describe("shouldStopForStagnation", () => {
         })
 
         state.awaitingPostInjectionProgressCheck = true
-        const secondCycle = sessionStateStore.trackContinuationProgress(sessionID, 2, todos)
+        const secondCycle = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          todos,
+        )
 
         handleNonIdleEvent({
           eventType: "tool.execute.after",
@@ -90,7 +98,11 @@ describe("shouldStopForStagnation", () => {
         })
 
         state.awaitingPostInjectionProgressCheck = true
-        const thirdCycle = sessionStateStore.trackContinuationProgress(sessionID, 2, todos)
+        const thirdCycle = sessionStateStore.trackContinuationProgress(
+          sessionID,
+          2,
+          todos,
+        )
 
         // then
         expect(firstCycle.stagnationCount).toBe(1)

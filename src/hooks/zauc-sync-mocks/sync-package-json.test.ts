@@ -1,5 +1,19 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test"
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { join } from "node:path"
 import type { PluginEntryInfo } from "../auto-update-checker/checker/plugin-entry"
 import { CACHE_DIR } from "../auto-update-checker/constants"
@@ -12,19 +26,27 @@ const ORIGINAL_CACHE_PACKAGE_JSON = existsSync(CACHE_PACKAGE_JSON_PATH)
 
 let importCounter = 0
 
-async function importFreshSyncPackageJsonModule(): Promise<typeof import("../auto-update-checker/checker/sync-package-json")> {
+async function importFreshSyncPackageJsonModule(): Promise<
+  typeof import("../auto-update-checker/checker/sync-package-json")
+> {
   mock.module("../../shared/logger", () => ({
     log: () => {},
   }))
 
-  return import(`../auto-update-checker/checker/sync-package-json?test=${importCounter++}`)
+  return import(
+    `../auto-update-checker/checker/sync-package-json?test=${importCounter++}`
+  )
 }
 
 function resetTestCache(currentVersion = "3.10.0"): void {
   mkdirSync(CACHE_PACKAGES_DIR, { recursive: true })
   writeFileSync(
     CACHE_PACKAGE_JSON_PATH,
-    JSON.stringify({ dependencies: { "oh-my-codes": currentVersion, other: "1.0.0" } }, null, 2)
+    JSON.stringify(
+      { dependencies: { "oh-my-codes": currentVersion, other: "1.0.0" } },
+      null,
+      2,
+    ),
   )
 }
 
@@ -53,7 +75,8 @@ describe("syncCachePackageJsonToIntent", () => {
   describe("#given cache package.json with pinned semver version", () => {
     describe("#when opencode.json intent is latest tag", () => {
       it("#then updates package.json to use latest", async () => {
-        const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+        const { syncCachePackageJsonToIntent } =
+          await importFreshSyncPackageJsonModule()
 
         const pluginInfo: PluginEntryInfo = {
           entry: "oh-my-codes@latest",
@@ -72,7 +95,8 @@ describe("syncCachePackageJsonToIntent", () => {
 
     describe("#when opencode.json intent is next tag", () => {
       it("#then updates package.json to use next", async () => {
-        const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+        const { syncCachePackageJsonToIntent } =
+          await importFreshSyncPackageJsonModule()
 
         const pluginInfo: PluginEntryInfo = {
           entry: "oh-my-codes@next",
@@ -91,7 +115,8 @@ describe("syncCachePackageJsonToIntent", () => {
 
     describe("#when opencode.json has no version (implies latest)", () => {
       it("#then updates package.json to use latest", async () => {
-        const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+        const { syncCachePackageJsonToIntent } =
+          await importFreshSyncPackageJsonModule()
 
         const pluginInfo: PluginEntryInfo = {
           entry: "oh-my-codes",
@@ -112,7 +137,8 @@ describe("syncCachePackageJsonToIntent", () => {
   describe("#given cache package.json already matches intent", () => {
     it("#then returns synced false with no error", async () => {
       resetTestCache("latest")
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@latest",
@@ -132,7 +158,8 @@ describe("syncCachePackageJsonToIntent", () => {
   describe("#given cache package.json does not exist", () => {
     it("#then creates cache package.json with the plugin dependency", async () => {
       cleanupTestCache()
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@latest",
@@ -155,10 +182,11 @@ describe("syncCachePackageJsonToIntent", () => {
       mkdirSync(CACHE_PACKAGES_DIR, { recursive: true })
       writeFileSync(
         join(CACHE_PACKAGES_DIR, "package.json"),
-        JSON.stringify({ dependencies: { other: "1.0.0" } }, null, 2)
+        JSON.stringify({ dependencies: { other: "1.0.0" } }, null, 2),
       )
 
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@latest",
@@ -172,17 +200,23 @@ describe("syncCachePackageJsonToIntent", () => {
       expect(result.synced).toBe(true)
       expect(result.error).toBeNull()
 
-        const content = readFileSync(join(CACHE_PACKAGES_DIR, "package.json"), "utf-8")
-        const pkg = JSON.parse(content) as { dependencies?: Record<string, string> }
-        expect(pkg.dependencies?.["oh-my-codes"]).toBe("latest")
-        expect(pkg.dependencies?.other).toBe("1.0.0")
+      const content = readFileSync(
+        join(CACHE_PACKAGES_DIR, "package.json"),
+        "utf-8",
+      )
+      const pkg = JSON.parse(content) as {
+        dependencies?: Record<string, string>
+      }
+      expect(pkg.dependencies?.["oh-my-codes"]).toBe("latest")
+      expect(pkg.dependencies?.other).toBe("1.0.0")
     })
   })
 
   describe("#given user explicitly changed from one semver to another", () => {
     it("#then updates package.json to new version", async () => {
       resetTestCache("3.9.0")
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@3.10.0",
@@ -201,7 +235,8 @@ describe("syncCachePackageJsonToIntent", () => {
 
   describe("#given cache package.json with other dependencies", () => {
     it("#then other dependencies are preserved when updating plugin version", async () => {
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@latest",
@@ -215,9 +250,14 @@ describe("syncCachePackageJsonToIntent", () => {
       expect(result.synced).toBe(true)
       expect(result.error).toBeNull()
 
-        const content = readFileSync(join(CACHE_PACKAGES_DIR, "package.json"), "utf-8")
-        const pkg = JSON.parse(content) as { dependencies?: Record<string, string> }
-        expect(pkg.dependencies?.["other"]).toBe("1.0.0")
+      const content = readFileSync(
+        join(CACHE_PACKAGES_DIR, "package.json"),
+        "utf-8",
+      )
+      const pkg = JSON.parse(content) as {
+        dependencies?: Record<string, string>
+      }
+      expect(pkg.dependencies?.["other"]).toBe("1.0.0")
     })
   })
 
@@ -225,9 +265,13 @@ describe("syncCachePackageJsonToIntent", () => {
     it("#then returns parse_error", async () => {
       cleanupTestCache()
       mkdirSync(CACHE_PACKAGES_DIR, { recursive: true })
-      writeFileSync(join(CACHE_PACKAGES_DIR, "package.json"), "{ invalid json }")
+      writeFileSync(
+        join(CACHE_PACKAGES_DIR, "package.json"),
+        "{ invalid json }",
+      )
 
-      const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+      const { syncCachePackageJsonToIntent } =
+        await importFreshSyncPackageJsonModule()
 
       const pluginInfo: PluginEntryInfo = {
         entry: "oh-my-codes@latest",
@@ -249,7 +293,7 @@ describe("syncCachePackageJsonToIntent", () => {
       mkdirSync(CACHE_PACKAGES_DIR, { recursive: true })
       writeFileSync(
         join(CACHE_PACKAGES_DIR, "package.json"),
-        JSON.stringify({ dependencies: { "oh-my-codes": "3.10.0" } }, null, 2)
+        JSON.stringify({ dependencies: { "oh-my-codes": "3.10.0" } }, null, 2),
       )
 
       const fs = await import("node:fs")
@@ -265,7 +309,8 @@ describe("syncCachePackageJsonToIntent", () => {
       }))
 
       try {
-        const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+        const { syncCachePackageJsonToIntent } =
+          await importFreshSyncPackageJsonModule()
 
         const pluginInfo: PluginEntryInfo = {
           entry: "oh-my-codes@latest",
@@ -294,7 +339,7 @@ describe("syncCachePackageJsonToIntent", () => {
       mkdirSync(CACHE_PACKAGES_DIR, { recursive: true })
       writeFileSync(
         join(CACHE_PACKAGES_DIR, "package.json"),
-        JSON.stringify({ dependencies: { "oh-my-codes": "3.10.0" } }, null, 2)
+        JSON.stringify({ dependencies: { "oh-my-codes": "3.10.0" } }, null, 2),
       )
 
       const fs = await import("node:fs")
@@ -315,7 +360,8 @@ describe("syncCachePackageJsonToIntent", () => {
       }))
 
       try {
-        const { syncCachePackageJsonToIntent } = await importFreshSyncPackageJsonModule()
+        const { syncCachePackageJsonToIntent } =
+          await importFreshSyncPackageJsonModule()
 
         const pluginInfo: PluginEntryInfo = {
           entry: "oh-my-codes@latest",

@@ -1,9 +1,16 @@
 /// <reference types="bun-types" />
 
 import { describe, expect, it } from "bun:test"
-import { createTimestampTransformer, createTimestampedStdoutController } from "./timestamp-output"
+import {
+  createTimestampTransformer,
+  createTimestampedStdoutController,
+} from "./timestamp-output"
 
-function createLocalDate(hours: number, minutes: number, seconds: number): Date {
+function createLocalDate(
+  hours: number,
+  minutes: number,
+  seconds: number,
+): Date {
   return new Date(2026, 1, 19, hours, minutes, seconds)
 }
 
@@ -24,9 +31,14 @@ function createMockWriteStream(): MockWriteStream {
     encodingOrCallback,
     callback,
   ) => {
-    const text = typeof chunk === "string"
-      ? chunk
-      : Buffer.from(chunk).toString(typeof encodingOrCallback === "string" ? encodingOrCallback : undefined)
+    const text =
+      typeof chunk === "string"
+        ? chunk
+        : Buffer.from(chunk).toString(
+            typeof encodingOrCallback === "string"
+              ? encodingOrCallback
+              : undefined,
+          )
 
     writes.push(text)
 
@@ -87,7 +99,9 @@ describe("createTimestampedStdoutController", () => {
   it("prefixes stdout writes when enabled", () => {
     // given
     const stdout = createMockWriteStream()
-    const controller = createTimestampedStdoutController(stdout as unknown as NodeJS.WriteStream)
+    const controller = createTimestampedStdoutController(
+      stdout as unknown as NodeJS.WriteStream,
+    )
 
     // when
     controller.enable()
@@ -95,13 +109,17 @@ describe("createTimestampedStdoutController", () => {
 
     // then
     expect(stdout.writes).toHaveLength(1)
-    expect(stdout.writes[0]!).toMatch(/^\[\d{2}:\d{2}:\d{2}\] hello\n\[\d{2}:\d{2}:\d{2}\] world$/)
+    expect(stdout.writes[0]!).toMatch(
+      /^\[\d{2}:\d{2}:\d{2}\] hello\n\[\d{2}:\d{2}:\d{2}\] world$/,
+    )
   })
 
   it("restores original write function", () => {
     // given
     const stdout = createMockWriteStream()
-    const controller = createTimestampedStdoutController(stdout as unknown as NodeJS.WriteStream)
+    const controller = createTimestampedStdoutController(
+      stdout as unknown as NodeJS.WriteStream,
+    )
     controller.enable()
 
     // when
@@ -118,7 +136,9 @@ describe("createTimestampedStdoutController", () => {
   it("supports Uint8Array chunks and encoding", () => {
     // given
     const stdout = createMockWriteStream()
-    const controller = createTimestampedStdoutController(stdout as unknown as NodeJS.WriteStream)
+    const controller = createTimestampedStdoutController(
+      stdout as unknown as NodeJS.WriteStream,
+    )
 
     // when
     controller.enable()

@@ -3,7 +3,8 @@ import { describe, expect, it } from "bun:test"
 describe("buildMultimodalLookerFallbackChain", () => {
   it("builds fallback chain from vision-capable models", async () => {
     // given
-    const { buildMultimodalLookerFallbackChain } = await import("./multimodal-fallback-chain")
+    const { buildMultimodalLookerFallbackChain } =
+      await import("./multimodal-fallback-chain")
     const visionCapableModels = [
       { providerID: "openai", modelID: "gpt-5.4" },
       { providerID: "opencode", modelID: "gpt-5.4" },
@@ -19,7 +20,8 @@ describe("buildMultimodalLookerFallbackChain", () => {
 
   it("avoids duplicates when adding hardcoded entries", async () => {
     // given
-    const { buildMultimodalLookerFallbackChain } = await import("./multimodal-fallback-chain")
+    const { buildMultimodalLookerFallbackChain } =
+      await import("./multimodal-fallback-chain")
     const visionCapableModels = [{ providerID: "openai", modelID: "gpt-5.4" }]
 
     // when
@@ -33,7 +35,8 @@ describe("buildMultimodalLookerFallbackChain", () => {
 
   it("preserves hardcoded variant metadata for cache-derived entries", async () => {
     // given
-    const { buildMultimodalLookerFallbackChain } = await import("./multimodal-fallback-chain")
+    const { buildMultimodalLookerFallbackChain } =
+      await import("./multimodal-fallback-chain")
     const visionCapableModels = [{ providerID: "openai", modelID: "gpt-5.4" }]
 
     // when

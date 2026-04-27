@@ -9,7 +9,10 @@ function buildReuseHint(sessionId: string): string {
 `
 }
 
-export function buildCompletionGate(planName: string, sessionId: string): string {
+export function buildCompletionGate(
+  planName: string,
+  sessionId: string,
+): string {
   return `
 **COMPLETION GATE - DO NOT PROCEED UNTIL THIS IS DONE**
 
@@ -58,7 +61,7 @@ export function buildOrchestratorReminder(
   progress: { total: number; completed: number },
   sessionId: string,
   autoCommit: boolean = true,
-  includeCompletionGate: boolean = true
+  includeCompletionGate: boolean = true,
 ): string {
   const remaining = progress.total - progress.completed
 
@@ -80,9 +83,13 @@ export function buildOrchestratorReminder(
 
 ---
 
-${includeCompletionGate ? `${buildCompletionGate(planName, sessionId)}
+${
+  includeCompletionGate
+    ? `${buildCompletionGate(planName, sessionId)}
 
-` : ""}${buildVerificationReminder(sessionId)}
+`
+    : ""
+}${buildVerificationReminder(sessionId)}
 
 **STEP 5: READ SUBAGENT NOTEPAD (LEARNINGS, ISSUES, PROBLEMS)**
 
@@ -123,7 +130,7 @@ ${commitStep}
 export function buildFinalWaveApprovalReminder(
   planName: string,
   progress: { total: number; completed: number },
-  sessionId: string
+  sessionId: string,
 ): string {
   const remaining = progress.total - progress.completed
 

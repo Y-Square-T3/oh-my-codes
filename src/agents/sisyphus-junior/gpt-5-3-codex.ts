@@ -12,7 +12,7 @@ import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
 
 export function buildGpt53CodexSisyphusJuniorPrompt(
   useTaskSystem: boolean,
-  promptAppend?: string
+  promptAppend?: string,
 ): string {
   const taskDiscipline = buildGpt53CodexTaskDisciplineSection(useTaskSystem)
   const verificationText = useTaskSystem

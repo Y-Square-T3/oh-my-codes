@@ -12,7 +12,7 @@ function createMockClient(messages: unknown[] = []) {
       messages: mock(() =>
         Promise.resolve({
           data: messages,
-        })
+        }),
       ),
     },
   }
@@ -45,7 +45,7 @@ describe("transcript caching", () => {
       "ses_cache1",
       "/tmp",
       "bash",
-      { command: "echo hi" }
+      { command: "echo hi" },
     )
 
     const path2 = await buildTranscriptFromSession(
@@ -53,7 +53,7 @@ describe("transcript caching", () => {
       "ses_cache1",
       "/tmp",
       "read",
-      { path: "/tmp/file" }
+      { path: "/tmp/file" },
     )
 
     // session.messages() called only once
@@ -110,21 +110,21 @@ describe("transcript caching", () => {
       "ses_sequential",
       "/tmp",
       "bash",
-      { command: "echo first" }
+      { command: "echo first" },
     )
     const secondPath = await buildTranscriptFromSession(
       client,
       "ses_sequential",
       "/tmp",
       "read",
-      { filePath: "/tmp/second.txt" }
+      { filePath: "/tmp/second.txt" },
     )
     const thirdPath = await buildTranscriptFromSession(
       client,
       "ses_sequential",
       "/tmp",
       "write",
-      { filePath: "/tmp/third.txt", content: "third" }
+      { filePath: "/tmp/third.txt", content: "third" },
     )
 
     // then
@@ -155,14 +155,14 @@ describe("transcript caching", () => {
       "ses_cleanup",
       "/tmp",
       "bash",
-      { command: "echo first" }
+      { command: "echo first" },
     )
     const secondPath = await buildTranscriptFromSession(
       client,
       "ses_cleanup",
       "/tmp",
       "read",
-      { filePath: "/tmp/second.txt" }
+      { filePath: "/tmp/second.txt" },
     )
 
     // then

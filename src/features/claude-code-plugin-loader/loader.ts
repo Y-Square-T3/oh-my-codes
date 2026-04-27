@@ -2,7 +2,12 @@ import { log } from "../../shared/logger"
 import type { CommandDefinition } from "../claude-code-command-loader/types"
 import type { McpServerConfig } from "../claude-code-mcp-loader/types"
 import type { ClaudeCodeAgentConfig } from "../claude-code-agent-loader/types"
-import type { HooksConfig, LoadedPlugin, PluginLoadError, PluginLoaderOptions } from "./types"
+import type {
+  HooksConfig,
+  LoadedPlugin,
+  PluginLoadError,
+  PluginLoaderOptions,
+} from "./types"
 import { discoverInstalledPlugins } from "./discovery"
 import { loadPluginCommands } from "./command-loader"
 import { loadPluginSkillsAsCommands } from "./skill-loader"
@@ -56,12 +61,18 @@ function clonePluginComponentsResult(
 function isClaudeCodePluginsDisabled(): boolean {
   const disableFlag = process.env.OPENCODE_DISABLE_CLAUDE_CODE
   const disablePluginsFlag = process.env.OPENCODE_DISABLE_CLAUDE_CODE_PLUGINS
-  return disableFlag === "true" || disableFlag === "1" || disablePluginsFlag === "true" || disablePluginsFlag === "1"
+  return (
+    disableFlag === "true" ||
+    disableFlag === "1" ||
+    disablePluginsFlag === "true" ||
+    disablePluginsFlag === "1"
+  )
 }
 
 function getPluginComponentsCacheKey(options?: PluginLoaderOptions): string {
-  const overrideEntries = Object.entries(options?.enabledPluginsOverride ?? {})
-    .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+  const overrideEntries = Object.entries(
+    options?.enabledPluginsOverride ?? {},
+  ).sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
 
   return JSON.stringify({
     enabledPluginsOverride: overrideEntries,
@@ -77,7 +88,9 @@ async function loadAllPluginComponentsInternal(
   deps: PluginComponentLoadDeps = defaultPluginComponentLoadDeps,
 ): Promise<PluginComponentsResult> {
   if (isClaudeCodePluginsDisabled()) {
-    log("Claude Code plugin loading disabled via OPENCODE_DISABLE_CLAUDE_CODE env var")
+    log(
+      "Claude Code plugin loading disabled via OPENCODE_DISABLE_CLAUDE_CODE env var",
+    )
     return {
       commands: {},
       skills: {},
@@ -97,15 +110,18 @@ async function loadAllPluginComponentsInternal(
 
   const { plugins, errors } = deps.discoverInstalledPlugins(options)
 
-  const [commands, skills, agents, mcpServers, hooksConfigs] = await Promise.all([
-    Promise.resolve(deps.loadPluginCommands(plugins)),
-    Promise.resolve(deps.loadPluginSkillsAsCommands(plugins)),
-    Promise.resolve(deps.loadPluginAgents(plugins)),
-    deps.loadPluginMcpServers(plugins),
-    Promise.resolve(deps.loadPluginHooksConfigs(plugins)),
-  ])
+  const [commands, skills, agents, mcpServers, hooksConfigs] =
+    await Promise.all([
+      Promise.resolve(deps.loadPluginCommands(plugins)),
+      Promise.resolve(deps.loadPluginSkillsAsCommands(plugins)),
+      Promise.resolve(deps.loadPluginAgents(plugins)),
+      deps.loadPluginMcpServers(plugins),
+      Promise.resolve(deps.loadPluginHooksConfigs(plugins)),
+    ])
 
-  log(`Loaded ${plugins.length} plugins with ${Object.keys(commands).length} commands, ${Object.keys(skills).length} skills, ${Object.keys(agents).length} agents, ${Object.keys(mcpServers).length} MCP servers`)
+  log(
+    `Loaded ${plugins.length} plugins with ${Object.keys(commands).length} commands, ${Object.keys(skills).length} skills, ${Object.keys(agents).length} agents, ${Object.keys(mcpServers).length} MCP servers`,
+  )
 
   const result = {
     commands,
@@ -122,7 +138,9 @@ async function loadAllPluginComponentsInternal(
   return clonePluginComponentsResult(result)
 }
 
-export async function loadAllPluginComponents(options?: PluginLoaderOptions): Promise<PluginComponentsResult> {
+export async function loadAllPluginComponents(
+  options?: PluginLoaderOptions,
+): Promise<PluginComponentsResult> {
   return loadAllPluginComponentsInternal(options)
 }
 

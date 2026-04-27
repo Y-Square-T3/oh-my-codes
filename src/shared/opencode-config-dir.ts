@@ -32,13 +32,15 @@ function getTauriConfigDir(identifier: string): string {
       return join(homedir(), "Library", "Application Support", identifier)
 
     case "win32": {
-      const appData = process.env.APPDATA || join(homedir(), "AppData", "Roaming")
+      const appData =
+        process.env.APPDATA || join(homedir(), "AppData", "Roaming")
       return win32.join(appData, identifier)
     }
 
     case "linux":
     default: {
-      const xdgConfig = process.env.XDG_CONFIG_HOME || join(homedir(), ".config")
+      const xdgConfig =
+        process.env.XDG_CONFIG_HOME || join(homedir(), ".config")
       return join(xdgConfig, identifier)
     }
   }
@@ -65,18 +67,25 @@ function getCliConfigDir(): string {
   return resolveConfigPath(join(xdgConfig, "opencode"))
 }
 
-export function getOpenCodeConfigDir(options: OpenCodeConfigDirOptions): string {
+export function getOpenCodeConfigDir(
+  options: OpenCodeConfigDirOptions,
+): string {
   const { binary, version, checkExisting = true } = options
 
   if (binary === "opencode") {
     return getCliConfigDir()
   }
 
-  const identifier = isDevBuild(version) ? TAURI_APP_IDENTIFIER_DEV : TAURI_APP_IDENTIFIER
+  const identifier = isDevBuild(version)
+    ? TAURI_APP_IDENTIFIER_DEV
+    : TAURI_APP_IDENTIFIER
   const tauriDirBase = getTauriConfigDir(identifier)
-  const tauriDir = process.platform === "win32"
-    ? (win32.isAbsolute(tauriDirBase) ? win32.normalize(tauriDirBase) : win32.resolve(tauriDirBase))
-    : resolveConfigPath(tauriDirBase)
+  const tauriDir =
+    process.platform === "win32"
+      ? win32.isAbsolute(tauriDirBase)
+        ? win32.normalize(tauriDirBase)
+        : win32.resolve(tauriDirBase)
+      : resolveConfigPath(tauriDirBase)
 
   if (checkExisting) {
     const legacyDir = getCliConfigDir()
@@ -91,7 +100,9 @@ export function getOpenCodeConfigDir(options: OpenCodeConfigDirOptions): string 
   return tauriDir
 }
 
-export function getOpenCodeConfigPaths(options: OpenCodeConfigDirOptions): OpenCodeConfigPaths {
+export function getOpenCodeConfigPaths(
+  options: OpenCodeConfigDirOptions,
+): OpenCodeConfigPaths {
   const configDir = getOpenCodeConfigDir(options)
 
   return {
@@ -103,7 +114,10 @@ export function getOpenCodeConfigPaths(options: OpenCodeConfigDirOptions): OpenC
   }
 }
 
-export function detectExistingConfigDir(binary: OpenCodeBinaryType, version?: string | null): string | null {
+export function detectExistingConfigDir(
+  binary: OpenCodeBinaryType,
+  version?: string | null,
+): string | null {
   const locations: string[] = []
 
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
@@ -112,7 +126,9 @@ export function detectExistingConfigDir(binary: OpenCodeBinaryType, version?: st
   }
 
   if (binary === "opencode-desktop") {
-    const identifier = isDevBuild(version) ? TAURI_APP_IDENTIFIER_DEV : TAURI_APP_IDENTIFIER
+    const identifier = isDevBuild(version)
+      ? TAURI_APP_IDENTIFIER_DEV
+      : TAURI_APP_IDENTIFIER
     locations.push(getTauriConfigDir(identifier))
 
     if (isDevBuild(version)) {

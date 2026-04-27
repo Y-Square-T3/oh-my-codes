@@ -1,4 +1,12 @@
-import { afterAll, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import { AUTO_SLASH_COMMAND_TAG_OPEN } from "../constants"
 import type {
   AutoSlashCommandHookInput,
@@ -15,7 +23,7 @@ const executeSlashCommandMock = mock(
   async (parsed: { command: string; args: string; raw: string }) => ({
     success: true,
     replacementText: parsed.raw,
-  })
+  }),
 )
 
 afterAll(async () => {
@@ -24,7 +32,10 @@ afterAll(async () => {
 
 let createAutoSlashCommandHook: AutoSlashCommandModule["createAutoSlashCommandHook"]
 
-function createChatInput(sessionID: string, messageID: string): AutoSlashCommandHookInput {
+function createChatInput(
+  sessionID: string,
+  messageID: string,
+): AutoSlashCommandHookInput {
   return {
     sessionID,
     messageID,
@@ -38,7 +49,10 @@ function createChatOutput(text: string): AutoSlashCommandHookOutput {
   }
 }
 
-function createCommandInput(sessionID: string, command: string): CommandExecuteBeforeInput {
+function createCommandInput(
+  sessionID: string,
+  command: string,
+): CommandExecuteBeforeInput {
   return {
     sessionID,
     command,
@@ -56,11 +70,16 @@ describe("createAutoSlashCommandHook leak prevention", () => {
   beforeEach(async () => {
     mock.restore()
     executeSlashCommandMock.mockClear()
-    spyOn(executorModule, "executeSlashCommand").mockImplementation(executeSlashCommandMock)
+    spyOn(executorModule, "executeSlashCommand").mockImplementation(
+      executeSlashCommandMock,
+    )
     spyOn(shared, "log").mockImplementation(() => {})
 
-    const autoSlashCommandModule = await import(`../hook?test=${Date.now()}-${Math.random()}`)
-    createAutoSlashCommandHook = autoSlashCommandModule.createAutoSlashCommandHook
+    const autoSlashCommandModule = await import(
+      `../hook?test=${Date.now()}-${Math.random()}`
+    )
+    createAutoSlashCommandHook =
+      autoSlashCommandModule.createAutoSlashCommandHook
   })
 
   describe("#given hook with sessionProcessedCommandExecutions", () => {
@@ -82,8 +101,12 @@ describe("createAutoSlashCommandHook leak prevention", () => {
 
           //#then
           expect(executeSlashCommandMock).toHaveBeenCalledTimes(2)
-          expect(firstOutput.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
-          expect(secondOutput.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
+          expect(firstOutput.parts[0].text).toContain(
+            AUTO_SLASH_COMMAND_TAG_OPEN,
+          )
+          expect(secondOutput.parts[0].text).toContain(
+            AUTO_SLASH_COMMAND_TAG_OPEN,
+          )
         } finally {
           nowSpy.mockRestore()
         }
@@ -108,7 +131,9 @@ describe("createAutoSlashCommandHook leak prevention", () => {
 
           //#then
           expect(executeSlashCommandMock).toHaveBeenCalledTimes(1)
-          expect(firstOutput.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
+          expect(firstOutput.parts[0].text).toContain(
+            AUTO_SLASH_COMMAND_TAG_OPEN,
+          )
           expect(secondOutput.parts[0].text).toBe("second")
         } finally {
           nowSpy.mockRestore()
@@ -137,7 +162,9 @@ describe("createAutoSlashCommandHook leak prevention", () => {
 
           //#then
           expect(executeSlashCommandMock).toHaveBeenCalledTimes(1)
-          expect(firstOutput.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
+          expect(firstOutput.parts[0].text).toContain(
+            AUTO_SLASH_COMMAND_TAG_OPEN,
+          )
           expect(secondOutput.parts[0].text).toBe("second")
         } finally {
           nowSpy.mockRestore()
@@ -152,11 +179,11 @@ describe("createAutoSlashCommandHook leak prevention", () => {
         const hook = createAutoSlashCommandHook()
         await hook["chat.message"](
           createChatInput("session-chat", "message-chat"),
-          createChatOutput("/leak-chat")
+          createChatOutput("/leak-chat"),
         )
         await hook["command.execute.before"](
           createCommandInput("session-command", "leak-command"),
-          createCommandOutput("before")
+          createCommandOutput("before"),
         )
         executeSlashCommandMock.mockClear()
 
@@ -165,17 +192,19 @@ describe("createAutoSlashCommandHook leak prevention", () => {
         const commandOutputAfterDispose = createCommandOutput("after")
         await hook["chat.message"](
           createChatInput("session-chat", "message-chat"),
-          chatOutputAfterDispose
+          chatOutputAfterDispose,
         )
         await hook["command.execute.before"](
           createCommandInput("session-command", "leak-command"),
-          commandOutputAfterDispose
+          commandOutputAfterDispose,
         )
 
         expect(executeSlashCommandMock).toHaveBeenCalledTimes(2)
-        expect(chatOutputAfterDispose.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
+        expect(chatOutputAfterDispose.parts[0].text).toContain(
+          AUTO_SLASH_COMMAND_TAG_OPEN,
+        )
         expect(commandOutputAfterDispose.parts[0].text).toContain(
-          AUTO_SLASH_COMMAND_TAG_OPEN
+          AUTO_SLASH_COMMAND_TAG_OPEN,
         )
       })
     })
@@ -186,17 +215,23 @@ describe("createAutoSlashCommandHook leak prevention", () => {
       it("#then Set size is reduced", async () => {
         const hook = createAutoSlashCommandHook()
         const oldestInput = createChatInput("session-oldest", "message-oldest")
-        await hook["chat.message"](oldestInput, createChatOutput("/leak-oldest"))
+        await hook["chat.message"](
+          oldestInput,
+          createChatOutput("/leak-oldest"),
+        )
 
         for (let index = 0; index < 10000; index += 1) {
           await hook["chat.message"](
             createChatInput(`session-${index}`, `message-${index}`),
-            createChatOutput(`/leak-${index}`)
+            createChatOutput(`/leak-${index}`),
           )
         }
 
         const newestInput = createChatInput("session-newest", "message-newest")
-        await hook["chat.message"](newestInput, createChatOutput("/leak-newest"))
+        await hook["chat.message"](
+          newestInput,
+          createChatOutput("/leak-newest"),
+        )
         executeSlashCommandMock.mockClear()
         const oldestRetryOutput = createChatOutput("/leak-oldest")
         const newestRetryOutput = createChatOutput("/leak-newest")
@@ -205,7 +240,9 @@ describe("createAutoSlashCommandHook leak prevention", () => {
         await hook["chat.message"](newestInput, newestRetryOutput)
 
         expect(executeSlashCommandMock).toHaveBeenCalledTimes(1)
-        expect(oldestRetryOutput.parts[0].text).toContain(AUTO_SLASH_COMMAND_TAG_OPEN)
+        expect(oldestRetryOutput.parts[0].text).toContain(
+          AUTO_SLASH_COMMAND_TAG_OPEN,
+        )
         expect(newestRetryOutput.parts[0].text).toBe("/leak-newest")
       })
     })

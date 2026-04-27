@@ -1,4 +1,7 @@
-export function truncateDescription(description: string, maxLength: number = 120): string {
+export function truncateDescription(
+  description: string,
+  maxLength: number = 120,
+): string {
   if (!description) {
     return description
   }

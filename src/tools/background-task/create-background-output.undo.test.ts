@@ -90,21 +90,22 @@ describe("createBackgroundOutput undo regression", () => {
     // #given
     const task = createTask()
     const manager: BackgroundOutputManager = {
-      getTask: id => (id === task.id ? task : undefined),
+      getTask: (id) => (id === task.id ? task : undefined),
     }
     const tool = createBackgroundOutput(manager, createMockClient())
     const eventHandler = createMockEventHandler()
 
     // #when
-    const firstOutput = await tool.execute(
-      { task_id: task.id },
-      { ...baseContext, messageID: "msg-result-1" } as ToolContextWithCallID
-    )
+    const firstOutput = await tool.execute({ task_id: task.id }, {
+      ...baseContext,
+      messageID: "msg-result-1",
+    } as ToolContextWithCallID)
 
-    const secondOutput = await tool.execute(
-      { task_id: task.id },
-      { ...baseContext, callID: "call-2", messageID: "msg-result-2" } as ToolContextWithCallID
-    )
+    const secondOutput = await tool.execute({ task_id: task.id }, {
+      ...baseContext,
+      callID: "call-2",
+      messageID: "msg-result-2",
+    } as ToolContextWithCallID)
 
     await eventHandler({
       event: {
@@ -116,10 +117,11 @@ describe("createBackgroundOutput undo regression", () => {
       },
     })
 
-    const thirdOutput = await tool.execute(
-      { task_id: task.id },
-      { ...baseContext, callID: "call-3", messageID: "msg-result-3" } as ToolContextWithCallID
-    )
+    const thirdOutput = await tool.execute({ task_id: task.id }, {
+      ...baseContext,
+      callID: "call-3",
+      messageID: "msg-result-3",
+    } as ToolContextWithCallID)
 
     // #then
     expect(firstOutput).toContain("final result")

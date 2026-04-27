@@ -7,6 +7,7 @@ gh pr checks --watch
 ```
 
 **Expected CI jobs** (from `ci.yml`):
+
 1. **Tests (split)**: mock-heavy isolated + batch `bun test`
 2. **Typecheck**: `bun run typecheck` (tsc --noEmit)
 3. **Build**: `bun run build`
@@ -15,6 +16,7 @@ gh pr checks --watch
 **Likely failure points**: None. This is a pure refactor with re-exports. No runtime behavior changes.
 
 **If CI fails**:
+
 - Typecheck error: Missing re-export or import cycle. Fix in the new modules, amend commit.
 - Test error: `tools.test.ts` imports all symbols from `"./constants"`. Re-export barrel must be complete.
 
@@ -27,6 +29,7 @@ Invoke after CI passes:
 ```
 
 **5 parallel agents**:
+
 1. **Oracle (goal/constraint)**: Verify backward compat claim. Check all 13 import paths resolve.
 2. **Oracle (code quality)**: Verify single-responsibility per file, LOC limits, no catch-all violations.
 3. **Oracle (security)**: No security implications in this refactor.
@@ -54,6 +57,7 @@ bun -e "import * as c from './src/tools/delegate-task/constants'; console.log(Ob
 ```
 
 Expected exports from constants.ts (13 total):
+
 - `ARTISTRY_CATEGORY_PROMPT_APPEND`
 - `CATEGORY_DESCRIPTIONS`
 - `CATEGORY_PROMPT_APPENDS`

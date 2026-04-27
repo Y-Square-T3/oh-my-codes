@@ -21,7 +21,9 @@ function mockCtx(): PluginInput {
 describe("hashline-read-enhancer", () => {
   it("hashifies only file content lines in read output", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "demo.ts",
@@ -54,7 +56,9 @@ describe("hashline-read-enhancer", () => {
 
   it("hashifies inline <content> format from updated OpenCode read tool", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "demo.ts",
@@ -86,7 +90,9 @@ describe("hashline-read-enhancer", () => {
 
   it("keeps OpenCode-truncated lines unhashed while hashifying normal lines", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const truncatedLine = `${"x".repeat(60)}... (line truncated to 2000 chars)`
     const output = {
@@ -113,7 +119,9 @@ describe("hashline-read-enhancer", () => {
 
   it("hashifies plain read output without content tags", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "README.md",
@@ -132,7 +140,9 @@ describe("hashline-read-enhancer", () => {
 
     //#then
     const lines = output.output.split("\n")
-    expect(lines[0]).toMatch(/^1#[ZPMQVRWSNKTXJBYH]{2}\|# Oh-My-Codes Features$/)
+    expect(lines[0]).toMatch(
+      /^1#[ZPMQVRWSNKTXJBYH]{2}\|# Oh-My-Codes Features$/,
+    )
     expect(lines[1]).toMatch(/^2#[ZPMQVRWSNKTXJBYH]{2}\|$/)
     expect(lines[2]).toMatch(/^3#[ZPMQVRWSNKTXJBYH]{2}\|Hashline test$/)
     expect(lines[4]).toBe("(End of file - total 3 lines)")
@@ -140,7 +150,9 @@ describe("hashline-read-enhancer", () => {
 
   it("hashifies read output with <file> and zero-padded pipe format", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "demo.ts",
@@ -167,7 +179,9 @@ describe("hashline-read-enhancer", () => {
 
   it("hashifies pipe format even with leading spaces", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "demo.ts",
@@ -193,7 +207,9 @@ describe("hashline-read-enhancer", () => {
 
   it("appends simple summary for write tool instead of full hashlined content", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "hashline-write-"))
     const filePath = path.join(tempDir, "demo.ts")
     fs.writeFileSync(filePath, "const x = 1\nconst y = 2")
@@ -218,7 +234,9 @@ describe("hashline-read-enhancer", () => {
 
   it("does not re-process write output that already contains the success marker", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "hashline-idem-"))
     const filePath = path.join(tempDir, "demo.ts")
     fs.writeFileSync(filePath, "a\nb\nc\nd\ne")
@@ -240,7 +258,9 @@ describe("hashline-read-enhancer", () => {
 
   it("does not overwrite write tool error output with success message", async () => {
     //#given — write tool failed, but stale file exists from previous write
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: true } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: true },
+    })
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "hashline-err-"))
     const filePath = path.join(tempDir, "demo.ts")
     fs.writeFileSync(filePath, "const x = 1")
@@ -263,7 +283,9 @@ describe("hashline-read-enhancer", () => {
 
   it("skips when feature is disabled", async () => {
     //#given
-    const hook = createHashlineReadEnhancerHook(mockCtx(), { hashline_edit: { enabled: false } })
+    const hook = createHashlineReadEnhancerHook(mockCtx(), {
+      hashline_edit: { enabled: false },
+    })
     const input = { tool: "read", sessionID: "s", callID: "c" }
     const output = {
       title: "demo.ts",

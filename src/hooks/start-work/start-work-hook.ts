@@ -40,16 +40,20 @@ interface StartWorkHookOutput {
   parts: Array<{ type: string; text?: string }>
 }
 
-function resolveWorktreeContext(
-  explicitWorktreePath: string | null,
-): { worktreePath: string | undefined; block: string } {
+function resolveWorktreeContext(explicitWorktreePath: string | null): {
+  worktreePath: string | undefined
+  block: string
+} {
   if (explicitWorktreePath === null) {
     return { worktreePath: undefined, block: "" }
   }
 
   const validatedPath = detectWorktreePath(explicitWorktreePath)
   if (validatedPath) {
-    return { worktreePath: validatedPath, block: createWorktreeActiveBlock(validatedPath) }
+    return {
+      worktreePath: validatedPath,
+      block: createWorktreeActiveBlock(validatedPath),
+    }
   }
 
   return {
@@ -72,27 +76,30 @@ export function createStartWorkHook(ctx: PluginInput) {
         .trim() || ""
 
     if (
-      !promptText.includes("<session-context>")
-      || !promptText.includes(START_WORK_TEMPLATE_MARKER)
+      !promptText.includes("<session-context>") ||
+      !promptText.includes(START_WORK_TEMPLATE_MARKER)
     ) {
       return
     }
 
-    log(`[${HOOK_NAME}] Processing start-work command`, { sessionID: input.sessionID })
-    const activeAgent = isAgentRegistered("atlas")
-      ? "atlas"
-      : "sisyphus"
+    log(`[${HOOK_NAME}] Processing start-work command`, {
+      sessionID: input.sessionID,
+    })
+    const activeAgent = isAgentRegistered("atlas") ? "atlas" : "sisyphus"
     updateSessionAgent(input.sessionID, activeAgent)
     if (output.message) {
-      output.message["agent"] = resolveRegisteredAgentName(activeAgent) ?? activeAgent
+      output.message["agent"] =
+        resolveRegisteredAgentName(activeAgent) ?? activeAgent
     }
 
     const existingState = readBoulderState(ctx.directory)
     const sessionId = input.sessionID
     const timestamp = new Date().toISOString()
 
-    const { planName: explicitPlanName, explicitWorktreePath } = parseUserRequest(promptText)
-    const { worktreePath, block: worktreeBlock } = resolveWorktreeContext(explicitWorktreePath)
+    const { planName: explicitPlanName, explicitWorktreePath } =
+      parseUserRequest(promptText)
+    const { worktreePath, block: worktreeBlock } =
+      resolveWorktreeContext(explicitWorktreePath)
 
     const contextInfo = buildStartWorkContextInfo({
       ctx,
@@ -122,7 +129,10 @@ export function createStartWorkHook(ctx: PluginInput) {
   }
 
   return {
-    "chat.message": async (input: StartWorkHookInput, output: StartWorkHookOutput): Promise<void> => {
+    "chat.message": async (
+      input: StartWorkHookInput,
+      output: StartWorkHookOutput,
+    ): Promise<void> => {
       await processStartWork(input, output)
     },
     "command.execute.before": async (

@@ -1,6 +1,9 @@
 import { getAllServers } from "../../../tools/lsp/config"
 
-export function getInstalledLspServers(): Array<{ id: string; extensions: string[] }> {
+export function getInstalledLspServers(): Array<{
+  id: string
+  extensions: string[]
+}> {
   const servers = getAllServers()
 
   return servers

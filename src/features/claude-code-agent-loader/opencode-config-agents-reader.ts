@@ -34,10 +34,12 @@ function convertInlineAgent(agentData: unknown): ClaudeCodeAgentConfig | null {
 
   const agent = agentData as Record<string, unknown>
 
-  const description = agent.description ? `(opencode-config) ${String(agent.description)}` : "(opencode-config) "
+  const description = agent.description
+    ? `(opencode-config) ${String(agent.description)}`
+    : "(opencode-config) "
 
   const mappedModel = mapClaudeModelToOpenCode(
-    agent.model ? String(agent.model) : undefined
+    agent.model ? String(agent.model) : undefined,
   )
   const modelString = mappedModel
     ? `${mappedModel.providerID}/${mappedModel.modelID}`
@@ -45,9 +47,10 @@ function convertInlineAgent(agentData: unknown): ClaudeCodeAgentConfig | null {
 
   const VALID_MODES = ["subagent", "primary", "all"] as const
   const rawMode = typeof agent.mode === "string" ? agent.mode : undefined
-  const mode = rawMode && (VALID_MODES as readonly string[]).includes(rawMode)
-    ? (rawMode as "subagent" | "primary" | "all")
-    : "subagent"
+  const mode =
+    rawMode && (VALID_MODES as readonly string[]).includes(rawMode)
+      ? (rawMode as "subagent" | "primary" | "all")
+      : "subagent"
 
   const config: ClaudeCodeAgentConfig = {
     description,
@@ -64,7 +67,9 @@ function convertInlineAgent(agentData: unknown): ClaudeCodeAgentConfig | null {
   return config
 }
 
-export function readOpencodeConfigAgents(directory: string): Record<string, ClaudeCodeAgentConfig> {
+export function readOpencodeConfigAgents(
+  directory: string,
+): Record<string, ClaudeCodeAgentConfig> {
   const result: Record<string, ClaudeCodeAgentConfig> = Object.create(null)
 
   for (const configPath of getConfigPaths(directory)) {
@@ -91,10 +96,19 @@ export function readOpencodeConfigAgents(directory: string): Record<string, Clau
       }
 
       if (parseResult.data.agent_definitions) {
-        const definitionPaths = extractDefinitionPaths(parseResult.data.agent_definitions)
-        const resolvedPaths = resolveAgentDefinitionPaths(definitionPaths, configDir, directory)
+        const definitionPaths = extractDefinitionPaths(
+          parseResult.data.agent_definitions,
+        )
+        const resolvedPaths = resolveAgentDefinitionPaths(
+          definitionPaths,
+          configDir,
+          directory,
+        )
 
-        const definitionAgents = loadAgentDefinitions(resolvedPaths, "opencode-config")
+        const definitionAgents = loadAgentDefinitions(
+          resolvedPaths,
+          "opencode-config",
+        )
 
         for (const [name, config] of Object.entries(definitionAgents)) {
           if (!Object.hasOwn(result, name)) {

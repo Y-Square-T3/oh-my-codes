@@ -4,7 +4,10 @@ function isRecord(value: unknown): value is UnknownRecord {
   return typeof value === "object" && value !== null
 }
 
-function getNestedRecord(value: unknown, key: string): UnknownRecord | undefined {
+function getNestedRecord(
+  value: unknown,
+  key: string,
+): UnknownRecord | undefined {
   if (!isRecord(value)) return undefined
   const nested = value[key]
   return isRecord(nested) ? nested : undefined

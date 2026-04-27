@@ -36,7 +36,9 @@ export type PrometheusPromptSource = "default" | "gpt" | "gemini"
 /**
  * Determines which Prometheus prompt to use based on model.
  */
-export function getPrometheusPromptSource(model?: string): PrometheusPromptSource {
+export function getPrometheusPromptSource(
+  model?: string,
+): PrometheusPromptSource {
   if (model && isGptModel(model)) {
     return "gpt"
   }
@@ -52,7 +54,10 @@ export function getPrometheusPromptSource(model?: string): PrometheusPromptSourc
  * Gemini models → Gemini-optimized prompt (aggressive tool-call enforcement, thinking checkpoints)
  * Default (Claude, etc.) → Claude-optimized prompt (modular sections)
  */
-export function getPrometheusPrompt(model?: string, disabledTools?: readonly string[]): string {
+export function getPrometheusPrompt(
+  model?: string,
+  disabledTools?: readonly string[],
+): string {
   const source = getPrometheusPromptSource(model)
   const isQuestionDisabled = disabledTools?.includes("question") ?? false
 
@@ -81,5 +86,8 @@ export function getPrometheusPrompt(model?: string, disabledTools?: readonly str
  */
 function stripQuestionToolReferences(prompt: string): string {
   // Remove Question({...}) code blocks (multi-line)
-  return prompt.replace(/```typescript\n\s*Question\(\{[\s\S]*?\}\)\s*\n```/g, "")
+  return prompt.replace(
+    /```typescript\n\s*Question\(\{[\s\S]*?\}\)\s*\n```/g,
+    "",
+  )
 }

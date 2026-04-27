@@ -19,7 +19,9 @@ export function formatGlobResult(result: GlobResult): string {
 
   if (result.truncated) {
     lines.push("")
-    lines.push("(Results are truncated. Consider using a more specific path or pattern.)")
+    lines.push(
+      "(Results are truncated. Consider using a more specific path or pattern.)",
+    )
   }
 
   return lines.join("\n")

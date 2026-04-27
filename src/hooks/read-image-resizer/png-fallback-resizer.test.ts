@@ -6,7 +6,9 @@ import { deflateSync } from "node:zlib"
 import { resizeImageFallback } from "./png-fallback-resizer"
 import { parseImageDimensions } from "./image-dimensions"
 
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+const PNG_SIGNATURE = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+])
 
 const CRC_TABLE = (() => {
   const table = new Uint32Array(256)
@@ -80,7 +82,10 @@ describe("resizeImageFallback", () => {
       const sourcePng = createValidRgbaPng(2000, 1500)
 
       //#when
-      const result = resizeImageFallback(sourcePng, "image/png", { width: 1568, height: 1176 })
+      const result = resizeImageFallback(sourcePng, "image/png", {
+        width: 1568,
+        height: 1176,
+      })
 
       //#then
       expect(result).not.toBeNull()
@@ -96,7 +101,10 @@ describe("resizeImageFallback", () => {
       const sourcePng = createValidRgbaPng(800, 800)
 
       //#when
-      const result = resizeImageFallback(sourcePng, "image/png", { width: 100, height: 100 })
+      const result = resizeImageFallback(sourcePng, "image/png", {
+        width: 100,
+        height: 100,
+      })
 
       //#then
       expect(result).not.toBeNull()
@@ -111,7 +119,10 @@ describe("resizeImageFallback", () => {
       const sourcePng = createValidRgbaPng(2000, 1500)
 
       //#when
-      const result = resizeImageFallback(sourcePng, "image/jpeg", { width: 1568, height: 1176 })
+      const result = resizeImageFallback(sourcePng, "image/jpeg", {
+        width: 1568,
+        height: 1176,
+      })
 
       //#then
       expect(result).toBeNull()
@@ -124,7 +135,10 @@ describe("resizeImageFallback", () => {
       const invalidPng = "data:image/png;base64,AAAA"
 
       //#when
-      const result = resizeImageFallback(invalidPng, "image/png", { width: 100, height: 100 })
+      const result = resizeImageFallback(invalidPng, "image/png", {
+        width: 100,
+        height: 100,
+      })
 
       //#then
       expect(result).toBeNull()
@@ -137,7 +151,10 @@ describe("resizeImageFallback", () => {
       const empty = "data:image/png;base64,"
 
       //#when
-      const result = resizeImageFallback(empty, "image/png", { width: 100, height: 100 })
+      const result = resizeImageFallback(empty, "image/png", {
+        width: 100,
+        height: 100,
+      })
 
       //#then
       expect(result).toBeNull()

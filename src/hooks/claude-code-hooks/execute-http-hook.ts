@@ -16,22 +16,23 @@ function isPlainHttp(url: URL): boolean {
 
 export function interpolateEnvVars(
   value: string,
-  allowedEnvVars: string[]
+  allowedEnvVars: string[],
 ): string {
   const allowedSet = new Set(allowedEnvVars)
 
-  return value.replace(/\$\{(\w+)\}|\$(\w+)/g, (_match, bracedVar: string | undefined, bareVar: string | undefined) => {
-    const varName = (bracedVar ?? bareVar) as string
-    if (allowedSet.has(varName)) {
-      return process.env[varName] ?? ""
-    }
-    return ""
-  })
+  return value.replace(
+    /\$\{(\w+)\}|\$(\w+)/g,
+    (_match, bracedVar: string | undefined, bareVar: string | undefined) => {
+      const varName = (bracedVar ?? bareVar) as string
+      if (allowedSet.has(varName)) {
+        return process.env[varName] ?? ""
+      }
+      return ""
+    },
+  )
 }
 
-function resolveHeaders(
-  hook: HookHttp
-): Record<string, string> {
+function resolveHeaders(hook: HookHttp): Record<string, string> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   }
@@ -48,7 +49,7 @@ function resolveHeaders(
 
 export async function executeHttpHook(
   hook: HookHttp,
-  stdin: string
+  stdin: string,
 ): Promise<CommandResult> {
   let parsed: URL
   try {
@@ -68,7 +69,8 @@ export async function executeHttpHook(
       log("HTTP hook URL uses insecure protocol", { url: hook.url })
       return {
         exitCode: 1,
-        stderr: "HTTP hook URL must use HTTPS. Plain HTTP is only allowed for localhost, 127.0.0.1, and ::1.",
+        stderr:
+          "HTTP hook URL must use HTTPS. Plain HTTP is only allowed for localhost, 127.0.0.1, and ::1.",
       }
     }
   }

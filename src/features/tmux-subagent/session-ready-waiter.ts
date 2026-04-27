@@ -16,7 +16,9 @@ export async function waitForSessionReady(params: {
 
   while (Date.now() - startTime < SESSION_READY_TIMEOUT_MS) {
     try {
-      const statusResult = await params.client.session.status({ path: undefined })
+      const statusResult = await params.client.session.status({
+        path: undefined,
+      })
       const allStatuses = parseSessionStatusMap(statusResult.data)
 
       if (allStatuses[params.sessionId]) {
@@ -28,7 +30,9 @@ export async function waitForSessionReady(params: {
         return true
       }
     } catch (error) {
-      log("[tmux-session-manager] session status check error", { error: String(error) })
+      log("[tmux-session-manager] session status check error", {
+        error: String(error),
+      })
     }
 
     await new Promise<void>((resolve) => {

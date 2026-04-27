@@ -1,8 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import {
-  getHighVariant,
-  isAlreadyHighVariant,
-} from "./switcher"
+import { getHighVariant, isAlreadyHighVariant } from "./switcher"
 
 /**
  * DEPRECATION NOTICE:
@@ -63,12 +60,8 @@ describe("think-mode switcher", () => {
 
       it("should handle Gemini preview variants", () => {
         // given Gemini preview model IDs
-        expect(getHighVariant("gemini-3.1-pro")).toBe(
-          "gemini-3-1-pro-high"
-        )
-        expect(getHighVariant("gemini-3-flash")).toBe(
-          "gemini-3-flash-high"
-        )
+        expect(getHighVariant("gemini-3.1-pro")).toBe("gemini-3-1-pro-high")
+        expect(getHighVariant("gemini-3-flash")).toBe("gemini-3-flash-high")
       })
 
       it("should return null for already-high variants", () => {
@@ -142,8 +135,12 @@ describe("think-mode switcher", () => {
       it("should handle multiple different prefixes", () => {
         // given various custom prefixes
         expect(getHighVariant("azure/gpt-5")).toBe("azure/gpt-5-high")
-        expect(getHighVariant("bedrock/claude-sonnet-4-6")).toBe("bedrock/claude-sonnet-4-6-high")
-        expect(getHighVariant("custom-llm/gemini-3.1-pro")).toBe("custom-llm/gemini-3-1-pro-high")
+        expect(getHighVariant("bedrock/claude-sonnet-4-6")).toBe(
+          "bedrock/claude-sonnet-4-6-high",
+        )
+        expect(getHighVariant("custom-llm/gemini-3.1-pro")).toBe(
+          "custom-llm/gemini-3-1-pro-high",
+        )
       })
 
       it("should handle multi-slash model IDs (#2852)", () => {
@@ -175,7 +172,9 @@ describe("think-mode switcher", () => {
     describe("isAlreadyHighVariant with prefixes", () => {
       it("should detect -high suffix in prefixed models", () => {
         // given prefixed model IDs with -high suffix
-        expect(isAlreadyHighVariant("vertex_ai/claude-opus-4-7-high")).toBe(true)
+        expect(isAlreadyHighVariant("vertex_ai/claude-opus-4-7-high")).toBe(
+          true,
+        )
         expect(isAlreadyHighVariant("openai/gpt-5-4-high")).toBe(true)
         expect(isAlreadyHighVariant("custom/gemini-3.1-pro-high")).toBe(true)
       })
@@ -192,5 +191,5 @@ describe("think-mode switcher", () => {
         expect(isAlreadyHighVariant("vertex_ai/gpt-5.4-high")).toBe(true)
       })
     })
-})
+  })
 })

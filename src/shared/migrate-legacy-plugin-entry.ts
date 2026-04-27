@@ -1,11 +1,23 @@
-import { closeSync, existsSync, fsyncSync, openSync, readFileSync, renameSync, writeFileSync } from "node:fs"
+import {
+  closeSync,
+  existsSync,
+  fsyncSync,
+  openSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs"
 
 import { applyEdits, modify } from "jsonc-parser"
 
 import { parseJsoncSafe } from "./jsonc-parser"
 import { log } from "./logger"
 import { LEGACY_PLUGIN_NAME, PLUGIN_NAME } from "./plugin-identity"
-import { isCanonicalEntry, isLegacyEntry, toCanonicalEntry } from "./plugin-entry-migrator"
+import {
+  isCanonicalEntry,
+  isLegacyEntry,
+  toCanonicalEntry,
+} from "./plugin-entry-migrator"
 
 interface OpenCodeConfig {
   plugin?: string[]
@@ -18,10 +30,15 @@ function normalizePluginEntries(entries: string[]): string[] {
     return entries.filter((entry) => !isLegacyEntry(entry))
   }
 
-  return entries.map((entry) => (isLegacyEntry(entry) ? toCanonicalEntry(entry) : entry))
+  return entries.map((entry) =>
+    isLegacyEntry(entry) ? toCanonicalEntry(entry) : entry,
+  )
 }
 
-function updateJsoncPluginArray(content: string, pluginEntries: string[]): string | null {
+function updateJsoncPluginArray(
+  content: string,
+  pluginEntries: string[],
+): string | null {
   const edits = modify(content, ["plugin"], pluginEntries, {
     formattingOptions: {
       insertSpaces: true,
@@ -49,7 +66,14 @@ export function migrateLegacyPluginEntry(configPath: string): boolean {
     const updatedPluginEntries = normalizePluginEntries(pluginEntries)
     const updated = configPath.endsWith(".jsonc")
       ? updateJsoncPluginArray(content, updatedPluginEntries)
-      : JSON.stringify({ ...(parseResult.data as OpenCodeConfig), plugin: updatedPluginEntries }, null, 2) + "\n"
+      : JSON.stringify(
+          {
+            ...(parseResult.data as OpenCodeConfig),
+            plugin: updatedPluginEntries,
+          },
+          null,
+          2,
+        ) + "\n"
     if (!updated || updated === content) return false
 
     const tempPath = `${configPath}.tmp`
@@ -69,7 +93,10 @@ export function migrateLegacyPluginEntry(configPath: string): boolean {
     })
     return true
   } catch (error) {
-    log("[migrateLegacyPluginEntry] Failed to migrate opencode.json", { configPath, error })
+    log("[migrateLegacyPluginEntry] Failed to migrate opencode.json", {
+      configPath,
+      error,
+    })
     return false
   }
 }

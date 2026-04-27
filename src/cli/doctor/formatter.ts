@@ -3,7 +3,10 @@ import { formatDefault } from "./format-default"
 import { formatStatus } from "./format-status"
 import { formatVerbose } from "./format-verbose"
 
-export function formatDoctorOutput(result: DoctorResult, mode: DoctorMode): string {
+export function formatDoctorOutput(
+  result: DoctorResult,
+  mode: DoctorMode,
+): string {
   switch (mode) {
     case "default":
       return formatDefault(result)

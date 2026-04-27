@@ -13,7 +13,10 @@ import { resolveRegisteredAgentName } from "../../features/claude-code-session-s
 
 const SESSION_TTL_MS = 30 * 60 * 1000
 
-declare function setTimeout(callback: () => void | Promise<void>, delay?: number): RuntimeFallbackTimeout
+declare function setTimeout(
+  callback: () => void | Promise<void>,
+  delay?: number,
+): RuntimeFallbackTimeout
 declare function clearTimeout(timeout: RuntimeFallbackTimeout): void
 
 export function createAutoRetryHelpers(deps: HookDeps) {
@@ -30,15 +33,23 @@ export function createAutoRetryHelpers(deps: HookDeps) {
     sessionStatusRetryKeys,
   } = deps
 
-  const abortSessionRequest = async (sessionID: string, source: string): Promise<void> => {
+  const abortSessionRequest = async (
+    sessionID: string,
+    source: string,
+  ): Promise<void> => {
     try {
       await ctx.client.session.abort({ path: { id: sessionID } })
-      log(`[${HOOK_NAME}] Aborted in-flight session request (${source})`, { sessionID })
-    } catch (error) {
-      log(`[${HOOK_NAME}] Failed to abort in-flight session request (${source})`, {
+      log(`[${HOOK_NAME}] Aborted in-flight session request (${source})`, {
         sessionID,
-        error: String(error),
       })
+    } catch (error) {
+      log(
+        `[${HOOK_NAME}] Failed to abort in-flight session request (${source})`,
+        {
+          sessionID,
+          error: String(error),
+        },
+      )
     }
   }
 
@@ -50,10 +61,14 @@ export function createAutoRetryHelpers(deps: HookDeps) {
     }
   }
 
-  const scheduleSessionFallbackTimeout = (sessionID: string, resolvedAgent?: string) => {
+  const scheduleSessionFallbackTimeout = (
+    sessionID: string,
+    resolvedAgent?: string,
+  ) => {
     clearSessionFallbackTimeout(sessionID)
 
-    const timeoutMs = options?.session_timeout_ms ?? config.timeout_seconds * 1000
+    const timeoutMs =
+      options?.session_timeout_ms ?? config.timeout_seconds * 1000
     if (timeoutMs <= 0) return
 
     const timer = setTimeout(async () => {
@@ -63,7 +78,10 @@ export function createAutoRetryHelpers(deps: HookDeps) {
       if (!state) return
 
       if (sessionRetryInFlight.has(sessionID)) {
-        log(`[${HOOK_NAME}] Overriding in-flight retry due to session timeout`, { sessionID })
+        log(
+          `[${HOOK_NAME}] Overriding in-flight retry due to session timeout`,
+          { sessionID },
+        )
       }
 
       await abortSessionRequest(sessionID, "session.timeout")
@@ -73,7 +91,11 @@ export function createAutoRetryHelpers(deps: HookDeps) {
         state.pendingFallbackModel = undefined
       }
 
-      const fallbackModels = getFallbackModelsForSession(sessionID, resolvedAgent, pluginConfig)
+      const fallbackModels = getFallbackModelsForSession(
+        sessionID,
+        resolvedAgent,
+        pluginConfig,
+      )
       if (fallbackModels.length === 0) return
 
       log(`[${HOOK_NAME}] Session fallback timeout reached`, {
@@ -84,7 +106,12 @@ export function createAutoRetryHelpers(deps: HookDeps) {
 
       const result = prepareFallback(sessionID, state, fallbackModels, config)
       if (result.success && result.newModel) {
-        await autoRetryWithFallback(sessionID, result.newModel, resolvedAgent, "session.timeout")
+        await autoRetryWithFallback(
+          sessionID,
+          result.newModel,
+          resolvedAgent,
+          "session.timeout",
+        )
       }
     }, timeoutMs)
 
@@ -98,19 +125,30 @@ export function createAutoRetryHelpers(deps: HookDeps) {
     source: string,
   ): Promise<void> => {
     if (sessionRetryInFlight.has(sessionID)) {
-      log(`[${HOOK_NAME}] Retry already in flight, skipping (${source})`, { sessionID })
+      log(`[${HOOK_NAME}] Retry already in flight, skipping (${source})`, {
+        sessionID,
+      })
       return
     }
 
     const agentSettings = resolvedAgent
-      ? pluginConfig?.agents?.[resolvedAgent as keyof typeof pluginConfig.agents]
+      ? pluginConfig?.agents?.[
+          resolvedAgent as keyof typeof pluginConfig.agents
+        ]
       : undefined
-    const retryModelPayload = buildRetryModelPayload(newModel, agentSettings ? {
-      variant: agentSettings.variant,
-      reasoningEffort: agentSettings.reasoningEffort,
-    } : undefined)
+    const retryModelPayload = buildRetryModelPayload(
+      newModel,
+      agentSettings
+        ? {
+            variant: agentSettings.variant,
+            reasoningEffort: agentSettings.reasoningEffort,
+          }
+        : undefined,
+    )
     if (!retryModelPayload) {
-      log(`[${HOOK_NAME}] Invalid model format (missing provider prefix): ${newModel}`)
+      log(
+        `[${HOOK_NAME}] Invalid model format (missing provider prefix): ${newModel}`,
+      )
       const state = sessionStates.get(sessionID)
       if (state?.pendingFallbackModel) {
         state.pendingFallbackModel = undefined
@@ -148,10 +186,15 @@ export function createAutoRetryHelpers(deps: HookDeps) {
         })
         retryDispatched = true
       } else {
-        log(`[${HOOK_NAME}] No user message found for auto-retry (${source})`, { sessionID })
+        log(`[${HOOK_NAME}] No user message found for auto-retry (${source})`, {
+          sessionID,
+        })
       }
     } catch (retryError) {
-      log(`[${HOOK_NAME}] Auto-retry failed (${source})`, { sessionID, error: String(retryError) })
+      log(`[${HOOK_NAME}] Auto-retry failed (${source})`, {
+        sessionID,
+        error: String(retryError),
+      })
     } finally {
       sessionRetryInFlight.delete(sessionID)
       if (!retryDispatched) {
@@ -182,7 +225,8 @@ export function createAutoRetryHelpers(deps: HookDeps) {
 
       for (let i = msgs.length - 1; i >= 0; i--) {
         const info = msgs[i]?.info
-        const infoAgent = typeof info?.agent === "string" ? info.agent : undefined
+        const infoAgent =
+          typeof info?.agent === "string" ? info.agent : undefined
         const normalized = normalizeAgentName(infoAgent)
         if (normalized) {
           return normalized

@@ -21,30 +21,52 @@ function readString(value: unknown): string | undefined {
   return trimmed === "" ? undefined : trimmed
 }
 
-function readSessionIdFromMetadata(metadata: Record<string, unknown>): string | undefined {
-  return readString(metadata.sessionId) ?? readString(metadata.sessionID) ?? readString(metadata.session_id)
+function readSessionIdFromMetadata(
+  metadata: Record<string, unknown>,
+): string | undefined {
+  return (
+    readString(metadata.sessionId) ??
+    readString(metadata.sessionID) ??
+    readString(metadata.session_id)
+  )
 }
 
-function readTaskIdFromMetadata(metadata: Record<string, unknown>): string | undefined {
-  return readString(metadata.taskId) ?? readString(metadata.taskID) ?? readString(metadata.task_id)
+function readTaskIdFromMetadata(
+  metadata: Record<string, unknown>,
+): string | undefined {
+  return (
+    readString(metadata.taskId) ??
+    readString(metadata.taskID) ??
+    readString(metadata.task_id)
+  )
 }
 
-function readBackgroundTaskIdFromMetadata(metadata: Record<string, unknown>): string | undefined {
-  return readString(metadata.backgroundTaskId)
-    ?? readString(metadata.backgroundTaskID)
-    ?? readString(metadata.background_task_id)
+function readBackgroundTaskIdFromMetadata(
+  metadata: Record<string, unknown>,
+): string | undefined {
+  return (
+    readString(metadata.backgroundTaskId) ??
+    readString(metadata.backgroundTaskID) ??
+    readString(metadata.background_task_id)
+  )
 }
 
-function readAgentFromMetadata(metadata: Record<string, unknown>): string | undefined {
+function readAgentFromMetadata(
+  metadata: Record<string, unknown>,
+): string | undefined {
   return readString(metadata.agent) ?? readString(metadata.subagent)
 }
 
-function readCategoryFromMetadata(metadata: Record<string, unknown>): string | undefined {
+function readCategoryFromMetadata(
+  metadata: Record<string, unknown>,
+): string | undefined {
   return readString(metadata.category)
 }
 
 function extractTaskMetadataContent(text: string): string | undefined {
-  const blocks = [...text.matchAll(/<task_metadata>([\s\S]*?)<\/task_metadata>/gi)]
+  const blocks = [
+    ...text.matchAll(/<task_metadata>([\s\S]*?)<\/task_metadata>/gi),
+  ]
   return blocks.at(-1)?.[1]
 }
 
@@ -79,7 +101,7 @@ export function parseTaskMetadataBlock(text: string): TaskLink {
   const blockContent = extractTaskMetadataContent(text) ?? text
   const lines = blockContent
     .split("\n")
-    .map(line => line.trim())
+    .map((line) => line.trim())
     .filter(Boolean)
 
   const parsed: TaskLink = {}
@@ -113,7 +135,10 @@ export function parseTaskMetadataBlock(text: string): TaskLink {
   return parsed
 }
 
-export function extractTaskLink(metadata: unknown, outputText: string): TaskLink {
+export function extractTaskLink(
+  metadata: unknown,
+  outputText: string,
+): TaskLink {
   if (isRecord(metadata)) {
     const metadataLink: TaskLink = {
       sessionId: readSessionIdFromMetadata(metadata),
@@ -123,13 +148,25 @@ export function extractTaskLink(metadata: unknown, outputText: string): TaskLink
       category: readCategoryFromMetadata(metadata),
     }
 
-    if (metadataLink.sessionId || metadataLink.taskId || metadataLink.backgroundTaskId || metadataLink.agent || metadataLink.category) {
+    if (
+      metadataLink.sessionId ||
+      metadataLink.taskId ||
+      metadataLink.backgroundTaskId ||
+      metadataLink.agent ||
+      metadataLink.category
+    ) {
       return metadataLink
     }
   }
 
   const parsed = parseTaskMetadataBlock(outputText)
-  if (parsed.sessionId || parsed.taskId || parsed.backgroundTaskId || parsed.agent || parsed.category) {
+  if (
+    parsed.sessionId ||
+    parsed.taskId ||
+    parsed.backgroundTaskId ||
+    parsed.agent ||
+    parsed.category
+  ) {
     log("[tool-metadata-store] Falling back to <task_metadata> parsing")
     return parsed
   }

@@ -26,7 +26,9 @@ function getAssistantText(parts: SessionMessagePart[] | undefined): string {
     .join("\n")
 }
 
-export function hasVisibleAssistantResponse(extractAutoRetrySignalFn: typeof extractAutoRetrySignal) {
+export function hasVisibleAssistantResponse(
+  extractAutoRetrySignalFn: typeof extractAutoRetrySignal,
+) {
   return async (
     ctx: HookDeps["ctx"],
     sessionID: string,
@@ -43,7 +45,11 @@ export function hasVisibleAssistantResponse(extractAutoRetrySignalFn: typeof ext
       const lastUserMessageIndex = getLastUserMessageIndex(messages)
       if (lastUserMessageIndex === -1) return false
 
-      for (let index = lastUserMessageIndex + 1; index < messages.length; index++) {
+      for (
+        let index = lastUserMessageIndex + 1;
+        index < messages.length;
+        index++
+      ) {
         const message = messages[index]
         if (message?.info?.role !== "assistant") {
           continue
@@ -55,11 +61,15 @@ export function hasVisibleAssistantResponse(extractAutoRetrySignalFn: typeof ext
 
         const infoParts = message.info?.parts
         const infoMessageParts = Array.isArray(infoParts)
-          ? infoParts.filter((part): part is SessionMessagePart => typeof part === "object" && part !== null)
+          ? infoParts.filter(
+              (part): part is SessionMessagePart =>
+                typeof part === "object" && part !== null,
+            )
           : undefined
-        const parts = message.parts && message.parts.length > 0
-          ? message.parts
-          : infoMessageParts
+        const parts =
+          message.parts && message.parts.length > 0
+            ? message.parts
+            : infoMessageParts
         const assistantText = getAssistantText(parts)
         if (!assistantText) {
           continue

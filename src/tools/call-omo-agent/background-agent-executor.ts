@@ -9,71 +9,78 @@ import { getMessageDir } from "./message-storage-directory"
 import { getSessionTools } from "../../shared/session-tools-store"
 
 export async function executeBackgroundAgent(
-	args: CallOmoAgentArgs,
-	toolContext: ToolContextWithMetadata,
-	manager: BackgroundManager,
-	client: PluginInput["client"],
+  args: CallOmoAgentArgs,
+  toolContext: ToolContextWithMetadata,
+  manager: BackgroundManager,
+  client: PluginInput["client"],
 ): Promise<string> {
-	try {
-		const messageDir = getMessageDir(toolContext.sessionID)
-		const { prevMessage, firstMessageAgent } = await resolveMessageContext(
-			toolContext.sessionID,
-			client,
-			messageDir
-		)
+  try {
+    const messageDir = getMessageDir(toolContext.sessionID)
+    const { prevMessage, firstMessageAgent } = await resolveMessageContext(
+      toolContext.sessionID,
+      client,
+      messageDir,
+    )
 
-		const sessionAgent = getSessionAgent(toolContext.sessionID)
-		const parentAgent =
-			toolContext.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent
+    const sessionAgent = getSessionAgent(toolContext.sessionID)
+    const parentAgent =
+      toolContext.agent ??
+      sessionAgent ??
+      firstMessageAgent ??
+      prevMessage?.agent
 
-		log("[call_omo_agent] parentAgent resolution", {
-			sessionID: toolContext.sessionID,
-			messageDir,
-			ctxAgent: toolContext.agent,
-			sessionAgent,
-			firstMessageAgent,
-			prevMessageAgent: prevMessage?.agent,
-			resolvedParentAgent: parentAgent,
-		})
+    log("[call_omo_agent] parentAgent resolution", {
+      sessionID: toolContext.sessionID,
+      messageDir,
+      ctxAgent: toolContext.agent,
+      sessionAgent,
+      firstMessageAgent,
+      prevMessageAgent: prevMessage?.agent,
+      resolvedParentAgent: parentAgent,
+    })
 
-		const task = await manager.launch({
-			description: args.description,
-			prompt: args.prompt,
-			agent: args.subagent_type,
-			parentSessionID: toolContext.sessionID,
-			parentMessageID: toolContext.messageID,
-			parentAgent,
-			parentTools: getSessionTools(toolContext.sessionID),
-		})
+    const task = await manager.launch({
+      description: args.description,
+      prompt: args.prompt,
+      agent: args.subagent_type,
+      parentSessionID: toolContext.sessionID,
+      parentMessageID: toolContext.messageID,
+      parentAgent,
+      parentTools: getSessionTools(toolContext.sessionID),
+    })
 
-		const waitStart = Date.now()
-		const waitTimeoutMs = 30_000
-		const waitIntervalMs = 50
+    const waitStart = Date.now()
+    const waitTimeoutMs = 30_000
+    const waitIntervalMs = 50
 
-		let sessionId = task.sessionID
-		while (!sessionId && Date.now() - waitStart < waitTimeoutMs) {
-			const updated = manager.getTask(task.id)
-			if (updated?.status === "error" || updated?.status === "cancelled" || updated?.status === "interrupt") {
-				return `Task failed to start (status: ${updated.status}).\n\nTask ID: ${task.id}`
-			}
-			sessionId = updated?.sessionID
-			if (sessionId) {
-				break
-			}
-			if (toolContext.abort?.aborted) {
-				break
-			}
-			await new Promise<void>((resolve) => {
-				setTimeout(resolve, waitIntervalMs)
-			})
-		}
+    let sessionId = task.sessionID
+    while (!sessionId && Date.now() - waitStart < waitTimeoutMs) {
+      const updated = manager.getTask(task.id)
+      if (
+        updated?.status === "error" ||
+        updated?.status === "cancelled" ||
+        updated?.status === "interrupt"
+      ) {
+        return `Task failed to start (status: ${updated.status}).\n\nTask ID: ${task.id}`
+      }
+      sessionId = updated?.sessionID
+      if (sessionId) {
+        break
+      }
+      if (toolContext.abort?.aborted) {
+        break
+      }
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, waitIntervalMs)
+      })
+    }
 
-		await toolContext.metadata?.({
-			title: args.description,
-			metadata: { sessionId: sessionId ?? "pending" },
-		})
+    await toolContext.metadata?.({
+      title: args.description,
+      metadata: { sessionId: sessionId ?? "pending" },
+    })
 
-		return `Background agent task launched successfully.
+    return `Background agent task launched successfully.
 
 Task ID: ${task.id}
 Session ID: ${sessionId ?? "pending"}
@@ -84,8 +91,8 @@ Status: ${task.status}
 System notifies on completion. Use \`background_output\` with task_id="${task.id}" to check.
 
 Do NOT call background_output now. Wait for <system-reminder> notification first.`
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error)
-		return `Failed to launch background agent task: ${message}`
-	}
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return `Failed to launch background agent task: ${message}`
+  }
 }

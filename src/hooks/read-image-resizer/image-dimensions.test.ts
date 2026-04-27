@@ -28,7 +28,11 @@ function createGifDataUrl(width: number, height: number): string {
   return `data:image/gif;base64,${buf.toString("base64")}`
 }
 
-function createLargePngDataUrl(width: number, height: number, extraBase64Chars: number): string {
+function createLargePngDataUrl(
+  width: number,
+  height: number,
+  extraBase64Chars: number,
+): string {
   const baseDataUrl = createPngDataUrl(width, height)
   const base64Data = baseDataUrl.slice(baseDataUrl.indexOf(",") + 1)
   const paddedBase64 = `${base64Data}${"A".repeat(extraBase64Chars)}`

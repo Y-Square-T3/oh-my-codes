@@ -1,6 +1,10 @@
 import { describe, it, expect } from "bun:test"
 import { remapAgentKeysToDisplayNames } from "./agent-key-remapper"
-import { getAgentDisplayName, getAgentListDisplayName, getAgentRuntimeName } from "../shared/agent-display-names"
+import {
+  getAgentDisplayName,
+  getAgentListDisplayName,
+  getAgentRuntimeName,
+} from "../shared/agent-display-names"
 
 describe("remapAgentKeysToDisplayNames", () => {
   it("remaps known agent keys to display names", () => {
@@ -143,7 +147,11 @@ describe("remapAgentKeysToDisplayNames", () => {
       prompt: "test",
       mode: "primary",
     })
-    expect(result.oracle).toEqual({ name: "oracle", prompt: "test", mode: "subagent" })
+    expect(result.oracle).toEqual({
+      name: "oracle",
+      prompt: "test",
+      mode: "subagent",
+    })
   })
 
   it("backfills runtime names for core agents when builtin configs omit name", () => {

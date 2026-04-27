@@ -14,7 +14,10 @@ type DetectPluginConfigResult = {
   path: string
 }
 
-const pluginConfigFileDetectionCache = new Map<string, DetectPluginConfigResult>()
+const pluginConfigFileDetectionCache = new Map<
+  string,
+  DetectPluginConfigResult
+>()
 
 function stripBom(content: string): string {
   return content.charCodeAt(0) === 0xfeff ? content.slice(1) : content
@@ -40,7 +43,9 @@ export function parseJsonc<T = unknown>(content: string): T {
   return result
 }
 
-export function parseJsoncSafe<T = unknown>(content: string): JsoncParseResult<T> {
+export function parseJsoncSafe<T = unknown>(
+  content: string,
+): JsoncParseResult<T> {
   const errors: ParseError[] = []
   const data = parse(stripBom(content), errors, {
     allowTrailingComma: true,
@@ -100,7 +105,10 @@ export function detectPluginConfigFile(dir: string): DetectPluginConfigResult {
   if (canonicalResult.format !== "none") {
     detectionResult = canonicalResult
   } else {
-    detectionResult = { format: "none", path: join(dir, `${CONFIG_BASENAME}.json`) }
+    detectionResult = {
+      format: "none",
+      path: join(dir, `${CONFIG_BASENAME}.json`),
+    }
   }
 
   pluginConfigFileDetectionCache.set(dir, detectionResult)

@@ -2,7 +2,10 @@
 
 import { afterEach, beforeEach, describe, expect, it as test } from "bun:test"
 
-import { createSessionStateStore, type SessionStateStore } from "./session-state"
+import {
+  createSessionStateStore,
+  type SessionStateStore,
+} from "./session-state"
 
 describe("createSessionStateStore", () => {
   let sessionStateStore: SessionStateStore
@@ -21,11 +24,20 @@ describe("createSessionStateStore", () => {
     const state = sessionStateStore.getState(sessionID)
 
     // when
-    const firstUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
+    const firstUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
     state.awaitingPostInjectionProgressCheck = true
-    const secondUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
+    const secondUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
     state.awaitingPostInjectionProgressCheck = true
-    const thirdUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
+    const thirdUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
 
     // then
     expect(firstUpdate.stagnationCount).toBe(0)
@@ -40,9 +52,18 @@ describe("createSessionStateStore", () => {
     state.lastInjectedAt = Date.now()
 
     // when
-    const firstUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
-    const secondUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
-    const thirdUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
+    const firstUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
+    const secondUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
+    const thirdUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
 
     // then
     expect(firstUpdate.stagnationCount).toBe(0)
@@ -59,7 +80,10 @@ describe("createSessionStateStore", () => {
     sessionStateStore.trackContinuationProgress(sessionID, 3)
 
     // when
-    const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2)
+    const progressUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+    )
 
     // then
     expect(progressUpdate.hasProgressed).toBe(true)
@@ -85,7 +109,11 @@ describe("createSessionStateStore", () => {
     sessionStateStore.trackContinuationProgress(sessionID, 2, initialTodos)
 
     // when
-    const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, progressedTodos)
+    const progressUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+      progressedTodos,
+    )
 
     // then
     expect(progressUpdate.hasProgressed).toBe(true)
@@ -109,7 +137,11 @@ describe("createSessionStateStore", () => {
     sessionStateStore.trackContinuationProgress(sessionID, 2, initialTodos)
 
     // when
-    const progressUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, progressedTodos)
+    const progressUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+      progressedTodos,
+    )
 
     // then
     expect(progressUpdate.hasProgressed).toBe(true)
@@ -137,7 +169,11 @@ describe("createSessionStateStore", () => {
 
     // when
     state.awaitingPostInjectionProgressCheck = true
-    const stagnatedAgainUpdate = sessionStateStore.trackContinuationProgress(sessionID, 2, progressedTodos)
+    const stagnatedAgainUpdate = sessionStateStore.trackContinuationProgress(
+      sessionID,
+      2,
+      progressedTodos,
+    )
 
     // then
     expect(stagnatedAgainUpdate.hasProgressed).toBe(false)

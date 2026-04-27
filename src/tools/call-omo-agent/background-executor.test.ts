@@ -5,19 +5,23 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import { executeBackground } from "./background-executor"
 
 describe("executeBackground", () => {
-  const launchMock = mock(async (_input?: { fallbackChain?: unknown }): Promise<{
-    id: string
-    sessionID: string | null
-    description: string
-    agent: string
-    status: string
-  }> => ({
-    id: "test-task-id",
-    sessionID: null,
-    description: "Test task",
-    agent: "test-agent",
-    status: "pending",
-  }))
+  const launchMock = mock(
+    async (_input?: {
+      fallbackChain?: unknown
+    }): Promise<{
+      id: string
+      sessionID: string | null
+      description: string
+      agent: string
+      status: string
+    }> => ({
+      id: "test-task-id",
+      sessionID: null,
+      description: "Test task",
+      agent: "test-agent",
+      status: "pending",
+    }),
+  )
   const getTaskMock = mock()
 
   const mockManager = {
@@ -63,7 +67,12 @@ describe("executeBackground", () => {
     })
 
     //#when
-    const result = await executeBackground(testArgs, testContext, mockManager, mockClient)
+    const result = await executeBackground(
+      testArgs,
+      testContext,
+      mockManager,
+      mockClient,
+    )
 
     //#then
     expect(result).toContain("Task failed to start")
@@ -86,7 +95,13 @@ describe("executeBackground", () => {
     })
 
     //#when
-    await executeBackground(testArgs, testContext, mockManager, mockClient, fallbackChain)
+    await executeBackground(
+      testArgs,
+      testContext,
+      mockManager,
+      mockClient,
+      fallbackChain,
+    )
 
     //#then
     const latestCall = [...launchMock.mock.calls].pop()
@@ -112,7 +127,13 @@ describe("executeBackground", () => {
     })
     getTaskMock.mockImplementationOnce(() => {
       abortController.abort()
-      return { id: "test-task-id", sessionID: null, description: "Test task", agent: "test-agent", status: "pending" }
+      return {
+        id: "test-task-id",
+        sessionID: null,
+        description: "Test task",
+        agent: "test-agent",
+        status: "pending",
+      }
     })
 
     //#when
@@ -123,13 +144,15 @@ describe("executeBackground", () => {
         abort: abortController.signal,
       },
       mockManager,
-      mockClient
+      mockClient,
     )
 
     //#then - background launch should still be reported as launched
     expect(result).toContain("Background agent task launched successfully")
     expect(result).toContain("Task ID: test-task-id")
-    expect(result).not.toContain("Task aborted while waiting for session to start")
+    expect(result).not.toContain(
+      "Task aborted while waiting for session to start",
+    )
   })
 
   test("keeps sibling background launch alive when two tasks start concurrently", async () => {
@@ -144,8 +167,20 @@ describe("executeBackground", () => {
     launchMock.mockImplementation(async () => {
       launchCount += 1
       return launchCount === 1
-        ? { id: "task-1", sessionID: null, description: "Task 1", agent: "test-agent", status: "pending" }
-        : { id: "task-2", sessionID: null, description: "Task 2", agent: "test-agent", status: "pending" }
+        ? {
+            id: "task-1",
+            sessionID: null,
+            description: "Task 1",
+            agent: "test-agent",
+            status: "pending",
+          }
+        : {
+            id: "task-2",
+            sessionID: null,
+            description: "Task 2",
+            agent: "test-agent",
+            status: "pending",
+          }
     })
     getTaskMock.mockImplementation((taskID: string) => {
       const state = states.get(taskID)
@@ -155,8 +190,20 @@ describe("executeBackground", () => {
         firstAbortController.abort()
       }
       return state.reads >= 2
-        ? { id: taskID, sessionID: state.sessionID, description: "Task", agent: "test-agent", status: "pending" }
-        : { id: taskID, sessionID: null, description: "Task", agent: "test-agent", status: "pending" }
+        ? {
+            id: taskID,
+            sessionID: state.sessionID,
+            description: "Task",
+            agent: "test-agent",
+            status: "pending",
+          }
+        : {
+            id: taskID,
+            sessionID: null,
+            description: "Task",
+            agent: "test-agent",
+            status: "pending",
+          }
     })
 
     //#when
@@ -177,7 +224,9 @@ describe("executeBackground", () => {
 
     //#then - both launches still succeed and the sibling is not marked interrupted
     expect(firstResult).toContain("Background agent task launched successfully")
-    expect(secondResult).toContain("Background agent task launched successfully")
+    expect(secondResult).toContain(
+      "Background agent task launched successfully",
+    )
     expect(secondResult).toContain("Task ID: task-2")
     expect(secondResult).not.toContain("interrupt")
   })

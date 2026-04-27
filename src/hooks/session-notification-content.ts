@@ -4,7 +4,10 @@ type ReadyNotificationContext = {
   client: {
     session: {
       get?: (input: { path: { id: string } }) => Promise<unknown>
-      messages?: (input: { path: { id: string }; query: { directory: string } }) => Promise<unknown>
+      messages?: (input: {
+        path: { id: string }
+        query: { directory: string }
+      }) => Promise<unknown>
     }
   }
   directory: string
@@ -58,7 +61,10 @@ function getLastNonEmptyLine(text: string): string {
   return lines.at(-1) ?? ""
 }
 
-function findLastMessage(messages: SessionMessage[], role: "user" | "assistant"): SessionMessage | undefined {
+function findLastMessage(
+  messages: SessionMessage[],
+  role: "user" | "assistant",
+): SessionMessage | undefined {
   for (let index = messages.length - 1; index >= 0; index--) {
     const message = messages[index]
     if (message.info?.role !== role) continue
@@ -80,15 +86,18 @@ async function readSessionTitle(
 
   try {
     const response = await ctx.client.session.get({ path: { id: sessionID } })
-    const sessionInfo = normalizeSDKResponse(response, null as SessionInfo | null, {
-      preferResponseOnMissingData: true,
-    })
+    const sessionInfo = normalizeSDKResponse(
+      response,
+      null as SessionInfo | null,
+      {
+        preferResponseOnMissingData: true,
+      },
+    )
 
     if (sessionInfo?.title && sessionInfo.title.trim().length > 0) {
       return sessionInfo.title.trim()
     }
-  } catch {
-  }
+  } catch {}
 
   return sessionID
 }
@@ -126,7 +135,9 @@ export async function buildReadyNotificationContent(
     readSessionMessages(ctx, input.sessionID),
   ])
 
-  const lastUserText = collapseWhitespace(extractMessageText(findLastMessage(messages, "user")))
+  const lastUserText = collapseWhitespace(
+    extractMessageText(findLastMessage(messages, "user")),
+  )
   const lastAssistantLine = getLastNonEmptyLine(
     extractMessageText(findLastMessage(messages, "assistant")),
   )
@@ -138,8 +149,9 @@ export async function buildReadyNotificationContent(
 
   return {
     title: `${input.baseTitle} · ${sessionTitle}`,
-    message: detailLines.length > 0
-      ? [input.baseMessage, ...detailLines].join("\n")
-      : input.baseMessage,
+    message:
+      detailLines.length > 0
+        ? [input.baseMessage, ...detailLines].join("\n")
+        : input.baseMessage,
   }
 }

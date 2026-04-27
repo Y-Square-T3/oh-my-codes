@@ -10,7 +10,9 @@ export interface GhCliInfo {
   error: string | null
 }
 
-async function checkBinaryExists(binary: string): Promise<{ exists: boolean; path: string | null }> {
+async function checkBinaryExists(
+  binary: string,
+): Promise<{ exists: boolean; path: string | null }> {
   try {
     const binaryPath = Bun.which(binary)
     return { exists: Boolean(binaryPath), path: binaryPath ?? null }
@@ -21,7 +23,10 @@ async function checkBinaryExists(binary: string): Promise<{ exists: boolean; pat
 
 async function getGhVersion(): Promise<string | null> {
   try {
-    const result = await spawnWithTimeout(["gh", "--version"], { stdout: "pipe", stderr: "pipe" })
+    const result = await spawnWithTimeout(["gh", "--version"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    })
     if (result.timedOut || result.exitCode !== 0) return null
 
     const matchedVersion = result.stdout.match(/gh version (\S+)/)
@@ -38,24 +43,36 @@ async function getGhAuthStatus(): Promise<{
   error: string | null
 }> {
   try {
-    const result = await spawnWithTimeout(
-      ["gh", "auth", "status"],
-      { stdout: "pipe", stderr: "pipe", env: { ...process.env, GH_NO_UPDATE_NOTIFIER: "1" } }
-    )
+    const result = await spawnWithTimeout(["gh", "auth", "status"], {
+      stdout: "pipe",
+      stderr: "pipe",
+      env: { ...process.env, GH_NO_UPDATE_NOTIFIER: "1" },
+    })
 
     if (result.timedOut) {
-      return { authenticated: false, username: null, scopes: [], error: "gh auth status timed out" }
+      return {
+        authenticated: false,
+        username: null,
+        scopes: [],
+        error: "gh auth status timed out",
+      }
     }
 
     const output = result.stderr || result.stdout
     if (result.exitCode === 0) {
-      const usernameMatch = output.match(/Logged in to github\.com account (\S+)/)
+      const usernameMatch = output.match(
+        /Logged in to github\.com account (\S+)/,
+      )
       const scopesMatch = output.match(/Token scopes?:\s*(.+)/i)
 
       return {
         authenticated: true,
         username: usernameMatch?.[1]?.replace(/[()]/g, "") ?? null,
-        scopes: scopesMatch?.[1]?.split(/,\s*/).map((scope) => scope.trim()).filter(Boolean) ?? [],
+        scopes:
+          scopesMatch?.[1]
+            ?.split(/,\s*/)
+            .map((scope) => scope.trim())
+            .filter(Boolean) ?? [],
         error: null,
       }
     }
@@ -72,7 +89,8 @@ async function getGhAuthStatus(): Promise<{
       authenticated: false,
       username: null,
       scopes: [],
-      error: error instanceof Error ? error.message : "Failed to check auth status",
+      error:
+        error instanceof Error ? error.message : "Failed to check auth status",
     }
   }
 }
@@ -91,7 +109,10 @@ export async function getGhCliInfo(): Promise<GhCliInfo> {
     }
   }
 
-  const [version, authStatus] = await Promise.all([getGhVersion(), getGhAuthStatus()])
+  const [version, authStatus] = await Promise.all([
+    getGhVersion(),
+    getGhAuthStatus(),
+  ])
   return {
     installed: true,
     version,

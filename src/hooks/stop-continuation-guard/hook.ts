@@ -15,7 +15,9 @@ type StopContinuationBackgroundManager = Pick<
 >
 
 export interface StopContinuationGuard {
-  event: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
+  event: (input: {
+    event: { type: string; properties?: unknown }
+  }) => Promise<void>
   "chat.message": (input: { sessionID?: string }) => Promise<void>
   stop: (sessionID: string) => void
   isStopped: (sessionID: string) => boolean
@@ -26,13 +28,19 @@ export function createStopContinuationGuardHook(
   ctx: PluginInput,
   options?: {
     backgroundManager?: StopContinuationBackgroundManager
-  }
+  },
 ): StopContinuationGuard {
   const stoppedSessions = new Set<string>()
 
   const stop = (sessionID: string): void => {
     stoppedSessions.add(sessionID)
-    setContinuationMarkerSource(ctx.directory, sessionID, "stop", "stopped", "continuation stopped")
+    setContinuationMarkerSource(
+      ctx.directory,
+      sessionID,
+      "stop",
+      "stopped",
+      "continuation stopped",
+    )
     log(`[${HOOK_NAME}] Continuation stopped for session`, { sessionID })
 
     const backgroundManager = options?.backgroundManager
@@ -56,9 +64,11 @@ export function createStopContinuationGuardHook(
           abortSession: task.status === "running",
           skipNotification: true,
         })
-      })
+      }),
     ).then((results) => {
-      const cancelledCount = results.filter((result) => result.status === "fulfilled").length
+      const cancelledCount = results.filter(
+        (result) => result.status === "fulfilled",
+      ).length
       const failedCount = results.length - cancelledCount
       log(`[${HOOK_NAME}] Cancelled background tasks for stopped session`, {
         sessionID,
@@ -90,7 +100,9 @@ export function createStopContinuationGuardHook(
       if (sessionInfo?.id) {
         clear(sessionInfo.id)
         clearContinuationMarker(ctx.directory, sessionInfo.id)
-        log(`[${HOOK_NAME}] Session deleted: cleaned up`, { sessionID: sessionInfo.id })
+        log(`[${HOOK_NAME}] Session deleted: cleaned up`, {
+          sessionID: sessionInfo.id,
+        })
       }
     }
   }

@@ -8,14 +8,14 @@ Commander.js CLI with 6 commands. Entry: `index.ts` → `runCli()` in `cli-progr
 
 ## COMMANDS
 
-| Command | Purpose | Key Logic |
-|---------|---------|-----------|
-| `install` | Interactive/non-interactive setup | Provider selection → config gen → plugin registration |
-| `run <message>` | Non-interactive session launcher | Agent resolution (flag → env → config → Sisyphus) |
-| `doctor` | 4-category health checks | System, Config, Tools, Models |
-| `get-local-version` | Version detection | Installed vs npm latest |
-| `mcp-oauth` | OAuth token management | login (PKCE), logout, status |
-| `refresh-model-capabilities` | Refresh models.dev cache | Model capabilities refresh |
+| Command                      | Purpose                           | Key Logic                                             |
+| ---------------------------- | --------------------------------- | ----------------------------------------------------- |
+| `install`                    | Interactive/non-interactive setup | Provider selection → config gen → plugin registration |
+| `run <message>`              | Non-interactive session launcher  | Agent resolution (flag → env → config → Sisyphus)     |
+| `doctor`                     | 4-category health checks          | System, Config, Tools, Models                         |
+| `get-local-version`          | Version detection                 | Installed vs npm latest                               |
+| `mcp-oauth`                  | OAuth token management            | login (PKCE), logout, status                          |
+| `refresh-model-capabilities` | Refresh models.dev cache          | Model capabilities refresh                            |
 
 ## STRUCTURE
 
@@ -58,11 +58,11 @@ Common patterns: Claude/OpenAI/Gemini are preferred when an agent chain includes
 
 ## DOCTOR CHECKS
 
-| Category | Validates |
-|----------|-----------|
-| **System** | Binary found, version >=1.0.150, plugin registered, version match |
-| **Config** | JSONC validity, Zod schema, model override syntax |
-| **Tools** | AST-Grep, comment-checker, LSP servers, GH CLI, MCP servers |
+| Category   | Validates                                                              |
+| ---------- | ---------------------------------------------------------------------- |
+| **System** | Binary found, version >=1.0.150, plugin registered, version match      |
+| **Config** | JSONC validity, Zod schema, model override syntax                      |
+| **Tools**  | AST-Grep, comment-checker, LSP servers, GH CLI, MCP servers            |
 | **Models** | Cache exists, model resolution, agent/category overrides, availability |
 
 ## HOW TO ADD A DOCTOR CHECK

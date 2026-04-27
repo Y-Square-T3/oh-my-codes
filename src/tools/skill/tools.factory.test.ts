@@ -1,6 +1,14 @@
 /// <reference types="bun-types" />
 
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin/tool"
 import type { LoadedSkill } from "../../features/opencode-skill-loader/types"
 import * as skillContent from "../../features/opencode-skill-loader/skill-content"
@@ -62,19 +70,24 @@ afterEach(async () => {
 describe("createSkillTool", () => {
   it("delays command discovery until the description getter is accessed", async () => {
     // given
-    const baselineDiscoverCommandsSyncCalls = discoverCommandsSync.mock.calls.length
+    const baselineDiscoverCommandsSyncCalls =
+      discoverCommandsSync.mock.calls.length
 
     // when
     const { createSkillTool } = await import("./tools")
     const skillTool = createSkillTool({})
 
     // then
-    expect(discoverCommandsSync.mock.calls.length).toBe(baselineDiscoverCommandsSyncCalls)
+    expect(discoverCommandsSync.mock.calls.length).toBe(
+      baselineDiscoverCommandsSyncCalls,
+    )
 
     void skillTool.description
     await flushMicrotasks()
 
-    expect(discoverCommandsSync.mock.calls.length).toBe(baselineDiscoverCommandsSyncCalls + 1)
+    expect(discoverCommandsSync.mock.calls.length).toBe(
+      baselineDiscoverCommandsSyncCalls + 1,
+    )
   })
 
   it("delays skill loading until execute is invoked", async () => {
@@ -88,7 +101,7 @@ describe("createSkillTool", () => {
     // then
     expect(getAllSkills.mock.calls.length).toBe(baselineGetAllSkillsCalls)
 
-		await skillTool.execute({ name: "lazy-skill" }, mockContext)
+    await skillTool.execute({ name: "lazy-skill" }, mockContext)
 
     expect(getAllSkills.mock.calls.length).toBe(baselineGetAllSkillsCalls + 1)
   })
@@ -107,7 +120,9 @@ describe("createSkillTool", () => {
     await skillTool.execute({ name: "lazy-skill" }, sessionContext)
 
     // then
-    expect(clearSkillCache.mock.calls.length).toBe(baselineClearSkillCacheCalls + 1)
+    expect(clearSkillCache.mock.calls.length).toBe(
+      baselineClearSkillCacheCalls + 1,
+    )
   })
 
   it("clears the skill discovery cache once per session", async () => {
@@ -126,7 +141,9 @@ describe("createSkillTool", () => {
     await skillTool.execute({ name: "lazy-skill" }, sessionBContext)
 
     // then
-    expect(clearSkillCache.mock.calls.length).toBe(baselineClearSkillCacheCalls + 2)
+    expect(clearSkillCache.mock.calls.length).toBe(
+      baselineClearSkillCacheCalls + 2,
+    )
     expect(getAllSkills.mock.calls.length).toBe(baselineGetAllSkillsCalls + 4)
   })
 })

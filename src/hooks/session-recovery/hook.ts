@@ -8,7 +8,11 @@ import { recoverToolResultMissing } from "./recover-tool-result-missing"
 import { recoverUnavailableTool } from "./recover-unavailable-tool"
 import { recoverThinkingBlockOrder } from "./recover-thinking-block-order"
 import { recoverThinkingDisabledViolation } from "./recover-thinking-disabled-violation"
-import { extractResumeConfig, findLastUserMessage, resumeSession } from "./resume"
+import {
+  extractResumeConfig,
+  findLastUserMessage,
+  resumeSession,
+} from "./resume"
 
 interface MessageInfo {
   id?: string
@@ -29,7 +33,10 @@ export interface SessionRecoveryHook {
   setOnRecoveryCompleteCallback: (callback: (sessionID: string) => void) => void
 }
 
-export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRecoveryOptions): SessionRecoveryHook {
+export function createSessionRecoveryHook(
+  ctx: PluginInput,
+  options?: SessionRecoveryOptions,
+): SessionRecoveryHook {
   const processingErrors = new Set<string>()
   const experimental = options?.experimental
   let onAbortCallback: ((sessionID: string) => void) | null = null
@@ -39,7 +46,9 @@ export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRec
     onAbortCallback = callback
   }
 
-  const setOnRecoveryCompleteCallback = (callback: (sessionID: string) => void): void => {
+  const setOnRecoveryCompleteCallback = (
+    callback: (sessionID: string) => void,
+  ): void => {
     onRecoveryCompleteCallback = callback
   }
 
@@ -65,10 +74,15 @@ export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRec
           query: { directory: ctx.directory },
         })
         const msgs = (messagesResp as { data?: MessageData[] }).data
-        const lastAssistant = msgs?.findLast((m) => m.info?.role === "assistant" && m.info?.error)
+        const lastAssistant = msgs?.findLast(
+          (m) => m.info?.role === "assistant" && m.info?.error,
+        )
         assistantMsgID = lastAssistant?.info?.id
       } catch {
-        log("[session-recovery] Failed to fetch messages for messageID fallback", { sessionID })
+        log(
+          "[session-recovery] Failed to fetch messages for messageID fallback",
+          { sessionID },
+        )
       }
     }
 
@@ -81,7 +95,9 @@ export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRec
         onAbortCallback(sessionID)
       }
 
-      await ctx.client.session.abort({ path: { id: sessionID } }).catch(() => {})
+      await ctx.client.session
+        .abort({ path: { id: sessionID } })
+        .catch(() => {})
 
       const messagesResp = await ctx.client.session.messages({
         path: { id: sessionID },
@@ -99,14 +115,15 @@ export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRec
         unavailable_tool: "Tool Recovery",
         thinking_block_order: "Thinking Block Recovery",
         thinking_disabled_violation: "Thinking Strip Recovery",
-        "assistant_prefill_unsupported": "Prefill Unsupported",
+        assistant_prefill_unsupported: "Prefill Unsupported",
       }
       const toastMessages: Record<RecoveryErrorType & string, string> = {
         tool_result_missing: "Injecting cancelled tool results...",
         unavailable_tool: "Recovering from unavailable tool call...",
         thinking_block_order: "Fixing message structure...",
         thinking_disabled_violation: "Stripping thinking blocks...",
-        "assistant_prefill_unsupported": "Prefill not supported; continuing without recovery.",
+        assistant_prefill_unsupported:
+          "Prefill not supported; continuing without recovery.",
       }
 
       await ctx.client.tui
@@ -123,18 +140,32 @@ export function createSessionRecoveryHook(ctx: PluginInput, options?: SessionRec
       let success = false
 
       if (errorType === "tool_result_missing") {
-        success = await recoverToolResultMissing(ctx.client, sessionID, failedMsg)
+        success = await recoverToolResultMissing(
+          ctx.client,
+          sessionID,
+          failedMsg,
+        )
       } else if (errorType === "unavailable_tool") {
         success = await recoverUnavailableTool(ctx.client, sessionID, failedMsg)
       } else if (errorType === "thinking_block_order") {
-        success = await recoverThinkingBlockOrder(ctx.client, sessionID, failedMsg, ctx.directory, info.error)
+        success = await recoverThinkingBlockOrder(
+          ctx.client,
+          sessionID,
+          failedMsg,
+          ctx.directory,
+          info.error,
+        )
         if (success && experimental?.auto_resume) {
           const lastUser = findLastUserMessage(msgs ?? [])
           const resumeConfig = extractResumeConfig(lastUser, sessionID)
           await resumeSession(ctx.client, resumeConfig)
         }
       } else if (errorType === "thinking_disabled_violation") {
-        success = await recoverThinkingDisabledViolation(ctx.client, sessionID, failedMsg)
+        success = await recoverThinkingDisabledViolation(
+          ctx.client,
+          sessionID,
+          failedMsg,
+        )
         if (success && experimental?.auto_resume) {
           const lastUser = findLastUserMessage(msgs ?? [])
           const resumeConfig = extractResumeConfig(lastUser, sessionID)

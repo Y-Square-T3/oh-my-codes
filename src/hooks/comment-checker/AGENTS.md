@@ -9,6 +9,7 @@ Tool Guard tier hook. Runs after `write`/`edit` tools to detect AI-generated com
 ## WHAT IT BLOCKS
 
 AI slop comment smells:
+
 - Restating what code literally does (`// increment counter`)
 - Filler phrases (`// obviously`, `// clearly`, `// simply`)
 - Decorative separators without purpose
@@ -30,13 +31,13 @@ tool.execute.after (write | edit | hashline edit)
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `hook.ts` | `createCommentCheckerHook()` — main factory, tool.execute.after handler |
-| `comment-checker-runner.ts` | Spawn binary, parse JSON output |
-| `changed-line-extractor.ts` | Extract which lines changed from tool result |
-| `findings-formatter.ts` | Format violations as actionable error message |
-| `binary-resolver.ts` | Locate `comment-checker` binary (node_modules + PATH) |
+| File                        | Purpose                                                                 |
+| --------------------------- | ----------------------------------------------------------------------- |
+| `hook.ts`                   | `createCommentCheckerHook()` — main factory, tool.execute.after handler |
+| `comment-checker-runner.ts` | Spawn binary, parse JSON output                                         |
+| `changed-line-extractor.ts` | Extract which lines changed from tool result                            |
+| `findings-formatter.ts`     | Format violations as actionable error message                           |
+| `binary-resolver.ts`        | Locate `comment-checker` binary (node_modules + PATH)                   |
 
 ## CONFIG
 
@@ -44,9 +45,9 @@ tool.execute.after (write | edit | hashline edit)
 // oh-my-codes.jsonc
 {
   "comment_checker": {
-    "enabled": true,      // default: true
-    "severity": "error"   // error blocks, warning notifies only
-  }
+    "enabled": true, // default: true
+    "severity": "error", // error blocks, warning notifies only
+  },
 }
 ```
 

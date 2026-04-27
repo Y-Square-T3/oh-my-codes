@@ -1,11 +1,20 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test"
-import { detectExternalNotificationPlugin, getNotificationConflictWarning, detectExternalSkillPlugin, getSkillPluginConflictWarning } from "./external-plugin-detector"
+import {
+  detectExternalNotificationPlugin,
+  getNotificationConflictWarning,
+  detectExternalSkillPlugin,
+  getSkillPluginConflictWarning,
+} from "./external-plugin-detector"
 import * as fs from "node:fs"
 import * as path from "node:path"
 import * as os from "node:os"
 
-async function importFreshExternalPluginDetectorModule(): Promise<typeof import("./external-plugin-detector")> {
-  return import(`./external-plugin-detector?test=${Date.now()}-${Math.random()}`)
+async function importFreshExternalPluginDetectorModule(): Promise<
+  typeof import("./external-plugin-detector")
+> {
+  return import(
+    `./external-plugin-detector?test=${Date.now()}-${Math.random()}`
+  )
 }
 
 describe("external-plugin-detector", () => {
@@ -39,7 +48,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes"] })
+        JSON.stringify({ plugin: ["oh-my-codes"] }),
       )
 
       // when
@@ -57,7 +66,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "opencode-notifier"] })
+        JSON.stringify({ plugin: ["oh-my-codes", "opencode-notifier"] }),
       )
 
       // when
@@ -74,7 +83,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "opencode-notifier@1.2.3"] })
+        JSON.stringify({ plugin: ["oh-my-codes", "opencode-notifier@1.2.3"] }),
       )
 
       // when
@@ -91,7 +100,9 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "@mohak34/opencode-notifier"] })
+        JSON.stringify({
+          plugin: ["oh-my-codes", "@mohak34/opencode-notifier"],
+        }),
       )
 
       // when
@@ -112,9 +123,9 @@ describe("external-plugin-detector", () => {
           plugin: [
             "oh-my-codes",
             ["advanced-tuple-plugin", { debug: true }],
-            "opencode-notifier"
-          ]
-        })
+            "opencode-notifier",
+          ],
+        }),
       )
 
       // when
@@ -125,7 +136,10 @@ describe("external-plugin-detector", () => {
       expect(result.pluginName).toBe("opencode-notifier")
       expect(result.allPlugins).toContain("oh-my-codes")
       expect(result.allPlugins).toContain("advanced-tuple-plugin")
-      expect(result.allPlugins).not.toContain(["advanced-tuple-plugin", { debug: true }])
+      expect(result.allPlugins).not.toContain([
+        "advanced-tuple-plugin",
+        { debug: true },
+      ])
     })
 
     test("should handle JSONC format with comments", () => {
@@ -140,7 +154,7 @@ describe("external-plugin-detector", () => {
             "oh-my-codes",
             "opencode-notifier" // Another comment
           ]
-        }`
+        }`,
       )
 
       // when
@@ -159,7 +173,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["my-opencode-notifier-fork"] })
+        JSON.stringify({ plugin: ["my-opencode-notifier-fork"] }),
       )
 
       // when
@@ -176,7 +190,9 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["some-other-plugin/opencode-notifier-like"] })
+        JSON.stringify({
+          plugin: ["some-other-plugin/opencode-notifier-like"],
+        }),
       )
 
       // when
@@ -193,7 +209,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["opencode-notifier-extended"] })
+        JSON.stringify({ plugin: ["opencode-notifier-extended"] }),
       )
 
       // when
@@ -210,7 +226,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["opencode-notifier"] })
+        JSON.stringify({ plugin: ["opencode-notifier"] }),
       )
 
       // when
@@ -227,7 +243,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["opencode-notifier@1.2.3"] })
+        JSON.stringify({ plugin: ["opencode-notifier@1.2.3"] }),
       )
 
       // when
@@ -244,7 +260,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["@mohak34/opencode-notifier"] })
+        JSON.stringify({ plugin: ["@mohak34/opencode-notifier"] }),
       )
 
       // when
@@ -261,7 +277,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["npm:opencode-notifier"] })
+        JSON.stringify({ plugin: ["npm:opencode-notifier"] }),
       )
 
       // when
@@ -278,7 +294,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["npm:opencode-notifier@2.0.0"] })
+        JSON.stringify({ plugin: ["npm:opencode-notifier@2.0.0"] }),
       )
 
       // when
@@ -295,7 +311,9 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["file:///home/user/plugins/opencode-notifier"] })
+        JSON.stringify({
+          plugin: ["file:///home/user/plugins/opencode-notifier"],
+        }),
       )
 
       // when
@@ -336,7 +354,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes"] })
+        JSON.stringify({ plugin: ["oh-my-codes"] }),
       )
 
       // when
@@ -354,7 +372,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "opencode-skills"] })
+        JSON.stringify({ plugin: ["oh-my-codes", "opencode-skills"] }),
       )
 
       // when
@@ -371,7 +389,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "opencode-skills@1.2.3"] })
+        JSON.stringify({ plugin: ["oh-my-codes", "opencode-skills@1.2.3"] }),
       )
 
       // when
@@ -388,7 +406,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["oh-my-codes", "@opencode/skills"] })
+        JSON.stringify({ plugin: ["oh-my-codes", "@opencode/skills"] }),
       )
 
       // when
@@ -405,7 +423,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["npm:opencode-skills"] })
+        JSON.stringify({ plugin: ["npm:opencode-skills"] }),
       )
 
       // when
@@ -422,7 +440,9 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["file:///home/user/plugins/opencode-skills"] })
+        JSON.stringify({
+          plugin: ["file:///home/user/plugins/opencode-skills"],
+        }),
       )
 
       // when
@@ -439,15 +459,22 @@ describe("external-plugin-detector", () => {
       const userConfigDir = path.join(tempHomeDir, ".config", "opencode")
       fs.mkdirSync(projectConfigDir, { recursive: true })
       fs.mkdirSync(userConfigDir, { recursive: true })
-      fs.writeFileSync(path.join(projectConfigDir, "opencode.json"), JSON.stringify({}))
-      fs.writeFileSync(path.join(userConfigDir, "opencode.json"), JSON.stringify({ plugin: ["opencode-skills"] }))
+      fs.writeFileSync(
+        path.join(projectConfigDir, "opencode.json"),
+        JSON.stringify({}),
+      )
+      fs.writeFileSync(
+        path.join(userConfigDir, "opencode.json"),
+        JSON.stringify({ plugin: ["opencode-skills"] }),
+      )
 
       const nodeOs = await import("node:os")
       mock.module("node:os", () => ({
         ...nodeOs,
         homedir: () => tempHomeDir,
       }))
-      const { detectExternalSkillPlugin: detectExternalSkillPluginFresh } = await importFreshExternalPluginDetectorModule()
+      const { detectExternalSkillPlugin: detectExternalSkillPluginFresh } =
+        await importFreshExternalPluginDetectorModule()
 
       // when
       const result = detectExternalSkillPluginFresh(tempDir)
@@ -464,7 +491,7 @@ describe("external-plugin-detector", () => {
       fs.mkdirSync(opencodeDir, { recursive: true })
       fs.writeFileSync(
         path.join(opencodeDir, "opencode.json"),
-        JSON.stringify({ plugin: ["opencode-skills-extra"] })
+        JSON.stringify({ plugin: ["opencode-skills-extra"] }),
       )
 
       // when

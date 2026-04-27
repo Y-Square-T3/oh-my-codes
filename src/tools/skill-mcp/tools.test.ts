@@ -4,7 +4,10 @@ import { createSkillMcpTool, applyGrepFilter } from "./tools"
 import { SkillMcpManager } from "../../features/skill-mcp-manager"
 import type { LoadedSkill } from "../../features/opencode-skill-loader/types"
 
-function createMockSkillWithMcp(name: string, mcpServers: Record<string, unknown>): LoadedSkill {
+function createMockSkillWithMcp(
+  name: string,
+  mcpServers: Record<string, unknown>,
+): LoadedSkill {
   return {
     name,
     path: `/test/skills/${name}/SKILL.md`,
@@ -52,7 +55,7 @@ describe("skill_mcp tool", () => {
 
       // when / #then
       await expect(
-        tool.execute({ mcp_name: "test-server" }, mockContext)
+        tool.execute({ mcp_name: "test-server" }, mockContext),
       ).rejects.toThrow(/Missing operation/)
     })
 
@@ -66,11 +69,14 @@ describe("skill_mcp tool", () => {
 
       // when / #then
       await expect(
-        tool.execute({
-          mcp_name: "test-server",
-          tool_name: "some-tool",
-          resource_name: "some://resource",
-        }, mockContext)
+        tool.execute(
+          {
+            mcp_name: "test-server",
+            tool_name: "some-tool",
+            resource_name: "some://resource",
+          },
+          mockContext,
+        ),
       ).rejects.toThrow(/Multiple operations/)
     })
 
@@ -89,7 +95,10 @@ describe("skill_mcp tool", () => {
 
       // when / #then
       await expect(
-        tool.execute({ mcp_name: "unknown-server", tool_name: "some-tool" }, mockContext)
+        tool.execute(
+          { mcp_name: "unknown-server", tool_name: "some-tool" },
+          mockContext,
+        ),
       ).rejects.toThrow(/not found/)
     })
 
@@ -111,7 +120,7 @@ describe("skill_mcp tool", () => {
 
       // when / #then
       await expect(
-        tool.execute({ mcp_name: "missing", tool_name: "test" }, mockContext)
+        tool.execute({ mcp_name: "missing", tool_name: "test" }, mockContext),
       ).rejects.toThrow(/sqlite.*db-skill|rest-api.*api-skill/s)
     })
 
@@ -130,11 +139,14 @@ describe("skill_mcp tool", () => {
 
       // when / #then
       await expect(
-        tool.execute({
-          mcp_name: "test-server",
-          tool_name: "some-tool",
-          arguments: "not valid json",
-        }, mockContext)
+        tool.execute(
+          {
+            mcp_name: "test-server",
+            tool_name: "some-tool",
+            arguments: "not valid json",
+          },
+          mockContext,
+        ),
       ).rejects.toThrow(/Invalid arguments JSON/)
     })
   })
@@ -174,7 +186,9 @@ describe("skill_mcp tool", () => {
           "test-server": { command: "echo", args: ["test"] },
         }),
       ]
-      const callToolSpy = spyOn(manager, "callTool").mockResolvedValue({ content: [] } as never)
+      const callToolSpy = spyOn(manager, "callTool").mockResolvedValue({
+        content: [],
+      } as never)
       const tool = createSkillMcpTool({
         manager,
         getLoadedSkills: () => loadedSkills,
@@ -182,7 +196,10 @@ describe("skill_mcp tool", () => {
       })
 
       // when
-      await tool.execute({ mcp_name: "test-server", tool_name: "some-tool" }, mockContext)
+      await tool.execute(
+        { mcp_name: "test-server", tool_name: "some-tool" },
+        mockContext,
+      )
 
       // then
       expect(callToolSpy).toHaveBeenCalledWith(

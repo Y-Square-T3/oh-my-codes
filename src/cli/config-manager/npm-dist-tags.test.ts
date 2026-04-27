@@ -16,8 +16,9 @@ describe("fetchNpmDistTags", () => {
     globalThis.fetch = mock(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ latest: "3.13.1", beta: "3.14.0-beta.1" }),
-      } as Response)
+        json: () =>
+          Promise.resolve({ latest: "3.13.1", beta: "3.14.0-beta.1" }),
+      } as Response),
     ) as unknown as typeof fetch
 
     //#when
@@ -29,7 +30,9 @@ describe("fetchNpmDistTags", () => {
 
   test("returns null on network failure", async () => {
     //#given
-    globalThis.fetch = mock(() => Promise.reject(new Error("Network error"))) as unknown as typeof fetch
+    globalThis.fetch = mock(() =>
+      Promise.reject(new Error("Network error")),
+    ) as unknown as typeof fetch
 
     //#when
     const result = await fetchNpmDistTags("oh-my-openagent")
@@ -44,7 +47,7 @@ describe("fetchNpmDistTags", () => {
       Promise.resolve({
         ok: false,
         status: 404,
-      } as Response)
+      } as Response),
     ) as unknown as typeof fetch
 
     //#when

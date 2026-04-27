@@ -1,7 +1,18 @@
 declare const require: (name: string) => any
-const { describe, it, expect, mock, spyOn, beforeEach, afterEach } = require("bun:test")
+const {
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+  beforeEach,
+  afterEach,
+} = require("bun:test")
 
-import { checkAndInterruptStaleTasks, pruneStaleTasksAndNotifications } from "./task-poller"
+import {
+  checkAndInterruptStaleTasks,
+  pruneStaleTasksAndNotifications,
+} from "./task-poller"
 import type { BackgroundTask } from "./types"
 
 describe("checkAndInterruptStaleTasks", () => {
@@ -30,7 +41,9 @@ describe("checkAndInterruptStaleTasks", () => {
     }
   }
 
-  function createRunningTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
+  function createRunningTask(
+    overrides: Partial<BackgroundTask> = {},
+  ): BackgroundTask {
     return {
       id: "task-1",
       sessionID: "ses-1",
@@ -60,7 +73,6 @@ describe("checkAndInterruptStaleTasks", () => {
   afterEach(() => {
     Date.now = originalDateNow
   })
-
 
   it("should interrupt tasks with lastUpdate exceeding stale timeout", async () => {
     //#given
@@ -391,7 +403,9 @@ describe("checkAndInterruptStaleTasks", () => {
     //#then
     expect(task.status).toBe("running")
     expect(task.consecutiveMissedPolls).toBe(0)
-    expect(mockClient.session.get).toHaveBeenCalledWith({ path: { id: "ses-1" } })
+    expect(mockClient.session.get).toHaveBeenCalledWith({
+      path: { id: "ses-1" },
+    })
   })
 
   it("should NOT cancel task when session.get returns a transient error response", async () => {
@@ -423,7 +437,9 @@ describe("checkAndInterruptStaleTasks", () => {
     //#then
     expect(task.status).toBe("running")
     expect(task.consecutiveMissedPolls).toBe(0)
-    expect(mockClient.session.get).toHaveBeenCalledWith({ path: { id: "ses-1" } })
+    expect(mockClient.session.get).toHaveBeenCalledWith({
+      path: { id: "ses-1" },
+    })
   })
 
   it("should use session-gone timeout when session is missing from status map (with progress)", async () => {
@@ -507,7 +523,10 @@ describe("checkAndInterruptStaleTasks", () => {
     await checkAndInterruptStaleTasks({
       tasks: [task],
       client: mockClient as never,
-      config: { messageStalenessTimeoutMs: 600_000, sessionGoneTimeoutMs: 60_000 },
+      config: {
+        messageStalenessTimeoutMs: 600_000,
+        sessionGoneTimeoutMs: 60_000,
+      },
       concurrencyManager: mockConcurrencyManager as never,
       notifyParentSession: mockNotify,
       sessionStatuses: {},
@@ -715,7 +734,7 @@ describe("checkAndInterruptStaleTasks", () => {
     expect(task.error).toContain("Stale timeout")
   })
 
-  it('should NOT protect task when session has unknown status type', async () => {
+  it("should NOT protect task when session has unknown status type", async () => {
     //#given — lastUpdate is 5min old, session has an unknown status
     const task = createRunningTask({
       startedAt: new Date(Date.now() - 300_000),
@@ -742,7 +761,9 @@ describe("checkAndInterruptStaleTasks", () => {
 })
 
 describe("pruneStaleTasksAndNotifications", () => {
-  function createTerminalTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
+  function createTerminalTask(
+    overrides: Partial<BackgroundTask> = {},
+  ): BackgroundTask {
     return {
       id: "terminal-task",
       parentSessionID: "parent",
@@ -915,15 +936,23 @@ describe("pruneStaleTasksAndNotifications", () => {
   it("should prune terminal tasks when completion time exceeds terminal TTL", () => {
     //#given
     const tasks = new Map<string, BackgroundTask>()
-    const terminalStatuses: BackgroundTask["status"][] = ["completed", "error", "cancelled", "interrupt"]
+    const terminalStatuses: BackgroundTask["status"][] = [
+      "completed",
+      "error",
+      "cancelled",
+      "interrupt",
+    ]
 
     for (const status of terminalStatuses) {
-      tasks.set(status, createTerminalTask({
-        id: status,
-        description: status,
-        prompt: status,
+      tasks.set(
         status,
-      }))
+        createTerminalTask({
+          id: status,
+          description: status,
+          prompt: status,
+          status,
+        }),
+      )
     }
 
     const pruned: string[] = []
@@ -944,7 +973,9 @@ describe("pruneStaleTasksAndNotifications", () => {
     //#given
     const task = createTerminalTask()
     const tasks = new Map<string, BackgroundTask>([[task.id, task]])
-    const notifications = new Map<string, BackgroundTask[]>([[task.parentSessionID, [task]]])
+    const notifications = new Map<string, BackgroundTask[]>([
+      [task.parentSessionID, [task]],
+    ])
     const pruned: string[] = []
 
     //#when

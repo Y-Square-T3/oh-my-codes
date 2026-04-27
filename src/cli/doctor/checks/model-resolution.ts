@@ -1,14 +1,27 @@
-import { AGENT_MODEL_REQUIREMENTS, CATEGORY_MODEL_REQUIREMENTS } from "../../../shared/model-requirements"
+import {
+  AGENT_MODEL_REQUIREMENTS,
+  CATEGORY_MODEL_REQUIREMENTS,
+} from "../../../shared/model-requirements"
 import { getModelCapabilities } from "../../../shared/model-capabilities"
 import { CHECK_IDS, CHECK_NAMES } from "../constants"
 import type { CheckResult, DoctorIssue } from "../types"
 import { loadAvailableModelsFromCache } from "./model-resolution-cache"
 import { loadOmoConfig } from "./model-resolution-config"
 import { buildModelResolutionDetails } from "./model-resolution-details"
-import { buildEffectiveResolution, getEffectiveModel } from "./model-resolution-effective-model"
-import type { AgentResolutionInfo, CategoryResolutionInfo, ModelResolutionInfo, OmoConfig } from "./model-resolution-types"
+import {
+  buildEffectiveResolution,
+  getEffectiveModel,
+} from "./model-resolution-effective-model"
+import type {
+  AgentResolutionInfo,
+  CategoryResolutionInfo,
+  ModelResolutionInfo,
+  OmoConfig,
+} from "./model-resolution-types"
 
-function parseProviderModel(value: string): { providerID: string; modelID: string } | null {
+function parseProviderModel(
+  value: string,
+): { providerID: string; modelID: string } | null {
   const slashIndex = value.lastIndexOf("/")
   if (slashIndex <= 0 || slashIndex === value.length - 1) {
     return null
@@ -20,7 +33,9 @@ function parseProviderModel(value: string): { providerID: string; modelID: strin
   }
 }
 
-function attachCapabilityDiagnostics<T extends AgentResolutionInfo | CategoryResolutionInfo>(entry: T): T {
+function attachCapabilityDiagnostics<
+  T extends AgentResolutionInfo | CategoryResolutionInfo,
+>(entry: T): T {
   const parsed = parseProviderModel(entry.effectiveModel)
   if (!parsed) {
     return entry
@@ -36,30 +51,37 @@ function attachCapabilityDiagnostics<T extends AgentResolutionInfo | CategoryRes
 }
 
 export function getModelResolutionInfo(): ModelResolutionInfo {
-  const agents: AgentResolutionInfo[] = Object.entries(AGENT_MODEL_REQUIREMENTS).map(([name, requirement]) =>
+  const agents: AgentResolutionInfo[] = Object.entries(
+    AGENT_MODEL_REQUIREMENTS,
+  ).map(([name, requirement]) =>
     attachCapabilityDiagnostics({
       name,
       requirement,
       effectiveModel: getEffectiveModel(requirement),
       effectiveResolution: buildEffectiveResolution(requirement),
-    })
+    }),
   )
 
-  const categories: CategoryResolutionInfo[] = Object.entries(CATEGORY_MODEL_REQUIREMENTS).map(
-    ([name, requirement]) =>
-      attachCapabilityDiagnostics({
-        name,
-        requirement,
-        effectiveModel: getEffectiveModel(requirement),
-        effectiveResolution: buildEffectiveResolution(requirement),
-      })
+  const categories: CategoryResolutionInfo[] = Object.entries(
+    CATEGORY_MODEL_REQUIREMENTS,
+  ).map(([name, requirement]) =>
+    attachCapabilityDiagnostics({
+      name,
+      requirement,
+      effectiveModel: getEffectiveModel(requirement),
+      effectiveResolution: buildEffectiveResolution(requirement),
+    }),
   )
 
   return { agents, categories }
 }
 
-export function getModelResolutionInfoWithOverrides(config: OmoConfig): ModelResolutionInfo {
-  const agents: AgentResolutionInfo[] = Object.entries(AGENT_MODEL_REQUIREMENTS).map(([name, requirement]) => {
+export function getModelResolutionInfoWithOverrides(
+  config: OmoConfig,
+): ModelResolutionInfo {
+  const agents: AgentResolutionInfo[] = Object.entries(
+    AGENT_MODEL_REQUIREMENTS,
+  ).map(([name, requirement]) => {
     const userOverride = config.agents?.[name]?.model
     const userVariant = config.agents?.[name]?.variant
     return attachCapabilityDiagnostics({
@@ -72,30 +94,36 @@ export function getModelResolutionInfoWithOverrides(config: OmoConfig): ModelRes
     })
   })
 
-  const categories: CategoryResolutionInfo[] = Object.entries(CATEGORY_MODEL_REQUIREMENTS).map(
-    ([name, requirement]) => {
-      const userOverride = config.categories?.[name]?.model
-      const userVariant = config.categories?.[name]?.variant
-      return attachCapabilityDiagnostics({
-        name,
-        requirement,
-        userOverride,
-        userVariant,
-        effectiveModel: getEffectiveModel(requirement, userOverride),
-        effectiveResolution: buildEffectiveResolution(requirement, userOverride),
-      })
-    }
-  )
+  const categories: CategoryResolutionInfo[] = Object.entries(
+    CATEGORY_MODEL_REQUIREMENTS,
+  ).map(([name, requirement]) => {
+    const userOverride = config.categories?.[name]?.model
+    const userVariant = config.categories?.[name]?.variant
+    return attachCapabilityDiagnostics({
+      name,
+      requirement,
+      userOverride,
+      userVariant,
+      effectiveModel: getEffectiveModel(requirement, userOverride),
+      effectiveResolution: buildEffectiveResolution(requirement, userOverride),
+    })
+  })
 
   return { agents, categories }
 }
 
-export function collectCapabilityResolutionIssues(info: ModelResolutionInfo): DoctorIssue[] {
+export function collectCapabilityResolutionIssues(
+  info: ModelResolutionInfo,
+): DoctorIssue[] {
   const issues: DoctorIssue[] = []
   const allEntries = [...info.agents, ...info.categories]
   const fallbackEntries = allEntries.filter((entry) => {
     const mode = entry.capabilityDiagnostics?.resolutionMode
-    return mode === "alias-backed" || mode === "heuristic-backed" || mode === "unknown"
+    return (
+      mode === "alias-backed" ||
+      mode === "heuristic-backed" ||
+      mode === "unknown"
+    )
   })
 
   if (fallbackEntries.length === 0) {
@@ -103,7 +131,10 @@ export function collectCapabilityResolutionIssues(info: ModelResolutionInfo): Do
   }
 
   const summary = fallbackEntries
-    .map((entry) => `${entry.name}=${entry.effectiveModel} (${entry.capabilityDiagnostics?.resolutionMode ?? "unknown"})`)
+    .map(
+      (entry) =>
+        `${entry.name}=${entry.effectiveModel} (${entry.capabilityDiagnostics?.resolutionMode ?? "unknown"})`,
+    )
     .join(", ")
 
   issues.push({
@@ -125,7 +156,8 @@ export async function checkModels(): Promise<CheckResult> {
   if (!available.cacheExists) {
     issues.push({
       title: "Model cache not found",
-      description: "OpenCode model cache is missing, so model availability cannot be validated.",
+      description:
+        "OpenCode model cache is missing, so model availability cannot be validated.",
       fix: "Run: opencode models --refresh",
       severity: "warning",
       affects: ["model resolution"],

@@ -11,7 +11,10 @@ import {
   getCachedBinaryPath as getCachedBinaryPathShared,
 } from "../../shared/binary-downloader"
 import { log } from "../../shared/logger"
-import { CACHE_DIR_NAME, PUBLISHED_PACKAGE_NAME } from "../../shared/plugin-identity"
+import {
+  CACHE_DIR_NAME,
+  PUBLISHED_PACKAGE_NAME,
+} from "../../shared/plugin-identity"
 
 const REPO = "ast-grep/ast-grep"
 
@@ -64,14 +67,16 @@ export function getCachedBinaryPath(): string | null {
   return getCachedBinaryPathShared(getCacheDir(), getBinaryName())
 }
 
-
-
-export async function downloadAstGrep(version: string = DEFAULT_VERSION): Promise<string | null> {
+export async function downloadAstGrep(
+  version: string = DEFAULT_VERSION,
+): Promise<string | null> {
   const platformKey = `${process.platform}-${process.arch}`
   const platformInfo = PLATFORM_MAP[platformKey]
 
   if (!platformInfo) {
-    log(`[${PUBLISHED_PACKAGE_NAME}] Unsupported platform for ast-grep: ${platformKey}`)
+    log(
+      `[${PUBLISHED_PACKAGE_NAME}] Unsupported platform for ast-grep: ${platformKey}`,
+    )
     return null
   }
 
@@ -102,7 +107,7 @@ export async function downloadAstGrep(version: string = DEFAULT_VERSION): Promis
     return binaryPath
   } catch (err) {
     log(
-      `[${PUBLISHED_PACKAGE_NAME}] Failed to download ast-grep: ${err instanceof Error ? err.message : err}`
+      `[${PUBLISHED_PACKAGE_NAME}] Failed to download ast-grep: ${err instanceof Error ? err.message : err}`,
     )
     return null
   }

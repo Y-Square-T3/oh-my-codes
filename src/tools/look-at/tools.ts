@@ -1,4 +1,8 @@
-import { tool, type PluginInput, type ToolDefinition } from "@opencode-ai/plugin"
+import {
+  tool,
+  type PluginInput,
+  type ToolDefinition,
+} from "@opencode-ai/plugin"
 import { LOOK_AT_DESCRIPTION } from "./constants"
 import type { LookAtArgs } from "./types"
 import { log } from "../../shared"
@@ -13,9 +17,17 @@ export function createLookAt(ctx: PluginInput): ToolDefinition {
   return tool({
     description: LOOK_AT_DESCRIPTION,
     args: {
-      file_path: tool.schema.string().optional().describe("Absolute path to the file to analyze"),
-      image_data: tool.schema.string().optional().describe("Base64 encoded image data (for clipboard/pasted images)"),
-      goal: tool.schema.string().describe("What specific information to extract from the file"),
+      file_path: tool.schema
+        .string()
+        .optional()
+        .describe("Absolute path to the file to analyze"),
+      image_data: tool.schema
+        .string()
+        .optional()
+        .describe("Base64 encoded image data (for clipboard/pasted images)"),
+      goal: tool.schema
+        .string()
+        .describe("What specific information to extract from the file"),
     },
     async execute(rawArgs: LookAtArgs, toolContext) {
       const args = normalizeArgs(rawArgs as LookAtArgsWithAlias)
@@ -43,7 +55,8 @@ export function createLookAt(ctx: PluginInput): ToolDefinition {
           isBase64Input,
         })
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error)
+        const errorMessage =
+          error instanceof Error ? error.message : String(error)
         log(`[look_at] Unexpected error analyzing ${sourceDescription}:`, error)
         return `Error: Failed to analyze ${sourceDescription}: ${errorMessage}`
       } finally {

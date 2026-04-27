@@ -87,7 +87,10 @@ async function cleanupIdleClients(state: SkillMcpManagerState): Promise<void> {
   }
 }
 
-export async function disconnectSession(state: SkillMcpManagerState, sessionID: string): Promise<void> {
+export async function disconnectSession(
+  state: SkillMcpManagerState,
+  sessionID: string,
+): Promise<void> {
   let hasPendingForSession = false
   for (const key of state.pendingConnections.keys()) {
     if (key.startsWith(`${sessionID}:`)) {
@@ -96,7 +99,10 @@ export async function disconnectSession(state: SkillMcpManagerState, sessionID: 
     }
   }
   if (hasPendingForSession) {
-    state.disconnectedSessions.set(sessionID, (state.disconnectedSessions.get(sessionID) ?? 0) + 1)
+    state.disconnectedSessions.set(
+      sessionID,
+      (state.disconnectedSessions.get(sessionID) ?? 0) + 1,
+    )
   }
   const keysToRemove: string[] = []
 
@@ -125,7 +131,9 @@ export async function disconnectSession(state: SkillMcpManagerState, sessionID: 
   }
 }
 
-export async function disconnectAll(state: SkillMcpManagerState): Promise<void> {
+export async function disconnectAll(
+  state: SkillMcpManagerState,
+): Promise<void> {
   state.shutdownGeneration++
   state.disposed = true
   stopCleanupTimer(state)
@@ -143,7 +151,10 @@ export async function disconnectAll(state: SkillMcpManagerState): Promise<void> 
   }
 }
 
-export async function forceReconnect(state: SkillMcpManagerState, clientKey: string): Promise<boolean> {
+export async function forceReconnect(
+  state: SkillMcpManagerState,
+  clientKey: string,
+): Promise<boolean> {
   const existing = state.clients.get(clientKey)
   if (!existing) return false
 

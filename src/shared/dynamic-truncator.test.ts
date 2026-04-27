@@ -26,7 +26,7 @@ function resetContextLimitEnv(): void {
 
 function createContextUsageMockContext(
   inputTokens: number,
-  options?: { providerID?: string; modelID?: string; cacheRead?: number }
+  options?: { providerID?: string; modelID?: string; cacheRead?: number },
 ) {
   return {
     client: {
@@ -96,9 +96,13 @@ describe("getContextWindowUsage", () => {
     const ctx = createContextUsageMockContext(300000)
 
     //#when
-    const usage = await getContextWindowUsage(ctx as never, "ses_env_fallback", {
-      anthropicContext1MEnabled: false,
-    })
+    const usage = await getContextWindowUsage(
+      ctx as never,
+      "ses_env_fallback",
+      {
+        anthropicContext1MEnabled: false,
+      },
+    )
 
     //#then
     expect(usage?.usagePercentage).toBe(0.3)
@@ -133,9 +137,13 @@ describe("getContextWindowUsage", () => {
     })
 
     // when
-    const usage = await getContextWindowUsage(ctx as never, "ses_no_cached_limit", {
-      anthropicContext1MEnabled: false,
-    })
+    const usage = await getContextWindowUsage(
+      ctx as never,
+      "ses_no_cached_limit",
+      {
+        anthropicContext1MEnabled: false,
+      },
+    )
 
     // then
     expect(usage).toBeNull()
@@ -157,10 +165,14 @@ describe("getContextWindowUsage", () => {
         })
 
         // when
-        const usage = await getContextWindowUsage(ctx as never, "ses_cached_anthropic_1m", {
-          anthropicContext1MEnabled: true,
-          modelContextLimitsCache,
-        })
+        const usage = await getContextWindowUsage(
+          ctx as never,
+          "ses_cached_anthropic_1m",
+          {
+            anthropicContext1MEnabled: true,
+            modelContextLimitsCache,
+          },
+        )
 
         // then
         expect(usage?.usagePercentage).toBe(0.3)

@@ -54,7 +54,8 @@ export function loadAvailableModelsFromCache(): AvailableModelsInfo {
 
   try {
     const content = readFileSync(cacheFile, "utf-8")
-    const data = parseJsonc<Record<string, { models?: Record<string, unknown> }>>(content)
+    const data =
+      parseJsonc<Record<string, { models?: Record<string, unknown> }>>(content)
 
     const cacheProviders = Object.keys(data)
     let modelCount = 0

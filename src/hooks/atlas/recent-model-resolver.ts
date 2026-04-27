@@ -3,7 +3,12 @@ import {
   findNearestMessageWithFields,
   findNearestMessageWithFieldsFromSDK,
 } from "../../features/hook-message-injector"
-import { getMessageDir, isSqliteBackend, normalizePromptTools, normalizeSDKResponse } from "../../shared"
+import {
+  getMessageDir,
+  isSqliteBackend,
+  normalizePromptTools,
+  normalizeSDKResponse,
+} from "../../shared"
 import type { ModelInfo } from "./types"
 
 type PromptContext = {
@@ -13,20 +18,25 @@ type PromptContext = {
 
 export async function resolveRecentPromptContextForSession(
   ctx: PluginInput,
-  sessionID: string
+  sessionID: string,
 ): Promise<PromptContext> {
   try {
-    const messagesResp = await ctx.client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(messagesResp, [] as Array<{
-      id?: string
-      info?: {
-        model?: ModelInfo
-        modelID?: string
-        providerID?: string
-        tools?: Record<string, boolean | "allow" | "deny" | "ask">
-        time?: { created?: number }
-      }
-    }>).sort((left, right) => {
+    const messagesResp = await ctx.client.session.messages({
+      path: { id: sessionID },
+    })
+    const messages = normalizeSDKResponse(
+      messagesResp,
+      [] as Array<{
+        id?: string
+        info?: {
+          model?: ModelInfo
+          modelID?: string
+          providerID?: string
+          tools?: Record<string, boolean | "allow" | "deny" | "ask">
+          time?: { created?: number }
+        }
+      }>,
+    ).sort((left, right) => {
       const leftTime = left.info?.time?.created ?? Number.NEGATIVE_INFINITY
       const rightTime = right.info?.time?.created ?? Number.NEGATIVE_INFINITY
       if (leftTime !== rightTime) return rightTime - leftTime
@@ -51,7 +61,10 @@ export async function resolveRecentPromptContextForSession(
       }
 
       if (info?.providerID && info?.modelID) {
-        return { model: { providerID: info.providerID, modelID: info.modelID }, tools }
+        return {
+          model: { providerID: info.providerID, modelID: info.modelID },
+          tools,
+        }
       }
     }
   } catch {
@@ -60,10 +73,15 @@ export async function resolveRecentPromptContextForSession(
 
   let currentMessage = null
   if (isSqliteBackend()) {
-    currentMessage = await findNearestMessageWithFieldsFromSDK(ctx.client, sessionID)
+    currentMessage = await findNearestMessageWithFieldsFromSDK(
+      ctx.client,
+      sessionID,
+    )
   } else {
     const messageDir = getMessageDir(sessionID)
-    currentMessage = messageDir ? findNearestMessageWithFields(messageDir) : null
+    currentMessage = messageDir
+      ? findNearestMessageWithFields(messageDir)
+      : null
   }
   const model = currentMessage?.model
   const tools = normalizePromptTools(currentMessage?.tools)
@@ -82,7 +100,7 @@ export async function resolveRecentPromptContextForSession(
 
 export async function resolveRecentModelForSession(
   ctx: PluginInput,
-  sessionID: string
+  sessionID: string,
 ): Promise<ModelInfo | undefined> {
   const context = await resolveRecentPromptContextForSession(ctx, sessionID)
   return context.model

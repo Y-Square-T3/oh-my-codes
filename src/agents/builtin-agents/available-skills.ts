@@ -1,6 +1,9 @@
 import type { AvailableSkill } from "../dynamic-agent-prompt-builder"
 import type { BrowserAutomationProvider } from "../../config/schema"
-import type { LoadedSkill, SkillScope } from "../../features/opencode-skill-loader/types"
+import type {
+  LoadedSkill,
+  SkillScope,
+} from "../../features/opencode-skill-loader/types"
 import { createBuiltinSkills } from "../../features/builtin-skills"
 
 function mapScopeToLocation(scope: SkillScope): AvailableSkill["location"] {
@@ -12,10 +15,10 @@ function mapScopeToLocation(scope: SkillScope): AvailableSkill["location"] {
 export function buildAvailableSkills(
   discoveredSkills: LoadedSkill[],
   browserProvider?: BrowserAutomationProvider,
-  disabledSkills?: Set<string>
+  disabledSkills?: Set<string>,
 ): AvailableSkill[] {
   const builtinSkills = createBuiltinSkills({ browserProvider, disabledSkills })
-  const builtinSkillNames = new Set(builtinSkills.map(s => s.name))
+  const builtinSkillNames = new Set(builtinSkills.map((s) => s.name))
 
   const builtinAvailable: AvailableSkill[] = builtinSkills.map((skill) => ({
     name: skill.name,
@@ -24,7 +27,9 @@ export function buildAvailableSkills(
   }))
 
   const discoveredAvailable: AvailableSkill[] = discoveredSkills
-    .filter(s => !builtinSkillNames.has(s.name) && !disabledSkills?.has(s.name))
+    .filter(
+      (s) => !builtinSkillNames.has(s.name) && !disabledSkills?.has(s.name),
+    )
     .map((skill) => ({
       name: skill.name,
       description: skill.definition.description ?? "",

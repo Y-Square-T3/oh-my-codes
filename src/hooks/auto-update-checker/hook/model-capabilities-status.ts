@@ -24,11 +24,16 @@ export async function refreshModelCapabilitiesOnStartup(
         sourceUrl: config?.source_url,
       }),
       new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error("Model capabilities refresh timed out")), timeoutMs)
+        timeoutId = setTimeout(
+          () => reject(new Error("Model capabilities refresh timed out")),
+          timeoutMs,
+        )
       }),
     ])
   } catch (error) {
-    log("[auto-update-checker] Model capabilities refresh failed", { error: String(error) })
+    log("[auto-update-checker] Model capabilities refresh failed", {
+      error: String(error),
+    })
   } finally {
     if (timeoutId) {
       clearTimeout(timeoutId)

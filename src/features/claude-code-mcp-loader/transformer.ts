@@ -8,7 +8,7 @@ import { expandEnvVarsInObject } from "./env-expander"
 
 export function transformMcpServer(
   name: string,
-  server: ClaudeCodeMcpServer
+  server: ClaudeCodeMcpServer,
 ): McpServerConfig {
   const expanded = expandEnvVarsInObject(server)
   const serverType = expanded.type ?? "stdio"
@@ -16,7 +16,7 @@ export function transformMcpServer(
   if (serverType === "http" || serverType === "sse") {
     if (!expanded.url) {
       throw new Error(
-        `MCP server "${name}" requires url for type "${serverType}"`
+        `MCP server "${name}" requires url for type "${serverType}"`,
       )
     }
 

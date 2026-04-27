@@ -1,7 +1,11 @@
 /// <reference types="bun-types" />
 
 import { describe, expect, test } from "bun:test"
-import { formatFileChanges, parseGitDiffNumstat, parseGitStatusPorcelain } from "./index"
+import {
+  formatFileChanges,
+  parseGitDiffNumstat,
+  parseGitStatusPorcelain,
+} from "./index"
 
 describe("git-worktree", () => {
   test("#given status porcelain output #when parsing #then maps paths to statuses", () => {
@@ -23,7 +27,9 @@ describe("git-worktree", () => {
     const porcelain = [" M src/a.ts", "A  src/b.ts"].join("\n")
     const statusMap = parseGitStatusPorcelain(porcelain)
 
-    const numstat = ["1\t2\tsrc/a.ts", "3\t0\tsrc/b.ts", "-\t-\tbin.dat"].join("\n")
+    const numstat = ["1\t2\tsrc/a.ts", "3\t0\tsrc/b.ts", "-\t-\tbin.dat"].join(
+      "\n",
+    )
     const stats = parseGitDiffNumstat(numstat, statusMap)
 
     expect(stats).toEqual([

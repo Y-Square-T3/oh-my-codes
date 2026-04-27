@@ -15,7 +15,7 @@ export type ClientRegistrationStorage = {
   getClientRegistration: (serverIdentifier: string) => ClientCredentials | null
   setClientRegistration: (
     serverIdentifier: string,
-    credentials: ClientCredentials
+    credentials: ClientCredentials,
   ) => void
 }
 
@@ -32,11 +32,11 @@ export type DynamicClientRegistrationOptions = {
 
 export type DcrFetch = (
   input: string,
-  init?: { method?: string; headers?: Record<string, string>; body?: string }
+  init?: { method?: string; headers?: Record<string, string>; body?: string },
 ) => Promise<{ ok: boolean; json: () => Promise<unknown> }>
 
 export async function getOrRegisterClient(
-  options: DynamicClientRegistrationOptions
+  options: DynamicClientRegistrationOptions,
 ): Promise<ClientCredentials | null> {
   const serverIdentifier =
     options.serverIdentifier ?? options.registrationEndpoint ?? "default"

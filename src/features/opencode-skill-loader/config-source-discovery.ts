@@ -6,7 +6,10 @@ import type { SkillsConfig } from "../../config/schema"
 import { normalizeSkillsConfig } from "./merger/skills-config-normalizer"
 import { deduplicateSkillsByName } from "./skill-deduplication"
 import { loadSkillsFromDir } from "./skill-directory-loader"
-import { inferSkillNameFromFileName, loadSkillFromPath } from "./loaded-skill-from-path"
+import {
+  inferSkillNameFromFileName,
+  loadSkillFromPath,
+} from "./loaded-skill-from-path"
 import type { LoadedSkill } from "./types"
 
 const MAX_RECURSIVE_DEPTH = 10
@@ -38,7 +41,11 @@ export function normalizePathForGlob(path: string): string {
   return path.split("\\").join("/")
 }
 
-function filterByGlob(skills: LoadedSkill[], sourceBaseDir: string, globPattern?: string): LoadedSkill[] {
+function filterByGlob(
+  skills: LoadedSkill[],
+  sourceBaseDir: string,
+  globPattern?: string,
+): LoadedSkill[] {
   if (!globPattern) return skills
 
   return skills.filter((skill) => {

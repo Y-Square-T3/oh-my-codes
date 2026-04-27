@@ -15,14 +15,16 @@ import {
   updateSessionAgent,
 } from "./features/claude-code-session-state"
 
-
 describe("createPluginInterface - command.execute.before", () => {
   let testDir = ""
 
   beforeEach(() => {
     testDir = join(tmpdir(), `plugin-interface-start-work-${randomUUID()}`)
     mkdirSync(join(testDir, ".sisyphus", "plans"), { recursive: true })
-    writeFileSync(join(testDir, ".sisyphus", "plans", "worker-plan.md"), "# Plan\n- [ ] Task 1")
+    writeFileSync(
+      join(testDir, ".sisyphus", "plans", "worker-plan.md"),
+      "# Plan\n- [ ] Task 1",
+    )
     _resetForTesting()
     registerAgentName("prometheus")
     registerAgentName("sisyphus")
@@ -69,7 +71,7 @@ describe("createPluginInterface - command.execute.before", () => {
         sessionID: "ses-command-before",
         arguments: "",
       },
-      output as never
+      output as never,
     )
 
     // then
@@ -116,7 +118,7 @@ describe("createPluginInterface - command.execute.before", () => {
         sessionID: "ses-handoff",
         arguments: "",
       },
-      output as never
+      output as never,
     )
 
     // then
@@ -162,7 +164,7 @@ describe("createPluginInterface - command.execute.before", () => {
         sessionID: "ses-command-atlas",
         agent: "prometheus",
       } as never,
-      output as never
+      output as never,
     )
 
     // then
@@ -210,7 +212,11 @@ describe("createPluginInterface - ulw-loop native command smoke", () => {
       hooks: {
         autoSlashCommand: createAutoSlashCommandHook({ skills: [] }),
         ralphLoop: {
-          startLoop: (sessionID: string, prompt: string, options?: Record<string, unknown>) => {
+          startLoop: (
+            sessionID: string,
+            prompt: string,
+            options?: Record<string, unknown>,
+          ) => {
             startLoopCalls.push({ sessionID, prompt, options: options ?? {} })
             return true
           },

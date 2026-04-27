@@ -1,7 +1,10 @@
 import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import { dirname, join } from "node:path"
-import { downloadAndInstallRipgrep, getInstalledRipgrepPath } from "../tools/grep/downloader"
+import {
+  downloadAndInstallRipgrep,
+  getInstalledRipgrepPath,
+} from "../tools/grep/downloader"
 import { getDataDir } from "./data-path"
 import { log } from "./logger"
 import { PUBLISHED_PACKAGE_NAME } from "./plugin-identity"
@@ -62,7 +65,8 @@ export function resolveGrepCli(): ResolvedCli {
     return cachedCli
   }
 
-  const rgPath = getOpenCodeBundledRg() ?? findExecutable("rg") ?? getInstalledRipgrepPath()
+  const rgPath =
+    getOpenCodeBundledRg() ?? findExecutable("rg") ?? getInstalledRipgrepPath()
   if (rgPath) {
     cachedCli = { path: rgPath, backend: "rg" }
     return cachedCli
@@ -99,14 +103,20 @@ export async function resolveGrepCliWithAutoInstall(): Promise<ResolvedCli> {
     const message = error instanceof Error ? error.message : String(error)
 
     if (current.backend === "grep") {
-      log(`[${PUBLISHED_PACKAGE_NAME}] Failed to auto-install ripgrep. Falling back to GNU grep.`, {
-        error: message,
-        grep_path: current.path,
-      })
+      log(
+        `[${PUBLISHED_PACKAGE_NAME}] Failed to auto-install ripgrep. Falling back to GNU grep.`,
+        {
+          error: message,
+          grep_path: current.path,
+        },
+      )
     } else {
-      log(`[${PUBLISHED_PACKAGE_NAME}] Failed to auto-install ripgrep and GNU grep was not found.`, {
-        error: message,
-      })
+      log(
+        `[${PUBLISHED_PACKAGE_NAME}] Failed to auto-install ripgrep and GNU grep was not found.`,
+        {
+          error: message,
+        },
+      )
     }
 
     return current

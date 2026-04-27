@@ -10,18 +10,31 @@ describe("getLastAgentFromSession SQLite backend ordering", () => {
       session: {
         messages: async () => ({
           data: [
-            { id: "msg_0001", info: { agent: "atlas", time: { created: 100 } } },
-            { id: "msg_0003", info: { agent: "compaction", time: { created: 200 } } },
-            { id: "msg_0002", info: { agent: "sisyphus-junior", time: { created: 100 } } },
+            {
+              id: "msg_0001",
+              info: { agent: "atlas", time: { created: 100 } },
+            },
+            {
+              id: "msg_0003",
+              info: { agent: "compaction", time: { created: 200 } },
+            },
+            {
+              id: "msg_0002",
+              info: { agent: "sisyphus-junior", time: { created: 100 } },
+            },
           ],
         }),
       },
     }
 
     // when
-    const result = await getLastAgentFromSession("ses_sqlite_last_agent", client as never, {
-      isSqliteBackend: () => true,
-    })
+    const result = await getLastAgentFromSession(
+      "ses_sqlite_last_agent",
+      client as never,
+      {
+        isSqliteBackend: () => true,
+      },
+    )
 
     // then
     expect(result).toBe("sisyphus-junior")
@@ -33,18 +46,31 @@ describe("getLastAgentFromSession SQLite backend ordering", () => {
       session: {
         messages: async () => ({
           data: [
-            { id: "msg_a91f00ab", info: { agent: "atlas", time: { created: 100 } } },
-            { id: "msg_f0e1d2c3", info: { agent: "compaction", time: { created: 200 } } },
-            { id: "msg_d4c3b2a1", info: { agent: "sisyphus-junior", time: { created: 100 } } },
+            {
+              id: "msg_a91f00ab",
+              info: { agent: "atlas", time: { created: 100 } },
+            },
+            {
+              id: "msg_f0e1d2c3",
+              info: { agent: "compaction", time: { created: 200 } },
+            },
+            {
+              id: "msg_d4c3b2a1",
+              info: { agent: "sisyphus-junior", time: { created: 100 } },
+            },
           ],
         }),
       },
     }
 
     // when
-    const result = await getLastAgentFromSession("ses_sqlite_last_agent_equal_time", client as never, {
-      isSqliteBackend: () => true,
-    })
+    const result = await getLastAgentFromSession(
+      "ses_sqlite_last_agent_equal_time",
+      client as never,
+      {
+        isSqliteBackend: () => true,
+      },
+    )
 
     // then
     expect(result).toBe("sisyphus-junior")
@@ -56,7 +82,10 @@ describe("getLastAgentFromSession SQLite backend ordering", () => {
       session: {
         messages: async () => ({
           data: [
-            { id: "msg_real", info: { agent: "sisyphus", time: { created: 100 } } },
+            {
+              id: "msg_real",
+              info: { agent: "sisyphus", time: { created: 100 } },
+            },
             {
               id: "msg_compaction",
               info: { agent: "atlas", time: { created: 200 } },
@@ -68,9 +97,13 @@ describe("getLastAgentFromSession SQLite backend ordering", () => {
     }
 
     // when
-    const result = await getLastAgentFromSession("ses_sqlite_compaction_marker", client as never, {
-      isSqliteBackend: () => true,
-    })
+    const result = await getLastAgentFromSession(
+      "ses_sqlite_compaction_marker",
+      client as never,
+      {
+        isSqliteBackend: () => true,
+      },
+    )
 
     // then
     expect(result).toBe("sisyphus")
@@ -87,9 +120,13 @@ describe("getLastAgentFromSession SQLite backend ordering", () => {
     }
 
     // when
-    const result = await getLastAgentFromSession("ses_sqlite_error", client as never, {
-      isSqliteBackend: () => true,
-    })
+    const result = await getLastAgentFromSession(
+      "ses_sqlite_error",
+      client as never,
+      {
+        isSqliteBackend: () => true,
+      },
+    )
 
     // then
     expect(result).toBeNull()

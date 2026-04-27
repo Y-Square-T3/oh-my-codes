@@ -1,7 +1,10 @@
 import { readCurrentTopLevelTask } from "../../features/boulder-state"
 import type { PendingTaskRef, TrackedTopLevelTaskRef } from "./types"
 
-export function resolvePreferredSessionId(currentSessionId?: string, trackedSessionId?: string): string {
+export function resolvePreferredSessionId(
+  currentSessionId?: string,
+  trackedSessionId?: string,
+): string {
   return currentSessionId ?? trackedSessionId ?? "<session_id>"
 }
 

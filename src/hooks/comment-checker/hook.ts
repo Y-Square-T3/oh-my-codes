@@ -40,7 +40,9 @@ const DEBUG_FILE = join(tmpdir(), "comment-checker-debug.log")
 function debugLog(...args: unknown[]) {
   if (DEBUG) {
     const msg = `[${new Date().toISOString()}] [comment-checker:hook] ${args
-      .map((a) => (typeof a === "object" ? JSON.stringify(a, null, 2) : String(a)))
+      .map((a) =>
+        typeof a === "object" ? JSON.stringify(a, null, 2) : String(a),
+      )
       .join(" ")}\n`
     fs.appendFileSync(DEBUG_FILE, msg)
   }
@@ -66,7 +68,11 @@ export function createCommentCheckerHooks(config?: CommentCheckerConfig) {
       })
 
       const toolLower = input.tool.toLowerCase()
-      if (toolLower !== "write" && toolLower !== "edit" && toolLower !== "multiedit") {
+      if (
+        toolLower !== "write" &&
+        toolLower !== "edit" &&
+        toolLower !== "multiedit"
+      ) {
         debugLog("skipping non-write/edit tool:", toolLower)
         return
       }
@@ -75,9 +81,15 @@ export function createCommentCheckerHooks(config?: CommentCheckerConfig) {
         output.args.file_path ??
         output.args.path) as string | undefined
       const content = output.args.content as string | undefined
-      const oldString = (output.args.oldString ?? output.args.old_string) as string | undefined
-      const newString = (output.args.newString ?? output.args.new_string) as string | undefined
-      const edits = output.args.edits as Array<{ old_string: string; new_string: string }> | undefined
+      const oldString = (output.args.oldString ?? output.args.old_string) as
+        | string
+        | undefined
+      const newString = (output.args.newString ?? output.args.new_string) as
+        | string
+        | undefined
+      const edits = output.args.edits as
+        | Array<{ old_string: string; new_string: string }>
+        | undefined
 
       debugLog("extracted filePath:", filePath)
 
@@ -107,7 +119,10 @@ export function createCommentCheckerHooks(config?: CommentCheckerConfig) {
       input: { tool: string; sessionID: string; callID: string },
       output: { title: string; output: string; metadata: unknown },
     ): Promise<void> => {
-      debugLog("tool.execute.after:", { tool: input.tool, callID: input.callID })
+      debugLog("tool.execute.after:", {
+        tool: input.tool,
+        callID: input.callID,
+      })
 
       const toolLower = input.tool.toLowerCase()
 
@@ -123,7 +138,6 @@ export function createCommentCheckerHooks(config?: CommentCheckerConfig) {
         debugLog("skipping due to tool failure in output")
         return
       }
-
 
       if (toolLower === "apply_patch") {
         const parsed = ApplyPatchMetadataSchema.safeParse(output.metadata)
@@ -183,7 +197,14 @@ export function createCommentCheckerHooks(config?: CommentCheckerConfig) {
         }
 
         debugLog("using CLI:", cliPath)
-        await processWithCli(input, pendingCall, output, cliPath, config?.custom_prompt, debugLog)
+        await processWithCli(
+          input,
+          pendingCall,
+          output,
+          cliPath,
+          config?.custom_prompt,
+          debugLog,
+        )
       } catch (err) {
         debugLog("tool.execute.after failed:", err)
       }

@@ -1,44 +1,60 @@
 declare const require: (name: string) => any
-const { beforeEach, describe, expect, mock, test, afterAll } = require("bun:test")
+const {
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} = require("bun:test")
 
 const readConnectedProvidersCacheMock = mock(() => null)
 const readProviderModelsCacheMock = mock(() => null)
-const selectFallbackProviderMock = mock((providers: string[], preferredProviderID?: string) => {
-  const connectedProviders = readConnectedProvidersCacheMock()
-  if (connectedProviders) {
-    const connectedSet = new Set(connectedProviders.map((provider: string) => provider.toLowerCase()))
+const selectFallbackProviderMock = mock(
+  (providers: string[], preferredProviderID?: string) => {
+    const connectedProviders = readConnectedProvidersCacheMock()
+    if (connectedProviders) {
+      const connectedSet = new Set(
+        connectedProviders.map((provider: string) => provider.toLowerCase()),
+      )
 
-    for (const provider of providers) {
-      if (connectedSet.has(provider.toLowerCase())) {
-        return provider
+      for (const provider of providers) {
+        if (connectedSet.has(provider.toLowerCase())) {
+          return provider
+        }
+      }
+
+      if (
+        preferredProviderID &&
+        connectedSet.has(preferredProviderID.toLowerCase())
+      ) {
+        return preferredProviderID
       }
     }
 
-    if (preferredProviderID && connectedSet.has(preferredProviderID.toLowerCase())) {
-      return preferredProviderID
+    return providers[0] || preferredProviderID || "opencode"
+  },
+)
+const transformModelForProviderMock = mock(
+  (provider: string, model: string) => {
+    if (provider === "github-copilot") {
+      return model
+        .replace("claude-opus-4-7", "claude-opus-4.7")
+        .replace("claude-sonnet-4-6", "claude-sonnet-4.6")
+        .replace("claude-sonnet-4-5", "claude-sonnet-4.5")
+        .replace("claude-haiku-4-5", "claude-haiku-4.5")
+        .replace("claude-sonnet-4", "claude-sonnet-4")
+        .replace(/gemini-3\.1-pro(?!-)/g, "gemini-3.1-pro-preview")
+        .replace(/gemini-3-flash(?!-)/g, "gemini-3-flash-preview")
     }
-  }
-
-  return providers[0] || preferredProviderID || "opencode"
-})
-const transformModelForProviderMock = mock((provider: string, model: string) => {
-  if (provider === "github-copilot") {
+    if (provider === "google") {
+      return model
+        .replace(/gemini-3\.1-pro(?!-)/g, "gemini-3.1-pro-preview")
+        .replace(/gemini-3-flash(?!-)/g, "gemini-3-flash-preview")
+    }
     return model
-      .replace("claude-opus-4-7", "claude-opus-4.7")
-      .replace("claude-sonnet-4-6", "claude-sonnet-4.6")
-      .replace("claude-sonnet-4-5", "claude-sonnet-4.5")
-      .replace("claude-haiku-4-5", "claude-haiku-4.5")
-      .replace("claude-sonnet-4", "claude-sonnet-4")
-      .replace(/gemini-3\.1-pro(?!-)/g, "gemini-3.1-pro-preview")
-      .replace(/gemini-3-flash(?!-)/g, "gemini-3-flash-preview")
-  }
-  if (provider === "google") {
-    return model
-      .replace(/gemini-3\.1-pro(?!-)/g, "gemini-3.1-pro-preview")
-      .replace(/gemini-3-flash(?!-)/g, "gemini-3-flash-preview")
-  }
-  return model
-})
+  },
+)
 
 afterAll(() => {
   mock.restore()
@@ -89,7 +105,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -128,13 +147,22 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
     const sessionID = "ses_model_fallback_main"
 
     expect(
-      setPendingModelFallback(modelFallback, sessionID, "Sisyphus - Ultraworker", "anthropic", "claude-opus-4-7-thinking"),
+      setPendingModelFallback(
+        modelFallback,
+        sessionID,
+        "Sisyphus - Ultraworker",
+        "anthropic",
+        "claude-opus-4-7-thinking",
+      ),
     ).toBe(true)
 
     const firstOutput = {
@@ -156,7 +184,13 @@ describe("model fallback hook", () => {
 
     //#when - second error re-arms fallback and should advance to next entry
     expect(
-      setPendingModelFallback(modelFallback, sessionID, "Sisyphus - Ultraworker", "anthropic", "claude-opus-4-7"),
+      setPendingModelFallback(
+        modelFallback,
+        sessionID,
+        "Sisyphus - Ultraworker",
+        "anthropic",
+        "claude-opus-4-7",
+      ),
     ).toBe(true)
 
     const secondOutput = {
@@ -210,7 +244,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -255,7 +292,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -303,7 +343,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -369,7 +412,10 @@ describe("model fallback hook", () => {
     }) as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -391,7 +437,10 @@ describe("model fallback hook", () => {
     }
 
     //#when
-    await hook["chat.message"]?.({ sessionID: "ses_model_fallback_toast" }, output)
+    await hook["chat.message"]?.(
+      { sessionID: "ses_model_fallback_toast" },
+      output,
+    )
 
     //#then
     expect(toastCalls.length).toBe(1)
@@ -406,7 +455,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 
@@ -451,7 +503,10 @@ describe("model fallback hook", () => {
     const hook = modelFallback as unknown as {
       "chat.message"?: (
         input: { sessionID: string },
-        output: { message: Record<string, unknown>; parts: Array<{ type: string; text?: string }> },
+        output: {
+          message: Record<string, unknown>
+          parts: Array<{ type: string; text?: string }>
+        },
       ) => Promise<void>
     }
 

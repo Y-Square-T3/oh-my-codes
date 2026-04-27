@@ -29,7 +29,10 @@ export function isSystemDirective(text: string): boolean {
   if (trimmed.startsWith(SYSTEM_DIRECTIVE_PREFIX)) {
     return true
   }
-  const withoutLeadingKeyword = trimmed.replace(SYSTEM_DIRECTIVE_LEADING_KEYWORD_PATTERN, "")
+  const withoutLeadingKeyword = trimmed.replace(
+    SYSTEM_DIRECTIVE_LEADING_KEYWORD_PATTERN,
+    "",
+  )
   return withoutLeadingKeyword.startsWith(SYSTEM_DIRECTIVE_PREFIX)
 }
 
@@ -50,7 +53,9 @@ export function hasSystemReminder(text: string): boolean {
  * @returns text with system-reminder content removed
  */
 export function removeSystemReminders(text: string): string {
-  return text.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/gi, "").trim()
+  return text
+    .replace(/<system-reminder>[\s\S]*?<\/system-reminder>/gi, "")
+    .trim()
 }
 
 export const SystemDirectiveTypes = {
@@ -64,4 +69,5 @@ export const SystemDirectiveTypes = {
   PROMETHEUS_READ_ONLY: "PROMETHEUS READ-ONLY",
 } as const
 
-export type SystemDirectiveType = (typeof SystemDirectiveTypes)[keyof typeof SystemDirectiveTypes]
+export type SystemDirectiveType =
+  (typeof SystemDirectiveTypes)[keyof typeof SystemDirectiveTypes]

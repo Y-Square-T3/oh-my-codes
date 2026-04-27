@@ -38,11 +38,13 @@ Skill body.
     //#when
     const { discoverGlobalAgentsSkills } = await import("./loader")
     const skills = await discoverGlobalAgentsSkills()
-    const skill = skills.find(s => s.name === "agent-global-skill")
+    const skill = skills.find((s) => s.name === "agent-global-skill")
 
     //#then
     expect(skill).toBeDefined()
     expect(skill?.scope).toBe("user")
-    expect(skill?.definition.description).toContain("A skill from global .agents/skills directory")
+    expect(skill?.definition.description).toContain(
+      "A skill from global .agents/skills directory",
+    )
   })
 })

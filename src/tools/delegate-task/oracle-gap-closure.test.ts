@@ -1,12 +1,22 @@
 declare const require: NodeJS.Require
 
-const { describe, test, expect, beforeEach, afterEach, spyOn, mock } = require("bun:test")
+const {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  spyOn,
+  mock,
+} = require("bun:test")
 
 import type { DelegateTaskArgs, ToolContextWithMetadata } from "./types"
 import type { ParentContext } from "./executor-types"
 import * as executor from "./executor"
 
-const runtimeRequire = require as NodeJS.Require & { cache?: Record<string, unknown> }
+const runtimeRequire = require as NodeJS.Require & {
+  cache?: Record<string, unknown>
+}
 const MODEL = { providerID: "openai", modelID: "gpt-5.4" }
 
 function clearRequireCache(modulePath: string): void {
@@ -19,7 +29,10 @@ function clearRequireCache(modulePath: string): void {
 function makeMockCtx(): ToolContextWithMetadata & {
   captured: Array<{ title?: string; metadata?: Record<string, unknown> }>
 } {
-  const captured: Array<{ title?: string; metadata?: Record<string, unknown> }> = []
+  const captured: Array<{
+    title?: string
+    metadata?: Record<string, unknown>
+  }> = []
 
   return {
     sessionID: "ses_parent",
@@ -65,20 +78,35 @@ describe("delegate-task Oracle gap closure", () => {
     }
 
     //#when
-    await executeSyncContinuation(args, ctx, {
-      client: {
-        session: {
-          messages: async () => ({ data: [{ info: { agent: "explore", model: MODEL, variant: "max" } }] }),
-          promptAsync: async () => ({}),
+    await executeSyncContinuation(
+      args,
+      ctx,
+      {
+        client: {
+          session: {
+            messages: async () => ({
+              data: [
+                { info: { agent: "explore", model: MODEL, variant: "max" } },
+              ],
+            }),
+            promptAsync: async () => ({}),
+          },
         },
       },
-    }, parentContext, {
-      pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
-    })
+      parentContext,
+      {
+        pollSyncSession: async () => null,
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
+      },
+    )
 
     //#then
-    const published = ctx.captured.find((item) => item.metadata?.sessionId === "ses_cont_variant")
+    const published = ctx.captured.find(
+      (item) => item.metadata?.sessionId === "ses_cont_variant",
+    )
     expect(published?.metadata?.model).toEqual({ ...MODEL, variant: "max" })
   })
 
@@ -95,17 +123,28 @@ describe("delegate-task Oracle gap closure", () => {
     }
 
     //#when
-    const result = await executeSyncContinuation(args, makeMockCtx(), {
-      client: {
-        session: {
-          messages: async () => ({ data: [{ info: { agent: "explore", model: MODEL } }] }),
-          promptAsync: async () => ({}),
+    const result = await executeSyncContinuation(
+      args,
+      makeMockCtx(),
+      {
+        client: {
+          session: {
+            messages: async () => ({
+              data: [{ info: { agent: "explore", model: MODEL } }],
+            }),
+            promptAsync: async () => ({}),
+          },
         },
       },
-    }, parentContext, {
-      pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
-    })
+      parentContext,
+      {
+        pollSyncSession: async () => null,
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
+      },
+    )
 
     //#then
     expect(result).toContain("<task_metadata>")
@@ -114,7 +153,9 @@ describe("delegate-task Oracle gap closure", () => {
 
   test("#given background continuation task category #when result returns task metadata block #then block includes category", async () => {
     //#given
-    const { executeBackgroundContinuation } = require("./background-continuation")
+    const {
+      executeBackgroundContinuation,
+    } = require("./background-continuation")
     const args: DelegateTaskArgs = {
       description: "continue",
       prompt: "keep going",
@@ -124,19 +165,24 @@ describe("delegate-task Oracle gap closure", () => {
     }
 
     //#when
-    const result = await executeBackgroundContinuation(args, makeMockCtx(), {
-      manager: {
-        resume: async () => ({
-          id: "bg_category",
-          description: "existing",
-          agent: "explore",
-          status: "running",
-          sessionID: "ses_bg_category",
-          category: "deep",
-          model: MODEL,
-        }),
+    const result = await executeBackgroundContinuation(
+      args,
+      makeMockCtx(),
+      {
+        manager: {
+          resume: async () => ({
+            id: "bg_category",
+            description: "existing",
+            agent: "explore",
+            status: "running",
+            sessionID: "ses_bg_category",
+            category: "deep",
+            model: MODEL,
+          }),
+        },
       },
-    }, parentContext)
+      parentContext,
+    )
 
     //#then
     expect(result).toContain("<task_metadata>")
@@ -145,7 +191,9 @@ describe("delegate-task Oracle gap closure", () => {
 
   test("#given background continuation description changed #when metadata publishes #then title uses args description", async () => {
     //#given
-    const { executeBackgroundContinuation } = require("./background-continuation")
+    const {
+      executeBackgroundContinuation,
+    } = require("./background-continuation")
     const ctx = makeMockCtx()
     const args: DelegateTaskArgs = {
       description: "new desc",
@@ -156,21 +204,28 @@ describe("delegate-task Oracle gap closure", () => {
     }
 
     //#when
-    await executeBackgroundContinuation(args, ctx, {
-      manager: {
-        resume: async () => ({
-          id: "bg_title",
-          description: "old desc",
-          agent: "explore",
-          status: "running",
-          sessionID: "ses_bg_title",
-          model: MODEL,
-        }),
+    await executeBackgroundContinuation(
+      args,
+      ctx,
+      {
+        manager: {
+          resume: async () => ({
+            id: "bg_title",
+            description: "old desc",
+            agent: "explore",
+            status: "running",
+            sessionID: "ses_bg_title",
+            model: MODEL,
+          }),
+        },
       },
-    }, parentContext)
+      parentContext,
+    )
 
     //#then
-    const published = ctx.captured.find((item) => item.metadata?.sessionId === "ses_bg_title")
+    const published = ctx.captured.find(
+      (item) => item.metadata?.sessionId === "ses_bg_title",
+    )
     expect(published?.title).toBe("Continue: new desc")
   })
 
@@ -180,26 +235,38 @@ describe("delegate-task Oracle gap closure", () => {
     const { executeSyncContinuation } = require("./sync-continuation")
 
     //#when
-    await executeSyncContinuation({
-      description: "continue",
-      prompt: "keep going",
-      load_skills: ["playwright"],
-      run_in_background: false,
-      task_id: "ses_sync_skills",
-    }, makeMockCtx(), {
-      client: {
-        session: {
-          messages: async () => ({ data: [{ info: { agent: "explore", model: MODEL } }] }),
-          promptAsync: async (input: { body?: { system?: string } }) => {
-            promptCalls.push(input)
-            return {}
+    await executeSyncContinuation(
+      {
+        description: "continue",
+        prompt: "keep going",
+        load_skills: ["playwright"],
+        run_in_background: false,
+        task_id: "ses_sync_skills",
+      },
+      makeMockCtx(),
+      {
+        client: {
+          session: {
+            messages: async () => ({
+              data: [{ info: { agent: "explore", model: MODEL } }],
+            }),
+            promptAsync: async (input: { body?: { system?: string } }) => {
+              promptCalls.push(input)
+              return {}
+            },
           },
         },
       },
-    }, parentContext, {
-      pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
-    }, "skill instructions")
+      parentContext,
+      {
+        pollSyncSession: async () => null,
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
+      },
+      "skill instructions",
+    )
 
     //#then
     expect(promptCalls[0]?.body?.system).toBe("skill instructions")
@@ -208,7 +275,11 @@ describe("delegate-task Oracle gap closure", () => {
   test("#given background continuation loads skills through tool entry #when task resumes #then skill content is threaded into resumed prompt", async () => {
     //#given
     const resumeCalls: Array<{ prompt?: string }> = []
-    spyOn(executor, "resolveSkillContent").mockResolvedValue({ content: "skill instructions", contents: undefined, error: null })
+    spyOn(executor, "resolveSkillContent").mockResolvedValue({
+      content: "skill instructions",
+      contents: undefined,
+      error: null,
+    })
     spyOn(executor, "resolveParentContext").mockResolvedValue(parentContext)
     const { createDelegateTask } = require("./tools")
     const delegateTask = createDelegateTask({
@@ -230,13 +301,16 @@ describe("delegate-task Oracle gap closure", () => {
     })
 
     //#when
-    await delegateTask.execute({
-      description: "continue",
-      prompt: "keep going",
-      load_skills: ["playwright"],
-      run_in_background: true,
-      task_id: "ses_bg_skills",
-    }, makeMockCtx())
+    await delegateTask.execute(
+      {
+        description: "continue",
+        prompt: "keep going",
+        load_skills: ["playwright"],
+        run_in_background: true,
+        task_id: "ses_bg_skills",
+      },
+      makeMockCtx(),
+    )
 
     //#then
     expect(resumeCalls[0]?.prompt).toContain("skill instructions")

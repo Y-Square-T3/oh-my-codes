@@ -56,7 +56,7 @@ export async function resolveFileReferencesInText(
   text: string,
   cwd: string = process.cwd(),
   depth: number = 0,
-  maxDepth: number = 3
+  maxDepth: number = 3,
 ): Promise<string> {
   if (depth >= maxDepth) {
     return text
@@ -73,11 +73,14 @@ export async function resolveFileReferencesInText(
     const resolvedPath = resolveFilePath(match.filePath, cwd)
 
     if (!isWithinProject(resolvedPath, cwd)) {
-      log("[file-reference-resolver] Rejected file reference outside project root", {
-        filePath: match.filePath,
-        resolvedPath,
-        projectRoot: cwd,
-      })
+      log(
+        "[file-reference-resolver] Rejected file reference outside project root",
+        {
+          filePath: match.filePath,
+          resolvedPath,
+          projectRoot: cwd,
+        },
+      )
       replacements.set(match.fullMatch, `[path rejected: ${match.filePath}]`)
       continue
     }

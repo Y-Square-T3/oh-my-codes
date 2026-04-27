@@ -3,7 +3,10 @@ import * as fs from "node:fs"
 import * as path from "node:path"
 import * as os from "node:os"
 import { PACKAGE_NAME } from "../constants"
-import { updatePinnedVersion, revertPinnedVersion } from "./pinned-version-updater"
+import {
+  updatePinnedVersion,
+  revertPinnedVersion,
+} from "./pinned-version-updater"
 
 describe("pinned-version-updater", () => {
   let tmpDir: string
@@ -27,7 +30,11 @@ describe("pinned-version-updater", () => {
       fs.writeFileSync(configPath, config)
 
       //#when
-      const result = updatePinnedVersion(configPath, `${PACKAGE_NAME}@3.1.8`, "3.4.0")
+      const result = updatePinnedVersion(
+        configPath,
+        `${PACKAGE_NAME}@3.1.8`,
+        "3.4.0",
+      )
 
       //#then
       expect(result).toBe(true)
@@ -44,7 +51,11 @@ describe("pinned-version-updater", () => {
       fs.writeFileSync(configPath, config)
 
       //#when
-      const result = updatePinnedVersion(configPath, `${PACKAGE_NAME}@3.1.8`, "3.4.0")
+      const result = updatePinnedVersion(
+        configPath,
+        `${PACKAGE_NAME}@3.1.8`,
+        "3.4.0",
+      )
 
       //#then
       expect(result).toBe(false)
@@ -56,7 +67,11 @@ describe("pinned-version-updater", () => {
       fs.writeFileSync(configPath, config)
 
       //#when
-      const result = updatePinnedVersion(configPath, `${PACKAGE_NAME}@3.1.8`, "3.4.0")
+      const result = updatePinnedVersion(
+        configPath,
+        `${PACKAGE_NAME}@3.1.8`,
+        "3.4.0",
+      )
 
       //#then
       expect(result).toBe(false)
@@ -72,7 +87,11 @@ describe("pinned-version-updater", () => {
       fs.writeFileSync(configPath, config)
 
       //#when
-      const result = revertPinnedVersion(configPath, "3.4.0", `${PACKAGE_NAME}@3.1.8`)
+      const result = revertPinnedVersion(
+        configPath,
+        "3.4.0",
+        `${PACKAGE_NAME}@3.1.8`,
+      )
 
       //#then
       expect(result).toBe(true)
@@ -106,7 +125,11 @@ describe("pinned-version-updater", () => {
       fs.writeFileSync(configPath, config)
 
       //#when
-      const result = revertPinnedVersion(configPath, "3.4.0", `${PACKAGE_NAME}@3.1.8`)
+      const result = revertPinnedVersion(
+        configPath,
+        "3.4.0",
+        `${PACKAGE_NAME}@3.1.8`,
+      )
 
       //#then
       expect(result).toBe(false)

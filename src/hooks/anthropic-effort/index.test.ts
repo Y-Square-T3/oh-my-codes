@@ -9,7 +9,12 @@ import { createAnthropicEffortHook } from "./index"
 interface ChatParamsInput {
   sessionID: string
   agent: { name?: string }
-  model: { providerID: string; modelID: string; id?: string; api?: { npm?: string } }
+  model: {
+    providerID: string
+    modelID: string
+    id?: string
+    api?: { npm?: string }
+  }
   provider: { id: string }
   message: { variant?: string }
 }
@@ -135,7 +140,9 @@ describe("createAnthropicEffortHook", () => {
     it("should clamp effort to high for non-opus claude model with variant max", async () => {
       //#given claude-sonnet-4-6 (not opus) with variant max
       const hook = createAnthropicEffortHook()
-      const { input, output } = createMockParams({ modelID: "claude-sonnet-4-6" })
+      const { input, output } = createMockParams({
+        modelID: "claude-sonnet-4-6",
+      })
 
       await hook["chat.params"](input, output)
 
@@ -146,7 +153,10 @@ describe("createAnthropicEffortHook", () => {
 
     it("does nothing for non-claude providers/models", async () => {
       const hook = createAnthropicEffortHook()
-      const { input, output } = createMockParams({ providerID: "openai", modelID: "gpt-5.4" })
+      const { input, output } = createMockParams({
+        providerID: "openai",
+        modelID: "gpt-5.4",
+      })
 
       await hook["chat.params"](input, output)
 
@@ -213,7 +223,9 @@ describe("createAnthropicEffortHook", () => {
   describe("existing options", () => {
     it("does not overwrite existing effort", async () => {
       const hook = createAnthropicEffortHook()
-      const { input, output } = createMockParams({ existingOptions: { effort: "high" } })
+      const { input, output } = createMockParams({
+        existingOptions: { effort: "high" },
+      })
 
       await hook["chat.params"](input, output)
 
@@ -225,15 +237,24 @@ describe("createAnthropicEffortHook", () => {
     let tempDataDir: string
     const originalXdgDataHome = process.env.XDG_DATA_HOME
 
-    function writeAuthFile(providerEntries: Record<string, Record<string, unknown>>): void {
+    function writeAuthFile(
+      providerEntries: Record<string, Record<string, unknown>>,
+    ): void {
       const opencodeDir = path.join(tempDataDir, "opencode")
       mkdirSync(opencodeDir, { recursive: true })
-      writeFileSync(path.join(opencodeDir, "auth.json"), JSON.stringify(providerEntries), "utf-8")
+      writeFileSync(
+        path.join(opencodeDir, "auth.json"),
+        JSON.stringify(providerEntries),
+        "utf-8",
+      )
       _resetProviderAuthCacheForTesting()
     }
 
     beforeAll(() => {
-      tempDataDir = path.join(tmpdir(), `anthropic-effort-oauth-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+      tempDataDir = path.join(
+        tmpdir(),
+        `anthropic-effort-oauth-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      )
       mkdirSync(tempDataDir, { recursive: true })
       process.env.XDG_DATA_HOME = tempDataDir
     })
@@ -296,9 +317,15 @@ describe("createAnthropicEffortHook", () => {
 
     it("does not clamp when OAuth belongs to a different provider", async () => {
       // given OAuth entries for unrelated providers only
-      writeAuthFile({ "github-copilot": { type: "oauth" }, opencode: { type: "api", key: "sk-x" } })
+      writeAuthFile({
+        "github-copilot": { type: "oauth" },
+        opencode: { type: "api", key: "sk-x" },
+      })
       const hook = createAnthropicEffortHook()
-      const { input, output } = createMockParams({ modelID: "claude-opus-4-7", providerID: "anthropic" })
+      const { input, output } = createMockParams({
+        modelID: "claude-opus-4-7",
+        providerID: "anthropic",
+      })
 
       // when chat.params fires for the anthropic provider
       await hook["chat.params"](input, output)

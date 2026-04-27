@@ -14,13 +14,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }
 
-function getNestedRecord(record: Record<string, unknown>, key: string): Record<string, unknown> | undefined {
+function getNestedRecord(
+  record: Record<string, unknown>,
+  key: string,
+): Record<string, unknown> | undefined {
   const value = record[key]
   return isRecord(value) ? value : undefined
 }
 
 async function loadSeparateHostZodModule(): Promise<typeof import("zod")> {
-  const pluginPackageDirectory = dirname(Bun.resolveSync("@opencode-ai/plugin/package.json", import.meta.dir))
+  const pluginPackageDirectory = dirname(
+    Bun.resolveSync("@opencode-ai/plugin/package.json", import.meta.dir),
+  )
   const sourceZodDirectory = join(pluginPackageDirectory, "node_modules", "zod")
   const tempDirectory = mkdtempSync(join(tmpdir(), "omo-host-zod-"))
   const copiedZodDirectory = join(tempDirectory, "zod")
@@ -35,7 +40,9 @@ function serializeWithHostZod(
   hostZod: typeof import("zod"),
   args: Record<string, object>,
 ): Record<string, unknown> {
-  return hostZod.z.toJSONSchema(Reflect.apply(hostZod.z.object, hostZod.z, [args]))
+  return hostZod.z.toJSONSchema(
+    Reflect.apply(hostZod.z.object, hostZod.z, [args]),
+  )
 }
 
 describe("normalizeToolArgSchemas", () => {
@@ -69,17 +76,29 @@ describe("normalizeToolArgSchemas", () => {
     // when
     const beforeSchema = serializeWithHostZod(hostZod, toolDefinition.args)
     const beforeProperties = getNestedRecord(beforeSchema, "properties")
-    const beforeFilters = beforeProperties ? getNestedRecord(beforeProperties, "filters") : undefined
-    const beforeFilterProperties = beforeFilters ? getNestedRecord(beforeFilters, "properties") : undefined
-    const beforeQuery = beforeFilterProperties ? getNestedRecord(beforeFilterProperties, "query") : undefined
+    const beforeFilters = beforeProperties
+      ? getNestedRecord(beforeProperties, "filters")
+      : undefined
+    const beforeFilterProperties = beforeFilters
+      ? getNestedRecord(beforeFilters, "properties")
+      : undefined
+    const beforeQuery = beforeFilterProperties
+      ? getNestedRecord(beforeFilterProperties, "query")
+      : undefined
 
     normalizeToolArgSchemas(toolDefinition)
 
     const afterSchema = serializeWithHostZod(hostZod, toolDefinition.args)
     const afterProperties = getNestedRecord(afterSchema, "properties")
-    const afterFilters = afterProperties ? getNestedRecord(afterProperties, "filters") : undefined
-    const afterFilterProperties = afterFilters ? getNestedRecord(afterFilters, "properties") : undefined
-    const afterQuery = afterFilterProperties ? getNestedRecord(afterFilterProperties, "query") : undefined
+    const afterFilters = afterProperties
+      ? getNestedRecord(afterProperties, "filters")
+      : undefined
+    const afterFilterProperties = afterFilters
+      ? getNestedRecord(afterFilters, "properties")
+      : undefined
+    const afterQuery = afterFilterProperties
+      ? getNestedRecord(afterFilterProperties, "query")
+      : undefined
 
     // then
     expect(beforeFilters?.description).toBeUndefined()

@@ -9,7 +9,10 @@ export interface LoginOptions {
 export type McpOAuthProviderLike = Pick<McpOAuthProvider, "login">
 
 export interface LoginDependencies {
-  createProvider: (options: Required<Pick<LoginOptions, "serverUrl">> & Omit<LoginOptions, "serverUrl">) => McpOAuthProviderLike
+  createProvider: (
+    options: Required<Pick<LoginOptions, "serverUrl">> &
+      Omit<LoginOptions, "serverUrl">,
+  ) => McpOAuthProviderLike
 }
 
 const defaultLoginDependencies: LoginDependencies = {
@@ -24,7 +27,9 @@ export async function login(
   try {
     const serverUrl = options.serverUrl
     if (!serverUrl) {
-      console.error(`Error: --server-url is required for server "${serverName}"`)
+      console.error(
+        `Error: --server-url is required for server "${serverName}"`,
+      )
       return 1
     }
 
@@ -46,7 +51,9 @@ export async function login(
     return 0
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`Error: Failed to authenticate with ${serverName}: ${message}`)
+    console.error(
+      `Error: Failed to authenticate with ${serverName}: ${message}`,
+    )
     return 1
   }
 }

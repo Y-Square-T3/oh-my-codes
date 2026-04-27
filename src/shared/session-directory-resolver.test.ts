@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test"
 
-import { isWindowsAppDataDirectory, resolveSessionDirectory } from "./session-directory-resolver"
+import {
+  isWindowsAppDataDirectory,
+  resolveSessionDirectory,
+} from "./session-directory-resolver"
 
 describe("session-directory-resolver", () => {
   describe("isWindowsAppDataDirectory", () => {
@@ -79,7 +82,9 @@ describe("session-directory-resolver", () => {
       const result = resolveSessionDirectory(options)
 
       //#then
-      expect(result).toBe("C:\\Users\\test\\AppData\\Local\\ai.opencode.desktop")
+      expect(result).toBe(
+        "C:\\Users\\test\\AppData\\Local\\ai.opencode.desktop",
+      )
     })
 
     test("keeps original directory outside Windows", () => {

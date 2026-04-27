@@ -1,14 +1,23 @@
 /// <reference types="bun-types" />
 
 import { afterEach, describe, expect, test } from "bun:test"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 import { migrateConfigFile } from "./config-migration"
 import { getSidecarPath } from "./migrations-sidecar"
 
 const createdDirectories: string[] = []
-const MIGRATION_KEY = "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-7"
+const MIGRATION_KEY =
+  "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-7"
 
 function createWorkdir(): string {
   const workdir = mkdtempSync(join(tmpdir(), "omo-config-migration-"))
@@ -45,17 +54,23 @@ describe("migrateConfigFile sidecar write ordering", () => {
     // then
     expect(needsWrite).toBe(true)
     expect(rawConfig._migrations).toBeUndefined()
-    expect((rawConfig.agents as Record<string, Record<string, unknown>>).prometheus.model).toBe(
-      "anthropic/claude-opus-4-7",
-    )
+    expect(
+      (rawConfig.agents as Record<string, Record<string, unknown>>).prometheus
+        .model,
+    ).toBe("anthropic/claude-opus-4-7")
 
-    const persistedConfig = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>
+    const persistedConfig = JSON.parse(
+      readFileSync(configPath, "utf-8"),
+    ) as Record<string, unknown>
     expect(persistedConfig._migrations).toBeUndefined()
-    expect((persistedConfig.agents as Record<string, Record<string, unknown>>).prometheus.model).toBe(
-      "anthropic/claude-opus-4-7",
-    )
+    expect(
+      (persistedConfig.agents as Record<string, Record<string, unknown>>)
+        .prometheus.model,
+    ).toBe("anthropic/claude-opus-4-7")
 
-    const sidecar = JSON.parse(readFileSync(getSidecarPath(configPath), "utf-8")) as {
+    const sidecar = JSON.parse(
+      readFileSync(getSidecarPath(configPath), "utf-8"),
+    ) as {
       appliedMigrations: string[]
     }
     expect(sidecar.appliedMigrations).toEqual([MIGRATION_KEY])
@@ -68,7 +83,10 @@ describe("migrateConfigFile sidecar write ordering", () => {
     const firstAttemptConfig = createLegacyConfig()
 
     // when
-    const firstAttemptNeedsWrite = migrateConfigFile(configPath, firstAttemptConfig)
+    const firstAttemptNeedsWrite = migrateConfigFile(
+      configPath,
+      firstAttemptConfig,
+    )
 
     // then
     expect(firstAttemptNeedsWrite).toBe(true)
@@ -77,7 +95,10 @@ describe("migrateConfigFile sidecar write ordering", () => {
 
     // given
     mkdirSync(join(workdir, "missing-parent"), { recursive: true })
-    writeFileSync(configPath, JSON.stringify(createLegacyConfig(), null, 2) + "\n")
+    writeFileSync(
+      configPath,
+      JSON.stringify(createLegacyConfig(), null, 2) + "\n",
+    )
     const retriedConfig = createLegacyConfig()
 
     // when
@@ -86,9 +107,10 @@ describe("migrateConfigFile sidecar write ordering", () => {
     // then
     expect(retriedNeedsWrite).toBe(true)
     expect(retriedConfig._migrations).toBeUndefined()
-    expect((retriedConfig.agents as Record<string, Record<string, unknown>>).prometheus.model).toBe(
-      "anthropic/claude-opus-4-7",
-    )
+    expect(
+      (retriedConfig.agents as Record<string, Record<string, unknown>>)
+        .prometheus.model,
+    ).toBe("anthropic/claude-opus-4-7")
     expect(existsSync(getSidecarPath(configPath))).toBe(true)
   })
 
@@ -107,15 +129,19 @@ describe("migrateConfigFile sidecar write ordering", () => {
     // then
     expect(needsWrite).toBe(true)
     expect(rawConfig._migrations).toEqual([MIGRATION_KEY])
-    expect((rawConfig.agents as Record<string, Record<string, unknown>>).prometheus.model).toBe(
-      "anthropic/claude-opus-4-7",
-    )
+    expect(
+      (rawConfig.agents as Record<string, Record<string, unknown>>).prometheus
+        .model,
+    ).toBe("anthropic/claude-opus-4-7")
 
-    const persistedConfig = JSON.parse(readFileSync(configPath, "utf-8")) as Record<string, unknown>
+    const persistedConfig = JSON.parse(
+      readFileSync(configPath, "utf-8"),
+    ) as Record<string, unknown>
     expect(persistedConfig._migrations).toEqual([MIGRATION_KEY])
-    expect((persistedConfig.agents as Record<string, Record<string, unknown>>).prometheus.model).toBe(
-      "anthropic/claude-opus-4-7",
-    )
+    expect(
+      (persistedConfig.agents as Record<string, Record<string, unknown>>)
+        .prometheus.model,
+    ).toBe("anthropic/claude-opus-4-7")
     expect(statSync(getSidecarPath(configPath)).isDirectory()).toBe(true)
   })
 })
@@ -159,7 +185,10 @@ describe("migrateConfigFile backup skipping", () => {
     writeFileSync(configPath, JSON.stringify(rawConfig, null, 2) + "\n")
 
     // when
-    const needsWrite = migrateConfigFile(configPath, rawConfig as Record<string, unknown>)
+    const needsWrite = migrateConfigFile(
+      configPath,
+      rawConfig as Record<string, unknown>,
+    )
 
     // then - backup should be created since content changed
     expect(needsWrite).toBe(true)

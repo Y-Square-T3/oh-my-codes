@@ -9,13 +9,18 @@ import type { OhMyCodesConfig } from "../config"
 import * as agentLoader from "../features/claude-code-agent-loader"
 import * as skillLoader from "../features/opencode-skill-loader"
 import type { LoadedSkill } from "../features/opencode-skill-loader"
-import { getAgentListDisplayName, getAgentRuntimeName } from "../shared/agent-display-names"
+import {
+  getAgentListDisplayName,
+  getAgentRuntimeName,
+} from "../shared/agent-display-names"
 import { applyAgentConfig } from "./agent-config-handler"
 import type { PluginComponents } from "./plugin-components-loader"
 
 const BUILTIN_SISYPHUS_DISPLAY_NAME = getAgentListDisplayName("sisyphus")
-const BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME = getAgentListDisplayName("sisyphus-junior")
-const BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME = getAgentListDisplayName("multimodal-looker")
+const BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME =
+  getAgentListDisplayName("sisyphus-junior")
+const BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME =
+  getAgentListDisplayName("multimodal-looker")
 
 function createPluginComponents(): PluginComponents {
   return {
@@ -99,7 +104,10 @@ describe("applyAgentConfig builtin override protection", () => {
   }
 
   beforeEach(() => {
-    createBuiltinAgentsSpy = spyOn(agents, "createBuiltinAgents").mockResolvedValue({
+    createBuiltinAgentsSpy = spyOn(
+      agents,
+      "createBuiltinAgents",
+    ).mockResolvedValue({
       sisyphus: builtinSisyphusConfig,
       oracle: builtinOracleConfig,
       "multimodal-looker": builtinMultimodalLookerConfig,
@@ -141,16 +149,23 @@ describe("applyAgentConfig builtin override protection", () => {
     ).mockResolvedValue([])
 
     loadUserAgentsSpy = spyOn(agentLoader, "loadUserAgents").mockReturnValue({})
-    loadProjectAgentsSpy = spyOn(agentLoader, "loadProjectAgents").mockReturnValue({})
-    loadAgentDefinitionsSpy = spyOn(agentLoader, "loadAgentDefinitions").mockReturnValue({})
+    loadProjectAgentsSpy = spyOn(
+      agentLoader,
+      "loadProjectAgents",
+    ).mockReturnValue({})
+    loadAgentDefinitionsSpy = spyOn(
+      agentLoader,
+      "loadAgentDefinitions",
+    ).mockReturnValue({})
     readOpencodeConfigAgentsSpy = spyOn(
       agentLoader,
       "readOpencodeConfigAgents",
     ).mockReturnValue({})
 
-    migrateAgentConfigSpy = spyOn(shared, "migrateAgentConfig").mockImplementation(
-      (config: Record<string, unknown>) => config,
-    )
+    migrateAgentConfigSpy = spyOn(
+      shared,
+      "migrateAgentConfig",
+    ).mockImplementation((config: Record<string, unknown>) => config)
     logSpy = spyOn(shared, "log").mockImplementation(() => {})
   })
 
@@ -289,7 +304,9 @@ describe("applyAgentConfig builtin override protection", () => {
         })
 
         // then
-        expect(result[BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME]).toEqual(builtinMultimodalLookerConfig)
+        expect(result[BUILTIN_MULTIMODAL_LOOKER_DISPLAY_NAME]).toEqual(
+          builtinMultimodalLookerConfig,
+        )
         expect(result.multimodal_looker).toBeUndefined()
       })
     })
@@ -314,7 +331,9 @@ describe("applyAgentConfig builtin override protection", () => {
         })
 
         // then
-        expect(result[BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME]).toEqual(sisyphusJuniorConfig)
+        expect(result[BUILTIN_SISYPHUS_JUNIOR_DISPLAY_NAME]).toEqual(
+          sisyphusJuniorConfig,
+        )
         expect(result.sisyphus_junior).toBeUndefined()
       })
     })
@@ -332,7 +351,11 @@ describe("applyAgentConfig builtin override protection", () => {
     })
 
     // then
-    expect(createSisyphusJuniorAgentSpy).toHaveBeenCalledWith(undefined, "openai/gpt-5.4", false)
+    expect(createSisyphusJuniorAgentSpy).toHaveBeenCalledWith(
+      undefined,
+      "openai/gpt-5.4",
+      false,
+    )
   })
 
   test("defaults mode to subagent for configAgent entries missing mode", async () => {
@@ -474,7 +497,9 @@ describe("applyAgentConfig builtin override protection", () => {
 
       // then
       expect(result["my-custom-agent"]).toBeDefined()
-      expect(result["my-custom-agent"]?.prompt).toBe("test custom agent from agent_definitions")
+      expect(result["my-custom-agent"]?.prompt).toBe(
+        "test custom agent from agent_definitions",
+      )
     })
 
     test("opencode.json agents appear in output", async () => {
@@ -498,7 +523,9 @@ describe("applyAgentConfig builtin override protection", () => {
 
       // then
       expect(result["opencode-agent"]).toBeDefined()
-      expect(result["opencode-agent"]?.prompt).toBe("test opencode config agent")
+      expect(result["opencode-agent"]?.prompt).toBe(
+        "test opencode config agent",
+      )
       expect(result["opencode-agent"]?.description).toBe("(opencode-config) OC")
     })
 

@@ -3,7 +3,10 @@ import { log } from "../../shared"
 type ProcessCleanupSignal = NodeJS.Signals | "beforeExit" | "exit"
 type ProcessCleanupErrorEvent = "uncaughtException" | "unhandledRejection"
 
-function scheduleForcedExit(cleanupResult: void | Promise<void>, exitCode: number): void {
+function scheduleForcedExit(
+  cleanupResult: void | Promise<void>,
+  exitCode: number,
+): void {
   process.exitCode = exitCode
   const exitTimeout = setTimeout(() => process.exit(), 6000)
   void Promise.resolve(cleanupResult).finally(() => {
@@ -14,7 +17,7 @@ function scheduleForcedExit(cleanupResult: void | Promise<void>, exitCode: numbe
 function registerProcessSignal(
   signal: ProcessCleanupSignal,
   handler: () => void | Promise<void>,
-  exitAfter: boolean
+  exitAfter: boolean,
 ): () => void {
   const listener = () => {
     const cleanupResult = handler()
@@ -28,7 +31,7 @@ function registerProcessSignal(
 
 function registerErrorEvent(
   signal: ProcessCleanupErrorEvent,
-  handler: (error: unknown) => void | Promise<void>
+  handler: (error: unknown) => void | Promise<void>,
 ): (error: unknown) => void {
   const listener = (error: unknown) => {
     log(`[background-agent] ${signal} received during shutdown cleanup:`, error)
@@ -45,7 +48,10 @@ interface CleanupTarget {
 const cleanupManagers = new Set<CleanupTarget>()
 let cleanupRegistered = false
 const cleanupSignalHandlers = new Map<ProcessCleanupSignal, () => void>()
-const cleanupErrorHandlers = new Map<ProcessCleanupErrorEvent, (error: unknown) => void>()
+const cleanupErrorHandlers = new Map<
+  ProcessCleanupErrorEvent,
+  (error: unknown) => void
+>()
 
 export function registerManagerForCleanup(manager: CleanupTarget): void {
   cleanupManagers.add(manager)
@@ -62,8 +68,11 @@ export function registerManagerForCleanup(manager: CleanupTarget): void {
       try {
         promises.push(
           Promise.resolve(m.shutdown()).catch((error) => {
-            log("[background-agent] Error during async shutdown cleanup:", error)
-          })
+            log(
+              "[background-agent] Error during async shutdown cleanup:",
+              error,
+            )
+          }),
         )
       } catch (error) {
         log("[background-agent] Error during shutdown cleanup:", error)
@@ -77,7 +86,10 @@ export function registerManagerForCleanup(manager: CleanupTarget): void {
     return cleanupPromise
   }
 
-  const registerSignal = (signal: ProcessCleanupSignal, exitAfter: boolean): void => {
+  const registerSignal = (
+    signal: ProcessCleanupSignal,
+    exitAfter: boolean,
+  ): void => {
     const listener = registerProcessSignal(signal, cleanupAll, exitAfter)
     cleanupSignalHandlers.set(signal, listener)
   }
@@ -89,8 +101,14 @@ export function registerManagerForCleanup(manager: CleanupTarget): void {
   }
   registerSignal("beforeExit", false)
   registerSignal("exit", false)
-  cleanupErrorHandlers.set("uncaughtException", registerErrorEvent("uncaughtException", cleanupAll))
-  cleanupErrorHandlers.set("unhandledRejection", registerErrorEvent("unhandledRejection", cleanupAll))
+  cleanupErrorHandlers.set(
+    "uncaughtException",
+    registerErrorEvent("uncaughtException", cleanupAll),
+  )
+  cleanupErrorHandlers.set(
+    "unhandledRejection",
+    registerErrorEvent("unhandledRejection", cleanupAll),
+  )
 }
 
 export function unregisterManagerForCleanup(manager: CleanupTarget): void {

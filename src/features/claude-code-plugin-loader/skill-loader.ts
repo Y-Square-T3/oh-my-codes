@@ -38,7 +38,10 @@ export function loadPluginSkillsAsCommands(
         const originalDescription = data.description || ""
         const formattedDescription = `(plugin: ${plugin.name} - Skill) ${originalDescription}`
 
-        const resolvedBody = resolveSkillPathReferences(body.trim(), resolvedPath)
+        const resolvedBody = resolveSkillPathReferences(
+          body.trim(),
+          resolvedPath,
+        )
         const wrappedTemplate = `<skill-instruction>\nBase directory for this skill: ${resolvedPath}/\nFile references (@path) in this skill are relative to this directory.\n\n${resolvedBody}\n</skill-instruction>\n\n<user-request>\n$ARGUMENTS\n</user-request>`
 
         const definition = {

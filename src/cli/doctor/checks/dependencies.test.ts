@@ -12,7 +12,9 @@ describe("dependencies check", () => {
       expect(info.name).toBe("AST-Grep CLI")
       expect(info.required).toBe(false)
       expect(typeof info.installed).toBe("boolean")
-      expect(typeof info.version === "string" || info.version === null).toBe(true)
+      expect(typeof info.version === "string" || info.version === null).toBe(
+        true,
+      )
       expect(typeof info.path === "string" || info.path === null).toBe(true)
     })
   })
@@ -45,7 +47,7 @@ describe("dependencies check", () => {
     it("returns installed=true when cached binary exists", async () => {
       //#given cached binary exists
       const mockCachedPath = "/mock/path/to/comment-checker"
-      
+
       mock.module("../../../hooks/comment-checker/downloader", () => ({
         getCachedBinaryPath: () => mockCachedPath,
         getCacheDir: () => "/mock/cache/dir",

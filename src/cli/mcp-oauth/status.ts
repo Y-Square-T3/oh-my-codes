@@ -1,4 +1,7 @@
-import { listAllTokens, listTokensByHost } from "../../features/mcp-oauth/storage"
+import {
+  listAllTokens,
+  listTokensByHost,
+} from "../../features/mcp-oauth/storage"
 
 export async function status(serverName: string | undefined): Promise<number> {
   try {
@@ -22,7 +25,9 @@ export async function status(serverName: string | undefined): Promise<number> {
           const now = Date.now() / 1000
           const isExpired = token.expiresAt < now
           const tokenStatus = isExpired ? "EXPIRED" : "VALID"
-          console.log(`    Expiry: ${expiryDate.toISOString()} (${tokenStatus})`)
+          console.log(
+            `    Expiry: ${expiryDate.toISOString()} (${tokenStatus})`,
+          )
         }
       }
       return 0

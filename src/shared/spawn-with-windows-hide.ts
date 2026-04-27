@@ -18,7 +18,9 @@ export interface SpawnedProcess {
   kill(signal?: NodeJS.Signals): void
 }
 
-function toReadableStream(stream: NodeJS.ReadableStream | null): ReadableStream<Uint8Array> | undefined {
+function toReadableStream(
+  stream: NodeJS.ReadableStream | null,
+): ReadableStream<Uint8Array> | undefined {
   if (!stream) {
     return undefined
   }
@@ -66,7 +68,10 @@ function wrapNodeProcess(proc: ChildProcess): SpawnedProcess {
   }
 }
 
-export function spawnWithWindowsHide(command: string[], options: SpawnOptions): SpawnedProcess {
+export function spawnWithWindowsHide(
+  command: string[],
+  options: SpawnOptions,
+): SpawnedProcess {
   if (process.platform !== "win32") {
     return bunSpawn(command, options)
   }
@@ -75,7 +80,11 @@ export function spawnWithWindowsHide(command: string[], options: SpawnOptions): 
   const proc = nodeSpawn(cmd, args, {
     cwd: options.cwd,
     env: options.env,
-    stdio: [options.stdin ?? "pipe", options.stdout ?? "pipe", options.stderr ?? "pipe"],
+    stdio: [
+      options.stdin ?? "pipe",
+      options.stdout ?? "pipe",
+      options.stderr ?? "pipe",
+    ],
     windowsHide: true,
     shell: true,
   })

@@ -11,6 +11,9 @@ export function getResourceIndicator(url: string): string {
   return normalized
 }
 
-export function addResourceToParams(params: URLSearchParams, resource: string): void {
+export function addResourceToParams(
+  params: URLSearchParams,
+  resource: string,
+): void {
   params.set("resource", resource)
 }

@@ -26,7 +26,10 @@ describe("resolveModelPipeline", () => {
       : false
 
     // then
-    expect(result).toEqual({ model: "openai/gpt-5.3-codex", provenance: "override" })
+    expect(result).toEqual({
+      model: "openai/gpt-5.3-codex",
+      provenance: "override",
+    })
     expect(hasExplicitUserConfigField).toBe(false)
   })
 })

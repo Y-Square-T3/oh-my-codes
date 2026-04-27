@@ -41,7 +41,13 @@ describe("createJsonErrorRecoveryHook", () => {
       metadata: {},
     })
 
-    const createUnknownOutput = (value: unknown): { title: string; output: unknown; metadata: Record<string, unknown> } => ({
+    const createUnknownOutput = (
+      value: unknown,
+    ): {
+      title: string
+      output: unknown
+      metadata: Record<string, unknown>
+    } => ({
       title: "Tool Error",
       output: value,
       metadata: {},
@@ -62,7 +68,9 @@ describe("createJsonErrorRecoveryHook", () => {
     it("appends reminder when output includes SyntaxError", async () => {
       // given
       const input = createInput()
-      const output = createOutput("SyntaxError: Unexpected token in JSON at position 10")
+      const output = createOutput(
+        "SyntaxError: Unexpected token in JSON at position 10",
+      )
 
       // when
       await hook["tool.execute.after"](input, output)
@@ -98,7 +106,9 @@ describe("createJsonErrorRecoveryHook", () => {
     it("does not append reminder for false positive non-JSON text", async () => {
       // given
       const input = createInput()
-      const output = createOutput("Template failed: expected '}' before newline")
+      const output = createOutput(
+        "Template failed: expected '}' before newline",
+      )
 
       // when
       await hook["tool.execute.after"](input, output)
@@ -110,25 +120,33 @@ describe("createJsonErrorRecoveryHook", () => {
     it("does not append reminder for excluded tools", async () => {
       // given
       const input = createInput("Read")
-      const output = createOutput("JSON parse error: unexpected end of JSON input")
+      const output = createOutput(
+        "JSON parse error: unexpected end of JSON input",
+      )
 
       // when
       await hook["tool.execute.after"](input, output)
 
       // then
-      expect(output.output).toBe("JSON parse error: unexpected end of JSON input")
+      expect(output.output).toBe(
+        "JSON parse error: unexpected end of JSON input",
+      )
     })
 
     it("does not append reminder when reminder already exists", async () => {
       // given
       const input = createInput()
-      const output = createOutput(`JSON parse error: invalid JSON\n${JSON_ERROR_REMINDER}`)
+      const output = createOutput(
+        `JSON parse error: invalid JSON\n${JSON_ERROR_REMINDER}`,
+      )
 
       // when
       await hook["tool.execute.after"](input, output)
 
       // then
-      const reminderCount = output.output.split("[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]").length - 1
+      const reminderCount =
+        output.output.split("[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]")
+          .length - 1
       expect(reminderCount).toBe(1)
     })
 
@@ -142,7 +160,9 @@ describe("createJsonErrorRecoveryHook", () => {
       await hook["tool.execute.after"](input, output)
 
       // then
-      const reminderCount = output.output.split("[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]").length - 1
+      const reminderCount =
+        output.output.split("[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]")
+          .length - 1
       expect(reminderCount).toBe(1)
     })
 
@@ -154,7 +174,10 @@ describe("createJsonErrorRecoveryHook", () => {
       // when
       for (const value of values) {
         const output = createUnknownOutput(value)
-        await hook["tool.execute.after"](input, output as ToolExecuteAfterOutput)
+        await hook["tool.execute.after"](
+          input,
+          output as ToolExecuteAfterOutput,
+        )
 
         // then
         expect(output.output).toBe(value)
@@ -168,7 +191,9 @@ describe("createJsonErrorRecoveryHook", () => {
       const output = "JSON parse error: unexpected end of JSON input"
 
       // when
-      const isMatched = JSON_ERROR_PATTERNS.some((pattern) => pattern.test(output))
+      const isMatched = JSON_ERROR_PATTERNS.some((pattern) =>
+        pattern.test(output),
+      )
 
       // then
       expect(isMatched).toBe(true)
@@ -178,15 +203,13 @@ describe("createJsonErrorRecoveryHook", () => {
   describe("JSON_ERROR_TOOL_EXCLUDE_LIST", () => {
     it("contains content-heavy tools that should be excluded", () => {
       // given
-      const expectedExcludedTools: Array<(typeof JSON_ERROR_TOOL_EXCLUDE_LIST)[number]> = [
-        "read",
-        "bash",
-        "webfetch",
-      ]
+      const expectedExcludedTools: Array<
+        (typeof JSON_ERROR_TOOL_EXCLUDE_LIST)[number]
+      > = ["read", "bash", "webfetch"]
 
       // when
       const allExpectedToolsIncluded = expectedExcludedTools.every((toolName) =>
-        JSON_ERROR_TOOL_EXCLUDE_LIST.includes(toolName)
+        JSON_ERROR_TOOL_EXCLUDE_LIST.includes(toolName),
       )
 
       // then

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test"
-import { decideSpawnActions, findSpawnTarget, type SessionMapping } from "./decision-engine"
+import {
+  decideSpawnActions,
+  findSpawnTarget,
+  type SessionMapping,
+} from "./decision-engine"
 import type { CapacityConfig, WindowState } from "./types"
 
 function createState(
@@ -106,7 +110,13 @@ describe("tmux layout-aware split behavior", () => {
       { sessionId: "old-ses", paneId: "%1", createdAt: new Date("2024-01-01") },
     ]
 
-    const decision = decideSpawnActions(state, "new-ses", "agent", config, mappings)
+    const decision = decideSpawnActions(
+      state,
+      "new-ses",
+      "agent",
+      config,
+      mappings,
+    )
 
     expect(decision.canSpawn).toBe(false)
     expect(decision.actions).toHaveLength(0)

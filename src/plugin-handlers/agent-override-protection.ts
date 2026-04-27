@@ -13,7 +13,9 @@ export function normalizeProtectedAgentName(agentName: string): string {
     .trim()
 }
 
-export function createProtectedAgentNameSet(agentNames: Iterable<string>): Set<string> {
+export function createProtectedAgentNameSet(
+  agentNames: Iterable<string>,
+): Set<string> {
   const protectedAgentNames = new Set<string>()
 
   for (const agentName of agentNames) {

@@ -14,12 +14,15 @@ export function spawnReplyListenerDaemon(
   daemonScript: string,
   startupToken: string,
 ): ReplyListenerSpawnProcess {
-  return spawn(["bun", "run", daemonScript, REPLY_LISTENER_DAEMON_IDENTITY_MARKER], {
-    detached: true,
-    stdio: ["ignore", "ignore", "ignore"],
-    cwd: process.cwd(),
-    env: createReplyListenerDaemonEnv({
-      [REPLY_LISTENER_STARTUP_TOKEN_ENV]: startupToken,
-    }),
-  })
+  return spawn(
+    ["bun", "run", daemonScript, REPLY_LISTENER_DAEMON_IDENTITY_MARKER],
+    {
+      detached: true,
+      stdio: ["ignore", "ignore", "ignore"],
+      cwd: process.cwd(),
+      env: createReplyListenerDaemonEnv({
+        [REPLY_LISTENER_STARTUP_TOKEN_ENV]: startupToken,
+      }),
+    },
+  )
 }

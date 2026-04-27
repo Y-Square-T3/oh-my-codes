@@ -37,7 +37,8 @@ describe("createAnthropicContextWindowLimitRecoveryHook regressions", () => {
 
   test("clears older pending compaction timer before scheduling replacement for same session", async () => {
     //#given
-    const { restore, getClearTimeoutCalls, getScheduledTimeouts } = setupDelayedTimeoutMocks()
+    const { restore, getClearTimeoutCalls, getScheduledTimeouts } =
+      setupDelayedTimeoutMocks()
     const hook = createRecoveryHook()
 
     try {
@@ -45,14 +46,20 @@ describe("createAnthropicContextWindowLimitRecoveryHook regressions", () => {
       await hook.event({
         event: {
           type: "session.error",
-          properties: { sessionID: "session-retry-timer", error: "prompt is too long" },
+          properties: {
+            sessionID: "session-retry-timer",
+            error: "prompt is too long",
+          },
         },
       })
 
       await hook.event({
         event: {
           type: "session.error",
-          properties: { sessionID: "session-retry-timer", error: "prompt is too long again" },
+          properties: {
+            sessionID: "session-retry-timer",
+            error: "prompt is too long again",
+          },
         },
       })
 
@@ -151,7 +158,8 @@ describe("createAnthropicContextWindowLimitRecoveryHook regressions", () => {
         },
       })
 
-      const [firstScheduledTimeout, secondScheduledTimeout] = getScheduledTimeouts()
+      const [firstScheduledTimeout, secondScheduledTimeout] =
+        getScheduledTimeouts()
       if (
         firstScheduledTimeout === undefined ||
         secondScheduledTimeout === undefined ||
@@ -166,12 +174,24 @@ describe("createAnthropicContextWindowLimitRecoveryHook regressions", () => {
         secondScheduledTimeout,
         retryTimerHandle,
       ])
-      expect(capturedAutoCompactState?.pendingCompact.has(sessionID)).toBe(false)
-      expect(capturedAutoCompactState?.errorDataBySession.has(sessionID)).toBe(false)
-      expect(capturedAutoCompactState?.retryStateBySession.has(sessionID)).toBe(false)
-      expect(capturedAutoCompactState?.retryTimerBySession.has(sessionID)).toBe(false)
-      expect(capturedAutoCompactState?.truncateStateBySession.has(sessionID)).toBe(false)
-      expect(capturedAutoCompactState?.emptyContentAttemptBySession.has(sessionID)).toBe(false)
+      expect(capturedAutoCompactState?.pendingCompact.has(sessionID)).toBe(
+        false,
+      )
+      expect(capturedAutoCompactState?.errorDataBySession.has(sessionID)).toBe(
+        false,
+      )
+      expect(capturedAutoCompactState?.retryStateBySession.has(sessionID)).toBe(
+        false,
+      )
+      expect(capturedAutoCompactState?.retryTimerBySession.has(sessionID)).toBe(
+        false,
+      )
+      expect(
+        capturedAutoCompactState?.truncateStateBySession.has(sessionID),
+      ).toBe(false)
+      expect(
+        capturedAutoCompactState?.emptyContentAttemptBySession.has(sessionID),
+      ).toBe(false)
     } finally {
       restore()
     }

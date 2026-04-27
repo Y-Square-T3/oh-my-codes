@@ -1,11 +1,23 @@
 import type { Hooks, PluginInput } from "@opencode-ai/plugin"
 
 import { existsSync, realpathSync } from "fs"
-import { basename, dirname, isAbsolute, join, normalize, relative, resolve } from "path"
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  normalize,
+  relative,
+  resolve,
+} from "path"
 
 import { log } from "../../shared"
 import { handleWriteExistingFileGuardToolExecuteBefore } from "./tool-execute-before-handler"
-import { evictLeastRecentlyUsedSession, touchSession, trimSessionReadSet } from "./session-read-permissions"
+import {
+  evictLeastRecentlyUsedSession,
+  touchSession,
+  trimSessionReadSet,
+} from "./session-read-permissions"
 
 export type GuardArgs = {
   filePath?: string
@@ -26,20 +38,28 @@ export function asRecord(value: unknown): Record<string, unknown> | undefined {
   return value as Record<string, unknown>
 }
 
-export function getPathFromArgs(args: GuardArgs | undefined): string | undefined {
+export function getPathFromArgs(
+  args: GuardArgs | undefined,
+): string | undefined {
   return args?.filePath ?? args?.path ?? args?.file_path
 }
 
 export function resolveInputPath(ctx: PluginInput, inputPath: string): string {
-  return normalize(isAbsolute(inputPath) ? inputPath : resolve(ctx.directory, inputPath))
+  return normalize(
+    isAbsolute(inputPath) ? inputPath : resolve(ctx.directory, inputPath),
+  )
 }
 
-export function isPathInsideDirectory(pathToCheck: string, directory: string): boolean {
+export function isPathInsideDirectory(
+  pathToCheck: string,
+  directory: string,
+): boolean {
   const relativePath = relative(directory, pathToCheck)
-  return relativePath === "" || (!relativePath.startsWith("..") && !isAbsolute(relativePath))
+  return (
+    relativePath === "" ||
+    (!relativePath.startsWith("..") && !isAbsolute(relativePath))
+  )
 }
-
-
 
 export function toCanonicalPath(absolutePath: string): string {
   let canonicalPath = absolutePath
@@ -52,7 +72,9 @@ export function toCanonicalPath(absolutePath: string): string {
     }
   } else {
     const absoluteDir = dirname(absolutePath)
-    const resolvedDir = existsSync(absoluteDir) ? realpathSync.native(absoluteDir) : absoluteDir
+    const resolvedDir = existsSync(absoluteDir)
+      ? realpathSync.native(absoluteDir)
+      : absoluteDir
     canonicalPath = join(resolvedDir, basename(absolutePath))
   }
 
@@ -61,7 +83,9 @@ export function toCanonicalPath(absolutePath: string): string {
   return normalize(canonicalPath)
 }
 
-export function isOverwriteEnabled(value: boolean | string | undefined): boolean {
+export function isOverwriteEnabled(
+  value: boolean | string | undefined,
+): boolean {
   if (value === true) {
     return true
   }
@@ -80,7 +104,9 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
 
   function getCanonicalSessionRoot(): string {
     if (!canonicalSessionRoot) {
-      canonicalSessionRoot = toCanonicalPath(resolveInputPath(ctx, ctx.directory))
+      canonicalSessionRoot = toCanonicalPath(
+        resolveInputPath(ctx, ctx.directory),
+      )
     }
 
     return canonicalSessionRoot
@@ -98,7 +124,11 @@ export function createWriteExistingFileGuardHook(ctx: PluginInput): Hooks {
         maxTrackedSessions: MAX_TRACKED_SESSIONS,
       })
     },
-    event: async ({ event }: { event: { type: string; properties?: unknown } }) => {
+    event: async ({
+      event,
+    }: {
+      event: { type: string; properties?: unknown }
+    }) => {
       if (event.type !== "session.deleted") {
         return
       }

@@ -38,22 +38,32 @@ export function formatVersionOutput(info: VersionInfo): string {
       break
     case "outdated":
       lines.push(`  ${SYMBOLS.warn} ${color.yellow("Update available")}`)
-      lines.push(`  ${color.dim("Run:")} ${color.cyan(`cd ~/.config/opencode && bun update ${PUBLISHED_PACKAGE_NAME}`)}`)
+      lines.push(
+        `  ${color.dim("Run:")} ${color.cyan(`cd ~/.config/opencode && bun update ${PUBLISHED_PACKAGE_NAME}`)}`,
+      )
       break
     case "local-dev":
-      lines.push(`  ${SYMBOLS.dev} ${color.cyan("Running in local development mode")}`)
+      lines.push(
+        `  ${SYMBOLS.dev} ${color.cyan("Running in local development mode")}`,
+      )
       lines.push(`  ${color.dim("Using file:// protocol from config")}`)
       break
     case "pinned":
-      lines.push(`  ${SYMBOLS.pin} ${color.magenta(`Version pinned to ${info.pinnedVersion}`)}`)
+      lines.push(
+        `  ${SYMBOLS.pin} ${color.magenta(`Version pinned to ${info.pinnedVersion}`)}`,
+      )
       lines.push(`  ${color.dim("Update check skipped for pinned versions")}`)
       break
     case "error":
-      lines.push(`  ${SYMBOLS.cross} ${color.red("Unable to check for updates")}`)
+      lines.push(
+        `  ${SYMBOLS.cross} ${color.red("Unable to check for updates")}`,
+      )
       lines.push(`  ${color.dim("Network error or npm registry unavailable")}`)
       break
     case "unknown":
-      lines.push(`  ${SYMBOLS.info} ${color.yellow("Version information unavailable")}`)
+      lines.push(
+        `  ${SYMBOLS.info} ${color.yellow("Version information unavailable")}`,
+      )
       break
   }
 

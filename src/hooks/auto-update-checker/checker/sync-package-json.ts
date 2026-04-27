@@ -15,7 +15,8 @@ export interface SyncResult {
   message?: string
 }
 
-const EXACT_SEMVER_REGEX = /^\d+\.\d+\.\d+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/
+const EXACT_SEMVER_REGEX =
+  /^\d+\.\d+\.\d+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$/
 
 function safeUnlink(filePath: string): void {
   try {
@@ -45,18 +46,29 @@ function writeCachePackageJson(
   } catch (err) {
     log("[auto-update-checker] Failed to write cache package.json:", err)
     safeUnlink(tmpPath)
-    return { synced: false, error: "write_error", message: "Failed to write cache package.json" }
+    return {
+      synced: false,
+      error: "write_error",
+      message: "Failed to write cache package.json",
+    }
   }
 }
 
-export function syncCachePackageJsonToIntent(pluginInfo: PluginEntryInfo): SyncResult {
+export function syncCachePackageJsonToIntent(
+  pluginInfo: PluginEntryInfo,
+): SyncResult {
   const cachePackageJsonPath = path.join(CACHE_DIR, "package.json")
   const intentVersion = getIntentVersion(pluginInfo)
 
   if (!fs.existsSync(cachePackageJsonPath)) {
-    log("[auto-update-checker] Cache package.json missing, creating workspace package.json", { intentVersion })
+    log(
+      "[auto-update-checker] Cache package.json missing, creating workspace package.json",
+      { intentVersion },
+    )
     return {
-      ...writeCachePackageJson(cachePackageJsonPath, { dependencies: { [PACKAGE_NAME]: intentVersion } }),
+      ...writeCachePackageJson(cachePackageJsonPath, {
+        dependencies: { [PACKAGE_NAME]: intentVersion },
+      }),
       message: `Created cache package.json with: ${intentVersion}`,
     }
   }
@@ -68,18 +80,29 @@ export function syncCachePackageJsonToIntent(pluginInfo: PluginEntryInfo): SyncR
     content = fs.readFileSync(cachePackageJsonPath, "utf-8")
   } catch (err) {
     log("[auto-update-checker] Failed to read cache package.json:", err)
-    return { synced: false, error: "parse_error", message: "Failed to read cache package.json" }
+    return {
+      synced: false,
+      error: "parse_error",
+      message: "Failed to read cache package.json",
+    }
   }
 
   try {
     pkgJson = JSON.parse(content) as CachePackageJson
   } catch (err) {
     log("[auto-update-checker] Failed to parse cache package.json:", err)
-    return { synced: false, error: "parse_error", message: "Failed to parse cache package.json (malformed JSON)" }
+    return {
+      synced: false,
+      error: "parse_error",
+      message: "Failed to parse cache package.json (malformed JSON)",
+    }
   }
 
   if (!pkgJson || !pkgJson.dependencies?.[PACKAGE_NAME]) {
-    log("[auto-update-checker] Plugin missing from cache package.json dependencies, adding dependency", { intentVersion })
+    log(
+      "[auto-update-checker] Plugin missing from cache package.json dependencies, adding dependency",
+      { intentVersion },
+    )
     const nextPkgJson = {
       ...(pkgJson ?? {}),
       dependencies: {
@@ -96,8 +119,15 @@ export function syncCachePackageJsonToIntent(pluginInfo: PluginEntryInfo): SyncR
   const currentVersion = pkgJson.dependencies[PACKAGE_NAME]
 
   if (currentVersion === intentVersion) {
-    log("[auto-update-checker] Cache package.json already matches intent:", intentVersion)
-    return { synced: false, error: null, message: `Already matches intent: ${intentVersion}` }
+    log(
+      "[auto-update-checker] Cache package.json already matches intent:",
+      intentVersion,
+    )
+    return {
+      synced: false,
+      error: null,
+      message: `Already matches intent: ${intentVersion}`,
+    }
   }
 
   const intentIsTag = !EXACT_SEMVER_REGEX.test(intentVersion.trim())
@@ -105,11 +135,11 @@ export function syncCachePackageJsonToIntent(pluginInfo: PluginEntryInfo): SyncR
 
   if (intentIsTag && currentIsSemver) {
     log(
-      `[auto-update-checker] Syncing cache package.json: "${currentVersion}" → "${intentVersion}" (opencode.json intent)`
+      `[auto-update-checker] Syncing cache package.json: "${currentVersion}" → "${intentVersion}" (opencode.json intent)`,
     )
   } else {
     log(
-      `[auto-update-checker] Updating cache package.json: "${currentVersion}" → "${intentVersion}"`
+      `[auto-update-checker] Updating cache package.json: "${currentVersion}" → "${intentVersion}"`,
     )
   }
 

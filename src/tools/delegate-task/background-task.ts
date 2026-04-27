@@ -1,4 +1,8 @@
-import type { DelegateTaskArgs, ToolContextWithMetadata, DelegatedModelConfig } from "./types"
+import type {
+  DelegateTaskArgs,
+  ToolContextWithMetadata,
+  DelegatedModelConfig,
+} from "./types"
 import type { ExecutorContext, ParentContext } from "./executor-types"
 import type { FallbackEntry } from "../../shared/model-requirements"
 import { getTimingConfig } from "./timing"
@@ -18,7 +22,10 @@ function registerBackgroundSessionContext(args: {
   category?: string
   modelFallbackControllerAccessor?: ExecutorContext["modelFallbackControllerAccessor"]
 }): void {
-  args.modelFallbackControllerAccessor?.setSessionFallbackChain(args.sessionId, args.fallbackChain)
+  args.modelFallbackControllerAccessor?.setSessionFallbackChain(
+    args.sessionId,
+    args.fallbackChain,
+  )
   if (args.category) {
     SessionCategoryRegistry.register(args.sessionId, args.category)
   }
@@ -39,12 +46,18 @@ function continueSessionSetup(args: {
   void (async () => {
     const waitStart = Date.now()
     while (Date.now() - waitStart < args.timing.WAIT_FOR_SESSION_TIMEOUT_MS) {
-      await new Promise(resolve => setTimeout(resolve, args.timing.WAIT_FOR_SESSION_INTERVAL_MS))
+      await new Promise((resolve) =>
+        setTimeout(resolve, args.timing.WAIT_FOR_SESSION_INTERVAL_MS),
+      )
       const updated = args.manager.getTask(args.taskID)
       if (!updated) {
         return
       }
-      if (updated.status === "error" || updated.status === "cancelled" || updated.status === "interrupt") {
+      if (
+        updated.status === "error" ||
+        updated.status === "cancelled" ||
+        updated.status === "interrupt"
+      ) {
         return
       }
 
@@ -75,9 +88,16 @@ async function waitForBackgroundSessionStart(args: {
   const waitStart = Date.now()
   let sessionId = args.initialSessionId
 
-  while (!sessionId && Date.now() - waitStart < args.timing.WAIT_FOR_SESSION_TIMEOUT_MS) {
+  while (
+    !sessionId &&
+    Date.now() - waitStart < args.timing.WAIT_FOR_SESSION_TIMEOUT_MS
+  ) {
     const updated = args.manager.getTask(args.taskId)
-    if (updated?.status === "error" || updated?.status === "cancelled" || updated?.status === "interrupt") {
+    if (
+      updated?.status === "error" ||
+      updated?.status === "cancelled" ||
+      updated?.status === "interrupt"
+    ) {
       return undefined
     }
 
@@ -91,7 +111,9 @@ async function waitForBackgroundSessionStart(args: {
       return undefined
     }
 
-    await new Promise(resolve => setTimeout(resolve, args.timing.WAIT_FOR_SESSION_INTERVAL_MS))
+    await new Promise((resolve) =>
+      setTimeout(resolve, args.timing.WAIT_FOR_SESSION_INTERVAL_MS),
+    )
   }
 
   return sessionId
@@ -112,7 +134,11 @@ export async function executeBackgroundTask(
   try {
     const tddEnabled = executorCtx.sisyphusAgentConfig?.tdd
     const normalizedAgent = stripAgentListSortPrefix(agentToUse)
-    const effectivePrompt = buildTaskPrompt(args.prompt, normalizedAgent, tddEnabled)
+    const effectivePrompt = buildTaskPrompt(
+      args.prompt,
+      normalizedAgent,
+      tddEnabled,
+    )
     const task = await manager.launch({
       description: args.description,
       prompt: effectivePrompt,
@@ -148,15 +174,22 @@ export async function executeBackgroundTask(
           timing,
           fallbackChain,
           category: args.category,
-          modelFallbackControllerAccessor: executorCtx.modelFallbackControllerAccessor,
+          modelFallbackControllerAccessor:
+            executorCtx.modelFallbackControllerAccessor,
         })
       },
     })
 
-    const updatedTask = typeof manager.getTask === "function"
-      ? manager.getTask(task.id)
-      : undefined
-    if (!sessionId && (updatedTask?.status === "error" || updatedTask?.status === "cancelled" || updatedTask?.status === "interrupt")) {
+    const updatedTask =
+      typeof manager.getTask === "function"
+        ? manager.getTask(task.id)
+        : undefined
+    if (
+      !sessionId &&
+      (updatedTask?.status === "error" ||
+        updatedTask?.status === "cancelled" ||
+        updatedTask?.status === "interrupt")
+    ) {
       return `Task failed to start (status: ${updatedTask.status}).\n\nTask ID: ${task.id}`
     }
 
@@ -165,16 +198,22 @@ export async function executeBackgroundTask(
         sessionId,
         fallbackChain,
         category: args.category,
-        modelFallbackControllerAccessor: executorCtx.modelFallbackControllerAccessor,
+        modelFallbackControllerAccessor:
+          executorCtx.modelFallbackControllerAccessor,
       })
     }
 
-    const resolvedModel = resolveMetadataModel(categoryModel, parentContext.model)
+    const resolvedModel = resolveMetadataModel(
+      categoryModel,
+      parentContext.model,
+    )
     const metadata = {
       prompt: args.prompt,
       agent: task.agent,
       category: args.category,
-      ...(args.requested_subagent_type !== undefined ? { requested_subagent_type: args.requested_subagent_type } : {}),
+      ...(args.requested_subagent_type !== undefined
+        ? { requested_subagent_type: args.requested_subagent_type }
+        : {}),
       load_skills: args.load_skills,
       description: args.description,
       run_in_background: args.run_in_background,
@@ -191,12 +230,12 @@ export async function executeBackgroundTask(
 
     const taskMetadataBlock = sessionId
       ? `\n\n${buildTaskMetadataBlock({
-        sessionId,
-        taskId: sessionId,
-        backgroundTaskId: task.id,
-        agent: task.agent,
-        category: args.category,
-      })}`
+          sessionId,
+          taskId: sessionId,
+          backgroundTaskId: task.id,
+          agent: task.agent,
+          category: args.category,
+        })}`
       : ""
 
     return `Background task launched.

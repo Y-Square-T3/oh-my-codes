@@ -265,7 +265,9 @@ describe("listTaskFiles", () => {
     //#given
     const config: Partial<OhMyCodesConfig> = {
       new_task_system_enabled: false,
-      sisyphus: { tasks: { storage_path: TEST_DIR, claude_code_compat: false } }
+      sisyphus: {
+        tasks: { storage_path: TEST_DIR, claude_code_compat: false },
+      },
     }
 
     //#when
@@ -279,7 +281,9 @@ describe("listTaskFiles", () => {
     //#given
     const config: Partial<OhMyCodesConfig> = {
       new_task_system_enabled: false,
-      sisyphus: { tasks: { storage_path: TEST_DIR, claude_code_compat: false } }
+      sisyphus: {
+        tasks: { storage_path: TEST_DIR, claude_code_compat: false },
+      },
     }
     mkdirSync(TEST_DIR_ABS, { recursive: true })
     writeFileSync(join(TEST_DIR_ABS, "other.json"), "{}", "utf-8")
@@ -295,7 +299,9 @@ describe("listTaskFiles", () => {
     //#given
     const config: Partial<OhMyCodesConfig> = {
       new_task_system_enabled: false,
-      sisyphus: { tasks: { storage_path: TEST_DIR, claude_code_compat: false } }
+      sisyphus: {
+        tasks: { storage_path: TEST_DIR, claude_code_compat: false },
+      },
     }
     mkdirSync(TEST_DIR_ABS, { recursive: true })
     writeFileSync(join(TEST_DIR_ABS, "T-abc123.json"), "{}", "utf-8")
@@ -316,7 +322,9 @@ describe("listTaskFiles", () => {
     //#given
     const config: Partial<OhMyCodesConfig> = {
       new_task_system_enabled: false,
-      sisyphus: { tasks: { storage_path: TEST_DIR, claude_code_compat: false } }
+      sisyphus: {
+        tasks: { storage_path: TEST_DIR, claude_code_compat: false },
+      },
     }
     mkdirSync(TEST_DIR_ABS, { recursive: true })
     writeFileSync(join(TEST_DIR_ABS, "T-test-id.json"), "{}", "utf-8")
@@ -503,7 +511,11 @@ describe("acquireLock", () => {
     const dirPath = TEST_DIR
     const lockPath = join(dirPath, ".lock")
     const staleTimestamp = Date.now() - 31000 // 31 seconds ago
-    writeFileSync(lockPath, JSON.stringify({ timestamp: staleTimestamp }), "utf-8")
+    writeFileSync(
+      lockPath,
+      JSON.stringify({ timestamp: staleTimestamp }),
+      "utf-8",
+    )
 
     //#when
     const lock = acquireLock(dirPath)

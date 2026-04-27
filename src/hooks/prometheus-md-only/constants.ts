@@ -1,4 +1,7 @@
-import { createSystemDirective, SystemDirectiveTypes } from "../../shared/system-directive"
+import {
+  createSystemDirective,
+  SystemDirectiveTypes,
+} from "../../shared/system-directive"
 import { getAgentDisplayName } from "../../shared/agent-display-names"
 
 export const HOOK_NAME = "prometheus-md-only"

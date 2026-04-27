@@ -10,7 +10,7 @@ import type { GetLocalVersionOptions, VersionInfo } from "./types"
 import { formatJsonOutput, formatVersionOutput } from "./formatter"
 
 export async function getLocalVersion(
-  options: GetLocalVersionOptions = {}
+  options: GetLocalVersionOptions = {},
 ): Promise<number> {
   const directory = options.directory ?? process.cwd()
 
@@ -27,7 +27,9 @@ export async function getLocalVersion(
         status: "local-dev",
       }
 
-      console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+      console.log(
+        options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+      )
       return 0
     }
 
@@ -43,7 +45,9 @@ export async function getLocalVersion(
         status: "pinned",
       }
 
-      console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+      console.log(
+        options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+      )
       return 0
     }
 
@@ -59,11 +63,14 @@ export async function getLocalVersion(
         status: "unknown",
       }
 
-      console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+      console.log(
+        options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+      )
       return 1
     }
 
-    const { extractChannel } = await import("../../hooks/auto-update-checker/index")
+    const { extractChannel } =
+      await import("../../hooks/auto-update-checker/index")
     const channel = extractChannel(pluginInfo?.pinnedVersion ?? currentVersion)
     const latestVersion = await getLatestVersion(channel)
 
@@ -78,7 +85,9 @@ export async function getLocalVersion(
         status: "error",
       }
 
-      console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+      console.log(
+        options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+      )
       return 0
     }
 
@@ -93,7 +102,9 @@ export async function getLocalVersion(
       status: isUpToDate ? "up-to-date" : "outdated",
     }
 
-    console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+    console.log(
+      options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+    )
     return 0
   } catch (error) {
     const info: VersionInfo = {
@@ -106,7 +117,9 @@ export async function getLocalVersion(
       status: "error",
     }
 
-    console.log(options.json ? formatJsonOutput(info) : formatVersionOutput(info))
+    console.log(
+      options.json ? formatJsonOutput(info) : formatVersionOutput(info),
+    )
     return 1
   }
 }

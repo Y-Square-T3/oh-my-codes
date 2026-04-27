@@ -7,8 +7,15 @@ export function createChatMessageHandler(deps: HookDeps) {
   const { config, sessionStates, sessionLastAccess } = deps
 
   return async (
-    input: { sessionID: string; agent?: string; model?: { providerID: string; modelID: string } },
-    output: { message: { model?: { providerID: string; modelID: string } }; parts?: Array<{ type: string; text?: string }> }
+    input: {
+      sessionID: string
+      agent?: string
+      model?: { providerID: string; modelID: string }
+    },
+    output: {
+      message: { model?: { providerID: string; modelID: string } }
+      parts?: Array<{ type: string; text?: string }>
+    },
   ) => {
     if (!config.enabled) return
 
@@ -24,16 +31,22 @@ export function createChatMessageHandler(deps: HookDeps) {
       : undefined
 
     if (requestedModel && requestedModel !== state.currentModel) {
-      if (state.pendingFallbackModel && state.pendingFallbackModel === requestedModel) {
+      if (
+        state.pendingFallbackModel &&
+        state.pendingFallbackModel === requestedModel
+      ) {
         state.pendingFallbackModel = undefined
         return
       }
 
-      log(`[${HOOK_NAME}] Detected manual model change, resetting fallback state`, {
-        sessionID,
-        from: state.currentModel,
-        to: requestedModel,
-      })
+      log(
+        `[${HOOK_NAME}] Detected manual model change, resetting fallback state`,
+        {
+          sessionID,
+          from: state.currentModel,
+          to: requestedModel,
+        },
+      )
       state = createFallbackState(requestedModel)
       sessionStates.set(sessionID, state)
       return

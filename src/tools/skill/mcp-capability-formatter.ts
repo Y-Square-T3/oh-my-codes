@@ -10,7 +10,7 @@ import type { LoadedSkill } from "../../features/opencode-skill-loader"
 export async function formatMcpCapabilities(
   skill: LoadedSkill,
   manager: SkillMcpManager,
-  sessionID: string
+  sessionID: string,
 ): Promise<string | null> {
   if (!skill.mcpConfig || Object.keys(skill.mcpConfig).length === 0) {
     return null
@@ -43,15 +43,24 @@ export async function formatMcpCapabilities(
       appendResourceSection(sections, resources as Resource[])
       appendPromptSection(sections, prompts as Prompt[])
 
-      if (tools.length === 0 && resources.length === 0 && prompts.length === 0) {
+      if (
+        tools.length === 0 &&
+        resources.length === 0 &&
+        prompts.length === 0
+      ) {
         sections.push("*No capabilities discovered*")
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
       sections.push(`*Failed to connect: ${errorMessage.split("\n")[0]}*`)
     }
 
-    sections.push("", `Use \`skill_mcp\` tool with \`mcp_name=\"${serverName}\"\` to invoke.`, "")
+    sections.push(
+      "",
+      `Use \`skill_mcp\` tool with \`mcp_name=\"${serverName}\"\` to invoke.`,
+      "",
+    )
   }
 
   return sections.join("\n")
@@ -75,17 +84,22 @@ function appendToolSections(sections: string[], tools: Tool[]): void {
       "```json",
       JSON.stringify(sanitizeJsonSchema(toolDefinition.inputSchema), null, 2),
       "```",
-      ""
+      "",
     )
   }
 }
 
-function appendResourceSection(sections: string[], resources: Resource[]): void {
+function appendResourceSection(
+  sections: string[],
+  resources: Resource[],
+): void {
   if (resources.length === 0) {
     return
   }
 
-  sections.push(`**Resources**: ${resources.map((resource) => resource.uri).join(", ")}`)
+  sections.push(
+    `**Resources**: ${resources.map((resource) => resource.uri).join(", ")}`,
+  )
 }
 
 function appendPromptSection(sections: string[], prompts: Prompt[]): void {
@@ -93,5 +107,7 @@ function appendPromptSection(sections: string[], prompts: Prompt[]): void {
     return
   }
 
-  sections.push(`**Prompts**: ${prompts.map((prompt) => prompt.name).join(", ")}`)
+  sections.push(
+    `**Prompts**: ${prompts.map((prompt) => prompt.name).join(", ")}`,
+  )
 }

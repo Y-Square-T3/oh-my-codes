@@ -1,38 +1,46 @@
-import type { OhMyCodesConfig } from "../config";
-import { getAgentDisplayName, getAgentListDisplayName } from "../shared/agent-display-names";
-import { isTaskSystemEnabled } from "../shared";
+import type { OhMyCodesConfig } from "../config"
+import {
+  getAgentDisplayName,
+  getAgentListDisplayName,
+} from "../shared/agent-display-names"
+import { isTaskSystemEnabled } from "../shared"
 
-type AgentWithPermission = { permission?: Record<string, unknown> };
+type AgentWithPermission = { permission?: Record<string, unknown> }
 
 function getConfigQuestionPermission(): string | null {
-  const configContent = process.env.OPENCODE_CONFIG_CONTENT;
-  if (!configContent) return null;
+  const configContent = process.env.OPENCODE_CONFIG_CONTENT
+  if (!configContent) return null
   try {
-    const parsed = JSON.parse(configContent);
-    return parsed?.permission?.question ?? null;
+    const parsed = JSON.parse(configContent)
+    return parsed?.permission?.question ?? null
   } catch {
-    return null;
+    return null
   }
 }
 
-function agentByKey(agentResult: Record<string, unknown>, key: string): AgentWithPermission | undefined {
-  return (agentResult[getAgentListDisplayName(key)] ?? agentResult[getAgentDisplayName(key)] ?? agentResult[key]) as
-    | AgentWithPermission
-    | undefined;
+function agentByKey(
+  agentResult: Record<string, unknown>,
+  key: string,
+): AgentWithPermission | undefined {
+  return (agentResult[getAgentListDisplayName(key)] ??
+    agentResult[getAgentDisplayName(key)] ??
+    agentResult[key]) as AgentWithPermission | undefined
 }
 
 export function applyToolConfig(params: {
-  config: Record<string, unknown>;
-  pluginConfig: OhMyCodesConfig;
-  agentResult: Record<string, unknown>;
+  config: Record<string, unknown>
+  pluginConfig: OhMyCodesConfig
+  agentResult: Record<string, unknown>
 }): void {
   const taskSystemEnabled = isTaskSystemEnabled(params.pluginConfig)
   const denyTodoTools = taskSystemEnabled
     ? { todowrite: "deny", todoread: "deny" }
     : {}
 
-  const existingPermission = params.config.permission as Record<string, unknown> | undefined;
-  const skillDeniedByHost = existingPermission?.skill === "deny";
+  const existingPermission = params.config.permission as
+    | Record<string, unknown>
+    | undefined
+  const skillDeniedByHost = existingPermission?.skill === "deny"
 
   params.config.tools = {
     ...(params.config.tools as Record<string, unknown>),
@@ -42,32 +50,31 @@ export function applyToolConfig(params: {
     LspCodeActionResolve: false,
     "task_*": false,
     teammate: false,
-    ...(taskSystemEnabled
-      ? { todowrite: false, todoread: false }
-      : {}),
-    ...(skillDeniedByHost
-      ? { skill: false, skill_mcp: false }
-      : {}),
-  };
+    ...(taskSystemEnabled ? { todowrite: false, todoread: false } : {}),
+    ...(skillDeniedByHost ? { skill: false, skill_mcp: false } : {}),
+  }
 
-  const isCliRunMode = process.env.OPENCODE_CLI_RUN_MODE === "true";
-  const configQuestionPermission = getConfigQuestionPermission();
-  const isQuestionDisabledByPlugin = params.pluginConfig.disabled_tools?.includes("question") ?? false;
-  const questionPermission =
-    isQuestionDisabledByPlugin ? "deny" :
-    configQuestionPermission === "deny" ? "deny" :
-    isCliRunMode ? "deny" :
-    "allow";
+  const isCliRunMode = process.env.OPENCODE_CLI_RUN_MODE === "true"
+  const configQuestionPermission = getConfigQuestionPermission()
+  const isQuestionDisabledByPlugin =
+    params.pluginConfig.disabled_tools?.includes("question") ?? false
+  const questionPermission = isQuestionDisabledByPlugin
+    ? "deny"
+    : configQuestionPermission === "deny"
+      ? "deny"
+      : isCliRunMode
+        ? "deny"
+        : "allow"
 
-  const librarian = agentByKey(params.agentResult, "librarian");
+  const librarian = agentByKey(params.agentResult, "librarian")
   if (librarian) {
-    librarian.permission = { ...librarian.permission, "grep_app_*": "allow" };
+    librarian.permission = { ...librarian.permission, "grep_app_*": "allow" }
   }
-  const looker = agentByKey(params.agentResult, "multimodal-looker");
+  const looker = agentByKey(params.agentResult, "multimodal-looker")
   if (looker) {
-    looker.permission = { ...looker.permission, task: "deny", look_at: "deny" };
+    looker.permission = { ...looker.permission, task: "deny", look_at: "deny" }
   }
-  const atlas = agentByKey(params.agentResult, "atlas");
+  const atlas = agentByKey(params.agentResult, "atlas")
   if (atlas) {
     atlas.permission = {
       ...atlas.permission,
@@ -76,9 +83,9 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
-    };
+    }
   }
-  const sisyphus = agentByKey(params.agentResult, "sisyphus");
+  const sisyphus = agentByKey(params.agentResult, "sisyphus")
   if (sisyphus) {
     sisyphus.permission = {
       ...sisyphus.permission,
@@ -88,9 +95,9 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
-    };
+    }
   }
-  const hephaestus = agentByKey(params.agentResult, "hephaestus");
+  const hephaestus = agentByKey(params.agentResult, "hephaestus")
   if (hephaestus) {
     hephaestus.permission = {
       ...hephaestus.permission,
@@ -98,9 +105,9 @@ export function applyToolConfig(params: {
       task: "allow",
       question: questionPermission,
       ...denyTodoTools,
-    };
+    }
   }
-  const prometheus = agentByKey(params.agentResult, "prometheus");
+  const prometheus = agentByKey(params.agentResult, "prometheus")
   if (prometheus) {
     prometheus.permission = {
       ...prometheus.permission,
@@ -110,9 +117,9 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
-    };
+    }
   }
-  const junior = agentByKey(params.agentResult, "sisyphus-junior");
+  const junior = agentByKey(params.agentResult, "sisyphus-junior")
   if (junior) {
     junior.permission = {
       ...junior.permission,
@@ -120,7 +127,7 @@ export function applyToolConfig(params: {
       "task_*": "allow",
       teammate: "allow",
       ...denyTodoTools,
-    };
+    }
   }
 
   params.config.permission = {
@@ -128,5 +135,5 @@ export function applyToolConfig(params: {
     external_directory: "allow",
     ...(params.config.permission as Record<string, unknown>),
     task: "deny",
-  };
+  }
 }

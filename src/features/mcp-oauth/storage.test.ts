@@ -1,5 +1,12 @@
 import { describe, expect, test, beforeEach, afterEach } from "bun:test"
-import { existsSync, mkdirSync, rmSync, readFileSync, statSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  rmSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import {
@@ -47,7 +54,10 @@ describe("mcp-oauth storage", () => {
     // when
     const success = saveToken("https://example.com:443", "mcp/v1", token)
     const storagePath = getMcpOauthStoragePath()
-    const parsed = JSON.parse(readFileSync(storagePath, "utf-8")) as Record<string, OAuthTokenData>
+    const parsed = JSON.parse(readFileSync(storagePath, "utf-8")) as Record<
+      string,
+      OAuthTokenData
+    >
     const mode = statSync(storagePath).mode & 0o777
 
     // then
@@ -59,7 +69,10 @@ describe("mcp-oauth storage", () => {
 
   test("should load a saved token", () => {
     // given
-    const token: OAuthTokenData = { accessToken: "access-2", refreshToken: "refresh-2" }
+    const token: OAuthTokenData = {
+      accessToken: "access-2",
+      refreshToken: "refresh-2",
+    }
     saveToken("api.example.com", "resource-a", token)
 
     // when

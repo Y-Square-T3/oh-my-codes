@@ -9,12 +9,14 @@ This is explicitly separate from model fallback.
 ## Problem
 
 Today, logic for `variant` and `reasoningEffort` compatibility is scattered across multiple places:
+
 - `hooks/anthropic-effort`
 - `plugin/chat-params`
 - agent/category/fallback config layers
 - delegate/background prompt plumbing
 
 That creates inconsistent behavior:
+
 - some paths clamp unsupported levels
 - some paths pass them through unchanged
 - some paths silently drop them
@@ -25,10 +27,12 @@ The result is brittle request behavior even when the chosen model itself is vali
 ## Scope
 
 Phase 1 covers only:
+
 - `variant`
 - `reasoningEffort`
 
 Out of scope for Phase 1:
+
 - model fallback itself
 - `thinking`
 - `maxTokens`
@@ -39,6 +43,7 @@ Out of scope for Phase 1:
 ## Desired behavior
 
 Given a fixed model and desired settings:
+
 1. If a desired value is supported, keep it.
 2. If not supported, downgrade to the nearest lower compatible value.
 3. If no compatible value exists, drop the field.
@@ -48,6 +53,7 @@ Given a fixed model and desired settings:
 ## Architecture
 
 Add a central module:
+
 - `src/shared/model-settings-compatibility.ts`
 
 Core API:
@@ -85,12 +91,15 @@ Phase 1 should be **metadata-first where the platform exposes reliable capabilit
 ### Variant compatibility
 
 Preferred source of truth:
+
 - OpenCode/provider model metadata (`variants`)
 
 Fallback when metadata is unavailable:
+
 - family-based ladders
 
 Examples of fallback ladders:
+
 - Claude Opus family: `low`, `medium`, `high`, `max`
 - Claude Sonnet/Haiku family: `low`, `medium`, `high`
 - OpenAI GPT family: conservative family fallback only when metadata is missing
@@ -99,12 +108,15 @@ Examples of fallback ladders:
 ### Reasoning effort compatibility
 
 Current Phase 1 source of truth:
+
 - conservative model/provider family heuristics
 
 Reason:
+
 - the currently available OpenCode SDK/provider metadata exposes model `variants`, but does not expose an equivalent per-model capability list for `reasoningEffort` levels
 
 Examples:
+
 - GPT/OpenAI-style models: `low`, `medium`, `high`, `xhigh` where supported by family heuristics
 - Claude family via current OpenCode path: treat `reasoningEffort` as unsupported in Phase 1 and remove it
 
@@ -113,11 +125,13 @@ The resolver should remain pure model/settings logic only. Transport restriction
 ## Separation of concerns
 
 This design intentionally separates:
+
 - model selection (`resolveModel...`, fallback chains)
 - settings compatibility (this resolver)
 - request transport compatibility (`chat.params`, prompt body constraints)
 
 That keeps responsibilities clear:
+
 - choose model first
 - normalize settings second
 - build request third
@@ -127,6 +141,7 @@ That keeps responsibilities clear:
 Phase 1 should first integrate into `chat.params`.
 
 Why:
+
 - it is already the centralized path for request-time tuning
 - it can influence provider-facing options without leaking unsupported fields into prompt payload bodies
 - it avoids trying to patch every prompt constructor at once
@@ -134,15 +149,18 @@ Why:
 ## Rollout plan
 
 ### Phase 1
+
 - add resolver module and tests
 - integrate into `chat.params`
 - migrate `anthropic-effort` to either use the resolver or become a thin Claude-specific supplement around it
 
 ### Phase 2
+
 - expand to `thinking`, `maxTokens`, `temperature`, `top_p`
 - formalize request-path capability tables if needed
 
 ### Phase 3
+
 - centralize all variant/reasoning normalization away from scattered hooks and ad hoc callers
 
 ## Risks

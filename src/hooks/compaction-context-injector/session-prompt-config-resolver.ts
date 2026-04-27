@@ -41,7 +41,9 @@ export async function resolveSessionPromptConfig(
   }
 
   try {
-    const response = await ctx.client.session.messages({ path: { id: sessionID } })
+    const response = await ctx.client.session.messages({
+      path: { id: sessionID },
+    })
     const messages = normalizeSDKResponse(response, [] as SessionMessage[], {
       preferResponseOnMissingData: true,
     })
@@ -49,7 +51,11 @@ export async function resolveSessionPromptConfig(
     for (let index = messages.length - 1; index >= 0; index--) {
       const info = messages[index].info
 
-      if (!promptConfig.agent && info?.agent && !isCompactionAgent(info.agent)) {
+      if (
+        !promptConfig.agent &&
+        info?.agent &&
+        !isCompactionAgent(info.agent)
+      ) {
         promptConfig.agent = info.agent
       }
 
@@ -72,11 +78,14 @@ export async function resolveSessionPromptConfig(
       }
     }
   } catch (error) {
-    log("[compaction-context-injector] Failed to resolve prompt config from messages", {
-      sessionID,
-      directory: ctx.directory,
-      error: String(error),
-    })
+    log(
+      "[compaction-context-injector] Failed to resolve prompt config from messages",
+      {
+        sessionID,
+        directory: ctx.directory,
+        error: String(error),
+      },
+    )
   }
 
   if (!promptConfig.model && storedModel) {
@@ -91,7 +100,9 @@ export async function resolveLatestSessionPromptConfig(
   sessionID: string,
 ): Promise<CompactionAgentConfigCheckpoint> {
   try {
-    const response = await ctx.client.session.messages({ path: { id: sessionID } })
+    const response = await ctx.client.session.messages({
+      path: { id: sessionID },
+    })
     const messages = normalizeSDKResponse(response, [] as SessionMessage[], {
       preferResponseOnMissingData: true,
     })
@@ -110,11 +121,14 @@ export async function resolveLatestSessionPromptConfig(
       ...(tools ? { tools } : {}),
     }
   } catch (error) {
-    log("[compaction-context-injector] Failed to resolve latest prompt config", {
-      sessionID,
-      directory: ctx.directory,
-      error: String(error),
-    })
+    log(
+      "[compaction-context-injector] Failed to resolve latest prompt config",
+      {
+        sessionID,
+        directory: ctx.directory,
+        error: String(error),
+      },
+    )
     return {}
   }
 }

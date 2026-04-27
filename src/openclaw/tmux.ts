@@ -23,7 +23,10 @@ export async function getTmuxSessionName(): Promise<string | null> {
   }
 }
 
-export async function captureTmuxPane(paneId: string, lines = 15): Promise<string | null> {
+export async function captureTmuxPane(
+  paneId: string,
+  lines = 15,
+): Promise<string | null> {
   try {
     const proc = spawn(
       ["tmux", "capture-pane", "-p", "-t", paneId, "-S", `-${lines}`],
@@ -42,12 +45,19 @@ export async function captureTmuxPane(paneId: string, lines = 15): Promise<strin
   }
 }
 
-export async function sendToPane(paneId: string, text: string, confirm = true): Promise<boolean> {
+export async function sendToPane(
+  paneId: string,
+  text: string,
+  confirm = true,
+): Promise<boolean> {
   try {
-    const literalProc = spawn(["tmux", "send-keys", "-t", paneId, "-l", "--", text], {
-      stdout: "ignore",
-      stderr: "ignore",
-    })
+    const literalProc = spawn(
+      ["tmux", "send-keys", "-t", paneId, "-l", "--", text],
+      {
+        stdout: "ignore",
+        stderr: "ignore",
+      },
+    )
     await literalProc.exited
     if (literalProc.exitCode !== 0) return false
 
@@ -77,7 +87,9 @@ export async function isTmuxAvailable(): Promise<boolean> {
   }
 }
 
-export function analyzePaneContent(content: string | null): { confidence: number } {
+export function analyzePaneContent(content: string | null): {
+  confidence: number
+} {
   if (!content) return { confidence: 0 }
 
   let confidence = 0

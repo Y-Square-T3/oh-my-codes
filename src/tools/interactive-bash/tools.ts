@@ -1,6 +1,10 @@
 import { tool, type ToolDefinition } from "@opencode-ai/plugin/tool"
 import { spawnWithWindowsHide } from "../../shared/spawn-with-windows-hide"
-import { BLOCKED_TMUX_SUBCOMMANDS, DEFAULT_TIMEOUT_MS, INTERACTIVE_BASH_DESCRIPTION } from "./constants"
+import {
+  BLOCKED_TMUX_SUBCOMMANDS,
+  DEFAULT_TIMEOUT_MS,
+  INTERACTIVE_BASH_DESCRIPTION,
+} from "./constants"
 import { getCachedTmuxPath } from "./tmux-path-resolver"
 
 /**
@@ -51,7 +55,9 @@ export function tokenizeCommand(cmd: string): string[] {
 export const interactive_bash: ToolDefinition = tool({
   description: INTERACTIVE_BASH_DESCRIPTION,
   args: {
-    tmux_command: tool.schema.string().describe("The tmux command to execute (without 'tmux' prefix)"),
+    tmux_command: tool.schema
+      .string()
+      .describe("The tmux command to execute (without 'tmux' prefix)"),
   },
   execute: async (args) => {
     try {
@@ -65,7 +71,9 @@ export const interactive_bash: ToolDefinition = tool({
 
       const subcommand = parts[0].toLowerCase()
       if (BLOCKED_TMUX_SUBCOMMANDS.includes(subcommand)) {
-        const sessionIdx = parts.findIndex(p => p === "-t" || p.startsWith("-t"))
+        const sessionIdx = parts.findIndex(
+          (p) => p === "-t" || p.startsWith("-t"),
+        )
         let sessionName = "omo-session"
         if (sessionIdx !== -1) {
           if (parts[sessionIdx] === "-t" && parts[sessionIdx + 1]) {
@@ -97,7 +105,9 @@ The Bash tool can execute these commands directly. Do NOT retry with interactive
 
       const timeoutPromise = new Promise<never>((_, reject) => {
         const id = setTimeout(() => {
-          const timeoutError = new Error(`Timeout after ${DEFAULT_TIMEOUT_MS}ms`)
+          const timeoutError = new Error(
+            `Timeout after ${DEFAULT_TIMEOUT_MS}ms`,
+          )
           try {
             proc.kill()
             // Fire-and-forget: wait for process exit in background to avoid zombies
@@ -107,9 +117,7 @@ The Bash tool can execute these commands directly. Do NOT retry with interactive
           }
           reject(timeoutError)
         }, DEFAULT_TIMEOUT_MS)
-        proc.exited
-          .then(() => clearTimeout(id))
-          .catch(() => clearTimeout(id))
+        proc.exited.then(() => clearTimeout(id)).catch(() => clearTimeout(id))
       })
 
       // Read stdout and stderr in parallel to avoid race conditions
@@ -124,7 +132,8 @@ The Bash tool can execute these commands directly. Do NOT retry with interactive
 
       // Check exitCode properly - return error even if stderr is empty
       if (exitCode !== 0) {
-        const errorMsg = stderr.trim() || `Command failed with exit code ${exitCode}`
+        const errorMsg =
+          stderr.trim() || `Command failed with exit code ${exitCode}`
         return `Error: ${errorMsg}`
       }
 

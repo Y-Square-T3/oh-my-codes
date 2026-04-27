@@ -3,9 +3,16 @@ import {
   resolveCommandsInText,
   resolveFileReferencesInText,
 } from "../../shared"
-import { discoverAllSkills, type LoadedSkill, type LazyContentLoader } from "../../features/opencode-skill-loader"
+import {
+  discoverAllSkills,
+  type LoadedSkill,
+  type LazyContentLoader,
+} from "../../features/opencode-skill-loader"
 import { discoverCommandsSync } from "../../tools/slashcommand"
-import type { CommandInfo as DiscoveredCommandInfo, CommandMetadata } from "../../tools/slashcommand/types"
+import type {
+  CommandInfo as DiscoveredCommandInfo,
+  CommandMetadata,
+} from "../../tools/slashcommand/types"
 import type { ParsedSlashCommand } from "./types"
 
 interface SkillCommandInfo {
@@ -45,39 +52,57 @@ export interface ExecutorOptions {
   directory?: string
 }
 
+async function discoverAllCommands(
+  options?: ExecutorOptions,
+): Promise<CommandInfo[]> {
+  const discoveredCommands = discoverCommandsSync(
+    options?.directory ?? process.cwd(),
+    {
+      pluginsEnabled: options?.pluginsEnabled,
+      enabledPluginsOverride: options?.enabledPluginsOverride,
+    },
+  )
 
-async function discoverAllCommands(options?: ExecutorOptions): Promise<CommandInfo[]> {
-  const discoveredCommands = discoverCommandsSync(options?.directory ?? process.cwd(), {
-    pluginsEnabled: options?.pluginsEnabled,
-    enabledPluginsOverride: options?.enabledPluginsOverride,
-  })
-
-  const skills = options?.skills ?? await discoverAllSkills()
+  const skills = options?.skills ?? (await discoverAllSkills())
   const skillCommands = skills.map(skillToCommandInfo)
 
-  const scopeOrder: DiscoveredCommandInfo["scope"][] = ["project", "user", "opencode-project", "opencode", "builtin", "plugin"]
+  const scopeOrder: DiscoveredCommandInfo["scope"][] = [
+    "project",
+    "user",
+    "opencode-project",
+    "opencode",
+    "builtin",
+    "plugin",
+  ]
   const grouped = new Map<string, DiscoveredCommandInfo[]>()
   for (const cmd of discoveredCommands) {
     const list = grouped.get(cmd.scope) ?? []
     list.push(cmd)
     grouped.set(cmd.scope, list)
   }
-  const orderedCommands = scopeOrder.flatMap((scope) => grouped.get(scope) ?? [])
+  const orderedCommands = scopeOrder.flatMap(
+    (scope) => grouped.get(scope) ?? [],
+  )
 
-  return [
-    ...skillCommands,
-    ...orderedCommands,
-  ]
+  return [...skillCommands, ...orderedCommands]
 }
 
-async function findCommand(commandName: string, options?: ExecutorOptions): Promise<CommandInfo | null> {
+async function findCommand(
+  commandName: string,
+  options?: ExecutorOptions,
+): Promise<CommandInfo | null> {
   const allCommands = await discoverAllCommands(options)
-  return allCommands.find(
-    (cmd) => cmd.name.toLowerCase() === commandName.toLowerCase()
-  ) ?? null
+  return (
+    allCommands.find(
+      (cmd) => cmd.name.toLowerCase() === commandName.toLowerCase(),
+    ) ?? null
+  )
 }
 
-async function formatCommandTemplate(cmd: CommandInfo, args: string): Promise<string> {
+async function formatCommandTemplate(
+  cmd: CommandInfo,
+  args: string,
+): Promise<string> {
   const sections: string[] = []
 
   sections.push(`# /${cmd.name} Command\n`)
@@ -131,7 +156,10 @@ export interface ExecuteResult {
   error?: string
 }
 
-export async function executeSlashCommand(parsed: ParsedSlashCommand, options?: ExecutorOptions): Promise<ExecuteResult> {
+export async function executeSlashCommand(
+  parsed: ParsedSlashCommand,
+  options?: ExecutorOptions,
+): Promise<ExecuteResult> {
   const command = await findCommand(parsed.command, options)
 
   if (!command) {

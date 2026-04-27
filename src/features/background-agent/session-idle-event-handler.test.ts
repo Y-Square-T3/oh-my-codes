@@ -4,7 +4,9 @@ import { handleSessionIdleBackgroundEvent } from "./session-idle-event-handler"
 import type { BackgroundTask } from "./types"
 import { MIN_IDLE_TIME_MS } from "./constants"
 
-function createRunningTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
+function createRunningTask(
+  overrides: Partial<BackgroundTask> = {},
+): BackgroundTask {
   return {
     id: "task-1",
     sessionID: "ses-idle-1",
@@ -133,7 +135,10 @@ describe("handleSessionIdleBackgroundEvent", () => {
       const realDateNow = Date.now
       const baseNow = realDateNow()
       const task = createRunningTask({ startedAt: new Date(baseNow) })
-      const idleDeferralTimers = new Map<string, ReturnType<typeof setTimeout>>()
+      const idleDeferralTimers = new Map<
+        string,
+        ReturnType<typeof setTimeout>
+      >()
       const emitIdleEvent = mock(() => {})
 
       try {
@@ -165,9 +170,9 @@ describe("handleSessionIdleBackgroundEvent", () => {
       const baseNow = realDateNow()
       const task = createRunningTask({ startedAt: new Date(baseNow) })
       const existingTimer = setTimeout(() => {}, 99999)
-      const idleDeferralTimers = new Map<string, ReturnType<typeof setTimeout>>([
-        [task.id, existingTimer],
-      ])
+      const idleDeferralTimers = new Map<string, ReturnType<typeof setTimeout>>(
+        [[task.id, existingTimer]],
+      )
       const emitIdleEvent = mock(() => {})
 
       try {
@@ -197,7 +202,10 @@ describe("handleSessionIdleBackgroundEvent", () => {
       const realDateNow = Date.now
       const baseNow = realDateNow()
       const task = createRunningTask({ startedAt: new Date(baseNow) })
-      const idleDeferralTimers = new Map<string, ReturnType<typeof setTimeout>>()
+      const idleDeferralTimers = new Map<
+        string,
+        ReturnType<typeof setTimeout>
+      >()
       const emitIdleEvent = mock(() => {})
       const remainingMs = 50
 

@@ -3,7 +3,15 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test"
 
 const storageMaps = new Map<string, Set<string>>()
 
@@ -13,7 +21,8 @@ mock.module("./constants", () => ({
 }))
 
 mock.module("./storage", () => ({
-  loadInjectedPaths: (sessionID: string) => storageMaps.get(sessionID) ?? new Set<string>(),
+  loadInjectedPaths: (sessionID: string) =>
+    storageMaps.get(sessionID) ?? new Set<string>(),
   saveInjectedPaths: (sessionID: string, paths: Set<string>) => {
     storageMaps.set(sessionID, paths)
   },
@@ -27,9 +36,16 @@ afterAll(() => {
 })
 
 const truncator = {
-  truncate: async (_sessionID: string, content: string) => ({ result: content, truncated: false }),
+  truncate: async (_sessionID: string, content: string) => ({
+    result: content,
+    truncated: false,
+  }),
   getUsage: async (_sessionID: string) => null,
-  truncateSync: (output: string, _maxTokens: number, _preserveHeaderLines?: number) => ({
+  truncateSync: (
+    output: string,
+    _maxTokens: number,
+    _preserveHeaderLines?: number,
+  ) => ({
     result: output,
     truncated: false,
   }),
@@ -42,7 +58,8 @@ describe("processFilePathForAgentsInjection", () => {
 
   const rootAgentsContent = "# ROOT AGENTS\nroot-level directives"
   const srcAgentsContent = "# SRC AGENTS\nsrc-level directives"
-  const componentsAgentsContent = "# COMPONENT AGENTS\ncomponents-level directives"
+  const componentsAgentsContent =
+    "# COMPONENT AGENTS\ncomponents-level directives"
 
   beforeEach(() => {
     storageMaps.clear()
@@ -54,9 +71,18 @@ describe("processFilePathForAgentsInjection", () => {
     mkdirSync(componentsDirectory, { recursive: true })
     writeFileSync(join(testRoot, "AGENTS.md"), rootAgentsContent)
     writeFileSync(join(srcDirectory, "AGENTS.md"), srcAgentsContent)
-    writeFileSync(join(componentsDirectory, "AGENTS.md"), componentsAgentsContent)
-    writeFileSync(join(componentsDirectory, "button.ts"), "export const button = true\n")
-    writeFileSync(join(srcDirectory, "file.ts"), "export const sourceFile = true\n")
+    writeFileSync(
+      join(componentsDirectory, "AGENTS.md"),
+      componentsAgentsContent,
+    )
+    writeFileSync(
+      join(componentsDirectory, "button.ts"),
+      "export const button = true\n",
+    )
+    writeFileSync(
+      join(srcDirectory, "file.ts"),
+      "export const sourceFile = true\n",
+    )
     writeFileSync(join(testRoot, "file.ts"), "export const rootFile = true\n")
   })
 
@@ -183,7 +209,11 @@ describe("processFilePathForAgentsInjection", () => {
         truncated: true,
       }),
       getUsage: async (_sessionID: string) => null,
-      truncateSync: (output: string, _maxTokens: number, _preserveHeaderLines?: number) => ({
+      truncateSync: (
+        output: string,
+        _maxTokens: number,
+        _preserveHeaderLines?: number,
+      ) => ({
         result: output,
         truncated: false,
       }),

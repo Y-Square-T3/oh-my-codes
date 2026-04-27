@@ -2,21 +2,21 @@
 
 ## Summary
 
-| Metric | With Skill | Without Skill | Delta |
-|--------|-----------|---------------|-------|
-| Pass Rate | 96.8% (30/31) | 51.6% (16/31) | +45.2% |
-| Mean Duration | 340.2s | 303.0s | +37.2s |
-| Duration Stddev | 169.3s | 77.8s | +91.5s |
+| Metric          | With Skill    | Without Skill | Delta  |
+| --------------- | ------------- | ------------- | ------ |
+| Pass Rate       | 96.8% (30/31) | 51.6% (16/31) | +45.2% |
+| Mean Duration   | 340.2s        | 303.0s        | +37.2s |
+| Duration Stddev | 169.3s        | 77.8s         | +91.5s |
 
 ## Per-Eval Breakdown
 
-| Eval | With Skill | Without Skill | Delta |
-|------|-----------|---------------|-------|
-| happy-path-feature-config-option | 100% (10/10) | 40% (4/10) | +60% |
-| bugfix-atlas-null-check | 100% (6/6) | 67% (4/6) | +33% |
-| refactor-split-constants | 100% (5/5) | 40% (2/5) | +60% |
-| new-mcp-arxiv-casual | 100% (5/5) | 60% (3/5) | +40% |
-| regex-fix-false-positive | 80% (4/5) | 60% (3/5) | +20% |
+| Eval                             | With Skill   | Without Skill | Delta |
+| -------------------------------- | ------------ | ------------- | ----- |
+| happy-path-feature-config-option | 100% (10/10) | 40% (4/10)    | +60%  |
+| bugfix-atlas-null-check          | 100% (6/6)   | 67% (4/6)     | +33%  |
+| refactor-split-constants         | 100% (5/5)   | 40% (2/5)     | +60%  |
+| new-mcp-arxiv-casual             | 100% (5/5)   | 60% (3/5)     | +40%  |
+| regex-fix-false-positive         | 80% (4/5)    | 60% (3/5)     | +20%  |
 
 ## Key Discriminators
 

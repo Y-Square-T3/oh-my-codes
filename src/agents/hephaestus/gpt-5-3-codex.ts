@@ -1,13 +1,13 @@
 /** GPT-5.3 Codex optimized Hephaestus prompt */
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
-import type { AgentConfig } from "@opencode-ai/sdk";
-import type { AgentMode } from "../types";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
+import type { AgentConfig } from "@opencode-ai/sdk"
+import type { AgentMode } from "../types"
 import type {
   AvailableAgent,
   AvailableTool,
   AvailableSkill,
   AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+} from "../dynamic-agent-prompt-builder"
 import {
   buildKeyTriggersSection,
   buildToolSelectionTable,
@@ -21,8 +21,8 @@ import {
   buildToolCallFormatSection,
   buildAntiDuplicationSection,
   categorizeTools,
-} from "../dynamic-agent-prompt-builder";
-const MODE: AgentMode = "primary";
+} from "../dynamic-agent-prompt-builder"
+const MODE: AgentMode = "primary"
 
 function buildTodoDisciplineSection(useTaskSystem: boolean): string {
   if (useTaskSystem) {
@@ -56,7 +56,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 - **Proceeding without \`in_progress\`** - No indication of current work
 - **Finishing without completing tasks** - Task appears incomplete
 
-**NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
+**NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`
   }
 
   return `## Todo Discipline (NON-NEGOTIABLE)
@@ -89,7 +89,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 - **Proceeding without \`in_progress\`** - No indication of current work
 - **Finishing without completing todos** - Task appears incomplete
 
-**NO TODOS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
+**NO TODOS ON MULTI-STEP WORK = INCOMPLETE WORK.**`
 }
 
 /**
@@ -113,24 +113,24 @@ export function buildHephaestusPrompt(
   availableCategories: AvailableCategory[] = [],
   useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(
     availableAgents,
     availableTools,
     availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
+  )
+  const exploreSection = buildExploreSection(availableAgents)
+  const librarianSection = buildLibrarianSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(
     availableCategories,
     availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
-  const toolCallFormat = buildToolCallFormatSection();
+  )
+  const delegationTable = buildDelegationTable(availableAgents)
+  const oracleSection = buildOracleSection(availableAgents)
+  const hardBlocks = buildHardBlocksSection()
+  const antiPatterns = buildAntiPatternsSection()
+  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
+  const toolCallFormat = buildToolCallFormatSection()
   return `You are Hephaestus, an autonomous deep worker for software engineering.
 
 ## Identity
@@ -507,7 +507,7 @@ This means:
    - DOCUMENT what you tried → CONSULT Oracle
    - If Oracle fails → ASK USER with clear explanation
 
-**Never**: Leave code broken, delete failing tests, shotgun debug`;
+**Never**: Leave code broken, delete failing tests, shotgun debug`
 }
 
 export function createHephaestusAgent(
@@ -518,9 +518,9 @@ export function createHephaestusAgent(
   availableCategories?: AvailableCategory[],
   useTaskSystem = false,
 ): AgentConfig {
-  const tools = availableToolNames ? categorizeTools(availableToolNames) : [];
-  const skills = availableSkills ?? [];
-  const categories = availableCategories ?? [];
+  const tools = availableToolNames ? categorizeTools(availableToolNames) : []
+  const skills = availableSkills ?? []
+  const categories = availableCategories ?? []
   const prompt = availableAgents
     ? buildHephaestusPrompt(
         availableAgents,
@@ -529,7 +529,7 @@ export function createHephaestusAgent(
         categories,
         useTaskSystem,
       )
-    : buildHephaestusPrompt([], tools, skills, categories, useTaskSystem);
+    : buildHephaestusPrompt([], tools, skills, categories, useTaskSystem)
 
   return {
     description:
@@ -544,6 +544,6 @@ export function createHephaestusAgent(
       call_omo_agent: "deny",
     } as AgentConfig["permission"],
     reasoningEffort: "medium",
-  };
+  }
 }
-createHephaestusAgent.mode = MODE;
+createHephaestusAgent.mode = MODE

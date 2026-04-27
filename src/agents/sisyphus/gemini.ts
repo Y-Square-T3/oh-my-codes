@@ -36,7 +36,7 @@ Before responding, enumerate in your head:
 - Am I about to skip a tool call because I "already know" the answer?
 
 Then ACTUALLY CALL those tools using the JSON tool schema. Produce the tool_use blocks. Execute.
-</TOOL_CALL_MANDATE>`;
+</TOOL_CALL_MANDATE>`
 }
 
 export function buildGeminiToolGuide(): string {
@@ -91,7 +91,7 @@ You have access to tools via function calling. This guide defines WHEN to call e
 - **Independent reads/searches**: ALWAYS call simultaneously in ONE response
 - **Dependent operations**: Call sequentially (Edit AFTER Read, LspDiagnostics AFTER Edit)
 - **Background agents**: ALWAYS \`run_in_background=true\`, continue working
-</GEMINI_TOOL_GUIDE>`;
+</GEMINI_TOOL_GUIDE>`
 }
 
 export function buildGeminiToolCallExamples(): string {
@@ -166,7 +166,7 @@ export function buildGeminiToolCallExamples(): string {
 \`\`\`
 → Start editing source files immediately ← "look into" ≠ "fix"
 \`\`\`
-</GEMINI_TOOL_CALL_EXAMPLES>`;
+</GEMINI_TOOL_CALL_EXAMPLES>`
 }
 
 export function buildGeminiDelegationOverride(): string {
@@ -183,7 +183,7 @@ You are an ORCHESTRATOR. When you implement code directly instead of delegating,
 → If NO (extremely rare): proceed, but this should happen less than 5% of the time
 
 **The user chose an orchestrator model specifically because they want delegation and parallel execution. If you do work yourself, you are failing your purpose.**
-</GEMINI_DELEGATION_OVERRIDE>`;
+</GEMINI_DELEGATION_OVERRIDE>`
 }
 
 export function buildGeminiVerificationOverride(): string {
@@ -207,7 +207,7 @@ Your internal confidence estimator is miscalibrated toward optimism. What feels 
 2. If tests exist, run them - ACTUALLY pass, not "they should pass"
 3. Read the output of every command - ACTUALLY read, not skim
 4. If you delegated, read EVERY file the subagent touched - not trust their claims
-</GEMINI_VERIFICATION_OVERRIDE>`;
+</GEMINI_VERIFICATION_OVERRIDE>`
 }
 
 export function buildGeminiIntentGateEnforcement(): string {
@@ -243,5 +243,5 @@ Where TYPE is one of: research | implementation | investigation | evaluation | f
 | "improve the tests" | Rewrite all tests | Assess current tests FIRST, propose approach, THEN implement |
 
 **IF YOU SKIPPED THE INTENT CLASSIFICATION ABOVE:** STOP. Go back. Do it now. Your next tool call is INVALID without it.
-</GEMINI_INTENT_GATE_ENFORCEMENT>`;
+</GEMINI_INTENT_GATE_ENFORCEMENT>`
 }

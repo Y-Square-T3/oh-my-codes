@@ -33,25 +33,35 @@ interface MessagePart {
 function extractToolUseParts(parts: MessagePart[]): ToolUsePart[] {
   return parts.filter(
     (part): part is ToolUsePart =>
-      part.type === "tool_use" && typeof part.id === "string" && typeof part.name === "string"
+      part.type === "tool_use" &&
+      typeof part.id === "string" &&
+      typeof part.name === "string",
   )
 }
 
 async function readPartsFromSDKFallback(
   client: Client,
   sessionID: string,
-  messageID: string
+  messageID: string,
 ): Promise<MessagePart[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
     const target = messages.find((message) => message.info?.id === messageID)
     if (!target?.parts) return []
 
     return target.parts.map((part) => ({
       type: part.type === "tool" ? "tool_use" : part.type,
       id: "callID" in part ? (part as { callID?: string }).callID : part.id,
-      name: "name" in part && typeof part.name === "string" ? part.name : ("tool" in part && typeof (part as { tool?: unknown }).tool === "string" ? (part as { tool: string }).tool : undefined),
+      name:
+        "name" in part && typeof part.name === "string"
+          ? part.name
+          : "tool" in part &&
+              typeof (part as { tool?: unknown }).tool === "string"
+            ? (part as { tool: string }).tool
+            : undefined,
     }))
   } catch {
     return []
@@ -61,18 +71,25 @@ async function readPartsFromSDKFallback(
 export async function recoverUnavailableTool(
   client: Client,
   sessionID: string,
-  failedAssistantMsg: MessageData
+  failedAssistantMsg: MessageData,
 ): Promise<boolean> {
   let parts = failedAssistantMsg.parts || []
   if (parts.length === 0 && failedAssistantMsg.info?.id) {
     if (isSqliteBackend()) {
-      parts = await readPartsFromSDKFallback(client, sessionID, failedAssistantMsg.info.id)
+      parts = await readPartsFromSDKFallback(
+        client,
+        sessionID,
+        failedAssistantMsg.info.id,
+      )
     } else {
       const storedParts = readParts(failedAssistantMsg.info.id)
       parts = storedParts.map((part) => ({
         type: part.type === "tool" ? "tool_use" : part.type,
         id: "callID" in part ? (part as { callID?: string }).callID : part.id,
-        name: "tool" in part && typeof part.tool === "string" ? part.tool : undefined,
+        name:
+          "tool" in part && typeof part.tool === "string"
+            ? part.tool
+            : undefined,
       }))
     }
   }
@@ -82,16 +99,22 @@ export async function recoverUnavailableTool(
     return false
   }
 
-  const unavailableToolName = extractUnavailableToolName(failedAssistantMsg.info?.error)
+  const unavailableToolName = extractUnavailableToolName(
+    failedAssistantMsg.info?.error,
+  )
   const matchingToolUses = unavailableToolName
-    ? toolUseParts.filter((part) => part.name.toLowerCase() === unavailableToolName)
+    ? toolUseParts.filter(
+        (part) => part.name.toLowerCase() === unavailableToolName,
+      )
     : []
-  const targetToolUses = matchingToolUses.length > 0 ? matchingToolUses : toolUseParts
+  const targetToolUses =
+    matchingToolUses.length > 0 ? matchingToolUses : toolUseParts
 
   const toolResultParts = targetToolUses.map((part) => ({
     type: "tool_result" as const,
     tool_use_id: part.id,
-    content: '{"status":"error","error":"Tool not available. Please continue without this tool."}',
+    content:
+      '{"status":"error","error":"Tool not available. Please continue without this tool."}',
   }))
 
   try {
@@ -99,7 +122,9 @@ export async function recoverUnavailableTool(
       path: { id: sessionID },
       body: { parts: toolResultParts },
     }
-    const promptAsync = client.session.promptAsync as (...args: never[]) => unknown
+    const promptAsync = client.session.promptAsync as (
+      ...args: never[]
+    ) => unknown
     await Reflect.apply(promptAsync, client.session, [promptInput])
     return true
   } catch {

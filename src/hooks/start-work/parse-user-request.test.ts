@@ -22,7 +22,9 @@ describe("parseUserRequest", () => {
 
   describe("when only plan name given", () => {
     test("#given plan name without worktree flag #when parsing #then returns plan name with null worktree", () => {
-      const result = parseUserRequest("<session-context>\n<user-request>my-plan</user-request>\n</session-context>")
+      const result = parseUserRequest(
+        "<session-context>\n<user-request>my-plan</user-request>\n</session-context>",
+      )
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBeNull()
     })
@@ -30,7 +32,9 @@ describe("parseUserRequest", () => {
 
   describe("when only --worktree flag given", () => {
     test("#given --worktree with path only #when parsing #then returns worktree path with null plan", () => {
-      const result = parseUserRequest("<user-request>--worktree /home/user/repo-feat</user-request>")
+      const result = parseUserRequest(
+        "<user-request>--worktree /home/user/repo-feat</user-request>",
+      )
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBe("/home/user/repo-feat")
     })
@@ -38,13 +42,17 @@ describe("parseUserRequest", () => {
 
   describe("when plan name and --worktree are both given", () => {
     test("#given plan name before --worktree #when parsing #then returns both", () => {
-      const result = parseUserRequest("<user-request>my-plan --worktree /path/to/worktree</user-request>")
+      const result = parseUserRequest(
+        "<user-request>my-plan --worktree /path/to/worktree</user-request>",
+      )
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/worktree")
     })
 
     test("#given --worktree before plan name #when parsing #then returns both", () => {
-      const result = parseUserRequest("<user-request>--worktree /path/to/worktree my-plan</user-request>")
+      const result = parseUserRequest(
+        "<user-request>--worktree /path/to/worktree my-plan</user-request>",
+      )
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/worktree")
     })
@@ -52,7 +60,9 @@ describe("parseUserRequest", () => {
 
   describe("when plan name is wrapped in quotes", () => {
     test("#given quoted plan name #when parsing #then strips wrapping quotes", () => {
-      const result = parseUserRequest("<user-request>\"my feature plan\"</user-request>")
+      const result = parseUserRequest(
+        '<user-request>"my feature plan"</user-request>',
+      )
       expect(result.planName).toBe("my feature plan")
       expect(result.explicitWorktreePath).toBeNull()
     })
@@ -67,18 +77,24 @@ describe("parseUserRequest", () => {
 
   describe("when ultrawork keywords are present", () => {
     test("#given plan name with ultrawork keyword #when parsing #then strips keyword from plan name", () => {
-      const result = parseUserRequest("<user-request>my-plan ultrawork</user-request>")
+      const result = parseUserRequest(
+        "<user-request>my-plan ultrawork</user-request>",
+      )
       expect(result.planName).toBe("my-plan")
     })
 
     test("#given plan name with ulw keyword and worktree #when parsing #then strips ulw, preserves worktree", () => {
-      const result = parseUserRequest("<user-request>my-plan ulw --worktree /path/to/wt</user-request>")
+      const result = parseUserRequest(
+        "<user-request>my-plan ulw --worktree /path/to/wt</user-request>",
+      )
       expect(result.planName).toBe("my-plan")
       expect(result.explicitWorktreePath).toBe("/path/to/wt")
     })
 
     test("#given only ultrawork keyword with worktree #when parsing #then plan name is null, worktree preserved", () => {
-      const result = parseUserRequest("<user-request>ultrawork --worktree /wt</user-request>")
+      const result = parseUserRequest(
+        "<user-request>ultrawork --worktree /wt</user-request>",
+      )
       expect(result.planName).toBeNull()
       expect(result.explicitWorktreePath).toBe("/wt")
     })

@@ -2,7 +2,10 @@ import type { ToolContext } from "@opencode-ai/plugin/tool"
 import { publishToolMetadata } from "../../features/tool-metadata-store"
 import { applyHashlineEditsWithReport } from "./edit-operations"
 import { countLineDiffs, generateUnifiedDiff } from "./diff-utils"
-import { canonicalizeFileText, restoreFileText } from "./file-text-canonicalization"
+import {
+  canonicalizeFileText,
+  restoreFileText,
+} from "./file-text-canonicalization"
 import { normalizeHashlineEdits, type RawHashlineEdit } from "./normalize-edits"
 import type { HashlineEdit } from "./types"
 import { HashlineMismatchError } from "./validation"
@@ -28,7 +31,9 @@ type ToolContextWithMetadata = ToolContextWithCallID & {
 
 function canCreateFromMissingFile(edits: HashlineEdit[]): boolean {
   if (edits.length === 0) return false
-  return edits.every((edit) => (edit.op === "append" || edit.op === "prepend") && !edit.pos)
+  return edits.every(
+    (edit) => (edit.op === "append" || edit.op === "prepend") && !edit.pos,
+  )
 }
 
 function buildSuccessMeta(
@@ -36,9 +41,13 @@ function buildSuccessMeta(
   beforeContent: string,
   afterContent: string,
   noopEdits: number,
-  deduplicatedEdits: number
+  deduplicatedEdits: number,
 ) {
-  const unifiedDiff = generateUnifiedDiff(beforeContent, afterContent, effectivePath)
+  const unifiedDiff = generateUnifiedDiff(
+    beforeContent,
+    afterContent,
+    effectivePath,
+  )
   const { additions, deletions } = countLineDiffs(beforeContent, afterContent)
   const beforeLines = beforeContent.split("\n")
   const afterLines = afterContent.split("\n")
@@ -75,7 +84,11 @@ function buildSuccessMeta(
   }
 }
 
-export async function executeHashlineEditTool(args: HashlineEditArgs, context: ToolContext, pluginCtx?: PluginContext): Promise<string> {
+export async function executeHashlineEditTool(
+  args: HashlineEditArgs,
+  context: ToolContext,
+  pluginCtx?: PluginContext,
+): Promise<string> {
   try {
     const metadataContext = context as ToolContextWithMetadata
     const filePath = args.filePath
@@ -88,7 +101,10 @@ export async function executeHashlineEditTool(args: HashlineEditArgs, context: T
       return "Error: delete mode requires edits to be an empty array"
     }
 
-    if (!deleteMode && (!args.edits || !Array.isArray(args.edits) || args.edits.length === 0)) {
+    if (
+      !deleteMode &&
+      (!args.edits || !Array.isArray(args.edits) || args.edits.length === 0)
+    ) {
       return "Error: edits parameter must be a non-empty array"
     }
 
@@ -106,7 +122,9 @@ export async function executeHashlineEditTool(args: HashlineEditArgs, context: T
       return `Successfully deleted ${filePath}`
     }
 
-    const rawOldContent = exists ? Buffer.from(await file.arrayBuffer()).toString("utf8") : ""
+    const rawOldContent = exists
+      ? Buffer.from(await file.arrayBuffer()).toString("utf8")
+      : ""
     const oldEnvelope = canonicalizeFileText(rawOldContent)
 
     const applyResult = applyHashlineEditsWithReport(oldEnvelope.content, edits)
@@ -125,8 +143,14 @@ export async function executeHashlineEditTool(args: HashlineEditArgs, context: T
     await Bun.write(filePath, writeContent)
 
     if (pluginCtx?.client) {
-      await runFormattersForFile(pluginCtx.client as FormatterClient, context.directory, filePath)
-      const formattedContent = Buffer.from(await Bun.file(filePath).arrayBuffer()).toString("utf8")
+      await runFormattersForFile(
+        pluginCtx.client as FormatterClient,
+        context.directory,
+        filePath,
+      )
+      const formattedContent = Buffer.from(
+        await Bun.file(filePath).arrayBuffer(),
+      ).toString("utf8")
       if (formattedContent !== writeContent) {
         const formattedEnvelope = canonicalizeFileText(formattedContent)
         const formattedMeta = buildSuccessMeta(
@@ -134,7 +158,7 @@ export async function executeHashlineEditTool(args: HashlineEditArgs, context: T
           oldEnvelope.content,
           formattedEnvelope.content,
           applyResult.noopEdits,
-          applyResult.deduplicatedEdits
+          applyResult.deduplicatedEdits,
         )
         await publishToolMetadata(metadataContext, formattedMeta)
         if (rename && rename !== filePath) {
@@ -157,7 +181,7 @@ export async function executeHashlineEditTool(args: HashlineEditArgs, context: T
       oldEnvelope.content,
       canonicalNewContent,
       applyResult.noopEdits,
-      applyResult.deduplicatedEdits
+      applyResult.deduplicatedEdits,
     )
 
     await publishToolMetadata(metadataContext, meta)

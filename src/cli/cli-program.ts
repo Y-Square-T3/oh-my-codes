@@ -17,7 +17,9 @@ const program = new Command()
 
 program
   .name("oh-my-codes")
-  .description("The ultimate OpenCode plugin - multi-model orchestration, LSP tools, and more")
+  .description(
+    "The ultimate OpenCode plugin - multi-model orchestration, LSP tools, and more",
+  )
   .version(VERSION, "-v, --version", "Show version number")
   .enablePositionalOptions()
 
@@ -26,16 +28,36 @@ program
   .description("Install and configure oh-my-codes with interactive setup")
   .option("--no-tui", "Run in non-interactive mode (requires all options)")
   .option("--claude <value>", "Claude subscription: no, yes, max20")
-  .option("--openai <value>", "OpenAI/ChatGPT subscription: no, yes (default: no)")
+  .option(
+    "--openai <value>",
+    "OpenAI/ChatGPT subscription: no, yes (default: no)",
+  )
   .option("--gemini <value>", "Gemini integration: no, yes")
   .option("--copilot <value>", "GitHub Copilot subscription: no, yes")
-  .option("--opencode-zen <value>", "OpenCode Zen access: no, yes (default: no)")
-  .option("--zai-coding-plan <value>", "Z.ai Coding Plan subscription: no, yes (default: no)")
-  .option("--kimi-for-coding <value>", "Kimi For Coding subscription: no, yes (default: no)")
-  .option("--opencode-go <value>", "OpenCode Go subscription: no, yes (default: no)")
-  .option("--vercel-ai-gateway <value>", "Vercel AI Gateway: no, yes (default: no)")
+  .option(
+    "--opencode-zen <value>",
+    "OpenCode Zen access: no, yes (default: no)",
+  )
+  .option(
+    "--zai-coding-plan <value>",
+    "Z.ai Coding Plan subscription: no, yes (default: no)",
+  )
+  .option(
+    "--kimi-for-coding <value>",
+    "Kimi For Coding subscription: no, yes (default: no)",
+  )
+  .option(
+    "--opencode-go <value>",
+    "OpenCode Go subscription: no, yes (default: no)",
+  )
+  .option(
+    "--vercel-ai-gateway <value>",
+    "Vercel AI Gateway: no, yes (default: no)",
+  )
   .option("--skip-auth", "Skip authentication setup hints")
-  .addHelpText("after", `
+  .addHelpText(
+    "after",
+    `
 Examples:
   $ bunx oh-my-codes install
   $ bunx oh-my-codes install --no-tui --claude=max20 --openai=yes --gemini=yes --copilot=no
@@ -50,7 +72,8 @@ Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Verce
   Z.ai          zai-coding-plan/glm-5 (visual-engineering fallback)
   Kimi          kimi-for-coding/k2p5 (Sisyphus/Prometheus fallback)
   Vercel        vercel/ models (universal proxy, always last fallback)
-`)
+`,
+  )
   .action(async (options) => {
     const args: InstallArgs = {
       tui: options.tui !== false,
@@ -70,21 +93,36 @@ Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Verce
   })
 
 program
-   .command("run <message>")
-   .allowUnknownOption()
-   .passThroughOptions()
+  .command("run <message>")
+  .allowUnknownOption()
+  .passThroughOptions()
   .description("Run opencode with todo/background task completion enforcement")
-  .option("-a, --agent <name>", "Agent to use (default: from CLI/env/config, fallback: Sisyphus)")
-  .option("-m, --model <provider/model>", "Model override (e.g., anthropic/claude-sonnet-4)")
+  .option(
+    "-a, --agent <name>",
+    "Agent to use (default: from CLI/env/config, fallback: Sisyphus)",
+  )
+  .option(
+    "-m, --model <provider/model>",
+    "Model override (e.g., anthropic/claude-sonnet-4)",
+  )
   .option("-d, --directory <path>", "Working directory")
-  .option("-p, --port <port>", "Server port (attaches if port already in use)", parseInt)
+  .option(
+    "-p, --port <port>",
+    "Server port (attaches if port already in use)",
+    parseInt,
+  )
   .option("--attach <url>", "Attach to existing opencode server URL")
   .option("--on-complete <command>", "Shell command to run after completion")
   .option("--json", "Output structured JSON result to stdout")
   .option("--no-timestamp", "Disable timestamp prefix in run output")
   .option("--verbose", "Show full event stream (default: messages/tools only)")
-  .option("--session-id <id>", "Resume existing session instead of creating new one")
-  .addHelpText("after", `
+  .option(
+    "--session-id <id>",
+    "Resume existing session instead of creating new one",
+  )
+  .addHelpText(
+    "after",
+    `
 Examples:
   $ bunx oh-my-codes run "Fix the bug in index.ts"
   $ bunx oh-my-codes run --agent Sisyphus "Implement feature X"
@@ -108,7 +146,8 @@ Available core agents:
 Unlike 'opencode run', this command waits until:
   - All todos are completed or cancelled
   - All child sessions (background tasks) are idle
-`)
+`,
+  )
   .action(async (message: string, options) => {
     if (options.port && options.attach) {
       console.error("Error: --port and --attach are mutually exclusive")
@@ -136,7 +175,9 @@ program
   .description("Show current installed version and check for updates")
   .option("-d, --directory <path>", "Working directory to check config from")
   .option("--json", "Output in JSON format for scripting")
-  .addHelpText("after", `
+  .addHelpText(
+    "after",
+    `
 Examples:
   $ bunx oh-my-codes get-local-version
   $ bunx oh-my-codes get-local-version --json
@@ -147,7 +188,8 @@ This command shows:
   - Latest available version on npm
   - Whether you're up to date
   - Special modes (local dev, pinned version)
-`)
+`,
+  )
   .action(async (options) => {
     const versionOptions: GetLocalVersionOptions = {
       directory: options.directory,
@@ -163,15 +205,22 @@ program
   .option("--status", "Show compact system dashboard")
   .option("--verbose", "Show detailed diagnostic information")
   .option("--json", "Output results in JSON format")
-  .addHelpText("after", `
+  .addHelpText(
+    "after",
+    `
 Examples:
   $ bunx oh-my-codes doctor            # Show problems only
   $ bunx oh-my-codes doctor --status   # Compact dashboard
   $ bunx oh-my-codes doctor --verbose  # Deep diagnostics
   $ bunx oh-my-codes doctor --json     # JSON output
-`)
+`,
+  )
   .action(async (options) => {
-    const mode = options.status ? "status" : options.verbose ? "verbose" : "default"
+    const mode = options.status
+      ? "status"
+      : options.verbose
+        ? "verbose"
+        : "default"
     const doctorOptions: DoctorOptions = {
       mode,
       json: options.json ?? false,
@@ -182,8 +231,13 @@ Examples:
 
 program
   .command("refresh-model-capabilities")
-  .description("Refresh the cached models.dev-based model capabilities snapshot")
-  .option("-d, --directory <path>", "Working directory to read oh-my-codes config from")
+  .description(
+    "Refresh the cached models.dev-based model capabilities snapshot",
+  )
+  .option(
+    "-d, --directory <path>",
+    "Working directory to read oh-my-codes config from",
+  )
   .option("--source-url <url>", "Override the models.dev source URL")
   .option("--json", "Output refresh summary as JSON")
   .action(async (options) => {

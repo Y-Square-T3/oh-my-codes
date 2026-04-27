@@ -27,7 +27,9 @@ declare function clearTimeout(timeout: number): void
 type ProcessOutputStream = ReturnType<typeof spawnWithWindowsHide>["stdout"]
 
 declare const Bun: {
-  readableStreamToText(stream: NonNullable<ProcessOutputStream>): Promise<string>
+  readableStreamToText(
+    stream: NonNullable<ProcessOutputStream>,
+  ): Promise<string>
 }
 
 export interface BunInstallResult {
@@ -53,7 +55,10 @@ function readProcessOutput(stream: ProcessOutputStream): Promise<string> {
   return Bun.readableStreamToText(stream)
 }
 
-function logCapturedOutputOnFailure(outputMode: BunInstallOutputMode, output: BunInstallOutput): void {
+function logCapturedOutputOnFailure(
+  outputMode: BunInstallOutputMode,
+  output: BunInstallOutput,
+): void {
   if (outputMode !== "pipe") {
     return
   }
@@ -70,7 +75,9 @@ function logCapturedOutputOnFailure(outputMode: BunInstallOutputMode, output: Bu
   })
 }
 
-export async function runBunInstallWithDetails(options?: RunBunInstallOptions): Promise<BunInstallResult> {
+export async function runBunInstallWithDetails(
+  options?: RunBunInstallOptions,
+): Promise<BunInstallResult> {
   const outputMode = options?.outputMode ?? "pipe"
   const cacheDir = options?.workspaceDir ?? getDefaultWorkspaceDir()
   const packageJsonPath = `${cacheDir}/package.json`
@@ -89,9 +96,10 @@ export async function runBunInstallWithDetails(options?: RunBunInstallOptions): 
       stderr: outputMode,
     })
 
-    const outputPromise = Promise.all([readProcessOutput(proc.stdout), readProcessOutput(proc.stderr)]).then(
-      ([stdout, stderr]) => ({ stdout, stderr })
-    )
+    const outputPromise = Promise.all([
+      readProcessOutput(proc.stdout),
+      readProcessOutput(proc.stderr),
+    ]).then(([stdout, stderr]) => ({ stdout, stderr }))
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined
     const timeoutPromise = new Promise<"timeout">((resolve) => {
@@ -116,7 +124,10 @@ export async function runBunInstallWithDetails(options?: RunBunInstallOptions): 
             logCapturedOutputOnFailure(outputMode, output)
           })
           .catch((err) => {
-            log("[bun-install] Failed to read captured output after timeout:", err)
+            log(
+              "[bun-install] Failed to read captured output after timeout:",
+              err,
+            )
           })
       }
 

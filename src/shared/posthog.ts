@@ -6,7 +6,8 @@ import { PLUGIN_NAME, PUBLISHED_PACKAGE_NAME } from "./plugin-identity"
 import { getPostHogActivityCaptureState } from "./posthog-activity-state"
 
 const DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com"
-const DEFAULT_POSTHOG_API_KEY = "phc_CFJhj5HyvA62QPhvyaUCtaq23aUfznnijg5VaaGkNk74"
+const DEFAULT_POSTHOG_API_KEY =
+  "phc_CFJhj5HyvA62QPhvyaUCtaq23aUfznnijg5VaaGkNk74"
 
 type PostHogCaptureEvent = Parameters<PostHog["capture"]>[0]
 type PostHogExceptionProperties = Parameters<PostHog["captureException"]>[2]
@@ -36,7 +37,10 @@ function isFalsy(value: string | undefined): boolean {
 }
 
 function shouldDisablePostHog(): boolean {
-  if (process.env.OMO_DISABLE_POSTHOG === "true" || process.env.OMO_DISABLE_POSTHOG === "1") {
+  if (
+    process.env.OMO_DISABLE_POSTHOG === "true" ||
+    process.env.OMO_DISABLE_POSTHOG === "1"
+  ) {
     return true
   }
 
@@ -55,7 +59,9 @@ function getPostHogHost(): string {
   return process.env.POSTHOG_HOST?.trim() || DEFAULT_POSTHOG_HOST
 }
 
-function getSharedProperties(source: PostHogSource): NonNullable<PostHogCaptureEvent["properties"]> {
+function getSharedProperties(
+  source: PostHogSource,
+): NonNullable<PostHogCaptureEvent["properties"]> {
   return {
     platform: "oh-my-codes",
     package_name: PUBLISHED_PACKAGE_NAME,

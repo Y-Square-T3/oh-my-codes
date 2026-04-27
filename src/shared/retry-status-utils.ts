@@ -7,7 +7,10 @@ export function normalizeRetryStatusMessage(message: string): string {
     .toLowerCase()
 }
 
-export function extractRetryAttempt(statusAttempt: unknown, message: string): string {
+export function extractRetryAttempt(
+  statusAttempt: unknown,
+  message: string,
+): string {
   if (typeof statusAttempt === "number" && Number.isFinite(statusAttempt)) {
     return String(statusAttempt)
   }

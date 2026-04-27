@@ -1,66 +1,73 @@
-import type { CategoryConfig } from "../config/schema";
-import { PROMETHEUS_PERMISSION, getPrometheusPrompt } from "../agents/prometheus";
-import { resolvePromptAppend } from "../agents/builtin-agents/resolve-file-uri";
-import { AGENT_MODEL_REQUIREMENTS } from "../shared/model-requirements";
-import type { FallbackEntry } from "../shared/model-requirements";
+import type { CategoryConfig } from "../config/schema"
+import {
+  PROMETHEUS_PERMISSION,
+  getPrometheusPrompt,
+} from "../agents/prometheus"
+import { resolvePromptAppend } from "../agents/builtin-agents/resolve-file-uri"
+import { AGENT_MODEL_REQUIREMENTS } from "../shared/model-requirements"
+import type { FallbackEntry } from "../shared/model-requirements"
 import {
   fetchAvailableModels,
   readConnectedProvidersCache,
   resolveModelPipeline,
-} from "../shared";
-import { resolveCategoryConfig } from "./category-config-resolver";
+} from "../shared"
+import { resolveCategoryConfig } from "./category-config-resolver"
 
 type PrometheusOverride = Record<string, unknown> & {
-  category?: string;
-  model?: string;
-  variant?: string;
-  reasoningEffort?: string;
-  textVerbosity?: string;
-  thinking?: { type: string; budgetTokens?: number };
-  temperature?: number;
-  top_p?: number;
-  maxTokens?: number;
-  prompt_append?: string;
-};
+  category?: string
+  model?: string
+  variant?: string
+  reasoningEffort?: string
+  textVerbosity?: string
+  thinking?: { type: string; budgetTokens?: number }
+  temperature?: number
+  top_p?: number
+  maxTokens?: number
+  prompt_append?: string
+}
 
 function isModelInFallbackChain(
   model: string | undefined,
   fallbackChain: FallbackEntry[] | undefined,
 ): boolean {
   if (!model || !fallbackChain || fallbackChain.length === 0) {
-    return false;
+    return false
   }
 
-  const modelParts = model.split("/");
-  const modelName = modelParts.length >= 2 ? modelParts.slice(1).join("/") : model;
+  const modelParts = model.split("/")
+  const modelName =
+    modelParts.length >= 2 ? modelParts.slice(1).join("/") : model
 
-  return fallbackChain.some((entry) => entry.model === modelName);
+  return fallbackChain.some((entry) => entry.model === modelName)
 }
 
 export async function buildPrometheusAgentConfig(params: {
-  configAgentPlan: Record<string, unknown> | undefined;
-  pluginPrometheusOverride: PrometheusOverride | undefined;
-  userCategories: Record<string, CategoryConfig> | undefined;
-  currentModel: string | undefined;
-  disabledTools?: readonly string[];
+  configAgentPlan: Record<string, unknown> | undefined
+  pluginPrometheusOverride: PrometheusOverride | undefined
+  userCategories: Record<string, CategoryConfig> | undefined
+  currentModel: string | undefined
+  disabledTools?: readonly string[]
 }): Promise<Record<string, unknown>> {
   const categoryConfig = params.pluginPrometheusOverride?.category
-    ? resolveCategoryConfig(params.pluginPrometheusOverride.category, params.userCategories)
-    : undefined;
+    ? resolveCategoryConfig(
+        params.pluginPrometheusOverride.category,
+        params.userCategories,
+      )
+    : undefined
 
-  const requirement = AGENT_MODEL_REQUIREMENTS["prometheus"];
-  const connectedProviders = readConnectedProvidersCache();
+  const requirement = AGENT_MODEL_REQUIREMENTS["prometheus"]
+  const connectedProviders = readConnectedProvidersCache()
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders: connectedProviders ?? undefined,
-  });
+  })
 
   const configuredPrometheusModel =
-    params.pluginPrometheusOverride?.model ?? categoryConfig?.model;
+    params.pluginPrometheusOverride?.model ?? categoryConfig?.model
 
   const shouldUseCurrentModel = isModelInFallbackChain(
     params.currentModel,
     requirement?.fallbackChain,
-  );
+  )
 
   const modelResolution = resolveModelPipeline({
     intent: {
@@ -77,22 +84,27 @@ export async function buildPrometheusAgentConfig(params: {
       fallbackChain: requirement?.fallbackChain,
       systemDefaultModel: undefined,
     },
-  });
+  })
 
-  const resolvedModel = modelResolution?.model;
-  const resolvedVariant = modelResolution?.variant;
+  const resolvedModel = modelResolution?.model
+  const resolvedVariant = modelResolution?.variant
 
-  const variantToUse = params.pluginPrometheusOverride?.variant ?? resolvedVariant;
+  const variantToUse =
+    params.pluginPrometheusOverride?.variant ?? resolvedVariant
   const reasoningEffortToUse =
-    params.pluginPrometheusOverride?.reasoningEffort ?? categoryConfig?.reasoningEffort;
+    params.pluginPrometheusOverride?.reasoningEffort ??
+    categoryConfig?.reasoningEffort
   const textVerbosityToUse =
-    params.pluginPrometheusOverride?.textVerbosity ?? categoryConfig?.textVerbosity;
-  const thinkingToUse = params.pluginPrometheusOverride?.thinking ?? categoryConfig?.thinking;
+    params.pluginPrometheusOverride?.textVerbosity ??
+    categoryConfig?.textVerbosity
+  const thinkingToUse =
+    params.pluginPrometheusOverride?.thinking ?? categoryConfig?.thinking
   const temperatureToUse =
-    params.pluginPrometheusOverride?.temperature ?? categoryConfig?.temperature;
-  const topPToUse = params.pluginPrometheusOverride?.top_p ?? categoryConfig?.top_p;
+    params.pluginPrometheusOverride?.temperature ?? categoryConfig?.temperature
+  const topPToUse =
+    params.pluginPrometheusOverride?.top_p ?? categoryConfig?.top_p
   const maxTokensToUse =
-    params.pluginPrometheusOverride?.maxTokens ?? categoryConfig?.maxTokens;
+    params.pluginPrometheusOverride?.maxTokens ?? categoryConfig?.maxTokens
 
   const base: Record<string, unknown> = {
     ...(resolvedModel ? { model: resolvedModel } : {}),
@@ -102,7 +114,9 @@ export async function buildPrometheusAgentConfig(params: {
     permission: PROMETHEUS_PERMISSION,
     description: `${(params.configAgentPlan?.description as string) ?? "Plan agent"} (Prometheus - OhMyCodes)`,
     color: (params.configAgentPlan?.color as string) ?? "#FF5722",
-    ...(temperatureToUse !== undefined ? { temperature: temperatureToUse } : {}),
+    ...(temperatureToUse !== undefined
+      ? { temperature: temperatureToUse }
+      : {}),
     ...(topPToUse !== undefined ? { top_p: topPToUse } : {}),
     ...(maxTokensToUse !== undefined ? { maxTokens: maxTokensToUse } : {}),
     ...(categoryConfig?.tools ? { tools: categoryConfig.tools } : {}),
@@ -113,15 +127,15 @@ export async function buildPrometheusAgentConfig(params: {
     ...(textVerbosityToUse !== undefined
       ? { textVerbosity: textVerbosityToUse }
       : {}),
-  };
-
-  const override = params.pluginPrometheusOverride;
-  if (!override) return base;
-
-  const { prompt_append, ...restOverride } = override;
-  const merged = { ...base, ...restOverride };
-  if (prompt_append && typeof merged.prompt === "string") {
-    merged.prompt = merged.prompt + "\n" + resolvePromptAppend(prompt_append);
   }
-  return merged;
+
+  const override = params.pluginPrometheusOverride
+  if (!override) return base
+
+  const { prompt_append, ...restOverride } = override
+  const merged = { ...base, ...restOverride }
+  if (prompt_append && typeof merged.prompt === "string") {
+    merged.prompt = merged.prompt + "\n" + resolvePromptAppend(prompt_append)
+  }
+  return merged
 }

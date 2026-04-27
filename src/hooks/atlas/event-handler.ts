@@ -65,7 +65,10 @@ export function createAtlasEventHandler(input: {
       return
     }
 
-    if (event.type === "tool.execute.before" || event.type === "tool.execute.after") {
+    if (
+      event.type === "tool.execute.before" ||
+      event.type === "tool.execute.after"
+    ) {
       const sessionID = props?.sessionID as string | undefined
       if (sessionID) {
         const state = sessions.get(sessionID)
@@ -84,13 +87,16 @@ export function createAtlasEventHandler(input: {
           clearTimeout(deletedState.pendingRetryTimer)
         }
         sessions.delete(sessionInfo.id)
-        log(`[${HOOK_NAME}] Session deleted: cleaned up`, { sessionID: sessionInfo.id })
+        log(`[${HOOK_NAME}] Session deleted: cleaned up`, {
+          sessionID: sessionInfo.id,
+        })
       }
       return
     }
 
     if (event.type === "session.compacted") {
-      const sessionID = (props?.sessionID ?? (props?.info as { id?: string } | undefined)?.id) as string | undefined
+      const sessionID = (props?.sessionID ??
+        (props?.info as { id?: string } | undefined)?.id) as string | undefined
       if (sessionID) {
         const compactedState = sessions.get(sessionID)
         if (compactedState?.pendingRetryTimer) {

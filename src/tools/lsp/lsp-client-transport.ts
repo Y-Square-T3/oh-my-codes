@@ -18,13 +18,19 @@ export class LSPClientTransport {
   protected readonly diagnosticsStore = new Map<string, Diagnostic[]>()
   protected readonly REQUEST_TIMEOUT = 15000
 
-  constructor(protected root: string, protected server: ResolvedServer) {}
+  constructor(
+    protected root: string,
+    protected server: ResolvedServer,
+  ) {}
   async start(): Promise<void> {
     const env = {
       ...process.env,
       ...this.server.env,
     }
-    const pathValue = process.platform === "win32" ? env.PATH ?? env.Path ?? "" : env.PATH ?? ""
+    const pathValue =
+      process.platform === "win32"
+        ? (env.PATH ?? env.Path ?? "")
+        : (env.PATH ?? "")
     const spawnPath = [pathValue, ...getLspServerAdditionalPathBases(this.root)]
       .filter(Boolean)
       .join(delimiter)
@@ -38,14 +44,19 @@ export class LSPClientTransport {
       env,
     })
     if (!this.proc) {
-      throw new Error(`Failed to spawn LSP server: ${this.server.command.join(" ")}`)
+      throw new Error(
+        `Failed to spawn LSP server: ${this.server.command.join(" ")}`,
+      )
     }
     this.startStderrReading()
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     if (this.proc.exitCode !== null) {
       const stderr = this.stderrBuffer.join("\n")
-      throw new Error(`LSP server exited immediately with code ${this.proc.exitCode}` + (stderr ? `\nstderr: ${stderr}` : ""))
+      throw new Error(
+        `LSP server exited immediately with code ${this.proc.exitCode}` +
+          (stderr ? `\nstderr: ${stderr}` : ""),
+      )
     }
 
     const stdoutReader = this.proc.stdout.getReader()
@@ -76,21 +87,30 @@ export class LSPClientTransport {
       },
     })
 
-    this.connection = createMessageConnection(new StreamMessageReader(nodeReadable), new StreamMessageWriter(nodeWritable))
+    this.connection = createMessageConnection(
+      new StreamMessageReader(nodeReadable),
+      new StreamMessageWriter(nodeWritable),
+    )
 
-    this.connection.onNotification("textDocument/publishDiagnostics", (params: { uri?: string; diagnostics?: Diagnostic[] }) => {
-      if (params.uri) {
-        this.diagnosticsStore.set(params.uri, params.diagnostics ?? [])
-      }
-    })
+    this.connection.onNotification(
+      "textDocument/publishDiagnostics",
+      (params: { uri?: string; diagnostics?: Diagnostic[] }) => {
+        if (params.uri) {
+          this.diagnosticsStore.set(params.uri, params.diagnostics ?? [])
+        }
+      },
+    )
 
-    this.connection.onRequest("workspace/configuration", (params: { items?: Array<{ section?: string }> }) => {
-      const items = params?.items ?? []
-      return items.map((item) => {
-        if (item.section === "json") return { validate: { enable: true } }
-        return {}
-      })
-    })
+    this.connection.onRequest(
+      "workspace/configuration",
+      (params: { items?: Array<{ section?: string }> }) => {
+        const items = params?.items ?? []
+        return items.map((item) => {
+          if (item.section === "json") return { validate: { enable: true } }
+          return {}
+        })
+      },
+    )
 
     this.connection.onRequest("client/registerCapability", () => null)
     this.connection.onRequest("window/workDoneProgress/create", () => null)
@@ -128,23 +148,37 @@ export class LSPClientTransport {
 
   protected sendRequest<T>(method: string): Promise<T>
   protected sendRequest<T>(method: string, params: unknown): Promise<T>
-  protected async sendRequest<T>(method: string, ...args: [] | [unknown]): Promise<T> {
+  protected async sendRequest<T>(
+    method: string,
+    ...args: [] | [unknown]
+  ): Promise<T> {
     if (!this.connection) throw new Error("LSP client not started")
 
     if (this.processExited || (this.proc && this.proc.exitCode !== null)) {
       const stderr = this.stderrBuffer.slice(-10).join("\n")
-      throw new Error(`LSP server already exited (code: ${this.proc?.exitCode})` + (stderr ? `\nstderr: ${stderr}` : ""))
+      throw new Error(
+        `LSP server already exited (code: ${this.proc?.exitCode})` +
+          (stderr ? `\nstderr: ${stderr}` : ""),
+      )
     }
 
     let timeoutId: ReturnType<typeof setTimeout>
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         const stderr = this.stderrBuffer.slice(-5).join("\n")
-        reject(new Error(`LSP request timeout (method: ${method})` + (stderr ? `\nrecent stderr: ${stderr}` : "")))
+        reject(
+          new Error(
+            `LSP request timeout (method: ${method})` +
+              (stderr ? `\nrecent stderr: ${stderr}` : ""),
+          ),
+        )
       }, this.REQUEST_TIMEOUT)
     })
 
-    const requestPromise = this.connection.sendRequest(method, ...args) as Promise<T>
+    const requestPromise = this.connection.sendRequest(
+      method,
+      ...args,
+    ) as Promise<T>
 
     try {
       const result = await Promise.race([requestPromise, timeoutPromise])
@@ -165,7 +199,9 @@ export class LSPClientTransport {
   }
 
   isAlive(): boolean {
-    return this.proc !== null && !this.processExited && this.proc.exitCode === null
+    return (
+      this.proc !== null && !this.processExited && this.proc.exitCode === null
+    )
   }
 
   async stop(): Promise<void> {
@@ -189,17 +225,24 @@ export class LSPClientTransport {
           timeoutId = setTimeout(resolve, 5000)
         })
         await Promise.race([
-          proc.exited.then(() => {
-            exitedBeforeTimeout = true
-          }).finally(() => timeoutId && clearTimeout(timeoutId)),
+          proc.exited
+            .then(() => {
+              exitedBeforeTimeout = true
+            })
+            .finally(() => timeoutId && clearTimeout(timeoutId)),
           timeoutPromise,
         ])
         if (!exitedBeforeTimeout) {
-          log("[LSPClient] Process did not exit within timeout, escalating to SIGKILL")
+          log(
+            "[LSPClient] Process did not exit within timeout, escalating to SIGKILL",
+          )
           try {
             proc.kill("SIGKILL")
             // Wait briefly for SIGKILL to take effect
-            await Promise.race([proc.exited, new Promise<void>((resolve) => setTimeout(resolve, 1000))])
+            await Promise.race([
+              proc.exited,
+              new Promise<void>((resolve) => setTimeout(resolve, 1000)),
+            ])
           } catch {}
         }
       } catch {}

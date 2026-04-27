@@ -16,7 +16,10 @@ import { getOpenCodeStorageDir } from "../shared/data-path"
 
 const OPENCLAW_STORAGE_DIR = join(getOpenCodeStorageDir(), "openclaw")
 const REGISTRY_PATH = join(OPENCLAW_STORAGE_DIR, "reply-session-registry.jsonl")
-const REGISTRY_LOCK_PATH = join(OPENCLAW_STORAGE_DIR, "reply-session-registry.lock")
+const REGISTRY_LOCK_PATH = join(
+  OPENCLAW_STORAGE_DIR,
+  "reply-session-registry.lock",
+)
 const SECURE_FILE_MODE = 0o600
 const MAX_AGE_MS = 24 * 60 * 60 * 1000
 const LOCK_TIMEOUT_MS = 2000
@@ -73,9 +76,13 @@ function readLockSnapshot(): LockSnapshot | null {
     try {
       const parsed = JSON.parse(trimmed)
       const pid =
-        typeof parsed.pid === "number" && Number.isFinite(parsed.pid) ? parsed.pid : null
+        typeof parsed.pid === "number" && Number.isFinite(parsed.pid)
+          ? parsed.pid
+          : null
       const token =
-        typeof parsed.token === "string" && parsed.token.length > 0 ? parsed.token : null
+        typeof parsed.token === "string" && parsed.token.length > 0
+          ? parsed.token
+          : null
       return { raw, pid, token }
     } catch {
       const [pidStr] = trimmed.split(":")
@@ -129,12 +136,10 @@ function acquireRegistryLock(): LockHandle | null {
       } catch (writeError) {
         try {
           closeSync(fd)
-        } catch {
-        }
+        } catch {}
         try {
           unlinkSync(REGISTRY_LOCK_PATH)
-        } catch {
-        }
+        } catch {}
         throw writeError
       }
       return { fd, token }
@@ -159,15 +164,16 @@ function acquireRegistryLock(): LockHandle | null {
             continue
           }
         }
-      } catch {
-      }
+      } catch {}
       sleepMs(LOCK_RETRY_MS)
     }
   }
   return null
 }
 
-function acquireRegistryLockOrWait(maxWaitMs = LOCK_WAIT_TIMEOUT_MS): LockHandle | null {
+function acquireRegistryLockOrWait(
+  maxWaitMs = LOCK_WAIT_TIMEOUT_MS,
+): LockHandle | null {
   const started = Date.now()
   while (Date.now() - started < maxWaitMs) {
     const lock = acquireRegistryLock()
@@ -182,8 +188,7 @@ function acquireRegistryLockOrWait(maxWaitMs = LOCK_WAIT_TIMEOUT_MS): LockHandle
 function releaseRegistryLock(lock: LockHandle): void {
   try {
     closeSync(lock.fd)
-  } catch {
-    }
+  } catch {}
   const snapshot = readLockSnapshot()
   if (!snapshot || snapshot.token !== lock.token) return
   removeLockIfUnchanged(snapshot)
@@ -202,7 +207,10 @@ function withRegistryLockOrWait<T>(
   }
 }
 
-function withRegistryLock(onLocked: () => void, onLockUnavailable: () => void): void {
+function withRegistryLock(
+  onLocked: () => void,
+  onLockUnavailable: () => void,
+): void {
   const lock = acquireRegistryLock()
   if (lock === null) {
     onLockUnavailable()
@@ -278,9 +286,16 @@ export function loadAllMappings(): SessionMapping[] {
   )
 }
 
-export function lookupByMessageId(platform: string, messageId: string): SessionMapping | null {
+export function lookupByMessageId(
+  platform: string,
+  messageId: string,
+): SessionMapping | null {
   const mappings = loadAllMappings()
-  return mappings.find((m) => m.platform === platform && m.messageId === messageId) || null
+  return (
+    mappings.find(
+      (m) => m.platform === platform && m.messageId === messageId,
+    ) || null
+  )
 }
 
 export function removeSession(sessionId: string): void {
@@ -291,8 +306,7 @@ export function removeSession(sessionId: string): void {
       if (filtered.length === mappings.length) return
       rewriteRegistryUnsafe(filtered)
     },
-    () => {
-    },
+    () => {},
   )
 }
 
@@ -304,8 +318,7 @@ export function removeMessagesByPane(paneId: string): void {
       if (filtered.length === mappings.length) return
       rewriteRegistryUnsafe(filtered)
     },
-    () => {
-    },
+    () => {},
   )
 }
 
@@ -325,7 +338,6 @@ export function pruneStale(): void {
       if (filtered.length === mappings.length) return
       rewriteRegistryUnsafe(filtered)
     },
-    () => {
-    },
+    () => {},
   )
 }

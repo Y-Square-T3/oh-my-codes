@@ -4,7 +4,10 @@ export interface ToolHeader {
   description?: string
 }
 
-export function formatToolHeader(toolName: string, input: Record<string, unknown>): ToolHeader {
+export function formatToolHeader(
+  toolName: string,
+  input: Record<string, unknown>,
+): ToolHeader {
   if (toolName === "glob") {
     const pattern = str(input.pattern)
     const root = str(input.path)
@@ -55,7 +58,11 @@ export function formatToolHeader(toolName: string, input: Record<string, unknown
     return {
       icon: "←",
       title: filePath ? `Edit ${filePath}` : "Edit",
-      description: formatKeyValues(input, ["filePath", "oldString", "newString"]),
+      description: formatKeyValues(input, [
+        "filePath",
+        "oldString",
+        "newString",
+      ]),
     }
   }
 
@@ -125,16 +132,21 @@ export function formatToolHeader(toolName: string, input: Record<string, unknown
   }
 }
 
-function formatKeyValues(input: Record<string, unknown>, exclude: string[]): string | undefined {
+function formatKeyValues(
+  input: Record<string, unknown>,
+  exclude: string[],
+): string | undefined {
   const entries = Object.entries(input).filter(([key, value]) => {
     if (exclude.includes(key)) return false
-    return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
+    return (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    )
   })
   if (!entries.length) return undefined
 
-  return entries
-    .map(([key, value]) => `${key}=${String(value)}`)
-    .join(" ")
+  return entries.map(([key, value]) => `${key}=${String(value)}`).join(" ")
 }
 
 function str(value: unknown): string | undefined {

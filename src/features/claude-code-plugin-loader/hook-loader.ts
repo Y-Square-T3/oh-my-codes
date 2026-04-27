@@ -16,7 +16,9 @@ export function loadPluginHooksConfigs(plugins: LoadedPlugin[]): HooksConfig[] {
       config = resolvePluginPaths(config, plugin.installPath)
 
       configs.push(config)
-      log(`Loaded plugin hooks config from ${plugin.name}`, { path: plugin.hooksPath })
+      log(`Loaded plugin hooks config from ${plugin.name}`, {
+        path: plugin.hooksPath,
+      })
     } catch (error) {
       log(`Failed to load plugin hooks config: ${plugin.hooksPath}`, error)
     }

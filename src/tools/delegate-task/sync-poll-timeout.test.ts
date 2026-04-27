@@ -1,6 +1,10 @@
 declare const require: (name: string) => any
 const { describe, test, expect, beforeEach, afterEach } = require("bun:test")
-import { __setTimingConfig, __resetTimingConfig, getTimingConfig } from "./timing"
+import {
+  __setTimingConfig,
+  __resetTimingConfig,
+  getTimingConfig,
+} from "./timing"
 
 function createMockCtx(aborted = false) {
   const controller = new AbortController()
@@ -20,7 +24,9 @@ function createNeverCompleteClient(sessionID: string, onAbort?: () => void) {
         onAbort?.()
       },
       messages: async () => ({
-        data: [{ info: { id: "msg_001", role: "user", time: { created: 1000 } } }],
+        data: [
+          { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
+        ],
       }),
       status: async () => ({ data: { [sessionID]: { type: "idle" } } }),
     },
@@ -68,14 +74,21 @@ describe("syncPollTimeoutMs threading", () => {
         })
 
         await withMockedDateNow(60_000, async () => {
-          const result = await pollSyncSession(createMockCtx(), mockClient, {
-            sessionID: "ses_custom",
-            agentToUse: "test-agent",
-            toastManager: null,
-            taskId: undefined,
-          }, 120_000)
+          const result = await pollSyncSession(
+            createMockCtx(),
+            mockClient,
+            {
+              sessionID: "ses_custom",
+              agentToUse: "test-agent",
+              toastManager: null,
+              taskId: undefined,
+            },
+            120_000,
+          )
 
-          expect(result).toBe("Poll timeout reached after 120000ms for session ses_custom")
+          expect(result).toBe(
+            "Poll timeout reached after 120000ms for session ses_custom",
+          )
           expect(abortCount).toBe(1)
         })
       })
@@ -95,7 +108,9 @@ describe("syncPollTimeoutMs threading", () => {
             taskId: undefined,
           })
 
-          expect(result).toBe(`Poll timeout reached after ${MAX_POLL_TIME_MS}ms for session ses_default`)
+          expect(result).toBe(
+            `Poll timeout reached after ${MAX_POLL_TIME_MS}ms for session ses_default`,
+          )
         })
       })
 
@@ -113,7 +128,9 @@ describe("syncPollTimeoutMs threading", () => {
             taskId: undefined,
           })
 
-          expect(result).toBe("Poll timeout reached after 120000ms for session ses_legacy")
+          expect(result).toBe(
+            "Poll timeout reached after 120000ms for session ses_legacy",
+          )
         })
       })
     })
@@ -124,14 +141,21 @@ describe("syncPollTimeoutMs threading", () => {
         const mockClient = createNeverCompleteClient("ses_guard")
 
         await withMockedDateNow(25, async () => {
-          const result = await pollSyncSession(createMockCtx(), mockClient, {
-            sessionID: "ses_guard",
-            agentToUse: "test-agent",
-            toastManager: null,
-            taskId: undefined,
-          }, 10)
+          const result = await pollSyncSession(
+            createMockCtx(),
+            mockClient,
+            {
+              sessionID: "ses_guard",
+              agentToUse: "test-agent",
+              toastManager: null,
+              taskId: undefined,
+            },
+            10,
+          )
 
-          expect(result).toBe("Poll timeout reached after 50ms for session ses_guard")
+          expect(result).toBe(
+            "Poll timeout reached after 50ms for session ses_guard",
+          )
         })
       })
     })
@@ -152,7 +176,11 @@ describe("syncPollTimeoutMs threading", () => {
             messages: async () => ({
               data: [
                 {
-                  info: { id: "msg_001", role: "assistant", time: { created: 2000 } },
+                  info: {
+                    id: "msg_001",
+                    role: "assistant",
+                    time: { created: 2000 },
+                  },
                   parts: [{ type: "text", text: "unstable path done" }],
                 },
               ],
@@ -161,8 +189,16 @@ describe("syncPollTimeoutMs threading", () => {
         }
 
         const mockManager = {
-          launch: async () => ({ id: "task_001", sessionID: "ses_unstable", status: "running" }),
-          getTask: () => ({ id: "task_001", sessionID: "ses_unstable", status: "running" }),
+          launch: async () => ({
+            id: "task_001",
+            sessionID: "ses_unstable",
+            status: "running",
+          }),
+          getTask: () => ({
+            id: "task_001",
+            sessionID: "ses_unstable",
+            status: "running",
+          }),
         }
 
         const result = await executeUnstableAgentTask(
@@ -189,7 +225,7 @@ describe("syncPollTimeoutMs threading", () => {
           "test-agent",
           undefined,
           undefined,
-          "gpt-test"
+          "gpt-test",
         )
 
         expect(statusCallCount).toBe(0)

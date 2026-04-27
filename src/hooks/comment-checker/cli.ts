@@ -11,13 +11,15 @@ const DEBUG_FILE = join(tmpdir(), "comment-checker-debug.log")
 
 function debugLog(...args: unknown[]) {
   if (DEBUG) {
-    const msg = `[${new Date().toISOString()}] [comment-checker:cli] ${args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')}\n`
+    const msg = `[${new Date().toISOString()}] [comment-checker:cli] ${args.map((a) => (typeof a === "object" ? JSON.stringify(a, null, 2) : String(a))).join(" ")}\n`
     fs.appendFileSync(DEBUG_FILE, msg)
   }
 }
 
 function getBinaryName(): string {
-  return process.platform === "win32" ? "comment-checker.exe" : "comment-checker"
+  return process.platform === "win32"
+    ? "comment-checker.exe"
+    : "comment-checker"
 }
 
 function findCommentCheckerPathSync(): string | null {
@@ -38,7 +40,8 @@ function findCommentCheckerPathSync(): string | null {
 
   try {
     const require = createRequire(import.meta.url)
-    const cliPkgPath = require.resolve("@code-yeongyu/comment-checker/package.json")
+    const cliPkgPath =
+      require.resolve("@code-yeongyu/comment-checker/package.json")
     const cliDir = dirname(cliPkgPath)
     const binaryPath = join(cliDir, "bin", binaryName)
 
@@ -113,11 +116,13 @@ export function getCommentCheckerPathSync(): string | null {
 export function startBackgroundInit(): void {
   if (!initPromise) {
     initPromise = getCommentCheckerPath()
-    initPromise.then(path => {
-      debugLog("background init complete:", path || "no binary")
-    }).catch(err => {
-      debugLog("background init error:", err)
-    })
+    initPromise
+      .then((path) => {
+        debugLog("background init complete:", path || "no binary")
+      })
+      .catch((err) => {
+        debugLog("background init error:", err)
+      })
   }
 }
 
@@ -148,9 +153,13 @@ export interface CheckResult {
  * @param cliPath Optional explicit path to CLI binary
  * @param customPrompt Optional custom prompt to replace default warning message
  */
-export async function runCommentChecker(input: HookInput, cliPath?: string, customPrompt?: string): Promise<CheckResult> {
+export async function runCommentChecker(
+  input: HookInput,
+  cliPath?: string,
+  customPrompt?: string,
+): Promise<CheckResult> {
   const binaryPath = cliPath ?? resolvedCliPath ?? getCommentCheckerPathSync()
-  
+
   if (!binaryPath) {
     debugLog("comment-checker binary not found")
     return { hasComments: false, message: "" }
@@ -171,7 +180,7 @@ export async function runCommentChecker(input: HookInput, cliPath?: string, cust
     if (customPrompt) {
       args.push("--prompt", customPrompt)
     }
-    
+
     const proc = spawn(args, {
       stdin: "pipe",
       stdout: "pipe",
@@ -179,7 +188,7 @@ export async function runCommentChecker(input: HookInput, cliPath?: string, cust
     })
 
     let timeoutId: ReturnType<typeof setTimeout> | null = null
-    const timeoutPromise = new Promise<"timeout">(resolve => {
+    const timeoutPromise = new Promise<"timeout">((resolve) => {
       timeoutId = setTimeout(async () => {
         didTimeout = true
         debugLog("comment-checker timed out after 30s; sending SIGTERM")
@@ -192,13 +201,11 @@ export async function runCommentChecker(input: HookInput, cliPath?: string, cust
           try {
             proc.kill("SIGKILL")
             debugLog("sent SIGKILL after grace period")
-          } catch {
-          }
+          } catch {}
         }, 1000)
         try {
           await proc.exited
-        } catch {
-        }
+        } catch {}
         clearTimeout(graceTimer)
         resolve("timeout")
       }, 30_000)
@@ -224,7 +231,14 @@ export async function runCommentChecker(input: HookInput, cliPath?: string, cust
 
       const [stdout, stderr, exitCode] = raceResult
 
-      debugLog("exit code:", exitCode, "stdout length:", stdout.length, "stderr length:", stderr.length)
+      debugLog(
+        "exit code:",
+        exitCode,
+        "stdout length:",
+        stdout.length,
+        "stderr length:",
+        stderr.length,
+      )
 
       if (exitCode === 0) {
         return { hasComments: false, message: "" }

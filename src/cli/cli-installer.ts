@@ -25,7 +25,10 @@ import {
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 import { createCliPostHog, getPostHogDistinctId } from "../shared/posthog"
 
-export async function runCliInstaller(args: InstallArgs, version: string): Promise<number> {
+export async function runCliInstaller(
+  args: InstallArgs,
+  version: string,
+): Promise<number> {
   const posthog = createCliPostHog()
   const distinctId = getPostHogDistinctId()
   const validation = validateNonTuiArgs(args)
@@ -62,11 +65,20 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
   } else {
     printSuccess(`OpenCode ${openCodeVersion ?? ""} detected`)
 
-    const unsupportedVersionMessage = getUnsupportedOpenCodeVersionMessage(openCodeVersion)
+    const unsupportedVersionMessage =
+      getUnsupportedOpenCodeVersionMessage(openCodeVersion)
     if (unsupportedVersionMessage) {
       printWarning(unsupportedVersionMessage)
       try {
-        posthog.capture({ distinctId, event: "install_failed", properties: { command: "install", reason: "unsupported_opencode_version", is_update: isUpdate } })
+        posthog.capture({
+          distinctId,
+          event: "install_failed",
+          properties: {
+            command: "install",
+            reason: "unsupported_opencode_version",
+            is_update: isUpdate,
+          },
+        })
       } catch {
         // telemetry failure is non-fatal, silently ignore
       }
@@ -81,7 +93,9 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
 
   if (isUpdate) {
     const initial = detectedToInitialValues(detected)
-    printInfo(`Current config: Claude=${initial.claude}, Gemini=${initial.gemini}`)
+    printInfo(
+      `Current config: Claude=${initial.claude}, Gemini=${initial.gemini}`,
+    )
   }
 
   const config = argsToConfig(args)
@@ -91,7 +105,15 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
   if (!pluginResult.success) {
     printError(`Failed: ${pluginResult.error}`)
     try {
-      posthog.capture({ distinctId, event: "install_failed", properties: { command: "install", reason: "plugin_config_write_failed", is_update: isUpdate } })
+      posthog.capture({
+        distinctId,
+        event: "install_failed",
+        properties: {
+          command: "install",
+          reason: "plugin_config_write_failed",
+          is_update: isUpdate,
+        },
+      })
     } catch {
       // telemetry failure is non-fatal, silently ignore
     }
@@ -111,7 +133,15 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
   if (!omoResult.success) {
     printError(`Failed: ${omoResult.error}`)
     try {
-      posthog.capture({ distinctId, event: "install_failed", properties: { command: "install", reason: "omo_config_write_failed", is_update: isUpdate } })
+      posthog.capture({
+        distinctId,
+        event: "install_failed",
+        properties: {
+          command: "install",
+          reason: "omo_config_write_failed",
+          is_update: isUpdate,
+        },
+      })
     } catch {
       // telemetry failure is non-fatal, silently ignore
     }
@@ -122,9 +152,14 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     }
     return 1
   }
-  printSuccess(`Config written ${SYMBOLS.arrow} ${color.dim(omoResult.configPath)}`)
+  printSuccess(
+    `Config written ${SYMBOLS.arrow} ${color.dim(omoResult.configPath)}`,
+  )
 
-  printBox(formatConfigSummary(config), isUpdate ? "Updated Configuration" : "Installation Complete")
+  printBox(
+    formatConfigSummary(config),
+    isUpdate ? "Updated Configuration" : "Installation Complete",
+  )
 
   if (!config.hasClaude) {
     printInfo(
@@ -141,17 +176,23 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     !config.hasOpencodeZen &&
     !config.hasVercelAiGateway
   ) {
-    printWarning("No model providers configured. Using opencode/big-pickle as fallback.")
+    printWarning(
+      "No model providers configured. Using opencode/big-pickle as fallback.",
+    )
   }
 
-  console.log(`${SYMBOLS.star} ${color.bold(color.green(isUpdate ? "Configuration updated!" : "Installation complete!"))}`)
+  console.log(
+    `${SYMBOLS.star} ${color.bold(color.green(isUpdate ? "Configuration updated!" : "Installation complete!"))}`,
+  )
   console.log(`  Run ${color.cyan("opencode")} to start!`)
   console.log()
 
   printInfo(
     "Anonymous telemetry is enabled by default. Disable it with OMO_SEND_ANONYMOUS_TELEMETRY=0 or OMO_DISABLE_POSTHOG=1.",
   )
-  printInfo("Docs: docs/legal/privacy-policy.md and docs/legal/terms-of-service.md")
+  printInfo(
+    "Docs: docs/legal/privacy-policy.md and docs/legal/terms-of-service.md",
+  )
   console.log()
 
   printBox(
@@ -161,7 +202,9 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     "The Magic Word",
   )
 
-  console.log(`${SYMBOLS.star} ${color.yellow("If you found this helpful, consider starring the repo!")}`)
+  console.log(
+    `${SYMBOLS.star} ${color.yellow("If you found this helpful, consider starring the repo!")}`,
+  )
   console.log(
     `  ${color.dim("gh api --silent --method PUT /user/starred/code-yeongyu/oh-my-openagent >/dev/null 2>&1 || true")}`,
   )
@@ -192,12 +235,21 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     // telemetry failure is non-fatal, silently ignore
   }
 
-  if ((config.hasClaude || config.hasGemini || config.hasCopilot) && !args.skipAuth) {
+  if (
+    (config.hasClaude || config.hasGemini || config.hasCopilot) &&
+    !args.skipAuth
+  ) {
     printBox(
       `Run ${color.cyan("opencode auth login")} and select your provider:\n` +
-        (config.hasClaude ? `  ${SYMBOLS.bullet} Anthropic ${color.gray("→ Claude Pro/Max")}\n` : "") +
-        (config.hasGemini ? `  ${SYMBOLS.bullet} Google ${color.gray("→ Gemini")}\n` : "") +
-        (config.hasCopilot ? `  ${SYMBOLS.bullet} GitHub ${color.gray("→ Copilot")}` : ""),
+        (config.hasClaude
+          ? `  ${SYMBOLS.bullet} Anthropic ${color.gray("→ Claude Pro/Max")}\n`
+          : "") +
+        (config.hasGemini
+          ? `  ${SYMBOLS.bullet} Google ${color.gray("→ Gemini")}\n`
+          : "") +
+        (config.hasCopilot
+          ? `  ${SYMBOLS.bullet} GitHub ${color.gray("→ Copilot")}`
+          : ""),
       "Authenticate Your Providers",
     )
   }

@@ -319,7 +319,8 @@ export const metisPromptMetadata: AgentPromptMetadata = {
   triggers: [
     {
       domain: "Pre-planning analysis",
-      trigger: "Complex task requiring scope clarification, ambiguous requirements",
+      trigger:
+        "Complex task requiring scope clarification, ambiguous requirements",
     },
   ],
   useWhen: [

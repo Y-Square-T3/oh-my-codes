@@ -5,7 +5,10 @@ import { runSg } from "./cli"
 import { formatSearchResult, formatReplaceResult } from "./result-formatter"
 import type { CliLanguage } from "./types"
 
-async function showOutputToUser(context: unknown, output: string): Promise<void> {
+async function showOutputToUser(
+  context: unknown,
+  output: string,
+): Promise<void> {
   const ctx = context as {
     metadata?: (input: { metadata: { output: string } }) => void | Promise<void>
   }
@@ -20,7 +23,10 @@ function getEmptyResultHint(pattern: string, lang: CliLanguage): string | null {
       const withoutColon = src.slice(0, -1)
       return `Hint: Remove trailing colon. Try: "${withoutColon}"`
     }
-    if ((src.startsWith("def ") || src.startsWith("async def ")) && src.endsWith(":")) {
+    if (
+      (src.startsWith("def ") || src.startsWith("async def ")) &&
+      src.endsWith(":")
+    ) {
       const withoutColon = src.slice(0, -1)
       return `Hint: Remove trailing colon. Try: "${withoutColon}"`
     }
@@ -35,7 +41,9 @@ function getEmptyResultHint(pattern: string, lang: CliLanguage): string | null {
   return null
 }
 
-export function createAstGrepTools(ctx: PluginInput): Record<string, ToolDefinition> {
+export function createAstGrepTools(
+  ctx: PluginInput,
+): Record<string, ToolDefinition> {
   const ast_grep_search: ToolDefinition = tool({
     description:
       "Search code patterns across filesystem using AST-aware matching. Supports 25 languages. " +
@@ -44,11 +52,24 @@ export function createAstGrepTools(ctx: PluginInput): Record<string, ToolDefinit
       "For functions, include params and body: 'export async function $NAME($$$) { $$$ }' not 'export async function $NAME'. " +
       "Examples: 'console.log($MSG)', 'def $FUNC($$$):', 'async function $NAME($$$)'",
     args: {
-      pattern: tool.schema.string().describe("AST pattern with meta-variables ($VAR, $$$). Must be complete AST node."),
+      pattern: tool.schema
+        .string()
+        .describe(
+          "AST pattern with meta-variables ($VAR, $$$). Must be complete AST node.",
+        ),
       lang: tool.schema.enum(CLI_LANGUAGES).describe("Target language"),
-      paths: tool.schema.array(tool.schema.string()).optional().describe("Paths to search (default: ['.'])"),
-      globs: tool.schema.array(tool.schema.string()).optional().describe("Include/exclude globs (prefix ! to exclude)"),
-      context: tool.schema.number().optional().describe("Context lines around match"),
+      paths: tool.schema
+        .array(tool.schema.string())
+        .optional()
+        .describe("Paths to search (default: ['.'])"),
+      globs: tool.schema
+        .array(tool.schema.string())
+        .optional()
+        .describe("Include/exclude globs (prefix ! to exclude)"),
+      context: tool.schema
+        .number()
+        .optional()
+        .describe("Context lines around match"),
     },
     execute: async (args, context) => {
       try {
@@ -63,7 +84,10 @@ export function createAstGrepTools(ctx: PluginInput): Record<string, ToolDefinit
         let output = formatSearchResult(result)
 
         if (result.matches.length === 0 && !result.error) {
-          const hint = getEmptyResultHint(args.pattern, args.lang as CliLanguage)
+          const hint = getEmptyResultHint(
+            args.pattern,
+            args.lang as CliLanguage,
+          )
           if (hint) {
             output += `\n\n${hint}`
           }
@@ -86,11 +110,22 @@ export function createAstGrepTools(ctx: PluginInput): Record<string, ToolDefinit
       "Example: pattern='console.log($MSG)' rewrite='logger.info($MSG)'",
     args: {
       pattern: tool.schema.string().describe("AST pattern to match"),
-      rewrite: tool.schema.string().describe("Replacement pattern (can use $VAR from pattern)"),
+      rewrite: tool.schema
+        .string()
+        .describe("Replacement pattern (can use $VAR from pattern)"),
       lang: tool.schema.enum(CLI_LANGUAGES).describe("Target language"),
-      paths: tool.schema.array(tool.schema.string()).optional().describe("Paths to search"),
-      globs: tool.schema.array(tool.schema.string()).optional().describe("Include/exclude globs"),
-      dryRun: tool.schema.boolean().optional().describe("Preview changes without applying (default: true)"),
+      paths: tool.schema
+        .array(tool.schema.string())
+        .optional()
+        .describe("Paths to search"),
+      globs: tool.schema
+        .array(tool.schema.string())
+        .optional()
+        .describe("Include/exclude globs"),
+      dryRun: tool.schema
+        .boolean()
+        .optional()
+        .describe("Preview changes without applying (default: true)"),
     },
     execute: async (args, context) => {
       try {

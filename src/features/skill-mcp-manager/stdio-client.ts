@@ -4,15 +4,20 @@ import type { ClaudeCodeMcpServer } from "../claude-code-mcp-loader/types"
 import { createCleanMcpEnvironment } from "./env-cleaner"
 import { registerProcessCleanup, startCleanupTimer } from "./cleanup"
 import { redactSensitiveData } from "./error-redaction"
-import type { ManagedClient, McpClient, McpTransport, SkillMcpClientConnectionParams } from "./types"
+import type {
+  ManagedClient,
+  McpClient,
+  McpTransport,
+  SkillMcpClientConnectionParams,
+} from "./types"
 
 type StdioClientFactory = (
   clientInfo: { name: string; version: string },
-  options: { capabilities: Record<string, never> }
+  options: { capabilities: Record<string, never> },
 ) => McpClient
 
 type StdioTransportFactory = (
-  options: ConstructorParameters<typeof StdioClientTransport>[0]
+  options: ConstructorParameters<typeof StdioClientTransport>[0],
 ) => McpTransport
 
 interface StdioClientDependencies {
@@ -25,10 +30,11 @@ const defaultStdioClientDependencies: StdioClientDependencies = {
   createTransport: (options) => new StdioClientTransport(options),
 }
 
-let stdioClientDependencies: StdioClientDependencies = defaultStdioClientDependencies
+let stdioClientDependencies: StdioClientDependencies =
+  defaultStdioClientDependencies
 
 export function setStdioClientDependenciesForTesting(
-  dependencies?: Partial<StdioClientDependencies>
+  dependencies?: Partial<StdioClientDependencies>,
 ): void {
   stdioClientDependencies = dependencies
     ? {
@@ -38,14 +44,21 @@ export function setStdioClientDependenciesForTesting(
     : defaultStdioClientDependencies
 }
 
-function getStdioCommand(config: ClaudeCodeMcpServer, serverName: string): string {
+function getStdioCommand(
+  config: ClaudeCodeMcpServer,
+  serverName: string,
+): string {
   if (!config.command) {
-    throw new Error(`MCP server "${serverName}" is configured for stdio but missing 'command' field.`)
+    throw new Error(
+      `MCP server "${serverName}" is configured for stdio but missing 'command' field.`,
+    )
   }
   return config.command
 }
 
-export async function createStdioClient(params: SkillMcpClientConnectionParams): Promise<McpClient> {
+export async function createStdioClient(
+  params: SkillMcpClientConnectionParams,
+): Promise<McpClient> {
   const { state, clientKey, info, config } = params
   const shutdownGenAtStart = state.shutdownGeneration
 
@@ -63,8 +76,11 @@ export async function createStdioClient(params: SkillMcpClientConnectionParams):
   })
 
   const client: McpClient = stdioClientDependencies.createClient(
-    { name: `skill-mcp-${info.skillName}-${info.serverName}`, version: "1.0.0" },
-    { capabilities: {} }
+    {
+      name: `skill-mcp-${info.skillName}-${info.serverName}`,
+      version: "1.0.0",
+    },
+    { capabilities: {} },
   )
 
   try {
@@ -83,19 +99,25 @@ export async function createStdioClient(params: SkillMcpClientConnectionParams):
     const safeErrorMessage = redactSensitiveData(errorMessage)
     throw new Error(
       `Failed to connect to MCP server "${info.serverName}".\n\n` +
-      `Command: ${safeCommand}\n` +
-      `Reason: ${safeErrorMessage}\n\n` +
-      `Hints:\n` +
-      `  - Ensure the command is installed and available in PATH\n` +
-      `  - Check if the MCP server package exists\n` +
-      `  - Verify the args are correct for this server`
+        `Command: ${safeCommand}\n` +
+        `Reason: ${safeErrorMessage}\n\n` +
+        `Hints:\n` +
+        `  - Ensure the command is installed and available in PATH\n` +
+        `  - Check if the MCP server package exists\n` +
+        `  - Verify the args are correct for this server`,
     )
   }
 
   if (state.shutdownGeneration !== shutdownGenAtStart) {
-    try { await client.close() } catch {}
-    try { await transport.close() } catch {}
-    throw new Error(`MCP server "${info.serverName}" connection completed after shutdown`)
+    try {
+      await client.close()
+    } catch {}
+    try {
+      await transport.close()
+    } catch {}
+    throw new Error(
+      `MCP server "${info.serverName}" connection completed after shutdown`,
+    )
   }
 
   const managedClient = {

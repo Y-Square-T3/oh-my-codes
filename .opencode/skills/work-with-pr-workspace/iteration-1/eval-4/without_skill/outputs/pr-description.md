@@ -6,13 +6,13 @@
 
 ## Changes
 
-| File | Change |
-|------|--------|
-| `src/mcp/arxiv.ts` | New remote MCP config pointing to arXiv MCP endpoint |
-| `src/mcp/types.ts` | Add `"arxiv"` to `McpNameSchema` enum |
-| `src/mcp/index.ts` | Import + register arxiv in `createBuiltinMcps()` |
+| File                    | Change                                                  |
+| ----------------------- | ------------------------------------------------------- |
+| `src/mcp/arxiv.ts`      | New remote MCP config pointing to arXiv MCP endpoint    |
+| `src/mcp/types.ts`      | Add `"arxiv"` to `McpNameSchema` enum                   |
+| `src/mcp/index.ts`      | Import + register arxiv in `createBuiltinMcps()`        |
 | `src/mcp/index.test.ts` | Update count assertions (3 → 4), add arxiv disable test |
-| `src/mcp/AGENTS.md` | Update docs to reflect 4 built-in MCPs |
+| `src/mcp/AGENTS.md`     | Update docs to reflect 4 built-in MCPs                  |
 
 ## How to Test
 

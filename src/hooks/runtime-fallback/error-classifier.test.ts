@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
-import { classifyErrorType, extractAutoRetrySignal, extractStatusCode, isRetryableError } from "./error-classifier"
+import {
+  classifyErrorType,
+  extractAutoRetrySignal,
+  extractStatusCode,
+  isRetryableError,
+} from "./error-classifier"
 
 describe("runtime-fallback error classifier", () => {
   test("detects cooling-down auto-retry status signals", () => {
@@ -53,7 +58,10 @@ describe("runtime-fallback error classifier", () => {
     }
 
     //#when
-    const retryable = isRetryableError(error, [400, 403, 408, 429, 500, 502, 503, 504, 529])
+    const retryable = isRetryableError(
+      error,
+      [400, 403, 408, 429, 500, 502, 503, 504, 529],
+    )
 
     //#then
     expect(retryable).toBe(true)
@@ -158,7 +166,9 @@ describe("extractStatusCode", () => {
   })
 
   test("returns undefined when no numeric status exists", () => {
-    expect(extractStatusCode({ status: "error", message: "something broke" })).toBeUndefined()
+    expect(
+      extractStatusCode({ status: "error", message: "something broke" }),
+    ).toBeUndefined()
   })
 
   test("returns undefined for null/undefined error", () => {
@@ -185,7 +195,9 @@ describe("model support fallback", () => {
   test("detects model_not_supported errors as retryable for fallback chain", () => {
     //#given
     const error1 = { message: "model_not_supported" }
-    const error2 = { message: "The model 'gpt-4-foo' is not supported by this API" }
+    const error2 = {
+      message: "The model 'gpt-4-foo' is not supported by this API",
+    }
     const error3 = { message: "model not supported on free tier" }
 
     //#when

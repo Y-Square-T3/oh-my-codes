@@ -38,7 +38,11 @@ function buildWebFetchHeaders(format: WebFetchFormat): Record<string, string> {
 }
 
 function normalizeTimeoutMs(timeoutSeconds?: number): number {
-  if (typeof timeoutSeconds !== "number" || !Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
+  if (
+    typeof timeoutSeconds !== "number" ||
+    !Number.isFinite(timeoutSeconds) ||
+    timeoutSeconds <= 0
+  ) {
     return DEFAULT_WEBFETCH_TIMEOUT_MS
   }
 

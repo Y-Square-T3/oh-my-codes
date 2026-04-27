@@ -37,20 +37,29 @@ describe("resolveRecentPromptContextForSession fallback ordering", () => {
     testDirs.push(directory)
     const messageDir = join(TEST_MESSAGE_STORAGE, sessionID)
     mkdirSync(messageDir, { recursive: true })
-    writeFileSync(join(messageDir, "msg_ffff0000_000001.json"), JSON.stringify({
-      agent: "atlas",
-      model: { providerID: "anthropic", modelID: "claude-sonnet-4-6" },
-      tools: { read: true },
-      time: { created: 10 },
-    }), "utf-8")
-    writeFileSync(join(messageDir, "msg_00000000_000999.json"), JSON.stringify({
-      agent: "atlas",
-      model: { providerID: "openai", modelID: "gpt-5.4" },
-      tools: { edit: true },
-      time: { created: 100 },
-    }), "utf-8")
+    writeFileSync(
+      join(messageDir, "msg_ffff0000_000001.json"),
+      JSON.stringify({
+        agent: "atlas",
+        model: { providerID: "anthropic", modelID: "claude-sonnet-4-6" },
+        tools: { read: true },
+        time: { created: 10 },
+      }),
+      "utf-8",
+    )
+    writeFileSync(
+      join(messageDir, "msg_00000000_000999.json"),
+      JSON.stringify({
+        agent: "atlas",
+        model: { providerID: "openai", modelID: "gpt-5.4" },
+        tools: { edit: true },
+        time: { created: 100 },
+      }),
+      "utf-8",
+    )
 
-    const { resolveRecentPromptContextForSession } = await import("./recent-model-resolver")
+    const { resolveRecentPromptContextForSession } =
+      await import("./recent-model-resolver")
 
     const ctx = {
       client: {
@@ -63,7 +72,10 @@ describe("resolveRecentPromptContextForSession fallback ordering", () => {
     }
 
     // when
-    const result = await resolveRecentPromptContextForSession(ctx as never, sessionID)
+    const result = await resolveRecentPromptContextForSession(
+      ctx as never,
+      sessionID,
+    )
 
     // then
     expect(result.model).toEqual({ providerID: "openai", modelID: "gpt-5.4" })

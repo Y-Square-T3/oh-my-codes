@@ -4,18 +4,31 @@ type LayoutModule = typeof import("./layout")
 
 const spawnMock = mock(() => ({
   exited: Promise.resolve(0),
-  stdout: new ReadableStream({ start(controller) { controller.enqueue(new TextEncoder().encode("%1\n")); controller.close() } }),
-  stderr: new ReadableStream({ start(controller) { controller.close() } }),
+  stdout: new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("%1\n"))
+      controller.close()
+    },
+  }),
+  stderr: new ReadableStream({
+    start(controller) {
+      controller.close()
+    },
+  }),
 }))
 
 const layoutSpecifier = import.meta.resolve("./layout")
-const spawnProcessSpecifier = import.meta.resolve("../../../shared/tmux/tmux-utils/spawn-process")
-const tmuxPathResolverSpecifier = import.meta.resolve("../../../tools/interactive-bash/tmux-path-resolver")
+const spawnProcessSpecifier = import.meta
+  .resolve("../../../shared/tmux/tmux-utils/spawn-process")
+const tmuxPathResolverSpecifier = import.meta
+  .resolve("../../../tools/interactive-bash/tmux-path-resolver")
 const sharedSpecifier = import.meta.resolve("../../../shared")
 
 function registerModuleMocks(): void {
   mock.module(spawnProcessSpecifier, () => ({ spawn: spawnMock }))
-  mock.module(tmuxPathResolverSpecifier, () => ({ getTmuxPath: mock(() => Promise.resolve("tmux")) }))
+  mock.module(tmuxPathResolverSpecifier, () => ({
+    getTmuxPath: mock(() => Promise.resolve("tmux")),
+  }))
   mock.module(sharedSpecifier, () => ({ log: mock(() => undefined) }))
 }
 
@@ -58,11 +71,21 @@ describe("team-layout-tmux", () => {
     await createTeamLayout("run-2", members, {} as never)
 
     // then
-    expect(spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>)).toContain("new-session")
-    expect(spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>)).toContain("new-window")
-    expect(spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>)).toContain("split-window")
-    expect(spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>)).toContain("select-layout")
-    expect(spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>)).toContain("select-pane")
+    expect(
+      spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>),
+    ).toContain("new-session")
+    expect(
+      spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>),
+    ).toContain("new-window")
+    expect(
+      spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>),
+    ).toContain("split-window")
+    expect(
+      spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>),
+    ).toContain("select-layout")
+    expect(
+      spawnMock.mock.calls.flatMap((call) => call[0] as Array<string>),
+    ).toContain("select-pane")
   })
 
   test("returns null when tmux command fails", async () => {
@@ -70,12 +93,24 @@ describe("team-layout-tmux", () => {
     const { createTeamLayout } = await loadLayoutModule()
     spawnMock.mockImplementationOnce(() => ({
       exited: Promise.resolve(1),
-      stdout: new ReadableStream({ start(controller) { controller.close() } }),
-      stderr: new ReadableStream({ start(controller) { controller.close() } }),
+      stdout: new ReadableStream({
+        start(controller) {
+          controller.close()
+        },
+      }),
+      stderr: new ReadableStream({
+        start(controller) {
+          controller.close()
+        },
+      }),
     }))
 
     // when
-    const result = await createTeamLayout("run-3", [{ name: "lead", sessionId: "s1" }], {} as never)
+    const result = await createTeamLayout(
+      "run-3",
+      [{ name: "lead", sessionId: "s1" }],
+      {} as never,
+    )
 
     // then
     expect(result).toBeNull()
@@ -89,6 +124,10 @@ describe("team-layout-tmux", () => {
     await removeTeamLayout("run-4", {} as never)
 
     // then
-    expect(spawnMock.mock.calls.some((call) => (call[0] as Array<string>).includes("kill-session"))).toBe(true)
+    expect(
+      spawnMock.mock.calls.some((call) =>
+        (call[0] as Array<string>).includes("kill-session"),
+      ),
+    ).toBe(true)
   })
 })

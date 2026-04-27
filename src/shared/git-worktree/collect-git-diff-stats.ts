@@ -21,12 +21,16 @@ export function collectGitDiffStats(directory: string): GitFileStat[] {
       stdio: ["pipe", "pipe", "pipe"],
     }).trimEnd()
 
-    const untrackedOutput = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
-      cwd: directory,
-      encoding: "utf-8",
-      timeout: 5000,
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trimEnd()
+    const untrackedOutput = execFileSync(
+      "git",
+      ["ls-files", "--others", "--exclude-standard"],
+      {
+        cwd: directory,
+        encoding: "utf-8",
+        timeout: 5000,
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    ).trimEnd()
 
     const untrackedNumstat = untrackedOutput
       ? untrackedOutput
@@ -35,7 +39,8 @@ export function collectGitDiffStats(directory: string): GitFileStat[] {
           .map((filePath) => {
             try {
               const content = readFileSync(join(directory, filePath), "utf-8")
-              const lineCount = content.split("\n").length - (content.endsWith("\n") ? 1 : 0)
+              const lineCount =
+                content.split("\n").length - (content.endsWith("\n") ? 1 : 0)
               return `${lineCount}\t0\t${filePath}`
             } catch {
               return `0\t0\t${filePath}`
@@ -44,7 +49,10 @@ export function collectGitDiffStats(directory: string): GitFileStat[] {
           .join("\n")
       : ""
 
-    const combinedNumstat = [diffOutput, untrackedNumstat].filter(Boolean).join("\n").trim()
+    const combinedNumstat = [diffOutput, untrackedNumstat]
+      .filter(Boolean)
+      .join("\n")
+      .trim()
 
     if (!combinedNumstat) return []
 

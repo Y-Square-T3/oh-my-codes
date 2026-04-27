@@ -10,9 +10,13 @@ export function formatGrepResult(result: GrepResult): string {
   }
 
   const lines: string[] = []
-  const isFilesOnlyMode = result.matches.every((match) => match.line === 0 && match.text.trim() === "")
+  const isFilesOnlyMode = result.matches.every(
+    (match) => match.line === 0 && match.text.trim() === "",
+  )
 
-  lines.push(`Found ${result.totalMatches} match(es) in ${result.filesSearched} file(s)`)
+  lines.push(
+    `Found ${result.totalMatches} match(es) in ${result.filesSearched} file(s)`,
+  )
   if (result.truncated) {
     lines.push("[Output truncated due to size limit]")
   }
@@ -48,7 +52,10 @@ export function formatCountResult(results: CountResult[]): string {
   }
 
   const total = results.reduce((sum, r) => sum + r.count, 0)
-  const lines: string[] = [`Found ${total} match(es) in ${results.length} file(s):`, ""]
+  const lines: string[] = [
+    `Found ${total} match(es) in ${results.length} file(s):`,
+    "",
+  ]
 
   const sorted = [...results].sort((a, b) => b.count - a.count)
 

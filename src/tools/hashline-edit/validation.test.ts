@@ -113,7 +113,9 @@ describe("validateLineRef", () => {
     const lines = ["function hello() {"]
 
     //#when / #then
-    expect(() => validateLineRef(lines, "1#ZZ")).toThrow(/>>>\s+1#[ZPMQVRWSNKTXJBYH]{2}\|/)
+    expect(() => validateLineRef(lines, "1#ZZ")).toThrow(
+      />>>\s+1#[ZPMQVRWSNKTXJBYH]{2}\|/,
+    )
   })
 
   it("accepts legacy hashes for indented lines", () => {
@@ -139,8 +141,9 @@ describe("validateLineRef", () => {
     const lines = ["one", "two", "three", "four"]
 
     //#when / #then
-    expect(() => validateLineRefs(lines, ["2#ZZ"]))
-      .toThrow(/>>>\s+2#[ZPMQVRWSNKTXJBYH]{2}\|two/)
+    expect(() => validateLineRefs(lines, ["2#ZZ"])).toThrow(
+      />>>\s+2#[ZPMQVRWSNKTXJBYH]{2}\|two/,
+    )
   })
 
   it("suggests correct line number when hash matches a file line", () => {
@@ -149,6 +152,8 @@ describe("validateLineRef", () => {
     const hash = computeLineHash(1, lines[0])
 
     //#when / #then, error should suggest the correct reference
-    expect(() => validateLineRefs(lines, [`LINE#${hash}`])).toThrow(new RegExp(`1#${hash}`))
+    expect(() => validateLineRefs(lines, [`LINE#${hash}`])).toThrow(
+      new RegExp(`1#${hash}`),
+    )
   })
 })

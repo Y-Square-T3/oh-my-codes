@@ -20,8 +20,12 @@ function leadingWhitespace(text: string): string {
   return match ? match[0] : ""
 }
 
-export function restoreOldWrappedLines(originalLines: string[], replacementLines: string[]): string[] {
-  if (originalLines.length === 0 || replacementLines.length < 2) return replacementLines
+export function restoreOldWrappedLines(
+  originalLines: string[],
+  replacementLines: string[],
+): string[] {
+  if (originalLines.length === 0 || replacementLines.length < 2)
+    return replacementLines
 
   const canonicalToOriginal = new Map<string, { line: string; count: number }>()
   for (const line of originalLines) {
@@ -34,15 +38,29 @@ export function restoreOldWrappedLines(originalLines: string[], replacementLines
     }
   }
 
-  const candidates: { start: number; len: number; replacement: string; canonical: string }[] = []
+  const candidates: {
+    start: number
+    len: number
+    replacement: string
+    canonical: string
+  }[] = []
   for (let start = 0; start < replacementLines.length; start += 1) {
-    for (let len = 2; len <= 10 && start + len <= replacementLines.length; len += 1) {
+    for (
+      let len = 2;
+      len <= 10 && start + len <= replacementLines.length;
+      len += 1
+    ) {
       const span = replacementLines.slice(start, start + len)
       if (span.some((line) => line.trim().length === 0)) continue
       const canonicalSpan = stripAllWhitespace(span.join(""))
       const original = canonicalToOriginal.get(canonicalSpan)
       if (original && original.count === 1 && canonicalSpan.length >= 6) {
-        candidates.push({ start, len, replacement: original.line, canonical: canonicalSpan })
+        candidates.push({
+          start,
+          len,
+          replacement: original.line,
+          canonical: canonicalSpan,
+        })
       }
     }
   }
@@ -50,10 +68,15 @@ export function restoreOldWrappedLines(originalLines: string[], replacementLines
 
   const canonicalCounts = new Map<string, number>()
   for (const candidate of candidates) {
-    canonicalCounts.set(candidate.canonical, (canonicalCounts.get(candidate.canonical) ?? 0) + 1)
+    canonicalCounts.set(
+      candidate.canonical,
+      (canonicalCounts.get(candidate.canonical) ?? 0) + 1,
+    )
   }
 
-  const uniqueCandidates = candidates.filter((candidate) => (canonicalCounts.get(candidate.canonical) ?? 0) === 1)
+  const uniqueCandidates = candidates.filter(
+    (candidate) => (canonicalCounts.get(candidate.canonical) ?? 0) === 1,
+  )
   if (uniqueCandidates.length === 0) return replacementLines
 
   uniqueCandidates.sort((a, b) => b.start - a.start)
@@ -66,14 +89,16 @@ export function restoreOldWrappedLines(originalLines: string[], replacementLines
 
 export function maybeExpandSingleLineMerge(
   originalLines: string[],
-  replacementLines: string[]
+  replacementLines: string[],
 ): string[] {
   if (replacementLines.length !== 1 || originalLines.length <= 1) {
     return replacementLines
   }
 
   const merged = replacementLines[0]
-  const parts = originalLines.map((line) => line.trim()).filter((line) => line.length > 0)
+  const parts = originalLines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
   if (parts.length !== originalLines.length) return replacementLines
 
   const indices: number[] = []
@@ -151,7 +176,7 @@ export function maybeExpandSingleLineMerge(
 
 export function restoreIndentForPairedReplacement(
   originalLines: string[],
-  replacementLines: string[]
+  replacementLines: string[],
 ): string[] {
   if (originalLines.length !== replacementLines.length) {
     return replacementLines
@@ -169,7 +194,7 @@ export function restoreIndentForPairedReplacement(
 
 export function autocorrectReplacementLines(
   originalLines: string[],
-  replacementLines: string[]
+  replacementLines: string[],
 ): string[] {
   let next = replacementLines
   next = maybeExpandSingleLineMerge(originalLines, next)

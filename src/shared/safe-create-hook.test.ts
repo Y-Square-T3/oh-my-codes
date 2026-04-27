@@ -4,7 +4,9 @@ import * as shared from "./logger"
 let safeCreateHook: (typeof import("./safe-create-hook"))["safeCreateHook"]
 let logSpy: ReturnType<typeof spyOn> | undefined
 
-async function importFreshSafeCreateHookModule(): Promise<typeof import("./safe-create-hook")> {
+async function importFreshSafeCreateHookModule(): Promise<
+  typeof import("./safe-create-hook")
+> {
   return import(`./safe-create-hook?test=${Date.now()}-${Math.random()}`)
 }
 
@@ -77,7 +79,9 @@ describe("safeCreateHook", () => {
     }
 
     //#when + #then
-    expect(() => safeCreateHook("test-hook", factory, { enabled: false })).toThrow("boom")
+    expect(() =>
+      safeCreateHook("test-hook", factory, { enabled: false }),
+    ).toThrow("boom")
   })
 
   test("returns null for factory returning undefined", async () => {

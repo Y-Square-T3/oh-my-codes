@@ -6,7 +6,9 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import { BackgroundManager } from "./manager"
 import type { BackgroundTask } from "./types"
 
-function createManagerWithStatus(statusImpl: () => Promise<{ data: Record<string, { type: string }> }>): BackgroundManager {
+function createManagerWithStatus(
+  statusImpl: () => Promise<{ data: Record<string, { type: string }> }>,
+): BackgroundManager {
   const client = {
     session: {
       status: statusImpl,
@@ -18,7 +20,10 @@ function createManagerWithStatus(statusImpl: () => Promise<{ data: Record<string
     },
   }
 
-  return new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+  return new BackgroundManager({
+    client,
+    directory: tmpdir(),
+  } as unknown as PluginInput)
 }
 
 describe("BackgroundManager polling overlap", () => {
@@ -42,9 +47,13 @@ describe("BackgroundManager polling overlap", () => {
     })
 
     //#when
-    const firstPoll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks()
+    const firstPoll = (
+      manager as unknown as { pollRunningTasks: () => Promise<void> }
+    ).pollRunningTasks()
     await Promise.resolve()
-    const secondPoll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks()
+    const secondPoll = (
+      manager as unknown as { pollRunningTasks: () => Promise<void> }
+    ).pollRunningTasks()
     releaseStatus?.()
     await Promise.all([firstPoll, secondPoll])
     manager.shutdown()
@@ -54,7 +63,6 @@ describe("BackgroundManager polling overlap", () => {
     expect(statusCallCount).toBe(1)
   })
 })
-
 
 function createRunningTask(sessionID: string): BackgroundTask {
   return {
@@ -72,11 +80,14 @@ function createRunningTask(sessionID: string): BackgroundTask {
 }
 
 function injectTask(manager: BackgroundManager, task: BackgroundTask): void {
-  const tasks = (manager as unknown as { tasks: Map<string, BackgroundTask> }).tasks
+  const tasks = (manager as unknown as { tasks: Map<string, BackgroundTask> })
+    .tasks
   tasks.set(task.id, task)
 }
 
-function createManagerWithClient(clientOverrides: Record<string, unknown> = {}): BackgroundManager {
+function createManagerWithClient(
+  clientOverrides: Record<string, unknown> = {},
+): BackgroundManager {
   const client = {
     session: {
       status: async () => ({ data: {} }),
@@ -86,13 +97,16 @@ function createManagerWithClient(clientOverrides: Record<string, unknown> = {}):
       abort: async () => ({}),
       todo: async () => ({ data: [] }),
       messages: async () => ({
-        data: [{
-          info: { role: "assistant", finish: "end_turn", id: "msg-2" },
-          parts: [{ type: "text", text: "done" }],
-        }, {
-          info: { role: "user", id: "msg-1" },
-          parts: [{ type: "text", text: "go" }],
-        }],
+        data: [
+          {
+            info: { role: "assistant", finish: "end_turn", id: "msg-2" },
+            parts: [{ type: "text", text: "done" }],
+          },
+          {
+            info: { role: "user", id: "msg-1" },
+            parts: [{ type: "text", text: "go" }],
+          },
+        ],
       }),
       ...clientOverrides,
     },
@@ -153,7 +167,9 @@ describe("BackgroundManager pollRunningTasks", () => {
       injectTask(manager, task)
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -198,7 +214,9 @@ describe("BackgroundManager pollRunningTasks", () => {
       injectTask(manager, task)
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -214,10 +232,12 @@ describe("BackgroundManager pollRunningTasks", () => {
         messages: async () => {
           messagesCallCount += 1
           return {
-            data: [{
-              info: { role: "assistant", finish: "end_turn", id: "msg-2" },
-              parts: [{ type: "text", text: "done" }],
-            }],
+            data: [
+              {
+                info: { role: "assistant", finish: "end_turn", id: "msg-2" },
+                parts: [{ type: "text", text: "done" }],
+              },
+            ],
           }
         },
       })
@@ -230,7 +250,9 @@ describe("BackgroundManager pollRunningTasks", () => {
       })
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -243,7 +265,9 @@ describe("BackgroundManager pollRunningTasks", () => {
       //#given
       let todoCallCount = 0
       const manager = createManagerWithClient({
-        status: async () => ({ data: { "ses-idle-todo-cached": { type: "idle" } } }),
+        status: async () => ({
+          data: { "ses-idle-todo-cached": { type: "idle" } },
+        }),
         todo: async () => {
           todoCallCount += 1
           return { data: [] }
@@ -261,13 +285,20 @@ describe("BackgroundManager pollRunningTasks", () => {
         properties: {
           sessionID: "ses-idle-todo-cached",
           todos: [
-            { id: "todo-1", content: "done", status: "completed", priority: "high" },
+            {
+              id: "todo-1",
+              content: "done",
+              status: "completed",
+              priority: "high",
+            },
           ],
         },
       })
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -287,7 +318,9 @@ describe("BackgroundManager pollRunningTasks", () => {
       injectTask(manager, task)
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -300,13 +333,17 @@ describe("BackgroundManager pollRunningTasks", () => {
     test('#when session status is "interrupted" #then completes the task', async () => {
       //#given
       const manager = createManagerWithClient({
-        status: async () => ({ data: { "ses-interrupted": { type: "interrupted" } } }),
+        status: async () => ({
+          data: { "ses-interrupted": { type: "interrupted" } },
+        }),
       })
       const task = createRunningTask("ses-interrupted")
       injectTask(manager, task)
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 
@@ -315,16 +352,20 @@ describe("BackgroundManager pollRunningTasks", () => {
       expect(task.completedAt).toBeDefined()
     })
 
-    test('#when session status is an unknown type #then completes the task', async () => {
+    test("#when session status is an unknown type #then completes the task", async () => {
       //#given
       const manager = createManagerWithClient({
-        status: async () => ({ data: { "ses-unknown": { type: "some-weird-status" } } }),
+        status: async () => ({
+          data: { "ses-unknown": { type: "some-weird-status" } },
+        }),
       })
       const task = createRunningTask("ses-unknown")
       injectTask(manager, task)
 
       //#when
-      const poll = (manager as unknown as { pollRunningTasks: () => Promise<void> }).pollRunningTasks
+      const poll = (
+        manager as unknown as { pollRunningTasks: () => Promise<void> }
+      ).pollRunningTasks
       await poll.call(manager)
       manager.shutdown()
 

@@ -26,7 +26,7 @@ export class ConcurrencyManager {
     if (modelLimit !== undefined) {
       return modelLimit === 0 ? Infinity : modelLimit
     }
-    const provider = model.split('/')[0]
+    const provider = model.split("/")[0]
     const providerLimit = this.config?.providerConcurrency?.[provider]
     if (providerLimit !== undefined) {
       return providerLimit === 0 ? Infinity : providerLimit
@@ -102,7 +102,9 @@ export class ConcurrencyManager {
       for (const entry of queue) {
         if (!entry.settled) {
           entry.settled = true
-          entry.rawReject(new Error(`Concurrency queue cancelled for model: ${model}`))
+          entry.rawReject(
+            new Error(`Concurrency queue cancelled for model: ${model}`),
+          )
         }
       }
       this.queues.delete(model)

@@ -78,7 +78,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "test output", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     // session.messages() should NOT have been called
@@ -95,7 +95,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "test output", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     // No fetch, no crash
@@ -134,12 +134,14 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "original", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     expect(output.output).toContain("context remaining")
     expect(output.output).toContain("200,000-token context window")
-    expect(output.output).toContain("[Context Status: 80.0% used (160,000/200,000 tokens), 20.0% remaining]")
+    expect(output.output).toContain(
+      "[Context Status: 80.0% used (160,000/200,000 tokens), 20.0% remaining]",
+    )
     expect(ctx.client.session.messages).not.toHaveBeenCalled()
   })
 
@@ -172,7 +174,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "original", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     //#then context reminder should be appended
@@ -196,7 +198,12 @@ describe("context-window-monitor", () => {
             sessionID,
             providerID: "anthropic",
             finish: true,
-            tokens: { input: 150000, output: 0, reasoning: 0, cache: { read: 10000, write: 0 } },
+            tokens: {
+              input: 150000,
+              output: 0,
+              reasoning: 0,
+              cache: { read: 10000, write: 0 },
+            },
           },
         },
       },
@@ -214,7 +221,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "test", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
     expect(output.output).toBe("test")
   })
@@ -235,7 +242,12 @@ describe("context-window-monitor", () => {
             sessionID,
             providerID: "openai",
             finish: true,
-            tokens: { input: 200000, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+            tokens: {
+              input: 200000,
+              output: 0,
+              reasoning: 0,
+              cache: { read: 0, write: 0 },
+            },
           },
         },
       },
@@ -244,7 +256,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "test", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
     expect(output.output).toBe("test")
   })
@@ -280,7 +292,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "original", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     //#then
@@ -319,7 +331,7 @@ describe("context-window-monitor", () => {
     const output = { title: "", output: "original", metadata: null }
     await hook["tool.execute.after"](
       { tool: "bash", sessionID, callID: "call_1" },
-      output
+      output,
     )
 
     //#then

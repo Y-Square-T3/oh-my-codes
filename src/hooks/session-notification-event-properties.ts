@@ -4,7 +4,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }
 
-function getEventInfo(properties: EventProperties): Record<string, unknown> | undefined {
+function getEventInfo(
+  properties: EventProperties,
+): Record<string, unknown> | undefined {
   const info = properties?.info
   return isRecord(info) ? info : undefined
 }
@@ -18,15 +20,19 @@ export function getSessionID(properties: EventProperties): string | undefined {
 
   const info = getEventInfo(properties)
   const infoSessionID = info?.sessionID
-  if (typeof infoSessionID === "string" && infoSessionID.length > 0) return infoSessionID
+  if (typeof infoSessionID === "string" && infoSessionID.length > 0)
+    return infoSessionID
 
   const infoSessionId = info?.sessionId
-  if (typeof infoSessionId === "string" && infoSessionId.length > 0) return infoSessionId
+  if (typeof infoSessionId === "string" && infoSessionId.length > 0)
+    return infoSessionId
 
   return undefined
 }
 
-export function getEventToolName(properties: EventProperties): string | undefined {
+export function getEventToolName(
+  properties: EventProperties,
+): string | undefined {
   const tool = properties?.tool
   if (typeof tool === "string" && tool.length > 0) return tool
 

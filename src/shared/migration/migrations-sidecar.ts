@@ -55,7 +55,11 @@ export function readAppliedMigrations(configPath: string): Set<string> {
       !Array.isArray(parsed) &&
       Array.isArray((parsed as MigrationsSidecar).appliedMigrations)
     ) {
-      return new Set((parsed as MigrationsSidecar).appliedMigrations.filter((m): m is string => typeof m === "string"))
+      return new Set(
+        (parsed as MigrationsSidecar).appliedMigrations.filter(
+          (m): m is string => typeof m === "string",
+        ),
+      )
     }
     return new Set()
   } catch (err) {
@@ -70,7 +74,10 @@ export function readAppliedMigrations(configPath: string): Set<string> {
  * false if the write failed (the caller can still proceed — the next
  * startup will re-run the migration, which is idempotent by design).
  */
-export function writeAppliedMigrations(configPath: string, migrations: Set<string>): boolean {
+export function writeAppliedMigrations(
+  configPath: string,
+  migrations: Set<string>,
+): boolean {
   const sidecarPath = getSidecarPath(configPath)
   const body: MigrationsSidecar = {
     appliedMigrations: Array.from(migrations).sort(),

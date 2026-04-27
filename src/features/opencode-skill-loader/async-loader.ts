@@ -13,25 +13,30 @@ import type { SkillMcpConfig } from "../skill-mcp-manager/types"
 export async function mapWithConcurrency<T, R>(
   items: T[],
   mapper: (item: T) => Promise<R>,
-  concurrency: number
+  concurrency: number,
 ): Promise<R[]> {
   const results: R[] = new Array(items.length)
   let index = 0
-  
+
   const worker = async () => {
     while (index < items.length) {
       const currentIndex = index++
       results[currentIndex] = await mapper(items[currentIndex])
     }
   }
-  
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    () => worker(),
+  )
   await Promise.all(workers)
-  
+
   return results
 }
 
-function parseSkillMcpConfigFromFrontmatter(content: string): SkillMcpConfig | undefined {
+function parseSkillMcpConfigFromFrontmatter(
+  content: string,
+): SkillMcpConfig | undefined {
   const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
   if (!frontmatterMatch) return undefined
 
@@ -46,20 +51,30 @@ function parseSkillMcpConfigFromFrontmatter(content: string): SkillMcpConfig | u
   return undefined
 }
 
-export async function loadMcpJsonFromDirAsync(skillDir: string): Promise<SkillMcpConfig | undefined> {
+export async function loadMcpJsonFromDirAsync(
+  skillDir: string,
+): Promise<SkillMcpConfig | undefined> {
   const mcpJsonPath = join(skillDir, "mcp.json")
 
   try {
     const content = await readFile(mcpJsonPath, "utf-8")
     const parsed = JSON.parse(content) as Record<string, unknown>
-    
-    if (parsed && typeof parsed === "object" && "mcpServers" in parsed && parsed.mcpServers) {
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "mcpServers" in parsed &&
+      parsed.mcpServers
+    ) {
       return parsed.mcpServers as SkillMcpConfig
     }
-    
+
     if (parsed && typeof parsed === "object" && !("mcpServers" in parsed)) {
       const hasCommandField = Object.values(parsed).some(
-        (v) => v && typeof v === "object" && "command" in (v as Record<string, unknown>)
+        (v) =>
+          v &&
+          typeof v === "object" &&
+          "command" in (v as Record<string, unknown>),
       )
       if (hasCommandField) {
         return parsed as SkillMcpConfig
@@ -76,13 +91,13 @@ export async function loadSkillFromPathAsync(
   resolvedPath: string,
   defaultName: string,
   scope: SkillScope,
-  namePrefix = ""
+  namePrefix = "",
 ): Promise<LoadedSkill | null> {
   try {
     const content = await readFile(skillPath, "utf-8")
     const { data, body, parseError } = parseFrontmatter<SkillMetadata>(content)
     if (parseError) return null
-    
+
     const frontmatterMcp = parseSkillMcpConfigFromFrontmatter(content)
     const mcpJsonMcp = await loadMcpJsonFromDirAsync(resolvedPath)
     const mcpConfig = mcpJsonMcp || frontmatterMcp
@@ -90,7 +105,8 @@ export async function loadSkillFromPathAsync(
     const baseName = String(data.name || defaultName)
     const skillName = namePrefix ? `${namePrefix}/${baseName}` : baseName
     const originalDescription = data.description || ""
-    const isOpencodeSource = scope === "opencode" || scope === "opencode-project"
+    const isOpencodeSource =
+      scope === "opencode" || scope === "opencode-project"
     const formattedDescription = `(${scope} - Skill) ${originalDescription}`
 
     const resolvedBody = resolveSkillPathReferences(body.trim(), resolvedPath)
@@ -109,7 +125,10 @@ $ARGUMENTS
       name: skillName,
       description: formattedDescription,
       template: wrappedTemplate,
-      model: sanitizeModelField(data.model, isOpencodeSource ? "opencode" : "claude-code"),
+      model: sanitizeModelField(
+        data.model,
+        isOpencodeSource ? "opencode" : "claude-code",
+      ),
       agent: data.agent,
       subtask: data.subtask,
       argumentHint: data["argument-hint"],
@@ -132,14 +151,16 @@ $ARGUMENTS
   }
 }
 
-function parseAllowedTools(allowedTools: string | string[] | undefined): string[] | undefined {
+function parseAllowedTools(
+  allowedTools: string | string[] | undefined,
+): string[] | undefined {
   if (!allowedTools) return undefined
-  
+
   // Handle YAML array format: already parsed as string[]
   if (Array.isArray(allowedTools)) {
-    return allowedTools.map(t => t.trim()).filter(Boolean)
+    return allowedTools.map((t) => t.trim()).filter(Boolean)
   }
-  
+
   // Handle space-separated string format: "Read Write Edit Bash"
   return allowedTools.split(/\s+/).filter(Boolean)
 }
@@ -149,12 +170,14 @@ export async function discoverSkillsInDirAsync(
   scope: SkillScope = "opencode-project",
   namePrefix = "",
   depth = 0,
-  maxDepth = 2
+  maxDepth = 2,
 ): Promise<LoadedSkill[]> {
   try {
     const entries = await readdir(skillsDir, { withFileTypes: true })
-    
-    const processEntry = async (entry: Dirent): Promise<LoadedSkill | LoadedSkill[] | null> => {
+
+    const processEntry = async (
+      entry: Dirent,
+    ): Promise<LoadedSkill | LoadedSkill[] | null> => {
       if (entry.name.startsWith(".")) return null
 
       const entryPath = join(skillsDir, entry.name)
@@ -166,24 +189,38 @@ export async function discoverSkillsInDirAsync(
         const skillMdPath = join(resolvedPath, "SKILL.md")
         try {
           await readFile(skillMdPath, "utf-8")
-          return await loadSkillFromPathAsync(skillMdPath, resolvedPath, dirName, scope, namePrefix)
+          return await loadSkillFromPathAsync(
+            skillMdPath,
+            resolvedPath,
+            dirName,
+            scope,
+            namePrefix,
+          )
         } catch {
           const namedSkillMdPath = join(resolvedPath, `${dirName}.md`)
           try {
             await readFile(namedSkillMdPath, "utf-8")
-            return await loadSkillFromPathAsync(namedSkillMdPath, resolvedPath, dirName, scope, namePrefix)
+            return await loadSkillFromPathAsync(
+              namedSkillMdPath,
+              resolvedPath,
+              dirName,
+              scope,
+              namePrefix,
+            )
           } catch {
             if (depth >= maxDepth) {
               return null
             }
 
-            const nestedPrefix = namePrefix ? `${namePrefix}/${dirName}` : dirName
+            const nestedPrefix = namePrefix
+              ? `${namePrefix}/${dirName}`
+              : dirName
             const nestedSkills = await discoverSkillsInDirAsync(
               resolvedPath,
               scope,
               nestedPrefix,
               depth + 1,
-              maxDepth
+              maxDepth,
             )
 
             return nestedSkills.length > 0 ? nestedSkills : null
@@ -193,7 +230,13 @@ export async function discoverSkillsInDirAsync(
 
       if (isMarkdownFile(entry)) {
         const skillName = basename(entry.name, ".md")
-        return await loadSkillFromPathAsync(entryPath, skillsDir, skillName, scope, namePrefix)
+        return await loadSkillFromPathAsync(
+          entryPath,
+          skillsDir,
+          skillName,
+          scope,
+          namePrefix,
+        )
       }
 
       return null
@@ -205,7 +248,12 @@ export async function discoverSkillsInDirAsync(
       return Array.isArray(skill) ? skill : [skill]
     })
   } catch (error: unknown) {
-    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
       return []
     }
     return []

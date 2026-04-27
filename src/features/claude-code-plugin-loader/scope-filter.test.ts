@@ -98,7 +98,10 @@ describe("shouldLoadPluginForCwd", () => {
       }
 
       //#when
-      const result = shouldLoadPluginForCwd(installation, join(projectDirectory, "packages", "app"))
+      const result = shouldLoadPluginForCwd(
+        installation,
+        join(projectDirectory, "packages", "app"),
+      )
 
       //#then
       expect(result).toBe(true)

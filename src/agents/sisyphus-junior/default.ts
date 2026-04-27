@@ -12,7 +12,7 @@ import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder"
 
 export function buildDefaultSisyphusJuniorPrompt(
   useTaskSystem: boolean,
-  promptAppend?: string
+  promptAppend?: string,
 ): string {
   const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
   const verificationText = useTaskSystem

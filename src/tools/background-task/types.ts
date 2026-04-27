@@ -37,7 +37,9 @@ export type BackgroundOutputMessagesResult =
 
 export type BackgroundOutputClient = {
   session: {
-    messages: (args: { path: { id: string } }) => Promise<BackgroundOutputMessagesResult>
+    messages: (args: {
+      path: { id: string }
+    }) => Promise<BackgroundOutputMessagesResult>
   }
 }
 
@@ -47,7 +49,10 @@ export type BackgroundCancelClient = {
   }
 }
 
-export type BackgroundOutputManager = Pick<import("../../features/background-agent").BackgroundManager, "getTask">
+export type BackgroundOutputManager = Pick<
+  import("../../features/background-agent").BackgroundManager,
+  "getTask"
+>
 
 export type FullSessionMessagePart = {
   type?: string
@@ -68,5 +73,8 @@ export type ToolContextWithMetadata = {
   messageID: string
   agent: string
   abort: AbortSignal
-  metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void
+  metadata?: (input: {
+    title?: string
+    metadata?: Record<string, unknown>
+  }) => void
 }

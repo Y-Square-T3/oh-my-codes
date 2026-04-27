@@ -5,21 +5,31 @@ import { normalizeSDKResponse } from "../../shared"
 export async function fetchSyncResult(
   client: OpencodeClient,
   sessionID: string,
-  anchorMessageCount?: number
+  anchorMessageCount?: number,
 ): Promise<{ ok: true; textContent: string } | { ok: false; error: string }> {
   const messagesResult = await client.session.messages({
     path: { id: sessionID },
   })
 
   if ((messagesResult as { error?: unknown }).error) {
-    return { ok: false, error: `Error fetching result: ${(messagesResult as { error: unknown }).error}\n\nSession ID: ${sessionID}` }
+    return {
+      ok: false,
+      error: `Error fetching result: ${(messagesResult as { error: unknown }).error}\n\nSession ID: ${sessionID}`,
+    }
   }
 
-  const messages = normalizeSDKResponse(messagesResult, [] as SessionMessage[], {
-    preferResponseOnMissingData: true,
-  })
+  const messages = normalizeSDKResponse(
+    messagesResult,
+    [] as SessionMessage[],
+    {
+      preferResponseOnMissingData: true,
+    },
+  )
 
-  const messagesAfterAnchor = anchorMessageCount !== undefined ? messages.slice(anchorMessageCount) : messages
+  const messagesAfterAnchor =
+    anchorMessageCount !== undefined
+      ? messages.slice(anchorMessageCount)
+      : messages
 
   if (anchorMessageCount !== undefined && messagesAfterAnchor.length === 0) {
     return {
@@ -41,15 +51,23 @@ export async function fetchSyncResult(
   }
 
   if (!lastMessage) {
-    return { ok: false, error: `No assistant response found.\n\nSession ID: ${sessionID}` }
+    return {
+      ok: false,
+      error: `No assistant response found.\n\nSession ID: ${sessionID}`,
+    }
   }
 
   // Search assistant messages (newest first) for one with text/reasoning content.
   // The last assistant message may only contain tool calls with no text.
   let textContent = ""
   for (const msg of assistantMessages) {
-    const textParts = msg.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-    const content = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+    const textParts =
+      msg.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ??
+      []
+    const content = textParts
+      .map((p) => p.text ?? "")
+      .filter(Boolean)
+      .join("\n")
     if (content) {
       textContent = content
       break

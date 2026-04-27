@@ -35,7 +35,9 @@ function createManager(): BackgroundManager {
   return manager
 }
 
-function createTask(overrides: Partial<BackgroundTask> & { id: string; parentSessionID: string }): BackgroundTask {
+function createTask(
+  overrides: Partial<BackgroundTask> & { id: string; parentSessionID: string },
+): BackgroundTask {
   const { id, parentSessionID, ...rest } = overrides
 
   return {
@@ -55,8 +57,13 @@ function getTaskMap(manager: BackgroundManager): Map<string, BackgroundTask> {
   return Reflect.get(manager, "tasks") as Map<string, BackgroundTask>
 }
 
-function pruneStaleTasksAndNotificationsForTest(manager: BackgroundManager): void {
-  const pruneStaleTasksAndNotifications = Reflect.get(manager, "pruneStaleTasksAndNotifications") as () => void
+function pruneStaleTasksAndNotificationsForTest(
+  manager: BackgroundManager,
+): void {
+  const pruneStaleTasksAndNotifications = Reflect.get(
+    manager,
+    "pruneStaleTasksAndNotifications",
+  ) as () => void
   pruneStaleTasksAndNotifications.call(manager)
 }
 
@@ -64,8 +71,18 @@ describe("task history cleanup", () => {
   test("#given TaskHistory with entries for multiple parents #when clearSession called for one parent #then only that parent's entries are removed, others remain", () => {
     // given
     const history = new TaskHistory()
-    history.record("parent-1", { id: "task-1", agent: "explore", description: "task 1", status: "pending" })
-    history.record("parent-2", { id: "task-2", agent: "oracle", description: "task 2", status: "running" })
+    history.record("parent-1", {
+      id: "task-1",
+      agent: "explore",
+      description: "task 1",
+      status: "pending",
+    })
+    history.record("parent-2", {
+      id: "task-2",
+      agent: "oracle",
+      description: "task 2",
+      status: "running",
+    })
 
     // when
     history.clearSession("parent-1")
@@ -78,8 +95,18 @@ describe("task history cleanup", () => {
   test("#given TaskHistory with entries for multiple parents #when clearAll called #then all entries are removed", () => {
     // given
     const history = new TaskHistory()
-    history.record("parent-1", { id: "task-1", agent: "explore", description: "task 1", status: "pending" })
-    history.record("parent-2", { id: "task-2", agent: "oracle", description: "task 2", status: "running" })
+    history.record("parent-1", {
+      id: "task-1",
+      agent: "explore",
+      description: "task 1",
+      status: "pending",
+    })
+    history.record("parent-2", {
+      id: "task-2",
+      agent: "oracle",
+      description: "task 2",
+      status: "running",
+    })
 
     // when
     history.clearAll()
@@ -93,10 +120,17 @@ describe("task history cleanup", () => {
     // given
     const manager = createManager()
     managerUnderTest = manager
-    manager.taskHistory.record("parent-1", { id: "task-1", agent: "explore", description: "task 1", status: "pending" })
+    manager.taskHistory.record("parent-1", {
+      id: "task-1",
+      agent: "explore",
+      description: "task 1",
+      status: "pending",
+    })
 
     let clearAllCalls = 0
-    const originalClearAll = manager.taskHistory.clearAll.bind(manager.taskHistory)
+    const originalClearAll = manager.taskHistory.clearAll.bind(
+      manager.taskHistory,
+    )
     manager.taskHistory.clearAll = (): void => {
       clearAllCalls += 1
       originalClearAll()
@@ -129,8 +163,18 @@ describe("task history cleanup", () => {
 
     getTaskMap(manager).set(staleTask.id, staleTask)
     getTaskMap(manager).set(liveTask.id, liveTask)
-    manager.taskHistory.record("parent-1", { id: staleTask.id, agent: staleTask.agent, description: staleTask.description, status: staleTask.status })
-    manager.taskHistory.record("parent-2", { id: liveTask.id, agent: liveTask.agent, description: liveTask.description, status: liveTask.status })
+    manager.taskHistory.record("parent-1", {
+      id: staleTask.id,
+      agent: staleTask.agent,
+      description: staleTask.description,
+      status: staleTask.status,
+    })
+    manager.taskHistory.record("parent-2", {
+      id: liveTask.id,
+      agent: liveTask.agent,
+      description: liveTask.description,
+      status: liveTask.status,
+    })
 
     // when
     pruneStaleTasksAndNotificationsForTest(manager)

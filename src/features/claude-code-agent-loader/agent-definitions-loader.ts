@@ -5,9 +5,17 @@ import { log } from "../../shared/logger"
 import { parseToolsConfig } from "../../shared/parse-tools-config"
 import { parseJsonAgentFile } from "./json-agent-loader"
 import { mapClaudeModelToOpenCode } from "./claude-model-mapper"
-import type { AgentScope, AgentFrontmatter, ClaudeCodeAgentConfig, LoadedAgent } from "./types"
+import type {
+  AgentScope,
+  AgentFrontmatter,
+  ClaudeCodeAgentConfig,
+  LoadedAgent,
+} from "./types"
 
-export function parseMarkdownAgentFile(filePath: string, scope: AgentScope): LoadedAgent | null {
+export function parseMarkdownAgentFile(
+  filePath: string,
+  scope: AgentScope,
+): LoadedAgent | null {
   try {
     if (!existsSync(filePath)) {
       return null
@@ -53,7 +61,7 @@ export function parseMarkdownAgentFile(filePath: string, scope: AgentScope): Loa
 
 export function loadAgentDefinitions(
   paths: string[],
-  scope: AgentScope
+  scope: AgentScope,
 ): Record<string, ClaudeCodeAgentConfig> {
   const result: Record<string, ClaudeCodeAgentConfig> = Object.create(null)
 
@@ -71,7 +79,9 @@ export function loadAgentDefinitions(
     } else if (ext === ".json" || ext === ".jsonc") {
       agent = parseJsonAgentFile(filePath, scope)
     } else {
-      log(`[agent-definitions-loader] Unsupported file extension: ${ext} for ${filePath}`)
+      log(
+        `[agent-definitions-loader] Unsupported file extension: ${ext} for ${filePath}`,
+      )
       continue
     }
 

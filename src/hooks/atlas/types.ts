@@ -2,7 +2,11 @@ import type { AgentOverrides } from "../../config"
 import type { BackgroundManager } from "../../features/background-agent"
 import type { TopLevelTaskRef } from "../../features/boulder-state"
 
-export type ModelInfo = { providerID: string; modelID: string; variant?: string }
+export type ModelInfo = {
+  providerID: string
+  modelID: string
+  variant?: string
+}
 
 export interface AtlasHookOptions {
   directory: string
@@ -25,7 +29,10 @@ export interface ToolExecuteAfterOutput {
   metadata: Record<string, unknown>
 }
 
-export type TrackedTopLevelTaskRef = Pick<TopLevelTaskRef, "key" | "label" | "title">
+export type TrackedTopLevelTaskRef = Pick<
+  TopLevelTaskRef,
+  "key" | "label" | "title"
+>
 
 export type PendingTaskRef =
   | { kind: "track"; task: TrackedTopLevelTaskRef }

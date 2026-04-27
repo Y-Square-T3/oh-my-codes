@@ -1,4 +1,12 @@
-import { describe, expect, test, beforeEach, afterEach, mock, afterAll } from "bun:test"
+import {
+  describe,
+  expect,
+  test,
+  beforeEach,
+  afterEach,
+  mock,
+  afterAll,
+} from "bun:test"
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
@@ -9,10 +17,18 @@ import {
   readBoulderState,
 } from "../../features/boulder-state"
 import type { BoulderState } from "../../features/boulder-state"
-import { _resetForTesting, registerAgentName, subagentSessions, updateSessionAgent } from "../../features/claude-code-session-state"
+import {
+  _resetForTesting,
+  registerAgentName,
+  subagentSessions,
+  updateSessionAgent,
+} from "../../features/claude-code-session-state"
 import type { PendingTaskRef } from "./types"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-message-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `atlas-message-storage-${randomUUID()}`,
+)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -33,7 +49,9 @@ mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => false,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createAtlasHook } = await import("./index")
 const { createToolExecuteAfterHandler } = await import("./tool-execute-after")
@@ -49,12 +67,16 @@ describe("atlas hook", () => {
     sessionGetMock?: ReturnType<typeof mock>
   }) {
     const promptMock = overrides?.promptMock ?? mock(() => Promise.resolve())
-    const sessionGetMock = overrides?.sessionGetMock ?? mock(async ({ path }: { path: { id: string } }) => ({
-      data: {
-        id: path.id,
-        parentID: path.id.startsWith("ses_") ? "session-1" : "main-session-123",
-      },
-    }))
+    const sessionGetMock =
+      overrides?.sessionGetMock ??
+      mock(async ({ path }: { path: { id: string } }) => ({
+        data: {
+          id: path.id,
+          parentID: path.id.startsWith("ses_")
+            ? "session-1"
+            : "main-session-123",
+        },
+      }))
     return {
       directory: TEST_DIR,
       client: {
@@ -81,7 +103,10 @@ describe("atlas hook", () => {
       agent,
       model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
     }
-    writeFileSync(join(messageDir, "msg_test001.json"), JSON.stringify(messageData))
+    writeFileSync(
+      join(messageDir, "msg_test001.json"),
+      JSON.stringify(messageData),
+    )
   }
 
   function cleanupMessageStorage(sessionID: string): void {
@@ -122,7 +147,11 @@ describe("atlas hook", () => {
       // when - calling with undefined output
       const result = await hook["tool.execute.after"](
         { tool: "task", sessionID: "session-123" },
-        undefined as unknown as { title: string; output: string; metadata: Record<string, unknown> }
+        undefined as unknown as {
+          title: string
+          output: string
+          metadata: Record<string, unknown>
+        },
       )
 
       // then - returns undefined without throwing
@@ -141,18 +170,18 @@ describe("atlas hook", () => {
       // when
       await hook["tool.execute.after"](
         { tool: "other_tool", sessionID: "session-123" },
-        output
+        output,
       )
 
       // then - output unchanged
       expect(output.output).toBe("Original output")
     })
 
-     test("should not transform when caller is not Atlas", async () => {
-       // given - boulder state exists but caller agent in message storage is not Atlas
-       const sessionID = "session-non-orchestrator-test"
-       setupMessageStorage(sessionID, "other-agent")
-      
+    test("should not transform when caller is not Atlas", async () => {
+      // given - boulder state exists but caller agent in message storage is not Atlas
+      const sessionID = "session-non-orchestrator-test"
+      setupMessageStorage(sessionID, "other-agent")
+
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
 
@@ -172,22 +201,19 @@ describe("atlas hook", () => {
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - output unchanged because caller is not orchestrator
       expect(output.output).toBe("Task completed successfully")
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should append standalone verification when no boulder state but caller is Atlas", async () => {
-       // given - no boulder state, but caller is Atlas
-       const sessionID = "session-no-boulder-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should append standalone verification when no boulder state but caller is Atlas", async () => {
+      // given - no boulder state, but caller is Atlas
+      const sessionID = "session-no-boulder-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const hook = createAtlasHook(createMockPluginInput())
       const output = {
         title: "Sisyphus Task",
@@ -196,24 +222,21 @@ describe("atlas hook", () => {
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - standalone verification reminder appended
       expect(output.output).toContain("Task completed successfully")
       expect(output.output).toContain("LYING")
       expect(output.output).toContain("PHASE 1")
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should transform output when caller is Atlas with boulder state", async () => {
-       // given - Atlas caller with boulder state
-       const sessionID = "session-transform-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should transform output when caller is Atlas with boulder state", async () => {
+      // given - Atlas caller with boulder state
+      const sessionID = "session-transform-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [x] Task 2")
 
@@ -233,10 +256,7 @@ describe("atlas hook", () => {
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - output should be transformed (original output preserved for debugging)
       expect(output.output).toContain("Task completed successfully")
@@ -244,7 +264,7 @@ describe("atlas hook", () => {
       expect(output.output).toContain("test-plan")
       expect(output.output).toContain("LYING")
       expect(output.output).toContain("PHASE 1")
-      
+
       cleanupMessageStorage(sessionID)
     })
 
@@ -281,10 +301,7 @@ session_id: ses_subagent_abc
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - output is transformed but metadata is preserved
       expect(output.output).toContain("SUBAGENT WORK COMPLETED")
@@ -318,26 +335,26 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - standalone verification appended but metadata preserved
       expect(output.output).toContain("LYING")
       expect(output.metadata.sessionId).toBe("ses_standalone_def")
       expect(output.metadata.agent).toBe("sisyphus-junior")
-      expect(output.metadata.model).toEqual({ providerID: "openai", modelID: "gpt-5.4" })
+      expect(output.metadata.model).toEqual({
+        providerID: "openai",
+        modelID: "gpt-5.4",
+      })
       expect(output.metadata.truncated).toBe(false)
 
       cleanupMessageStorage(sessionID)
     })
 
-     test("should still transform when plan is complete (shows progress)", async () => {
-       // given - boulder state with complete plan, Atlas caller
-       const sessionID = "session-complete-plan-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should still transform when plan is complete (shows progress)", async () => {
+      // given - boulder state with complete plan, Atlas caller
+      const sessionID = "session-complete-plan-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "complete-plan.md")
       writeFileSync(planPath, "# Plan\n- [x] Task 1\n- [x] Task 2")
 
@@ -357,24 +374,21 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - output transformed even when complete (shows 2/2 done)
       expect(output.output).toContain("SUBAGENT WORK COMPLETED")
       expect(output.output).toContain("2/2 done")
       expect(output.output).toContain("0 remaining")
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should not append unrelated current session to boulder state if not already tracked", async () => {
-       // given - boulder state without session-append-test, Atlas caller
-       const sessionID = "session-append-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should not append unrelated current session to boulder state if not already tracked", async () => {
+      // given - boulder state without session-append-test, Atlas caller
+      const sessionID = "session-append-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
 
@@ -394,22 +408,19 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - unrelated current session should not be absorbed into boulder
       const updatedState = readBoulderState(TEST_DIR)
       expect(updatedState?.session_ids).not.toContain(sessionID)
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should not append current session when session lookup fails during append decision", async () => {
-       // given - boulder state without session-get-failure-test, Atlas caller, and session lookup failure
-       const sessionID = "session-get-failure-test"
-       setupMessageStorage(sessionID, "atlas")
+    test("should not append current session when session lookup fails during append decision", async () => {
+      // given - boulder state without session-get-failure-test, Atlas caller, and session lookup failure
+      const sessionID = "session-get-failure-test"
+      setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
@@ -422,11 +433,13 @@ session_id: ses_standalone_def
       }
       writeBoulderState(TEST_DIR, state)
 
-      const hook = createAtlasHook(createMockPluginInput({
-        sessionGetMock: mock(async () => {
-          throw new Error("session lookup failed")
+      const hook = createAtlasHook(
+        createMockPluginInput({
+          sessionGetMock: mock(async () => {
+            throw new Error("session lookup failed")
+          }),
         }),
-      }))
+      )
       const output = {
         title: "Sisyphus Task",
         output: "Task output",
@@ -434,10 +447,7 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output,
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then
       const updatedState = readBoulderState(TEST_DIR)
@@ -446,11 +456,11 @@ session_id: ses_standalone_def
       cleanupMessageStorage(sessionID)
     })
 
-     test("should not duplicate existing session ID", async () => {
-       // given - boulder state already has session-dup-test, Atlas caller
-       const sessionID = "session-dup-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should not duplicate existing session ID", async () => {
+      // given - boulder state already has session-dup-test, Atlas caller
+      const sessionID = "session-dup-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
 
@@ -470,26 +480,28 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - should still have only one sessionID
       const updatedState = readBoulderState(TEST_DIR)
-      const count = updatedState?.session_ids.filter((id) => id === sessionID).length
+      const count = updatedState?.session_ids.filter(
+        (id) => id === sessionID,
+      ).length
       expect(count).toBe(1)
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should include boulder.json path and notepad path in transformed output", async () => {
-       // given - boulder state, Atlas caller
-       const sessionID = "session-path-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should include boulder.json path and notepad path in transformed output", async () => {
+      // given - boulder state, Atlas caller
+      const sessionID = "session-path-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "my-feature.md")
-      writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2\n- [x] Task 3")
+      writeFileSync(
+        planPath,
+        "# Plan\n- [ ] Task 1\n- [ ] Task 2\n- [x] Task 3",
+      )
 
       const state: BoulderState = {
         active_plan: planPath,
@@ -507,24 +519,21 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - output should contain plan name and progress
       expect(output.output).toContain("my-feature")
       expect(output.output).toContain("1/3 done")
       expect(output.output).toContain("2 remaining")
-      
+
       cleanupMessageStorage(sessionID)
     })
 
-     test("should include session_id and checkbox instructions in reminder", async () => {
-       // given - boulder state, Atlas caller
-       const sessionID = "session-resume-test"
-       setupMessageStorage(sessionID, "atlas")
-      
+    test("should include session_id and checkbox instructions in reminder", async () => {
+      // given - boulder state, Atlas caller
+      const sessionID = "session-resume-test"
+      setupMessageStorage(sessionID, "atlas")
+
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
 
@@ -544,16 +553,13 @@ session_id: ses_standalone_def
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then - should include verification instructions
       expect(output.output).toContain("LYING")
-     expect(output.output).toContain("PHASE 1")
-     expect(output.output).toContain("PHASE 2")
-      
+      expect(output.output).toContain("PHASE 1")
+      expect(output.output).toContain("PHASE 2")
+
       cleanupMessageStorage(sessionID)
     })
 
@@ -563,11 +569,14 @@ session_id: ses_standalone_def
       setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "background-cleanup-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
-`)
+`,
+      )
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
         started_at: "2026-01-02T10:00:00Z",
@@ -593,7 +602,7 @@ session_id: ses_standalone_def
       // when - the task is captured before execution
       await beforeHandler(
         { tool: "task", sessionID, callID: "call-bg-launch" },
-        { args: { prompt: "Implement auth flow" } }
+        { args: { prompt: "Implement auth flow" } },
       )
       expect(pendingTaskRefs.size).toBe(1)
 
@@ -604,7 +613,7 @@ session_id: ses_standalone_def
           title: "Sisyphus Task",
           output: "Background task launched.\n\nSession ID: ses_bg_12345",
           metadata: {},
-        }
+        },
       )
 
       // then - the pending task ref is still cleaned up
@@ -613,18 +622,21 @@ session_id: ses_standalone_def
       cleanupMessageStorage(sessionID)
     })
 
-     test("should persist preferred subagent session for the current top-level task", async () => {
-       // given - boulder state with a current top-level task, Atlas caller
-       const sessionID = "session-task-session-track-test"
-       setupMessageStorage(sessionID, "atlas")
+    test("should persist preferred subagent session for the current top-level task", async () => {
+      // given - boulder state with a current top-level task, Atlas caller
+      const sessionID = "session-task-session-track-test"
+      setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "task-session-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
   - [ ] nested acceptance checkbox
-`)
+`,
+      )
 
       const state: BoulderState = {
         active_plan: planPath,
@@ -649,33 +661,39 @@ session_id: ses_auth_flow_123
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then
-     const updatedState = readBoulderState(TEST_DIR)
-      expect(updatedState?.task_sessions?.["todo:1"]?.session_id).toBe("ses_auth_flow_123")
-      expect(updatedState?.task_sessions?.["todo:1"]?.task_title).toBe("Implement auth flow")
-      expect(updatedState?.task_sessions?.["todo:1"]?.agent).toBe("sisyphus-junior")
+      const updatedState = readBoulderState(TEST_DIR)
+      expect(updatedState?.task_sessions?.["todo:1"]?.session_id).toBe(
+        "ses_auth_flow_123",
+      )
+      expect(updatedState?.task_sessions?.["todo:1"]?.task_title).toBe(
+        "Implement auth flow",
+      )
+      expect(updatedState?.task_sessions?.["todo:1"]?.agent).toBe(
+        "sisyphus-junior",
+      )
       expect(updatedState?.task_sessions?.["todo:1"]?.category).toBe("deep")
 
       cleanupMessageStorage(sessionID)
     })
 
-     test("should preserve the delegated task key even after the plan advances to the next task", async () => {
-       // given - Atlas caller starts task 1, then the plan advances before task output is processed
-       const sessionID = "session-stable-task-key-test"
-       setupMessageStorage(sessionID, "atlas")
+    test("should preserve the delegated task key even after the plan advances to the next task", async () => {
+      // given - Atlas caller starts task 1, then the plan advances before task output is processed
+      const sessionID = "session-stable-task-key-test"
+      setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "stable-task-key-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
 - [ ] 2. Add API validation
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -689,16 +707,19 @@ session_id: ses_auth_flow_123
       // when - Atlas delegates task 1
       await hook["tool.execute.before"](
         { tool: "task", sessionID, callID: "call-task-1" },
-        { args: { prompt: "Implement auth flow" } }
+        { args: { prompt: "Implement auth flow" } },
       )
 
       // and the plan is advanced before the task output is processed
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [x] 1. Implement auth flow
 - [ ] 2. Add API validation
-`)
+`,
+      )
 
       await hook["tool.execute.after"](
         { tool: "task", sessionID, callID: "call-task-1" },
@@ -713,29 +734,34 @@ session_id: ses_auth_flow_123
             agent: "sisyphus-junior",
             category: "deep",
           },
-        }
+        },
       )
 
       // then - the completed task session is still recorded against task 1, not task 2
-     const updatedState = readBoulderState(TEST_DIR)
-      expect(updatedState?.task_sessions?.["todo:1"]?.session_id).toBe("ses_auth_flow_123")
+      const updatedState = readBoulderState(TEST_DIR)
+      expect(updatedState?.task_sessions?.["todo:1"]?.session_id).toBe(
+        "ses_auth_flow_123",
+      )
       expect(updatedState?.task_sessions?.["todo:2"]).toBeUndefined()
 
       cleanupMessageStorage(sessionID)
     })
 
-     test("should not overwrite the current task mapping when task() explicitly resumes an older session", async () => {
-       // given - current plan is on task 2, but Atlas explicitly resumes an older session for a previous task
-       const sessionID = "session-cross-task-resume-test"
-       setupMessageStorage(sessionID, "atlas")
+    test("should not overwrite the current task mapping when task() explicitly resumes an older session", async () => {
+      // given - current plan is on task 2, but Atlas explicitly resumes an older session for a previous task
+      const sessionID = "session-cross-task-resume-test"
+      setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "cross-task-resume-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [x] 1. Implement auth flow
 - [ ] 2. Add API validation
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -749,7 +775,12 @@ session_id: ses_auth_flow_123
       // when - Atlas resumes an explicit prior session
       await hook["tool.execute.before"](
         { tool: "task", sessionID, callID: "call-resume-old-task" },
-        { args: { prompt: "Follow up on previous task", session_id: "ses_old_task_111" } }
+        {
+          args: {
+            prompt: "Follow up on previous task",
+            session_id: "ses_old_task_111",
+          },
+        },
       )
 
       const output = {
@@ -766,7 +797,7 @@ session_id: ses_old_task_111
       }
       await hook["tool.execute.after"](
         { tool: "task", sessionID, callID: "call-resume-old-task" },
-        output
+        output,
       )
 
       // then - Atlas does not poison task 2's preferred session mapping
@@ -783,12 +814,15 @@ session_id: ses_old_task_111
       setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "explicit-resume-reminder-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [x] 1. Implement auth flow
 - [ ] 2. Add API validation
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -820,11 +854,16 @@ session_id: ses_old_task_111
       // when
       await hook["tool.execute.before"](
         { tool: "task", sessionID, callID: "call-explicit-resume-reminder" },
-        { args: { prompt: "Follow up on previous task", session_id: "ses_old_task_111" } }
+        {
+          args: {
+            prompt: "Follow up on previous task",
+            session_id: "ses_old_task_111",
+          },
+        },
       )
       await hook["tool.execute.after"](
         { tool: "task", sessionID, callID: "call-explicit-resume-reminder" },
-        output
+        output,
       )
 
       // then
@@ -840,12 +879,15 @@ session_id: ses_old_task_111
       setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "parallel-task-collision-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
 - [ ] 2. Add API validation
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -872,11 +914,11 @@ session_id: ses_old_task_111
       // when - two task() calls start before either one completes
       await beforeHandler(
         { tool: "task", sessionID, callID: "call-task-first" },
-        { args: { prompt: "Implement auth flow part 1" } }
+        { args: { prompt: "Implement auth flow part 1" } },
       )
       await beforeHandler(
         { tool: "task", sessionID, callID: "call-task-second" },
-        { args: { prompt: "Implement auth flow part 2" } }
+        { args: { prompt: "Implement auth flow part 2" } },
       )
 
       const secondPendingTaskRef = pendingTaskRefs.get("call-task-second")
@@ -891,7 +933,7 @@ session_id: ses_old_task_111
 session_id: ses_parallel_collision_222
 </task_metadata>`,
           metadata: {},
-        }
+        },
       )
 
       // then
@@ -916,11 +958,14 @@ session_id: ses_parallel_collision_222
       setupMessageStorage(sessionID, "atlas")
 
       const planPath = join(TEST_DIR, "untrusted-session-id-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -929,14 +974,19 @@ session_id: ses_parallel_collision_222
         plan_name: "untrusted-session-id-plan",
       })
 
-      const hook = createAtlasHook(createMockPluginInput({
-        sessionGetMock: mock(async ({ path }: { path: { id: string } }) => ({
-          data: {
-            id: path.id,
-            parentID: path.id === "ses_untrusted_999" ? "session-outside-lineage" : "main-session-123",
-          },
-        })),
-      }))
+      const hook = createAtlasHook(
+        createMockPluginInput({
+          sessionGetMock: mock(async ({ path }: { path: { id: string } }) => ({
+            data: {
+              id: path.id,
+              parentID:
+                path.id === "ses_untrusted_999"
+                  ? "session-outside-lineage"
+                  : "main-session-123",
+            },
+          })),
+        }),
+      )
       const output = {
         title: "Sisyphus Task",
         output: `Task completed successfully
@@ -948,10 +998,7 @@ session_id: ses_untrusted_999
       }
 
       // when
-      await hook["tool.execute.after"](
-        { tool: "task", sessionID },
-        output
-      )
+      await hook["tool.execute.after"]({ tool: "task", sessionID }, output)
 
       // then
       const updatedState = readBoulderState(TEST_DIR)
@@ -997,11 +1044,13 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "task", sessionID: COMPLETION_GATE_SESSION },
-          output
+          output,
         )
 
         // then - completion gate should appear BEFORE Subagent Response
-        const subagentResponseIndex = output.output.indexOf("**Subagent Response:**")
+        const subagentResponseIndex = output.output.indexOf(
+          "**Subagent Response:**",
+        )
         const completionGateIndex = output.output.indexOf("COMPLETION GATE")
 
         expect(completionGateIndex).toBeGreaterThanOrEqual(0)
@@ -1032,7 +1081,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "task", sessionID: COMPLETION_GATE_SESSION },
-          output
+          output,
         )
 
         // then - completion gate should appear BEFORE verification phase text
@@ -1071,11 +1120,13 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "task", sessionID: COMPLETION_GATE_SESSION },
-          output
+          output,
         )
 
         // then - old STEP 7 MARK COMPLETION IN PLAN FILE should be absent
-        expect(output.output).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")
+        expect(output.output).not.toContain(
+          "STEP 7: MARK COMPLETION IN PLAN FILE",
+        )
         expect(output.output).not.toContain("MARK COMPLETION IN PLAN FILE")
       })
     })
@@ -1083,9 +1134,9 @@ session_id: ses_untrusted_999
     describe("Write/Edit tool direct work reminder", () => {
       const ORCHESTRATOR_SESSION = "orchestrator-write-test"
 
-       beforeEach(() => {
-         setupMessageStorage(ORCHESTRATOR_SESSION, "atlas")
-       })
+      beforeEach(() => {
+        setupMessageStorage(ORCHESTRATOR_SESSION, "atlas")
+      })
 
       afterEach(() => {
         cleanupMessageStorage(ORCHESTRATOR_SESSION)
@@ -1103,7 +1154,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-          output
+          output,
         )
 
         // then
@@ -1124,7 +1175,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Edit", sessionID: ORCHESTRATOR_SESSION },
-          output
+          output,
         )
 
         // then
@@ -1144,7 +1195,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-          output
+          output,
         )
 
         // then
@@ -1156,7 +1207,7 @@ session_id: ses_untrusted_999
         // given
         const nonOrchestratorSession = "non-orchestrator-session"
         setupMessageStorage(nonOrchestratorSession, "sisyphus-junior")
-        
+
         const hook = createAtlasHook(createMockPluginInput())
         const originalOutput = "File written successfully"
         const output = {
@@ -1168,13 +1219,13 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Write", sessionID: nonOrchestratorSession },
-          output
+          output,
         )
 
         // then
         expect(output.output).toBe(originalOutput)
         expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
-        
+
         cleanupMessageStorage(nonOrchestratorSession)
       })
 
@@ -1191,7 +1242,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Read", sessionID: ORCHESTRATOR_SESSION },
-          output
+          output,
         )
 
         // then
@@ -1211,7 +1262,7 @@ session_id: ses_untrusted_999
         // when
         await hook["tool.execute.after"](
           { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-          output
+          output,
         )
 
         // then
@@ -1232,12 +1283,14 @@ session_id: ses_untrusted_999
           // when
           await hook["tool.execute.after"](
             { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-            output
+            output,
           )
 
           // then
           expect(output.output).toBe(originalOutput)
-          expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
+          expect(output.output).not.toContain(
+            "ORCHESTRATOR, not an IMPLEMENTER",
+          )
         })
 
         test("should NOT append reminder when orchestrator writes inside .sisyphus with mixed separators", async () => {
@@ -1253,12 +1306,14 @@ session_id: ses_untrusted_999
           // when
           await hook["tool.execute.after"](
             { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-            output
+            output,
           )
 
           // then
           expect(output.output).toBe(originalOutput)
-          expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
+          expect(output.output).not.toContain(
+            "ORCHESTRATOR, not an IMPLEMENTER",
+          )
         })
 
         test("should NOT append reminder for absolute Windows path inside .sisyphus\\", async () => {
@@ -1268,18 +1323,22 @@ session_id: ses_untrusted_999
           const output = {
             title: "Write",
             output: originalOutput,
-            metadata: { filePath: "C:\\Users\\test\\project\\.sisyphus\\plans\\x.md" },
+            metadata: {
+              filePath: "C:\\Users\\test\\project\\.sisyphus\\plans\\x.md",
+            },
           }
 
           // when
           await hook["tool.execute.after"](
             { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-            output
+            output,
           )
 
           // then
           expect(output.output).toBe(originalOutput)
-          expect(output.output).not.toContain("ORCHESTRATOR, not an IMPLEMENTER")
+          expect(output.output).not.toContain(
+            "ORCHESTRATOR, not an IMPLEMENTER",
+          )
         })
 
         test("should append reminder for Windows path outside .sisyphus\\", async () => {
@@ -1294,7 +1353,7 @@ session_id: ses_untrusted_999
           // when
           await hook["tool.execute.after"](
             { tool: "Write", sessionID: ORCHESTRATOR_SESSION },
-            output
+            output,
           )
 
           // then
@@ -1312,13 +1371,13 @@ session_id: ses_untrusted_999
       await Promise.resolve()
     }
 
-     beforeEach(() => {
-       _resetForTesting()
-       registerAgentName("atlas")
-       registerAgentName("sisyphus")
-        subagentSessions.clear()
-        setupMessageStorage(MAIN_SESSION_ID, "atlas")
-      })
+    beforeEach(() => {
+      _resetForTesting()
+      registerAgentName("atlas")
+      registerAgentName("sisyphus")
+      subagentSessions.clear()
+      setupMessageStorage(MAIN_SESSION_ID, "atlas")
+    })
 
     afterEach(() => {
       cleanupMessageStorage(MAIN_SESSION_ID)
@@ -1328,7 +1387,10 @@ session_id: ses_untrusted_999
     test("should inject continuation when boulder has incomplete tasks", async () => {
       // given - boulder state with incomplete plan
       const planPath = join(TEST_DIR, "test-plan.md")
-      writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [x] Task 2\n- [ ] Task 3")
+      writeFileSync(
+        planPath,
+        "# Plan\n- [ ] Task 1\n- [x] Task 2\n- [ ] Task 3",
+      )
 
       const state: BoulderState = {
         active_plan: planPath,
@@ -1430,7 +1492,9 @@ session_id: ses_untrusted_999
       })
 
       // then - lineage alone is not enough to absorb the session into boulder
-      expect(readBoulderState(TEST_DIR)?.session_ids).not.toContain(subagentSessionID)
+      expect(readBoulderState(TEST_DIR)?.session_ids).not.toContain(
+        subagentSessionID,
+      )
       expect(mockInput._promptMock).not.toHaveBeenCalled()
     })
 
@@ -1531,71 +1595,72 @@ session_id: ses_untrusted_999
       expect(mockInput._promptMock).not.toHaveBeenCalled()
     })
 
-     test("should skip when background tasks are running", async () => {
-       // given - boulder state with incomplete plan
-       const planPath = join(TEST_DIR, "test-plan.md")
-       writeFileSync(planPath, "# Plan\n- [ ] Task 1")
+    test("should skip when background tasks are running", async () => {
+      // given - boulder state with incomplete plan
+      const planPath = join(TEST_DIR, "test-plan.md")
+      writeFileSync(planPath, "# Plan\n- [ ] Task 1")
 
-       const state: BoulderState = {
-         active_plan: planPath,
-         started_at: "2026-01-02T10:00:00Z",
-         session_ids: [MAIN_SESSION_ID],
-         plan_name: "test-plan",
-       }
-       writeBoulderState(TEST_DIR, state)
+      const state: BoulderState = {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [MAIN_SESSION_ID],
+        plan_name: "test-plan",
+      }
+      writeBoulderState(TEST_DIR, state)
 
-       const mockBackgroundManager = {
-         getTasksByParentSession: () => [{ status: "running" }],
-       }
+      const mockBackgroundManager = {
+        getTasksByParentSession: () => [{ status: "running" }],
+      }
 
-       const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput, {
-         directory: TEST_DIR,
-         backgroundManager: mockBackgroundManager as any,
-       })
+      const mockInput = createMockPluginInput()
+      const hook = createAtlasHook(mockInput, {
+        directory: TEST_DIR,
+        backgroundManager: mockBackgroundManager as any,
+      })
 
-       // when
-       await hook.handler({
-         event: {
-           type: "session.idle",
-           properties: { sessionID: MAIN_SESSION_ID },
-         },
-       })
+      // when
+      await hook.handler({
+        event: {
+          type: "session.idle",
+          properties: { sessionID: MAIN_SESSION_ID },
+        },
+      })
 
-       // then - should not call prompt
-       expect(mockInput._promptMock).not.toHaveBeenCalled()
-     })
+      // then - should not call prompt
+      expect(mockInput._promptMock).not.toHaveBeenCalled()
+    })
 
-     test("should skip when continuation is stopped via isContinuationStopped", async () => {
-       // given - boulder state with incomplete plan
-       const planPath = join(TEST_DIR, "test-plan.md")
-       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
+    test("should skip when continuation is stopped via isContinuationStopped", async () => {
+      // given - boulder state with incomplete plan
+      const planPath = join(TEST_DIR, "test-plan.md")
+      writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
-       const state: BoulderState = {
-         active_plan: planPath,
-         started_at: "2026-01-02T10:00:00Z",
-         session_ids: [MAIN_SESSION_ID],
-         plan_name: "test-plan",
-       }
-       writeBoulderState(TEST_DIR, state)
+      const state: BoulderState = {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [MAIN_SESSION_ID],
+        plan_name: "test-plan",
+      }
+      writeBoulderState(TEST_DIR, state)
 
-       const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput, {
-         directory: TEST_DIR,
-         isContinuationStopped: (sessionID: string) => sessionID === MAIN_SESSION_ID,
-       })
+      const mockInput = createMockPluginInput()
+      const hook = createAtlasHook(mockInput, {
+        directory: TEST_DIR,
+        isContinuationStopped: (sessionID: string) =>
+          sessionID === MAIN_SESSION_ID,
+      })
 
-       // when
-       await hook.handler({
-         event: {
-           type: "session.idle",
-           properties: { sessionID: MAIN_SESSION_ID },
-         },
-       })
+      // when
+      await hook.handler({
+        event: {
+          type: "session.idle",
+          properties: { sessionID: MAIN_SESSION_ID },
+        },
+      })
 
-       // then - should not call prompt because continuation is stopped
-       expect(mockInput._promptMock).not.toHaveBeenCalled()
-     })
+      // then - should not call prompt because continuation is stopped
+      expect(mockInput._promptMock).not.toHaveBeenCalled()
+    })
 
     test("should clear abort state on message.updated", async () => {
       // given - boulder with incomplete plan
@@ -1643,7 +1708,10 @@ session_id: ses_untrusted_999
     test("should include plan progress in continuation prompt", async () => {
       // given - boulder state with specific progress
       const planPath = join(TEST_DIR, "progress-plan.md")
-      writeFileSync(planPath, "# Plan\n- [x] Task 1\n- [x] Task 2\n- [ ] Task 3\n- [ ] Task 4")
+      writeFileSync(
+        planPath,
+        "# Plan\n- [x] Task 1\n- [x] Task 2\n- [ ] Task 3\n- [ ] Task 4",
+      )
 
       const state: BoulderState = {
         active_plan: planPath,
@@ -1673,11 +1741,14 @@ session_id: ses_untrusted_999
     test("should include preferred reuse session in continuation prompt for current top-level task", async () => {
       // given - boulder state with tracked preferred session
       const planPath = join(TEST_DIR, "preferred-session-plan.md")
-      writeFileSync(planPath, `# Plan
+      writeFileSync(
+        planPath,
+        `# Plan
 
 ## TODOs
 - [ ] 1. Implement auth flow
-`)
+`,
+      )
 
       writeBoulderState(TEST_DIR, {
         active_plan: planPath,
@@ -1708,61 +1779,63 @@ session_id: ses_untrusted_999
 
       // then
       const callArgs = mockInput._promptMock.mock.calls[0][0]
-      expect(callArgs.body.parts[0].text).toContain("Preferred reuse session for current top-level plan task")
+      expect(callArgs.body.parts[0].text).toContain(
+        "Preferred reuse session for current top-level plan task",
+      )
       expect(callArgs.body.parts[0].text).toContain("ses_auth_flow_123")
     })
 
     test("should inject when last agent is sisyphus and boulder targets atlas explicitly", async () => {
-       // given - boulder explicitly set to atlas, but last agent is sisyphus (initial state after /start-work)
-       const planPath = join(TEST_DIR, "test-plan.md")
-       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
+      // given - boulder explicitly set to atlas, but last agent is sisyphus (initial state after /start-work)
+      const planPath = join(TEST_DIR, "test-plan.md")
+      writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
-       const state: BoulderState = {
-         active_plan: planPath,
-         started_at: "2026-01-02T10:00:00Z",
-         session_ids: [MAIN_SESSION_ID],
-         plan_name: "test-plan",
-         agent: "atlas",
-       }
-       writeBoulderState(TEST_DIR, state)
+      const state: BoulderState = {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [MAIN_SESSION_ID],
+        plan_name: "test-plan",
+        agent: "atlas",
+      }
+      writeBoulderState(TEST_DIR, state)
 
-       // given - last agent is sisyphus (typical state right after /start-work)
-       cleanupMessageStorage(MAIN_SESSION_ID)
-       setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
+      // given - last agent is sisyphus (typical state right after /start-work)
+      cleanupMessageStorage(MAIN_SESSION_ID)
+      setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
 
-       const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput)
+      const mockInput = createMockPluginInput()
+      const hook = createAtlasHook(mockInput)
 
-       // when
-       await hook.handler({
-         event: {
-           type: "session.idle",
-           properties: { sessionID: MAIN_SESSION_ID },
-         },
-       })
+      // when
+      await hook.handler({
+        event: {
+          type: "session.idle",
+          properties: { sessionID: MAIN_SESSION_ID },
+        },
+      })
 
-       // then - should call prompt because sisyphus is always allowed for atlas boulders
-       expect(mockInput._promptMock).toHaveBeenCalled()
-     })
+      // then - should call prompt because sisyphus is always allowed for atlas boulders
+      expect(mockInput._promptMock).toHaveBeenCalled()
+    })
 
     test("should inject when registered atlas boulder session last agent does not match", async () => {
       const planPath = join(TEST_DIR, "test-plan.md")
       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
-       const state: BoulderState = {
-         active_plan: planPath,
-         started_at: "2026-01-02T10:00:00Z",
-         session_ids: [MAIN_SESSION_ID],
-         plan_name: "test-plan",
-         agent: "atlas",
-       }
-       writeBoulderState(TEST_DIR, state)
+      const state: BoulderState = {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [MAIN_SESSION_ID],
+        plan_name: "test-plan",
+        agent: "atlas",
+      }
+      writeBoulderState(TEST_DIR, state)
 
-       cleanupMessageStorage(MAIN_SESSION_ID)
-       setupMessageStorage(MAIN_SESSION_ID, "hephaestus")
+      cleanupMessageStorage(MAIN_SESSION_ID)
+      setupMessageStorage(MAIN_SESSION_ID, "hephaestus")
 
-       const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput)
+      const mockInput = createMockPluginInput()
+      const hook = createAtlasHook(mockInput)
 
       await hook.handler({
         event: {
@@ -1774,39 +1847,39 @@ session_id: ses_untrusted_999
       expect(mockInput._promptMock).toHaveBeenCalled()
     })
 
-     test("should inject when last agent matches boulder agent even if non-Atlas", async () => {
-       // given - boulder state expects sisyphus and last agent is sisyphus
-       const planPath = join(TEST_DIR, "test-plan.md")
-       writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
+    test("should inject when last agent matches boulder agent even if non-Atlas", async () => {
+      // given - boulder state expects sisyphus and last agent is sisyphus
+      const planPath = join(TEST_DIR, "test-plan.md")
+      writeFileSync(planPath, "# Plan\n- [ ] Task 1\n- [ ] Task 2")
 
-       const state: BoulderState = {
-         active_plan: planPath,
-         started_at: "2026-01-02T10:00:00Z",
-         session_ids: [MAIN_SESSION_ID],
-         plan_name: "test-plan",
-         agent: "sisyphus",
-       }
-       writeBoulderState(TEST_DIR, state)
+      const state: BoulderState = {
+        active_plan: planPath,
+        started_at: "2026-01-02T10:00:00Z",
+        session_ids: [MAIN_SESSION_ID],
+        plan_name: "test-plan",
+        agent: "sisyphus",
+      }
+      writeBoulderState(TEST_DIR, state)
 
-       cleanupMessageStorage(MAIN_SESSION_ID)
-       setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
+      cleanupMessageStorage(MAIN_SESSION_ID)
+      setupMessageStorage(MAIN_SESSION_ID, "sisyphus")
 
-       const mockInput = createMockPluginInput()
-       const hook = createAtlasHook(mockInput)
+      const mockInput = createMockPluginInput()
+      const hook = createAtlasHook(mockInput)
 
-       // when
-       await hook.handler({
-         event: {
-           type: "session.idle",
-           properties: { sessionID: MAIN_SESSION_ID },
-         },
-       })
+      // when
+      await hook.handler({
+        event: {
+          type: "session.idle",
+          properties: { sessionID: MAIN_SESSION_ID },
+        },
+      })
 
-       // then - should call prompt for sisyphus
-       expect(mockInput._promptMock).toHaveBeenCalled()
-       const callArgs = mockInput._promptMock.mock.calls[0][0]
-       expect(callArgs.body.agent).toBe("sisyphus")
-     })
+      // then - should call prompt for sisyphus
+      expect(mockInput._promptMock).toHaveBeenCalled()
+      const callArgs = mockInput._promptMock.mock.calls[0][0]
+      expect(callArgs.body.agent).toBe("sisyphus")
+    })
 
     test("should preserve display-name agent in continuation prompt when boulder agent uses display form", async () => {
       // given - boulder state uses display-form agent name
@@ -1894,7 +1967,9 @@ session_id: ses_untrusted_999
       }
       writeBoulderState(TEST_DIR, state)
 
-      const promptMock = mock((): Promise<void> => Promise.reject(new Error("Bad Request")))
+      const promptMock = mock(
+        (): Promise<void> => Promise.reject(new Error("Bad Request")),
+      )
       const mockInput = createMockPluginInput({ promptMock })
       const hook = createAtlasHook(mockInput)
 
@@ -1905,12 +1980,22 @@ session_id: ses_untrusted_999
       try {
         //#when - idle fires repeatedly, past cooldown each time
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
         //#then - should attempt only 10 times, then disable continuation
@@ -1933,8 +2018,12 @@ session_id: ses_untrusted_999
       }
       writeBoulderState(TEST_DIR, state)
 
-      const promptMock = mock((): Promise<void> => Promise.reject(new Error("Bad Request")))
-      promptMock.mockImplementationOnce(() => Promise.reject(new Error("Bad Request")))
+      const promptMock = mock(
+        (): Promise<void> => Promise.reject(new Error("Bad Request")),
+      )
+      promptMock.mockImplementationOnce(() =>
+        Promise.reject(new Error("Bad Request")),
+      )
       promptMock.mockImplementationOnce(() => Promise.resolve())
 
       const mockInput = createMockPluginInput({ promptMock })
@@ -1947,7 +2036,12 @@ session_id: ses_untrusted_999
       try {
         //#when - fail, succeed (reset), then fail 10 times (disable), then attempt again
         for (let i = 0; i < 13; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
@@ -1983,14 +2077,24 @@ session_id: ses_untrusted_999
       try {
         //#when - 11th idle occurs inside 5-minute backoff window
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
         now += 60000
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
         //#then - 11th attempt should still be skipped
@@ -2024,14 +2128,24 @@ session_id: ses_untrusted_999
       try {
         //#when - 11th idle occurs after 5+ minutes
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
         now += 300000
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
         //#then - 11th attempt should run after backoff expiration
@@ -2054,9 +2168,13 @@ session_id: ses_untrusted_999
       }
       writeBoulderState(TEST_DIR, state)
 
-      const promptMock = mock((): Promise<void> => Promise.reject(new Error("Bad Request")))
+      const promptMock = mock(
+        (): Promise<void> => Promise.reject(new Error("Bad Request")),
+      )
       for (let i = 0; i < 10; i++) {
-        promptMock.mockImplementationOnce(() => Promise.reject(new Error("Bad Request")))
+        promptMock.mockImplementationOnce(() =>
+          Promise.reject(new Error("Bad Request")),
+        )
       }
       promptMock.mockImplementationOnce(() => Promise.resolve(undefined))
       const mockInput = createMockPluginInput({ promptMock })
@@ -2069,24 +2187,44 @@ session_id: ses_untrusted_999
       try {
         //#when - fail 10 times, recover after backoff with success, then fail 10 times again
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
         now += 300000
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
         now += 6000
 
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
         //#then - success retry resets counter, so 10 additional failures are allowed before skip
@@ -2120,18 +2258,38 @@ session_id: ses_untrusted_999
       try {
         //#when - 10 failures disable continuation, then compaction resets it
         for (let i = 0; i < 10; i++) {
-          await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+          await hook.handler({
+            event: {
+              type: "session.idle",
+              properties: { sessionID: MAIN_SESSION_ID },
+            },
+          })
           await flushMicrotasks()
           now += 6000
         }
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
-        await hook.handler({ event: { type: "session.compacted", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.compacted",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         now += 6000
 
-        await hook.handler({ event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } } })
+        await hook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
+        })
         await flushMicrotasks()
 
         //#then - 10 attempts + 1 after compaction (11 total)
@@ -2223,7 +2381,10 @@ session_id: ses_untrusted_999
     })
 
     describe("delayed retry timer (abort-stuck fix)", () => {
-      const capturedTimers = new Map<number, { callback: Function; cleared: boolean }>()
+      const capturedTimers = new Map<
+        number,
+        { callback: Function; cleared: boolean }
+      >()
       let nextFakeId = 99000
       const originalSetTimeout = globalThis.setTimeout
       const originalClearTimeout = globalThis.clearTimeout
@@ -2236,17 +2397,29 @@ session_id: ses_untrusted_999
         fakeNow = 10000
         Date.now = () => fakeNow
 
-        globalThis.setTimeout = ((callback: Function, delay?: number, ...args: unknown[]) => {
+        globalThis.setTimeout = ((
+          callback: Function,
+          delay?: number,
+          ...args: unknown[]
+        ) => {
           const normalized = typeof delay === "number" ? delay : 0
           if (normalized >= 5000) {
             const id = nextFakeId++
-            capturedTimers.set(id, { callback: () => callback(...args), cleared: false })
+            capturedTimers.set(id, {
+              callback: () => callback(...args),
+              cleared: false,
+            })
             return id as unknown as ReturnType<typeof setTimeout>
           }
-          return originalSetTimeout(callback as Parameters<typeof originalSetTimeout>[0], delay)
+          return originalSetTimeout(
+            callback as Parameters<typeof originalSetTimeout>[0],
+            delay,
+          )
         }) as unknown as typeof setTimeout
 
-        globalThis.clearTimeout = ((id?: number | ReturnType<typeof setTimeout>) => {
+        globalThis.clearTimeout = ((
+          id?: number | ReturnType<typeof setTimeout>,
+        ) => {
           if (typeof id === "number" && capturedTimers.has(id)) {
             capturedTimers.get(id)!.cleared = true
             capturedTimers.delete(id)
@@ -2291,10 +2464,16 @@ session_id: ses_untrusted_999
 
         // when - first idle injects, second idle within cooldown schedules retry timer
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         // then - fire pending timer and verify retry
@@ -2320,16 +2499,28 @@ session_id: ses_untrusted_999
 
         // when - first idle injects, then 3 rapid idles within cooldown
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         // then - only one retry fires despite multiple cooldown-blocked idles
@@ -2355,10 +2546,16 @@ session_id: ses_untrusted_999
 
         // when - first idle injects, second schedules retry, then plan completes before timer fires
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         writeFileSync(planPath, "# Plan\n- [x] Task 1\n- [x] Task 2")
@@ -2385,15 +2582,24 @@ session_id: ses_untrusted_999
         const hook = createAtlasHook(mockInput)
 
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         // when - delete session before timer fires
         await hook.handler({
-          event: { type: "session.deleted", properties: { info: { id: MAIN_SESSION_ID } } },
+          event: {
+            type: "session.deleted",
+            properties: { info: { id: MAIN_SESSION_ID } },
+          },
         })
 
         // then - timer was cleared, prompt called only once
@@ -2418,15 +2624,24 @@ session_id: ses_untrusted_999
         const hook = createAtlasHook(mockInput)
 
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
         await hook.handler({
-          event: { type: "session.idle", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.idle",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         // when - compact session before timer fires
         await hook.handler({
-          event: { type: "session.compacted", properties: { sessionID: MAIN_SESSION_ID } },
+          event: {
+            type: "session.compacted",
+            properties: { sessionID: MAIN_SESSION_ID },
+          },
         })
 
         // then - timer was cleared, prompt called only once

@@ -2,16 +2,21 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import { registerProcessCleanup, startCleanupTimer } from "./cleanup"
 import { buildHttpRequestInit } from "./oauth-handler"
-import type { ManagedClient, McpClient, McpTransport, SkillMcpClientConnectionParams } from "./types"
+import type {
+  ManagedClient,
+  McpClient,
+  McpTransport,
+  SkillMcpClientConnectionParams,
+} from "./types"
 
 type HttpClientFactory = (
   clientInfo: { name: string; version: string },
-  options: { capabilities: Record<string, never> }
+  options: { capabilities: Record<string, never> },
 ) => McpClient
 
 type HttpTransportFactory = (
   url: URL,
-  options?: { requestInit?: RequestInit }
+  options?: { requestInit?: RequestInit },
 ) => McpTransport
 
 interface HttpClientDependencies {
@@ -21,13 +26,15 @@ interface HttpClientDependencies {
 
 const defaultHttpClientDependencies: HttpClientDependencies = {
   createClient: (clientInfo, options) => new Client(clientInfo, options),
-  createTransport: (url, options) => new StreamableHTTPClientTransport(url, options),
+  createTransport: (url, options) =>
+    new StreamableHTTPClientTransport(url, options),
 }
 
-let httpClientDependencies: HttpClientDependencies = defaultHttpClientDependencies
+let httpClientDependencies: HttpClientDependencies =
+  defaultHttpClientDependencies
 
 export function setHttpClientDependenciesForTesting(
-  dependencies?: Partial<HttpClientDependencies>
+  dependencies?: Partial<HttpClientDependencies>,
 ): void {
   httpClientDependencies = dependencies
     ? {
@@ -55,12 +62,16 @@ function redactUrl(urlStr: string): string {
   }
 }
 
-export async function createHttpClient(params: SkillMcpClientConnectionParams): Promise<McpClient> {
+export async function createHttpClient(
+  params: SkillMcpClientConnectionParams,
+): Promise<McpClient> {
   const { state, clientKey, info, config } = params
   const shutdownGenAtStart = state.shutdownGeneration
 
   if (!config.url) {
-    throw new Error(`MCP server "${info.serverName}" is configured for HTTP but missing 'url' field.`)
+    throw new Error(
+      `MCP server "${info.serverName}" is configured for HTTP but missing 'url' field.`,
+    )
   }
 
   let url: URL
@@ -69,20 +80,27 @@ export async function createHttpClient(params: SkillMcpClientConnectionParams): 
   } catch {
     throw new Error(
       `MCP server "${info.serverName}" has invalid URL: ${redactUrl(config.url)}\n\n` +
-      `Expected a valid URL like: https://mcp.example.com/mcp`
+        `Expected a valid URL like: https://mcp.example.com/mcp`,
     )
   }
 
   registerProcessCleanup(state)
 
-  const requestInit = await buildHttpRequestInit(config, state.authProviders, state.createOAuthProvider)
+  const requestInit = await buildHttpRequestInit(
+    config,
+    state.authProviders,
+    state.createOAuthProvider,
+  )
   const transport: McpTransport = httpClientDependencies.createTransport(url, {
     requestInit,
   })
 
   const client: McpClient = httpClientDependencies.createClient(
-    { name: `skill-mcp-${info.skillName}-${info.serverName}`, version: "1.0.0" },
-    { capabilities: {} }
+    {
+      name: `skill-mcp-${info.skillName}-${info.serverName}`,
+      version: "1.0.0",
+    },
+    { capabilities: {} },
   )
 
   try {
@@ -97,19 +115,25 @@ export async function createHttpClient(params: SkillMcpClientConnectionParams): 
     const errorMessage = error instanceof Error ? error.message : String(error)
     throw new Error(
       `Failed to connect to MCP server "${info.serverName}".\n\n` +
-      `URL: ${redactUrl(config.url)}\n` +
-      `Reason: ${errorMessage}\n\n` +
-      `Hints:\n` +
-      `  - Verify the URL is correct and the server is running\n` +
-      `  - Check if authentication headers are required\n` +
-      `  - Ensure the server supports MCP over HTTP`
+        `URL: ${redactUrl(config.url)}\n` +
+        `Reason: ${errorMessage}\n\n` +
+        `Hints:\n` +
+        `  - Verify the URL is correct and the server is running\n` +
+        `  - Check if authentication headers are required\n` +
+        `  - Ensure the server supports MCP over HTTP`,
     )
   }
 
   if (state.shutdownGeneration !== shutdownGenAtStart) {
-    try { await client.close() } catch {}
-    try { await transport.close() } catch {}
-    throw new Error(`MCP server "${info.serverName}" connection completed after shutdown`)
+    try {
+      await client.close()
+    } catch {}
+    try {
+      await transport.close()
+    } catch {}
+    throw new Error(
+      `MCP server "${info.serverName}" connection completed after shutdown`,
+    )
   }
 
   const managedClient = {

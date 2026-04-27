@@ -29,10 +29,15 @@ function shouldProcess(config: HashlineReadEnhancerConfig): boolean {
 
 function isTextFile(output: string): boolean {
   const firstLine = output.split("\n")[0] ?? ""
-  return COLON_READ_LINE_PATTERN.test(firstLine) || PIPE_READ_LINE_PATTERN.test(firstLine)
+  return (
+    COLON_READ_LINE_PATTERN.test(firstLine) ||
+    PIPE_READ_LINE_PATTERN.test(firstLine)
+  )
 }
 
-function parseReadLine(line: string): { lineNumber: number; content: string } | null {
+function parseReadLine(
+  line: string,
+): { lineNumber: number; content: string } | null {
   const colonMatch = COLON_READ_LINE_PATTERN.exec(line)
   if (colonMatch) {
     return {
@@ -71,10 +76,12 @@ function transformOutput(output: string): string {
 
   const lines = output.split("\n")
   const contentStart = lines.findIndex(
-    (line) => line === CONTENT_OPEN_TAG || line.startsWith(CONTENT_OPEN_TAG)
+    (line) => line === CONTENT_OPEN_TAG || line.startsWith(CONTENT_OPEN_TAG),
   )
   const contentEnd = lines.indexOf(CONTENT_CLOSE_TAG)
-  const fileStart = lines.findIndex((line) => line === FILE_OPEN_TAG || line.startsWith(FILE_OPEN_TAG))
+  const fileStart = lines.findIndex(
+    (line) => line === FILE_OPEN_TAG || line.startsWith(FILE_OPEN_TAG),
+  )
   const fileEnd = lines.indexOf(FILE_CLOSE_TAG)
 
   const blockStart = contentStart !== -1 ? contentStart : fileStart
@@ -83,12 +90,14 @@ function transformOutput(output: string): string {
 
   if (blockStart !== -1 && blockEnd !== -1 && blockEnd > blockStart) {
     const openLine = lines[blockStart] ?? ""
-    const inlineFirst = openLine.startsWith(openTag) && openLine !== openTag
-      ? openLine.slice(openTag.length)
-      : null
-    const fileLines = inlineFirst !== null
-      ? [inlineFirst, ...lines.slice(blockStart + 1, blockEnd)]
-      : lines.slice(blockStart + 1, blockEnd)
+    const inlineFirst =
+      openLine.startsWith(openTag) && openLine !== openTag
+        ? openLine.slice(openTag.length)
+        : null
+    const fileLines =
+      inlineFirst !== null
+        ? [inlineFirst, ...lines.slice(blockStart + 1, blockEnd)]
+        : lines.slice(blockStart + 1, blockEnd)
     if (!isTextFile(fileLines[0] ?? "")) {
       return output
     }
@@ -102,9 +111,10 @@ function transformOutput(output: string): string {
       result.push(transformLine(line))
     }
 
-    const prefixLines = inlineFirst !== null
-      ? [...lines.slice(0, blockStart), openTag]
-      : lines.slice(0, blockStart + 1)
+    const prefixLines =
+      inlineFirst !== null
+        ? [...lines.slice(0, blockStart), openTag]
+        : lines.slice(0, blockStart + 1)
 
     return [...prefixLines, ...result, ...lines.slice(blockEnd)].join("\n")
   }
@@ -131,7 +141,12 @@ function extractFilePath(metadata: unknown): string | undefined {
   }
 
   const objectMeta = metadata as Record<string, unknown>
-  const candidates = [objectMeta.filepath, objectMeta.filePath, objectMeta.path, objectMeta.file]
+  const candidates = [
+    objectMeta.filepath,
+    objectMeta.filePath,
+    objectMeta.path,
+    objectMeta.file,
+  ]
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate.length > 0) {
       return candidate
@@ -141,7 +156,10 @@ function extractFilePath(metadata: unknown): string | undefined {
   return undefined
 }
 
-async function appendWriteHashlineOutput(output: { output: string; metadata: unknown }): Promise<void> {
+async function appendWriteHashlineOutput(output: {
+  output: string
+  metadata: unknown
+}): Promise<void> {
   if (output.output.startsWith(WRITE_SUCCESS_MARKER)) {
     return
   }
@@ -168,15 +186,19 @@ async function appendWriteHashlineOutput(output: { output: string; metadata: unk
 
 export function createHashlineReadEnhancerHook(
   _ctx: PluginInput,
-  config: HashlineReadEnhancerConfig
+  config: HashlineReadEnhancerConfig,
 ) {
   return {
     "tool.execute.after": async (
       input: { tool: string; sessionID: string; callID: string },
-      output: { title: string; output: string; metadata: unknown }
+      output: { title: string; output: string; metadata: unknown },
     ) => {
       if (!isReadTool(input.tool)) {
-        if (isWriteTool(input.tool) && typeof output.output === "string" && shouldProcess(config)) {
+        if (
+          isWriteTool(input.tool) &&
+          typeof output.output === "string" &&
+          shouldProcess(config)
+        ) {
           await appendWriteHashlineOutput(output)
         }
         return

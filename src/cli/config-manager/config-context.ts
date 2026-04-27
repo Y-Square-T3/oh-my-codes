@@ -12,7 +12,10 @@ export interface ConfigContext {
 
 let configContext: ConfigContext | null = null
 
-export function initConfigContext(binary: OpenCodeBinaryType, version: string | null): void {
+export function initConfigContext(
+  binary: OpenCodeBinaryType,
+  version: string | null,
+): void {
   const paths = getOpenCodeConfigPaths({ binary, version })
   configContext = { binary, version, paths }
 }

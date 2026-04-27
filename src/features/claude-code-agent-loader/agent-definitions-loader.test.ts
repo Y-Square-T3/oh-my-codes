@@ -3,7 +3,10 @@ import { mkdtempSync, writeFileSync, rmSync } from "fs"
 import { join } from "path"
 import { tmpdir } from "os"
 
-import { loadAgentDefinitions, parseMarkdownAgentFile } from "./agent-definitions-loader"
+import {
+  loadAgentDefinitions,
+  parseMarkdownAgentFile,
+} from "./agent-definitions-loader"
 
 describe("agent-definitions-loader", () => {
   let tempDir: string
@@ -127,7 +130,7 @@ name: md-agent
 ---
 
 Markdown agent prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
       writeFileSync(
@@ -136,7 +139,7 @@ Markdown agent prompt.`,
           name: "json-agent",
           prompt: "JSON agent prompt.",
         }),
-        "utf-8"
+        "utf-8",
       )
 
       const result = loadAgentDefinitions([mdPath, jsonPath], "definition-file")
@@ -159,10 +162,13 @@ name: valid-agent
 ---
 
 Valid prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
-      const result = loadAgentDefinitions([validPath, missingPath], "definition-file")
+      const result = loadAgentDefinitions(
+        [validPath, missingPath],
+        "definition-file",
+      )
 
       expect(Object.keys(result)).toHaveLength(1)
       expect(result["valid-agent"]).toBeDefined()
@@ -178,12 +184,15 @@ Valid prompt.`,
           name: "valid-agent",
           prompt: "Valid prompt.",
         }),
-        "utf-8"
+        "utf-8",
       )
 
       writeFileSync(malformedPath, "{ invalid json", "utf-8")
 
-      const result = loadAgentDefinitions([validPath, malformedPath], "definition-file")
+      const result = loadAgentDefinitions(
+        [validPath, malformedPath],
+        "definition-file",
+      )
 
       expect(Object.keys(result)).toHaveLength(1)
       expect(result["valid-agent"]).toBeDefined()
@@ -201,7 +210,7 @@ description: First version
 ---
 
 First prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
       writeFileSync(
@@ -212,13 +221,15 @@ description: Second version
 ---
 
 Second prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
       const result = loadAgentDefinitions([path1, path2], "definition-file")
 
       expect(Object.keys(result)).toHaveLength(1)
-      expect(result["duplicate-agent"].description).toBe("(definition-file) Second version")
+      expect(result["duplicate-agent"].description).toBe(
+        "(definition-file) Second version",
+      )
       expect(result["duplicate-agent"].prompt).toBe("Second prompt.")
     })
 
@@ -238,7 +249,7 @@ name: absolute-agent
 ---
 
 Absolute path prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
       const result = loadAgentDefinitions([absolutePath], "definition-file")
@@ -258,12 +269,15 @@ name: valid-agent
 ---
 
 Valid prompt.`,
-        "utf-8"
+        "utf-8",
       )
 
       writeFileSync(unsupportedPath, "Some text file content.", "utf-8")
 
-      const result = loadAgentDefinitions([validPath, unsupportedPath], "definition-file")
+      const result = loadAgentDefinitions(
+        [validPath, unsupportedPath],
+        "definition-file",
+      )
 
       expect(Object.keys(result)).toHaveLength(1)
       expect(result["valid-agent"]).toBeDefined()
@@ -280,7 +294,7 @@ Valid prompt.`,
   "description": "JSONC agent", // inline comment
   "prompt": "JSONC prompt."
 }`,
-        "utf-8"
+        "utf-8",
       )
 
       const result = loadAgentDefinitions([jsoncPath], "definition-file")

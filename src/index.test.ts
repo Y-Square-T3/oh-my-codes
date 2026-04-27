@@ -1,13 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
 
 const mockInitConfigContext = mock(() => {})
-const mockDetectExternalSkillPlugin = mock(() => ({ detected: false, pluginName: null }))
+const mockDetectExternalSkillPlugin = mock(() => ({
+  detected: false,
+  pluginName: null,
+}))
 const mockGetSkillPluginConflictWarning = mock(() => "")
 const mockInjectServerAuthIntoClient = mock(() => {})
 const mockLogLegacyPluginStartupWarning = mock(() => {})
 const mockLoadPluginConfig = mock(() => ({}))
 const mockIsTmuxIntegrationEnabled = mock(
-  (pluginConfig: { tmux?: { enabled?: boolean } | undefined }) => pluginConfig.tmux?.enabled ?? false,
+  (pluginConfig: { tmux?: { enabled?: boolean } | undefined }) =>
+    pluginConfig.tmux?.enabled ?? false,
 )
 const mockIsInteractiveBashEnabled = mock(() => false)
 const mockCreateRuntimeTmuxConfig = mock(() => ({
@@ -103,7 +107,6 @@ function installIndexModuleMocks(): void {
     interactive_bash: {},
     startBackgroundCheck: mockStartTmuxCheck,
   }))
-
 }
 
 async function importFreshIndexModule(): Promise<typeof import("./index")> {

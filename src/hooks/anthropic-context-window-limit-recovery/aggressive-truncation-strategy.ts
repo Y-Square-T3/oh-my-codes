@@ -39,8 +39,11 @@ export async function runAggressiveTruncationStrategy(params: {
     return { handled: false, nextTruncateAttempt: params.truncateAttempt }
   }
 
-  const nextTruncateAttempt = params.truncateAttempt + aggressiveResult.truncatedCount
-  const toolNames = aggressiveResult.truncatedTools.map((t) => t.toolName).join(", ")
+  const nextTruncateAttempt =
+    params.truncateAttempt + aggressiveResult.truncatedCount
+  const toolNames = aggressiveResult.truncatedTools
+    .map((t) => t.toolName)
+    .join(", ")
   const statusMsg = aggressiveResult.sufficient
     ? `Truncated ${aggressiveResult.truncatedCount} outputs (${formatBytes(aggressiveResult.totalBytesRemoved)})`
     : `Truncated ${aggressiveResult.truncatedCount} outputs (${formatBytes(aggressiveResult.totalBytesRemoved)}) - continuing to summarize...`
@@ -48,7 +51,9 @@ export async function runAggressiveTruncationStrategy(params: {
   await params.client.tui
     .showToast({
       body: {
-        title: aggressiveResult.sufficient ? "Truncation Complete" : "Partial Truncation",
+        title: aggressiveResult.sufficient
+          ? "Truncation Complete"
+          : "Partial Truncation",
         message: `${statusMsg}: ${toolNames}`,
         variant: aggressiveResult.sufficient ? "success" : "warning",
         duration: 4000,

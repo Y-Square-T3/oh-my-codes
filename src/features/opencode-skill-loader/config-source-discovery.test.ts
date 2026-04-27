@@ -3,7 +3,10 @@ import { mkdirSync, rmSync, writeFileSync } from "fs"
 import { join } from "path"
 import { homedir, tmpdir } from "os"
 import { SkillsConfigSchema } from "../../config/schema/skills"
-import { discoverConfigSourceSkills, normalizePathForGlob } from "./config-source-discovery"
+import {
+  discoverConfigSourceSkills,
+  normalizePathForGlob,
+} from "./config-source-discovery"
 
 const TEST_DIR = join(tmpdir(), `config-source-discovery-test-${Date.now()}`)
 
@@ -28,7 +31,11 @@ describe("config source discovery", () => {
     // given
     const configDir = join(TEST_DIR, "config")
     const sourceDir = join(configDir, "custom-skills")
-    writeSkill(join(sourceDir, "local-skill"), "local-skill", "Loaded from local source")
+    writeSkill(
+      join(sourceDir, "local-skill"),
+      "local-skill",
+      "Loaded from local source",
+    )
     const config = SkillsConfigSchema.parse({
       sources: [{ path: "./custom-skills", recursive: true }],
     })
@@ -43,7 +50,9 @@ describe("config source discovery", () => {
     const localSkill = skills.find((skill) => skill.name === "local-skill")
     expect(localSkill).toBeDefined()
     expect(localSkill?.scope).toBe("config")
-    expect(localSkill?.definition.description).toContain("Loaded from local source")
+    expect(localSkill?.definition.description).toContain(
+      "Loaded from local source",
+    )
   })
 
   it("filters discovered skills using source glob", async () => {
@@ -52,7 +61,11 @@ describe("config source discovery", () => {
     const sourceDir = join(configDir, "custom-skills")
 
     writeSkill(join(sourceDir, "keep", "kept"), "kept-skill", "Should be kept")
-    writeSkill(join(sourceDir, "skip", "skipped"), "skipped-skill", "Should be skipped")
+    writeSkill(
+      join(sourceDir, "skip", "skipped"),
+      "skipped-skill",
+      "Should be skipped",
+    )
     const config = SkillsConfigSchema.parse({
       sources: [{ path: "./custom-skills", recursive: true, glob: "keep/**" }],
     })
@@ -72,9 +85,18 @@ describe("config source discovery", () => {
   it("loads skills from ~/ sources path", async () => {
     // given
     const homeSkillsDir = join(homedir(), `.omo-config-source-${Date.now()}`)
-    writeSkill(join(homeSkillsDir, "tilde-skill"), "tilde-skill", "Loaded from tilde path")
+    writeSkill(
+      join(homeSkillsDir, "tilde-skill"),
+      "tilde-skill",
+      "Loaded from tilde path",
+    )
     const config = SkillsConfigSchema.parse({
-      sources: [{ path: `~/${homeSkillsDir.split(homedir())[1]?.replace(/^\//, "")}`, recursive: true }],
+      sources: [
+        {
+          path: `~/${homeSkillsDir.split(homedir())[1]?.replace(/^\//, "")}`,
+          recursive: true,
+        },
+      ],
     })
 
     try {

@@ -24,7 +24,10 @@ function applyGatewayTransforms(model: string): string {
   )
 }
 
-export function transformModelForProvider(provider: string, model: string): string {
+export function transformModelForProvider(
+  provider: string,
+  model: string,
+): string {
   if (provider === "vercel") {
     const slashIndex = model.indexOf("/")
     if (slashIndex !== -1) {

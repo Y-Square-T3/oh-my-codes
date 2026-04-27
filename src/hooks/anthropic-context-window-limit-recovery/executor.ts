@@ -1,16 +1,16 @@
-import type { AutoCompactState } from "./types";
-import type { OhMyCodesConfig } from "../../config";
-import type { ExperimentalConfig } from "../../config";
-import { TRUNCATE_CONFIG } from "./types";
+import type { AutoCompactState } from "./types"
+import type { OhMyCodesConfig } from "../../config"
+import type { ExperimentalConfig } from "../../config"
+import { TRUNCATE_CONFIG } from "./types"
 
-import type { Client } from "./client";
-import { getOrCreateTruncateState } from "./state";
+import type { Client } from "./client"
+import { getOrCreateTruncateState } from "./state"
 import {
   runAggressiveTruncationStrategy,
   runSummarizeRetryStrategy,
-} from "./recovery-strategy";
+} from "./recovery-strategy"
 
-export { getLastAssistant } from "./message-builder";
+export { getLastAssistant } from "./message-builder"
 
 export async function executeCompact(
   sessionID: string,
@@ -19,7 +19,7 @@ export async function executeCompact(
   client: Client,
   directory: string,
   pluginConfig: OhMyCodesConfig,
-  _experimental?: ExperimentalConfig
+  _experimental?: ExperimentalConfig,
 ): Promise<void> {
   void _experimental
 
@@ -34,19 +34,19 @@ export async function executeCompact(
           duration: 5000,
         },
       })
-      .catch(() => {});
-    return;
+      .catch(() => {})
+    return
   }
-  autoCompactState.compactionInProgress.add(sessionID);
+  autoCompactState.compactionInProgress.add(sessionID)
 
   try {
-    const errorData = autoCompactState.errorDataBySession.get(sessionID);
-    const truncateState = getOrCreateTruncateState(autoCompactState, sessionID);
+    const errorData = autoCompactState.errorDataBySession.get(sessionID)
+    const truncateState = getOrCreateTruncateState(autoCompactState, sessionID)
 
     const isOverLimit =
       errorData?.currentTokens &&
       errorData?.maxTokens &&
-      errorData.currentTokens > errorData.maxTokens;
+      errorData.currentTokens > errorData.maxTokens
 
     // Aggressive Truncation - always try when over limit
     if (
@@ -61,10 +61,10 @@ export async function executeCompact(
         truncateAttempt: truncateState.truncateAttempt,
         currentTokens: errorData.currentTokens,
         maxTokens: errorData.maxTokens,
-      });
+      })
 
-      truncateState.truncateAttempt = result.nextTruncateAttempt;
-      if (result.handled) return;
+      truncateState.truncateAttempt = result.nextTruncateAttempt
+      if (result.handled) return
     }
 
     await runSummarizeRetryStrategy({
@@ -78,6 +78,6 @@ export async function executeCompact(
       messageIndex: errorData?.messageIndex,
     })
   } finally {
-    autoCompactState.compactionInProgress.delete(sessionID);
+    autoCompactState.compactionInProgress.delete(sessionID)
   }
 }

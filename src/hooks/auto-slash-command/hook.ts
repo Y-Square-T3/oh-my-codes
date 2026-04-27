@@ -37,7 +37,9 @@ function getDeletedSessionID(properties: unknown): string | null {
   return typeof info.id === "string" ? info.id : null
 }
 
-function getCommandExecutionEventID(input: CommandExecuteBeforeInput): string | null {
+function getCommandExecutionEventID(
+  input: CommandExecuteBeforeInput,
+): string | null {
   const candidateKeys = [
     "messageID",
     "messageId",
@@ -71,7 +73,9 @@ export interface AutoSlashCommandHookOptions {
   directory?: string
 }
 
-export function createAutoSlashCommandHook(options?: AutoSlashCommandHookOptions) {
+export function createAutoSlashCommandHook(
+  options?: AutoSlashCommandHookOptions,
+) {
   const executorOptions: ExecutorOptions = {
     skills: options?.skills,
     pluginsEnabled: options?.pluginsEnabled,
@@ -89,7 +93,7 @@ export function createAutoSlashCommandHook(options?: AutoSlashCommandHookOptions
   return {
     "chat.message": async (
       input: AutoSlashCommandHookInput,
-      output: AutoSlashCommandHookOutput
+      output: AutoSlashCommandHookOutput,
     ): Promise<void> => {
       const promptText = extractPromptText(output.parts)
 
@@ -159,7 +163,7 @@ export function createAutoSlashCommandHook(options?: AutoSlashCommandHookOptions
 
     "command.execute.before": async (
       input: CommandExecuteBeforeInput,
-      output: CommandExecuteBeforeOutput
+      output: CommandExecuteBeforeOutput,
     ): Promise<void> => {
       const eventID = getCommandExecutionEventID(input)
       const commandKey = eventID
@@ -189,17 +193,20 @@ export function createAutoSlashCommandHook(options?: AutoSlashCommandHookOptions
       const result = await executeSlashCommand(parsed, executionOptions)
 
       if (!result.success || !result.replacementText) {
-        log(`[auto-slash-command] command.execute.before - command not found in our executor`, {
-          sessionID: input.sessionID,
-          command: input.command,
-          error: result.error,
-        })
+        log(
+          `[auto-slash-command] command.execute.before - command not found in our executor`,
+          {
+            sessionID: input.sessionID,
+            command: input.command,
+            error: result.error,
+          },
+        )
         return
       }
 
       sessionProcessedCommandExecutions.add(
         commandKey,
-        eventID ? undefined : COMMAND_EXECUTE_FALLBACK_DEDUP_TTL_MS
+        eventID ? undefined : COMMAND_EXECUTE_FALLBACK_DEDUP_TTL_MS,
       )
 
       const taggedContent = `${AUTO_SLASH_COMMAND_TAG_OPEN}\n${result.replacementText}\n${AUTO_SLASH_COMMAND_TAG_CLOSE}`

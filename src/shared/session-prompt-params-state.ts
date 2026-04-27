@@ -7,23 +7,36 @@ export type SessionPromptParams = {
 
 const sessionPromptParams = new Map<string, SessionPromptParams>()
 
-export function setSessionPromptParams(sessionID: string, params: SessionPromptParams): void {
+export function setSessionPromptParams(
+  sessionID: string,
+  params: SessionPromptParams,
+): void {
   sessionPromptParams.set(sessionID, {
-    ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
+    ...(params.temperature !== undefined
+      ? { temperature: params.temperature }
+      : {}),
     ...(params.topP !== undefined ? { topP: params.topP } : {}),
-    ...(params.maxOutputTokens !== undefined ? { maxOutputTokens: params.maxOutputTokens } : {}),
+    ...(params.maxOutputTokens !== undefined
+      ? { maxOutputTokens: params.maxOutputTokens }
+      : {}),
     ...(params.options !== undefined ? { options: { ...params.options } } : {}),
   })
 }
 
-export function getSessionPromptParams(sessionID: string): SessionPromptParams | undefined {
+export function getSessionPromptParams(
+  sessionID: string,
+): SessionPromptParams | undefined {
   const params = sessionPromptParams.get(sessionID)
   if (!params) return undefined
 
   return {
-    ...(params.temperature !== undefined ? { temperature: params.temperature } : {}),
+    ...(params.temperature !== undefined
+      ? { temperature: params.temperature }
+      : {}),
     ...(params.topP !== undefined ? { topP: params.topP } : {}),
-    ...(params.maxOutputTokens !== undefined ? { maxOutputTokens: params.maxOutputTokens } : {}),
+    ...(params.maxOutputTokens !== undefined
+      ? { maxOutputTokens: params.maxOutputTokens }
+      : {}),
     ...(params.options !== undefined ? { options: { ...params.options } } : {}),
   }
 }

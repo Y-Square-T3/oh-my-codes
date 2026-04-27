@@ -20,10 +20,14 @@ export function createTrackedSession(params: {
   }
 }
 
-export function markTrackedSessionClosePending(tracked: TrackedSession): TrackedSession {
+export function markTrackedSessionClosePending(
+  tracked: TrackedSession,
+): TrackedSession {
   return {
     ...tracked,
     closePending: true,
-    closeRetryCount: tracked.closePending ? tracked.closeRetryCount + 1 : tracked.closeRetryCount,
+    closeRetryCount: tracked.closePending
+      ? tracked.closeRetryCount + 1
+      : tracked.closeRetryCount,
   }
 }

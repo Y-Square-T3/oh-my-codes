@@ -1,31 +1,36 @@
-const MAX_LABEL_LENGTH = 30;
+const MAX_LABEL_LENGTH = 30
 
 interface QuestionOption {
-  label: string;
-  description?: string;
+  label: string
+  description?: string
 }
 
 interface Question {
-  question: string;
-  header?: string;
-  options: QuestionOption[];
-  multiSelect?: boolean;
+  question: string
+  header?: string
+  options: QuestionOption[]
+  multiSelect?: boolean
 }
 
 interface AskUserQuestionArgs {
-  questions: Question[];
+  questions: Question[]
 }
 
-function truncateLabel(label: string, maxLength: number = MAX_LABEL_LENGTH): string {
+function truncateLabel(
+  label: string,
+  maxLength: number = MAX_LABEL_LENGTH,
+): string {
   if (label.length <= maxLength) {
-    return label;
+    return label
   }
-  return label.substring(0, maxLength - 3) + "...";
+  return label.substring(0, maxLength - 3) + "..."
 }
 
-function truncateQuestionLabels(args: AskUserQuestionArgs): AskUserQuestionArgs {
+function truncateQuestionLabels(
+  args: AskUserQuestionArgs,
+): AskUserQuestionArgs {
   if (!args.questions || !Array.isArray(args.questions)) {
-    return args;
+    return args
   }
 
   return {
@@ -38,25 +43,25 @@ function truncateQuestionLabels(args: AskUserQuestionArgs): AskUserQuestionArgs 
           label: truncateLabel(option.label),
         })) ?? [],
     })),
-  };
+  }
 }
 
 export function createQuestionLabelTruncatorHook() {
   return {
     "tool.execute.before": async (
       input: { tool: string },
-      output: { args: Record<string, unknown> }
+      output: { args: Record<string, unknown> },
     ): Promise<void> => {
-      const toolName = input.tool?.toLowerCase();
+      const toolName = input.tool?.toLowerCase()
 
       if (toolName === "askuserquestion" || toolName === "ask_user_question") {
-        const args = output.args as unknown as AskUserQuestionArgs | undefined;
+        const args = output.args as unknown as AskUserQuestionArgs | undefined
 
         if (args?.questions) {
-          const truncatedArgs = truncateQuestionLabels(args);
-          Object.assign(output.args, truncatedArgs);
+          const truncatedArgs = truncateQuestionLabels(args)
+          Object.assign(output.args, truncatedArgs)
         }
       }
     },
-  };
+  }
 }

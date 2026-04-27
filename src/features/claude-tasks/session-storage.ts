@@ -21,9 +21,7 @@ export function listSessionTaskFiles(
     .map((f) => f.replace(".json", ""))
 }
 
-export function listAllSessionDirs(
-  config: Partial<OhMyCodesConfig>,
-): string[] {
+export function listAllSessionDirs(config: Partial<OhMyCodesConfig>): string[] {
   const baseDir = getTaskDir(config)
   if (!existsSync(baseDir)) return []
   return readdirSync(baseDir).filter((entry) => {
@@ -43,7 +41,10 @@ export function findTaskAcrossSessions(
 ): TaskLocation | null {
   const sessionDirs = listAllSessionDirs(config)
   for (const sessionID of sessionDirs) {
-    const taskPath = join(getSessionTaskDir(config, sessionID), `${taskId}.json`)
+    const taskPath = join(
+      getSessionTaskDir(config, sessionID),
+      `${taskId}.json`,
+    )
     if (existsSync(taskPath)) {
       return { path: taskPath, sessionID }
     }

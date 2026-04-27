@@ -2,7 +2,15 @@
 
 declare const require: NodeJS.Require
 
-import { afterAll, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin/tool"
 import * as fs from "node:fs"
 import { tmpdir } from "node:os"
@@ -48,14 +56,18 @@ Test skill body content`
     },
   }))
 
-  createSkillTool = requireFresh<typeof import("../tools")>("../tools").createSkillTool
+  createSkillTool =
+    requireFresh<typeof import("../tools")>("../tools").createSkillTool
 })
 
 afterAll(() => {
   mock.restore()
 })
 
-function createMockSkill(name: string, options: { agent?: string } = {}): LoadedSkill {
+function createMockSkill(
+  name: string,
+  options: { agent?: string } = {},
+): LoadedSkill {
   return {
     name,
     path: `/test/skills/${name}/SKILL.md`,
@@ -70,7 +82,10 @@ function createMockSkill(name: string, options: { agent?: string } = {}): Loaded
   }
 }
 
-function createMockSkillWithMcp(name: string, mcpServers: Record<string, unknown>): LoadedSkill {
+function createMockSkillWithMcp(
+  name: string,
+  mcpServers: Record<string, unknown>,
+): LoadedSkill {
   return {
     name,
     path: `/test/skills/${name}/SKILL.md`,
@@ -178,7 +193,9 @@ describe("skill tool - agent restriction", () => {
 
   it("allows skill when agent matches restriction", async () => {
     // given
-    const loadedSkills = [createMockSkill("restricted-skill", { agent: "sisyphus" })]
+    const loadedSkills = [
+      createMockSkill("restricted-skill", { agent: "sisyphus" }),
+    ]
     const tool = createSkillTool({ skills: loadedSkills })
     const context = { ...mockContext, agent: "sisyphus" }
 
@@ -191,28 +208,38 @@ describe("skill tool - agent restriction", () => {
 
   it("throws error when agent does not match restriction", async () => {
     // given
-    const loadedSkills = [createMockSkill("sisyphus-only-skill", { agent: "sisyphus" })]
+    const loadedSkills = [
+      createMockSkill("sisyphus-only-skill", { agent: "sisyphus" }),
+    ]
     const tool = createSkillTool({ skills: loadedSkills })
     const context = { ...mockContext, agent: "oracle" }
 
     // when / #then
-    return expect(tool.execute({ name: "sisyphus-only-skill" }, context)).rejects.toThrow(
-      'Skill "sisyphus-only-skill" is restricted to agent "sisyphus"'
+    return expect(
+      tool.execute({ name: "sisyphus-only-skill" }, context),
+    ).rejects.toThrow(
+      'Skill "sisyphus-only-skill" is restricted to agent "sisyphus"',
     )
   })
 
   it("throws error when context agent is undefined for restricted skill", async () => {
     // given
-    const loadedSkills = [createMockSkill("sisyphus-only-skill", { agent: "sisyphus" })]
+    const loadedSkills = [
+      createMockSkill("sisyphus-only-skill", { agent: "sisyphus" }),
+    ]
     const tool = createSkillTool({ skills: loadedSkills })
-    const contextWithoutAgent = { ...mockContext, agent: undefined as unknown as string }
+    const contextWithoutAgent = {
+      ...mockContext,
+      agent: undefined as unknown as string,
+    }
 
     // when / #then
-    return expect(tool.execute({ name: "sisyphus-only-skill" }, contextWithoutAgent)).rejects.toThrow(
-      'Skill "sisyphus-only-skill" is restricted to agent "sisyphus"'
+    return expect(
+      tool.execute({ name: "sisyphus-only-skill" }, contextWithoutAgent),
+    ).rejects.toThrow(
+      'Skill "sisyphus-only-skill" is restricted to agent "sisyphus"',
     )
   })
-
 })
 
 describe("skill tool - MCP schema display", () => {
@@ -231,7 +258,10 @@ describe("skill tool - MCP schema display", () => {
       // given
       loadedSkills = [
         createMockSkillWithMcp("test-skill", {
-          playwright: { command: "npx", args: ["-y", "@anthropic-ai/mcp-playwright"] },
+          playwright: {
+            command: "npx",
+            args: ["-y", "@anthropic-ai/mcp-playwright"],
+          },
         }),
       ]
 
@@ -264,10 +294,22 @@ describe("skill tool - MCP schema display", () => {
           inputSchema: {
             type: "object",
             properties: {
-              element: { type: "string", description: "Human-readable element description" },
-              ref: { type: "string", description: "Element reference from page snapshot" },
-              text: { type: "string", description: "Text to type into the element" },
-              submit: { type: "boolean", description: "Submit form after typing" },
+              element: {
+                type: "string",
+                description: "Human-readable element description",
+              },
+              ref: {
+                type: "string",
+                description: "Element reference from page snapshot",
+              },
+              text: {
+                type: "string",
+                description: "Text to type into the element",
+              },
+              submit: {
+                type: "boolean",
+                description: "Submit form after typing",
+              },
             },
             required: ["element", "ref", "text"],
           },
@@ -276,7 +318,10 @@ describe("skill tool - MCP schema display", () => {
 
       loadedSkills = [
         createMockSkillWithMcp("test-skill", {
-          playwright: { command: "npx", args: ["-y", "@anthropic-ai/mcp-playwright"] },
+          playwright: {
+            command: "npx",
+            args: ["-y", "@anthropic-ai/mcp-playwright"],
+          },
         }),
       ]
 
@@ -335,7 +380,10 @@ describe("skill tool - MCP schema display", () => {
 
       loadedSkills = [
         createMockSkillWithMcp("playwright-skill", {
-          playwright: { command: "npx", args: ["-y", "@anthropic-ai/mcp-playwright"] },
+          playwright: {
+            command: "npx",
+            args: ["-y", "@anthropic-ai/mcp-playwright"],
+          },
         }),
       ]
 
@@ -350,7 +398,10 @@ describe("skill tool - MCP schema display", () => {
       })
 
       // when
-      const result = await tool.execute({ name: "playwright-skill" }, mockContext)
+      const result = await tool.execute(
+        { name: "playwright-skill" },
+        mockContext,
+      )
 
       // then
       expect(result).toContain("browser_navigate")
@@ -438,7 +489,6 @@ describe("skill tool - MCP schema display", () => {
     })
   })
 })
-
 
 describe("skill tool - ordering and priority", () => {
   function createMockSkillWithScope(name: string, scope: string): LoadedSkill {
@@ -548,7 +598,9 @@ describe("skill tool - ordering and priority", () => {
     const tool = createSkillTool({ skills, commands })
 
     //#then: should include priority info
-    expect(tool.description).toContain("Priority: project > user > opencode > builtin/plugin")
+    expect(tool.description).toContain(
+      "Priority: project > user > opencode > builtin/plugin",
+    )
     expect(tool.description).toContain("Skills listed before commands")
   })
 
@@ -575,22 +627,43 @@ describe("skill tool - dynamic discovery", () => {
     // given
     clearSkillCache()
     const originalDirectory = process.cwd()
-    const temporaryDirectory = fs.mkdtempSync(join(tmpdir(), "skill-tool-cache-"))
-    const initialSkillDirectory = join(temporaryDirectory, ".opencode", "skills", "initial-skill")
-    const secondSkillDirectory = join(temporaryDirectory, ".opencode", "skills", "second-skill")
+    const temporaryDirectory = fs.mkdtempSync(
+      join(tmpdir(), "skill-tool-cache-"),
+    )
+    const initialSkillDirectory = join(
+      temporaryDirectory,
+      ".opencode",
+      "skills",
+      "initial-skill",
+    )
+    const secondSkillDirectory = join(
+      temporaryDirectory,
+      ".opencode",
+      "skills",
+      "second-skill",
+    )
 
     fs.mkdirSync(initialSkillDirectory, { recursive: true })
-    fs.writeFileSync(join(initialSkillDirectory, "SKILL.md"), "---\ndescription: Initial skill\n---\nInitial skill body")
+    fs.writeFileSync(
+      join(initialSkillDirectory, "SKILL.md"),
+      "---\ndescription: Initial skill\n---\nInitial skill body",
+    )
     process.chdir(temporaryDirectory)
 
     try {
       const firstTool = createSkillTool({})
 
       // when
-      const initialResult = await firstTool.execute({ name: "initial-skill" }, mockContext)
+      const initialResult = await firstTool.execute(
+        { name: "initial-skill" },
+        mockContext,
+      )
 
       fs.mkdirSync(secondSkillDirectory, { recursive: true })
-      fs.writeFileSync(join(secondSkillDirectory, "SKILL.md"), "---\ndescription: Second skill\n---\nSecond skill body")
+      fs.writeFileSync(
+        join(secondSkillDirectory, "SKILL.md"),
+        "---\ndescription: Second skill\n---\nSecond skill body",
+      )
 
       const cachedTool = createSkillTool({})
 
@@ -602,7 +675,9 @@ describe("skill tool - dynamic discovery", () => {
       } catch (error) {
         cachedError = error instanceof Error ? error : new Error(String(error))
       }
-      expect(cachedError?.message).toContain('Skill or command "second-skill" not found.')
+      expect(cachedError?.message).toContain(
+        'Skill or command "second-skill" not found.',
+      )
     } finally {
       process.chdir(originalDirectory)
       clearSkillCache()
@@ -646,8 +721,7 @@ describe("skill tool - dynamic description cache invalidation", () => {
 
     try {
       await tool.execute({ name: "nonexistent-skill-12345" }, mockContext)
-    } catch {
-    }
+    } catch {}
 
     // then
     expect(tool.description).toBeDefined()
@@ -658,12 +732,27 @@ describe("skill tool - dynamic description cache invalidation", () => {
     // given
     clearSkillCache()
     const originalDirectory = process.cwd()
-    const temporaryDirectory = fs.mkdtempSync(join(tmpdir(), "skill-tool-refresh-"))
-    const initialSkillDirectory = join(temporaryDirectory, ".opencode", "skills", "initial-skill")
-    const secondSkillDirectory = join(temporaryDirectory, ".opencode", "skills", "second-skill")
+    const temporaryDirectory = fs.mkdtempSync(
+      join(tmpdir(), "skill-tool-refresh-"),
+    )
+    const initialSkillDirectory = join(
+      temporaryDirectory,
+      ".opencode",
+      "skills",
+      "initial-skill",
+    )
+    const secondSkillDirectory = join(
+      temporaryDirectory,
+      ".opencode",
+      "skills",
+      "second-skill",
+    )
 
     fs.mkdirSync(initialSkillDirectory, { recursive: true })
-    fs.writeFileSync(join(initialSkillDirectory, "SKILL.md"), "---\ndescription: Initial skill\n---\nInitial skill body")
+    fs.writeFileSync(
+      join(initialSkillDirectory, "SKILL.md"),
+      "---\ndescription: Initial skill\n---\nInitial skill body",
+    )
     process.chdir(temporaryDirectory)
 
     try {
@@ -671,7 +760,10 @@ describe("skill tool - dynamic description cache invalidation", () => {
       await initialTool.execute({ name: "initial-skill" }, mockContext)
 
       fs.mkdirSync(secondSkillDirectory, { recursive: true })
-      fs.writeFileSync(join(secondSkillDirectory, "SKILL.md"), "---\ndescription: Second skill\n---\nSecond skill body")
+      fs.writeFileSync(
+        join(secondSkillDirectory, "SKILL.md"),
+        "---\ndescription: Second skill\n---\nSecond skill body",
+      )
 
       const cachedTool = createSkillTool({})
       let cachedError: Error | undefined
@@ -680,13 +772,18 @@ describe("skill tool - dynamic description cache invalidation", () => {
       } catch (error) {
         cachedError = error instanceof Error ? error : new Error(String(error))
       }
-      expect(cachedError?.message).toContain('Skill or command "second-skill" not found.')
+      expect(cachedError?.message).toContain(
+        'Skill or command "second-skill" not found.',
+      )
 
       clearSkillCache()
       const refreshedTool = createSkillTool({})
 
       // when
-      const refreshedResult = await refreshedTool.execute({ name: "second-skill" }, mockContext)
+      const refreshedResult = await refreshedTool.execute(
+        { name: "second-skill" },
+        mockContext,
+      )
 
       // then
       expect(refreshedResult).toContain("Skill: second-skill")
@@ -698,8 +795,6 @@ describe("skill tool - dynamic description cache invalidation", () => {
     }
   })
 })
-
-
 
 describe("skill tool - browserProvider forwarding", () => {
   it("passes browserProvider to getAllSkills during execution", async () => {
@@ -740,15 +835,21 @@ describe("skill tool - nativeSkills integration", () => {
       skills: [createMockSkill("seeded-skill")],
       nativeSkills: {
         all() {
-          return [{
-            name: "native-visible-skill",
-            description: "Native skill exposed from config",
-            location: "/external/skills/native-visible-skill/SKILL.md",
-            content: "Native visible skill body",
-          }]
+          return [
+            {
+              name: "native-visible-skill",
+              description: "Native skill exposed from config",
+              location: "/external/skills/native-visible-skill/SKILL.md",
+              content: "Native visible skill body",
+            },
+          ]
         },
-        get() { return undefined },
-        dirs() { return [] },
+        get() {
+          return undefined
+        },
+        dirs() {
+          return []
+        },
       },
     })
 
@@ -768,20 +869,29 @@ describe("skill tool - nativeSkills integration", () => {
       skills: [],
       nativeSkills: {
         async all() {
-          return [{
-            name: "external-plugin-skill",
-            description: "Skill from config.skills.paths",
-            location: "/external/skills/external-plugin-skill/SKILL.md",
-            content: "External plugin skill body",
-          }]
+          return [
+            {
+              name: "external-plugin-skill",
+              description: "Skill from config.skills.paths",
+              location: "/external/skills/external-plugin-skill/SKILL.md",
+              content: "External plugin skill body",
+            },
+          ]
         },
-        async get() { return undefined },
-        async dirs() { return [] },
+        async get() {
+          return undefined
+        },
+        async dirs() {
+          return []
+        },
       },
     })
 
     //#when
-    const result = await tool.execute({ name: "external-plugin-skill" }, mockContext)
+    const result = await tool.execute(
+      { name: "external-plugin-skill" },
+      mockContext,
+    )
 
     //#then
     expect(result).toContain("external-plugin-skill")
@@ -796,7 +906,10 @@ describe("skill tool - short name resolution", () => {
     const tool = createSkillTool({ skills: loadedSkills })
 
     // when
-    const result = await tool.execute({ name: "systematic-debugging" }, mockContext)
+    const result = await tool.execute(
+      { name: "systematic-debugging" },
+      mockContext,
+    )
 
     // then
     expect(result).toContain("superpowers/systematic-debugging")
@@ -808,7 +921,10 @@ describe("skill tool - short name resolution", () => {
     const tool = createSkillTool({ skills: loadedSkills })
 
     // when
-    const result = await tool.execute({ name: "superpowers/systematic-debugging" }, mockContext)
+    const result = await tool.execute(
+      { name: "superpowers/systematic-debugging" },
+      mockContext,
+    )
 
     // then
     expect(result).toContain("superpowers/systematic-debugging")
@@ -823,9 +939,9 @@ describe("skill tool - short name resolution", () => {
     const tool = createSkillTool({ skills: loadedSkills })
 
     // when / then, should not resolve (ambiguous), should suggest both
-    return expect(tool.execute({ name: "debugging" }, mockContext)).rejects.toThrow(
-      "not found"
-    )
+    return expect(
+      tool.execute({ name: "debugging" }, mockContext),
+    ).rejects.toThrow("not found")
   })
 
   it("prefers exact match over short name match", async () => {

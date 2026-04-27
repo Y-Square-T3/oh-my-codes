@@ -13,7 +13,7 @@ import { createToolExecuteBeforeHandler } from "./handlers/tool-execute-before-h
 export function createClaudeCodeHooksHook(
   ctx: PluginInput,
   config: PluginConfig = {},
-  contextCollector?: ContextCollector
+  contextCollector?: ContextCollector,
 ) {
   return {
     "experimental.session.compacting": createPreCompactHandler(ctx, config),

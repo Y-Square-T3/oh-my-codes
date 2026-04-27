@@ -8,9 +8,15 @@ import { log, isSqliteBackend, patchPart } from "../../../shared"
 
 type OpencodeClient = PluginInput["client"]
 
-export function injectTextPart(sessionID: string, messageID: string, text: string): boolean {
+export function injectTextPart(
+  sessionID: string,
+  messageID: string,
+  text: string,
+): boolean {
   if (isSqliteBackend()) {
-    log("[session-recovery] Disabled on SQLite backend: injectTextPart (use async variant)")
+    log(
+      "[session-recovery] Disabled on SQLite backend: injectTextPart (use async variant)",
+    )
     return false
   }
 
@@ -31,7 +37,10 @@ export function injectTextPart(sessionID: string, messageID: string, text: strin
   }
 
   try {
-    writeFileSync(join(partDir, `${partId}.json`), JSON.stringify(part, null, 2))
+    writeFileSync(
+      join(partDir, `${partId}.json`),
+      JSON.stringify(part, null, 2),
+    )
     return true
   } catch {
     return false
@@ -42,7 +51,7 @@ export async function injectTextPartAsync(
   client: OpencodeClient,
   sessionID: string,
   messageID: string,
-  text: string
+  text: string,
 ): Promise<boolean> {
   const partId = generatePartId()
   const part: Record<string, unknown> = {
@@ -57,7 +66,9 @@ export async function injectTextPartAsync(
   try {
     return await patchPart(client, sessionID, messageID, partId, part)
   } catch (error) {
-    log("[session-recovery] injectTextPartAsync failed", { error: String(error) })
+    log("[session-recovery] injectTextPartAsync failed", {
+      error: String(error),
+    })
     return false
   }
 }

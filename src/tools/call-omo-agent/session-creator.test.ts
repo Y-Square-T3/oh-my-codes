@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test"
 
 import { createOrGetSession } from "./session-creator"
-import { _resetForTesting, subagentSessions } from "../../features/claude-code-session-state"
+import {
+  _resetForTesting,
+  subagentSessions,
+} from "../../features/claude-code-session-state"
 
 describe("call-omo-agent createOrGetSession", () => {
   test("creates child session without overriding permission and tracks it as subagent session", async () => {
@@ -37,7 +40,11 @@ describe("call-omo-agent createOrGetSession", () => {
     }
 
     // when
-    const result = await createOrGetSession(args as any, toolContext as any, ctx as any)
+    const result = await createOrGetSession(
+      args as any,
+      toolContext as any,
+      ctx as any,
+    )
 
     // then
     expect(result).toEqual({ sessionID: "ses_child", isNew: true })

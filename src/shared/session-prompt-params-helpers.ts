@@ -1,4 +1,7 @@
-import { clearSessionPromptParams, setSessionPromptParams } from "./session-prompt-params-state"
+import {
+  clearSessionPromptParams,
+  setSessionPromptParams,
+} from "./session-prompt-params-state"
 
 type PromptParamModel = {
   temperature?: number
@@ -18,14 +21,22 @@ export function applySessionPromptParams(
   }
 
   const promptOptions: Record<string, unknown> = {
-    ...(model.reasoningEffort ? { reasoningEffort: model.reasoningEffort } : {}),
+    ...(model.reasoningEffort
+      ? { reasoningEffort: model.reasoningEffort }
+      : {}),
     ...(model.thinking ? { thinking: model.thinking } : {}),
   }
 
   setSessionPromptParams(sessionID, {
-    ...(model.temperature !== undefined ? { temperature: model.temperature } : {}),
+    ...(model.temperature !== undefined
+      ? { temperature: model.temperature }
+      : {}),
     ...(model.top_p !== undefined ? { topP: model.top_p } : {}),
-    ...(model.maxTokens !== undefined ? { maxOutputTokens: model.maxTokens } : {}),
-    ...(Object.keys(promptOptions).length > 0 ? { options: promptOptions } : {}),
+    ...(model.maxTokens !== undefined
+      ? { maxOutputTokens: model.maxTokens }
+      : {}),
+    ...(Object.keys(promptOptions).length > 0
+      ? { options: promptOptions }
+      : {}),
   })
 }

@@ -48,7 +48,14 @@ function detectProvidersFromOmoConfig(): {
     const hasOpencodeGo = configStr.includes('"opencode-go/')
     const hasVercelAiGateway = configStr.includes('"vercel/')
 
-    return { hasOpenAI, hasOpencodeZen, hasZaiCodingPlan, hasKimiForCoding, hasOpencodeGo, hasVercelAiGateway }
+    return {
+      hasOpenAI,
+      hasOpencodeZen,
+      hasZaiCodingPlan,
+      hasKimiForCoding,
+      hasOpencodeGo,
+      hasVercelAiGateway,
+    }
   } catch {
     return {
       hasOpenAI: true,
@@ -62,8 +69,12 @@ function detectProvidersFromOmoConfig(): {
 }
 
 function isOurPlugin(plugin: string): boolean {
-  return plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`) ||
-         plugin === LEGACY_PLUGIN_NAME || plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  return (
+    plugin === PLUGIN_NAME ||
+    plugin.startsWith(`${PLUGIN_NAME}@`) ||
+    plugin === LEGACY_PLUGIN_NAME ||
+    plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  )
 }
 
 function findOurPluginEntry(plugins: string[]): string | null {
@@ -109,10 +120,19 @@ export function detectCurrentConfig(): DetectedConfig {
     return result
   }
 
-  const providers = openCodeConfig.provider as Record<string, unknown> | undefined
+  const providers = openCodeConfig.provider as
+    | Record<string, unknown>
+    | undefined
   result.hasGemini = providers ? "google" in providers : false
 
-  const { hasOpenAI, hasOpencodeZen, hasZaiCodingPlan, hasKimiForCoding, hasOpencodeGo, hasVercelAiGateway } = detectProvidersFromOmoConfig()
+  const {
+    hasOpenAI,
+    hasOpencodeZen,
+    hasZaiCodingPlan,
+    hasKimiForCoding,
+    hasOpencodeGo,
+    hasVercelAiGateway,
+  } = detectProvidersFromOmoConfig()
   result.hasOpenAI = hasOpenAI
   result.hasOpencodeZen = hasOpencodeZen
   result.hasZaiCodingPlan = hasZaiCodingPlan

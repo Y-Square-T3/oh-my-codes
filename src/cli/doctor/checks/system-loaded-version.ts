@@ -5,7 +5,12 @@ import { resolveSymlink } from "../../../shared/file-utils"
 import { getLatestVersion } from "../../../hooks/auto-update-checker/checker"
 import { extractChannel } from "../../../hooks/auto-update-checker"
 import { PACKAGE_NAME } from "../constants"
-import { ACCEPTED_PACKAGE_NAMES, getOpenCodeCacheDir, getOpenCodeConfigPaths, parseJsonc } from "../../../shared"
+import {
+  ACCEPTED_PACKAGE_NAMES,
+  getOpenCodeCacheDir,
+  getOpenCodeConfigPaths,
+  parseJsonc,
+} from "../../../shared"
 
 interface PackageJsonShape {
   version?: string
@@ -31,9 +36,12 @@ export interface LoadedVersionInfo {
   loadedVersion: string | null
 }
 
-function getPlatformDefaultCacheDir(platform: NodeJS.Platform = process.platform): string {
+function getPlatformDefaultCacheDir(
+  platform: NodeJS.Platform = process.platform,
+): string {
   if (platform === "darwin") return join(homedir(), "Library", "Caches")
-  if (platform === "win32") return process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local")
+  if (platform === "win32")
+    return process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local")
   return join(homedir(), ".cache")
 }
 
@@ -72,18 +80,31 @@ function normalizeVersion(value: string | undefined): string | null {
 function createPackageCandidates(rootDir: string): PackageCandidate[] {
   return ACCEPTED_PACKAGE_NAMES.map((packageName) => ({
     packageName,
-    installedPackagePath: join(rootDir, "node_modules", packageName, "package.json"),
+    installedPackagePath: join(
+      rootDir,
+      "node_modules",
+      packageName,
+      "package.json",
+    ),
   }))
 }
 
 function selectInstalledPackage(candidate: InstallCandidate): PackageCandidate {
-  return candidate.packageCandidates.find((packageCandidate) => existsSync(packageCandidate.installedPackagePath))
-    ?? candidate.packageCandidates[0]
+  return (
+    candidate.packageCandidates.find((packageCandidate) =>
+      existsSync(packageCandidate.installedPackagePath),
+    ) ?? candidate.packageCandidates[0]
+  )
 }
 
-function getExpectedVersion(cachePackage: PackageJsonShape | null, packageName: string): string | null {
-  return normalizeVersion(cachePackage?.dependencies?.[packageName])
-    ?? normalizeVersion(cachePackage?.dependencies?.[PACKAGE_NAME])
+function getExpectedVersion(
+  cachePackage: PackageJsonShape | null,
+  packageName: string,
+): string | null {
+  return (
+    normalizeVersion(cachePackage?.dependencies?.[packageName]) ??
+    normalizeVersion(cachePackage?.dependencies?.[PACKAGE_NAME])
+  )
 }
 
 export function getLoadedPluginVersion(): LoadedVersionInfo {
@@ -103,8 +124,12 @@ export function getLoadedPluginVersion(): LoadedVersionInfo {
     },
   ]
 
-  const selectedCandidate = candidates.find((candidate) => candidate.packageCandidates.some((packageCandidate) => existsSync(packageCandidate.installedPackagePath)))
-    ?? candidates[0]
+  const selectedCandidate =
+    candidates.find((candidate) =>
+      candidate.packageCandidates.some((packageCandidate) =>
+        existsSync(packageCandidate.installedPackagePath),
+      ),
+    ) ?? candidates[0]
 
   const { cacheDir: selectedDir, cachePackagePath } = selectedCandidate
   const selectedPackage = selectInstalledPackage(selectedCandidate)
@@ -113,7 +138,10 @@ export function getLoadedPluginVersion(): LoadedVersionInfo {
   const cachePackage = readPackageJson(cachePackagePath)
   const installedPackage = readPackageJson(installedPackagePath)
 
-  const expectedVersion = getExpectedVersion(cachePackage, selectedPackage.packageName)
+  const expectedVersion = getExpectedVersion(
+    cachePackage,
+    selectedPackage.packageName,
+  )
   const loadedVersion = normalizeVersion(installedPackage?.version)
 
   return {
@@ -125,7 +153,9 @@ export function getLoadedPluginVersion(): LoadedVersionInfo {
   }
 }
 
-export async function getLatestPluginVersion(currentVersion: string | null): Promise<string | null> {
+export async function getLatestPluginVersion(
+  currentVersion: string | null,
+): Promise<string | null> {
   const channel = extractChannel(currentVersion)
   return getLatestVersion(channel)
 }

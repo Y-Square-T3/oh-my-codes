@@ -10,28 +10,42 @@ describe("buildAgentIdentitySection", () => {
   describe("#given an agent name and role description", () => {
     describe("#when building the identity section", () => {
       it("#then includes the agent name prominently", () => {
-        const result = buildAgentIdentitySection("Sisyphus", "Powerful AI orchestrator from OhMyCodes")
+        const result = buildAgentIdentitySection(
+          "Sisyphus",
+          "Powerful AI orchestrator from OhMyCodes",
+        )
 
         expect(result).toContain("Sisyphus")
       })
 
       it("#then includes the role description", () => {
-        const result = buildAgentIdentitySection("Sisyphus", "Powerful AI orchestrator from OhMyCodes")
+        const result = buildAgentIdentitySection(
+          "Sisyphus",
+          "Powerful AI orchestrator from OhMyCodes",
+        )
 
         expect(result).toContain("Powerful AI orchestrator from OhMyCodes")
       })
 
       it("#then wraps content in an identity XML tag", () => {
-        const result = buildAgentIdentitySection("Hephaestus", "Autonomous deep worker")
+        const result = buildAgentIdentitySection(
+          "Hephaestus",
+          "Autonomous deep worker",
+        )
 
         expect(result).toContain("<agent-identity>")
         expect(result).toContain("</agent-identity>")
       })
 
       it("#then explicitly states this identity overrides any prior identity", () => {
-        const result = buildAgentIdentitySection("Sisyphus", "Powerful AI orchestrator from OhMyCodes")
+        const result = buildAgentIdentitySection(
+          "Sisyphus",
+          "Powerful AI orchestrator from OhMyCodes",
+        )
 
-        expect(result).toMatch(/override|supersede|replace|disregard|instead of/i)
+        expect(result).toMatch(
+          /override|supersede|replace|disregard|instead of/i,
+        )
       })
     })
   })
@@ -39,8 +53,14 @@ describe("buildAgentIdentitySection", () => {
   describe("#given different agent names", () => {
     describe("#when building identity for each", () => {
       it("#then each identity section contains the correct agent name", () => {
-        const sisyphus = buildAgentIdentitySection("Sisyphus", "AI orchestrator")
-        const hephaestus = buildAgentIdentitySection("Hephaestus", "Autonomous deep worker")
+        const sisyphus = buildAgentIdentitySection(
+          "Sisyphus",
+          "AI orchestrator",
+        )
+        const hephaestus = buildAgentIdentitySection(
+          "Hephaestus",
+          "Autonomous deep worker",
+        )
         const oracle = buildAgentIdentitySection("Oracle", "Strategic advisor")
 
         expect(sisyphus).toContain("Sisyphus")
@@ -116,7 +136,9 @@ describe("Agent identity preservation through overrides", () => {
     describe("#when merging the override", () => {
       it("#then identity section is preserved in the merged prompt", () => {
         const baseConfig = createSisyphusAgent("anthropic/claude-opus-4-7")
-        const merged = mergeAgentConfig(baseConfig, { prompt_append: "Extra instructions here" })
+        const merged = mergeAgentConfig(baseConfig, {
+          prompt_append: "Extra instructions here",
+        })
 
         expect(merged.prompt).toContain("<agent-identity>")
         expect(merged.prompt).toContain("Sisyphus")

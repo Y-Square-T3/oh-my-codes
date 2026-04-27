@@ -1,9 +1,9 @@
-import { getAgentListDisplayName, getAgentRuntimeName } from "../shared/agent-display-names"
+import {
+  getAgentListDisplayName,
+  getAgentRuntimeName,
+} from "../shared/agent-display-names"
 
-function rewriteAgentNameForListDisplay(
-  key: string,
-  value: unknown,
-): unknown {
+function rewriteAgentNameForListDisplay(key: string, value: unknown): unknown {
   if (typeof value !== "object" || value === null) {
     return value
   }

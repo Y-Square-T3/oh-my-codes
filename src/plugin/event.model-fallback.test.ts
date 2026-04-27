@@ -3,16 +3,28 @@ const { afterEach, describe, expect, spyOn, test } = require("bun:test")
 
 import { createEventHandler } from "./event"
 import { createChatMessageHandler } from "./chat-message"
-import { _resetForTesting, setMainSession } from "../features/claude-code-session-state"
-import { createModelFallbackHook, clearPendingModelFallback } from "../hooks/model-fallback/hook"
+import {
+  _resetForTesting,
+  setMainSession,
+} from "../features/claude-code-session-state"
+import {
+  createModelFallbackHook,
+  clearPendingModelFallback,
+} from "../hooks/model-fallback/hook"
 import * as connectedProvidersCache from "../shared/connected-providers-cache"
 
 let readConnectedProvidersCacheSpy: { mockRestore: () => void } | undefined
 let readProviderModelsCacheSpy: { mockRestore: () => void } | undefined
 
 function setupConnectedProviderCacheMocks(): void {
-  readConnectedProvidersCacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(null)
-  readProviderModelsCacheSpy = spyOn(connectedProvidersCache, "readProviderModelsCache").mockReturnValue(null)
+  readConnectedProvidersCacheSpy = spyOn(
+    connectedProvidersCache,
+    "readConnectedProvidersCache",
+  ).mockReturnValue(null)
+  readProviderModelsCacheSpy = spyOn(
+    connectedProvidersCache,
+    "readProviderModelsCache",
+  ).mockReturnValue(null)
 }
 
 describe("createEventHandler - model fallback", () => {
@@ -69,7 +81,9 @@ describe("createEventHandler - model fallback", () => {
     //#given
     const sessionID = "ses_message_updated_fallback"
     const modelFallback = createModelFallbackHook()
-    const { handler, abortCalls, promptCalls } = createHandler({ hooks: { modelFallback } })
+    const { handler, abortCalls, promptCalls } = createHandler({
+      hooks: { modelFallback },
+    })
 
     //#when
     await handler({
@@ -85,7 +99,7 @@ describe("createEventHandler - model fallback", () => {
               name: "APIError",
               data: {
                 message:
-                  "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+                  'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
                 isRetryable: true,
               },
             },
@@ -96,7 +110,12 @@ describe("createEventHandler - model fallback", () => {
             agent: "Sisyphus - Ultraworker",
             path: { cwd: "/tmp", root: "/tmp" },
             cost: 0,
-            tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+            tokens: {
+              input: 0,
+              output: 0,
+              reasoning: 0,
+              cache: { read: 0, write: 0 },
+            },
           },
         },
       },
@@ -112,7 +131,9 @@ describe("createEventHandler - model fallback", () => {
     const sessionID = "ses_main_fallback_nested"
     setMainSession(sessionID)
     const modelFallback = createModelFallbackHook()
-    const { handler, abortCalls, promptCalls } = createHandler({ hooks: { modelFallback } })
+    const { handler, abortCalls, promptCalls } = createHandler({
+      hooks: { modelFallback },
+    })
 
     //#when
     await handler({
@@ -125,7 +146,7 @@ describe("createEventHandler - model fallback", () => {
             data: {
               error: {
                 message:
-                  "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+                  'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
               },
             },
           },
@@ -145,7 +166,9 @@ describe("createEventHandler - model fallback", () => {
     const modelFallback = createModelFallbackHook()
     clearPendingModelFallback(modelFallback, sessionID)
 
-    const { handler, abortCalls, promptCalls } = createHandler({ hooks: { modelFallback } })
+    const { handler, abortCalls, promptCalls } = createHandler({
+      hooks: { modelFallback },
+    })
 
     const chatMessageHandler = createChatMessageHandler({
       ctx: {
@@ -200,14 +223,17 @@ describe("createEventHandler - model fallback", () => {
             type: "retry",
             attempt: 1,
             message:
-              "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+              'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
             next: 1234,
           },
         },
       },
     })
 
-    const output = { message: {}, parts: [] as Array<{ type: string; text?: string }> }
+    const output = {
+      message: {},
+      parts: [] as Array<{ type: string; text?: string }>,
+    }
     await chatMessageHandler(
       {
         sessionID,
@@ -233,7 +259,9 @@ describe("createEventHandler - model fallback", () => {
     setMainSession(sessionID)
     const modelFallback = createModelFallbackHook()
     clearPendingModelFallback(modelFallback, sessionID)
-    const { handler, abortCalls, promptCalls } = createHandler({ hooks: { modelFallback } })
+    const { handler, abortCalls, promptCalls } = createHandler({
+      hooks: { modelFallback },
+    })
 
     await handler({
       event: {
@@ -355,7 +383,10 @@ describe("createEventHandler - model fallback", () => {
       },
     }
 
-    const { handler, abortCalls, promptCalls } = createHandler({ hooks: { modelFallback }, pluginConfig })
+    const { handler, abortCalls, promptCalls } = createHandler({
+      hooks: { modelFallback },
+      pluginConfig,
+    })
 
     const chatMessageHandler = createChatMessageHandler({
       ctx: {
@@ -417,7 +448,10 @@ describe("createEventHandler - model fallback", () => {
       },
     })
 
-    const output = { message: {}, parts: [] as Array<{ type: string; text?: string }> }
+    const output = {
+      message: {},
+      parts: [] as Array<{ type: string; text?: string }>,
+    }
     await chatMessageHandler(
       {
         sessionID,
@@ -523,7 +557,7 @@ describe("createEventHandler - model fallback", () => {
               data: {
                 error: {
                   message:
-                    "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+                    'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
                 },
               },
             },
@@ -531,12 +565,18 @@ describe("createEventHandler - model fallback", () => {
         },
       })
 
-      const output = { message: {}, parts: [] as Array<{ type: string; text?: string }> }
+      const output = {
+        message: {},
+        parts: [] as Array<{ type: string; text?: string }>,
+      }
       await chatMessageHandler(
         {
           sessionID,
           agent: "sisyphus",
-          model: { providerID: "anthropic", modelID: "claude-opus-4-7-thinking" },
+          model: {
+            providerID: "anthropic",
+            modelID: "claude-opus-4-7-thinking",
+          },
         },
         output,
       )
@@ -587,7 +627,7 @@ describe("createEventHandler - model fallback", () => {
               name: "APIError",
               data: {
                 message:
-                  "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+                  'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
                 isRetryable: true,
               },
             },
@@ -597,7 +637,12 @@ describe("createEventHandler - model fallback", () => {
             agent: "Sisyphus - Ultraworker",
             path: { cwd: "/tmp", root: "/tmp" },
             cost: 0,
-            tokens: { input: 0, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
+            tokens: {
+              input: 0,
+              output: 0,
+              reasoning: 0,
+              cache: { read: 0, write: 0 },
+            },
           },
         },
       },
@@ -614,7 +659,7 @@ describe("createEventHandler - model fallback", () => {
             data: {
               error: {
                 message:
-                  "Bad Gateway: {\"error\":{\"message\":\"unknown provider for model claude-opus-4-7-thinking\"}}",
+                  'Bad Gateway: {"error":{"message":"unknown provider for model claude-opus-4-7-thinking"}}',
               },
             },
           },

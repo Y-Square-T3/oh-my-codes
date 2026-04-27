@@ -98,19 +98,22 @@ export const OPENAI_CATEGORIES: BuiltinCategoryDefinition[] = [
   {
     name: "ultrabrain",
     config: { model: "openai/gpt-5.4", variant: "xhigh" },
-    description: "Use ONLY for genuinely hard, logic-heavy tasks. Give clear goals only, not step-by-step instructions.",
+    description:
+      "Use ONLY for genuinely hard, logic-heavy tasks. Give clear goals only, not step-by-step instructions.",
     promptAppend: ULTRABRAIN_CATEGORY_PROMPT_APPEND,
   },
   {
     name: "deep",
     config: { model: "openai/gpt-5.4", variant: "medium" },
-    description: "Goal-oriented autonomous problem-solving. Thorough research before action. For hairy problems requiring deep understanding.",
+    description:
+      "Goal-oriented autonomous problem-solving. Thorough research before action. For hairy problems requiring deep understanding.",
     promptAppend: DEEP_CATEGORY_PROMPT_APPEND,
   },
   {
     name: "quick",
     config: { model: "openai/gpt-5.4-mini" },
-    description: "Trivial tasks - single file changes, typo fixes, simple modifications",
+    description:
+      "Trivial tasks - single file changes, typo fixes, simple modifications",
     promptAppend: QUICK_CATEGORY_PROMPT_APPEND,
   },
 ]

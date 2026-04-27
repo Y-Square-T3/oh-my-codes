@@ -14,7 +14,9 @@ interface TaskSummary {
   blockedBy: string[]
 }
 
-export function createTaskList(config: Partial<OhMyCodesConfig>): ToolDefinition {
+export function createTaskList(
+  config: Partial<OhMyCodesConfig>,
+): ToolDefinition {
   return tool({
     description: `List all active tasks with summary information.
     
@@ -39,7 +41,10 @@ Returns summary format: id, subject, status, owner, blockedBy (not full descript
 
       const allTasks: TaskObject[] = []
       for (const fileId of files) {
-        const task = readJsonSafe(join(taskDir, `${fileId}.json`), TaskObjectSchema)
+        const task = readJsonSafe(
+          join(taskDir, `${fileId}.json`),
+          TaskObjectSchema,
+        )
         if (task) {
           allTasks.push(task)
         }
@@ -49,17 +54,19 @@ Returns summary format: id, subject, status, owner, blockedBy (not full descript
 
       // Filter out completed and deleted tasks
       const activeTasks = allTasks.filter(
-        (task) => task.status !== "completed" && task.status !== "deleted"
+        (task) => task.status !== "completed" && task.status !== "deleted",
       )
 
       // Build summary with filtered blockedBy
       const summaries: TaskSummary[] = activeTasks.map((task) => {
         // Filter blockedBy to only include unresolved (non-completed) blockers
-        const unresolvedBlockers = task.blockedBy.filter((blockerId: string) => {
-          const blockerTask = taskMap.get(blockerId)
-          // Include if blocker doesn't exist (missing) or if it's not completed
-          return !blockerTask || blockerTask.status !== "completed"
-        })
+        const unresolvedBlockers = task.blockedBy.filter(
+          (blockerId: string) => {
+            const blockerTask = taskMap.get(blockerId)
+            // Include if blocker doesn't exist (missing) or if it's not completed
+            return !blockerTask || blockerTask.status !== "completed"
+          },
+        )
 
         return {
           id: task.id,
@@ -70,10 +77,11 @@ Returns summary format: id, subject, status, owner, blockedBy (not full descript
         }
       })
 
-       return JSON.stringify({
-         tasks: summaries,
-         reminder: "1 task = 1 task. Maximize parallel execution by running independent tasks (tasks with empty blockedBy) concurrently."
-       })
+      return JSON.stringify({
+        tasks: summaries,
+        reminder:
+          "1 task = 1 task. Maximize parallel execution by running independent tasks (tasks with empty blockedBy) concurrently.",
+      })
     },
   })
 }

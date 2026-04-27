@@ -11,7 +11,7 @@ import type { Diagnostic } from "./types"
 
 export const lsp_diagnostics: ToolDefinition = tool({
   description:
-    'Get errors, warnings, hints from language server BEFORE running build. Works for both single files and directories - file extension is auto-detected for directories.',
+    "Get errors, warnings, hints from language server BEFORE running build. Works for both single files and directories - file extension is auto-detected for directories.",
   args: {
     filePath: tool.schema
       .string()
@@ -32,14 +32,21 @@ export const lsp_diagnostics: ToolDefinition = tool({
         const extension = inferExtensionFromDirectory(absPath)
         if (!extension) {
           throw new Error(
-            `No supported source files found in directory: ${absPath}`
+            `No supported source files found in directory: ${absPath}`,
           )
         }
-        return await aggregateDiagnosticsForDirectory(absPath, extension, args.severity)
+        return await aggregateDiagnosticsForDirectory(
+          absPath,
+          extension,
+          args.severity,
+        )
       }
 
       const result = await withLspClient(args.filePath, async (client) => {
-        return (await client.diagnostics(args.filePath)) as { items?: Diagnostic[] } | Diagnostic[] | null
+        return (await client.diagnostics(args.filePath)) as
+          | { items?: Diagnostic[] }
+          | Diagnostic[]
+          | null
       })
 
       let diagnostics: Diagnostic[] = []
@@ -60,10 +67,14 @@ export const lsp_diagnostics: ToolDefinition = tool({
 
       const total = diagnostics.length
       const truncated = total > DEFAULT_MAX_DIAGNOSTICS
-      const limited = truncated ? diagnostics.slice(0, DEFAULT_MAX_DIAGNOSTICS) : diagnostics
+      const limited = truncated
+        ? diagnostics.slice(0, DEFAULT_MAX_DIAGNOSTICS)
+        : diagnostics
       const lines = limited.map(formatDiagnostic)
       if (truncated) {
-        lines.unshift(`Found ${total} diagnostics (showing first ${DEFAULT_MAX_DIAGNOSTICS}):`)
+        lines.unshift(
+          `Found ${total} diagnostics (showing first ${DEFAULT_MAX_DIAGNOSTICS}):`,
+        )
       }
       const output = lines.join("\n")
       return output

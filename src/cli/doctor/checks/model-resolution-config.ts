@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { detectPluginConfigFile, getOpenCodeConfigDir, parseJsonc } from "../../../shared"
+import {
+  detectPluginConfigFile,
+  getOpenCodeConfigDir,
+  parseJsonc,
+} from "../../../shared"
 import type { OmoConfig } from "./model-resolution-types"
 
 const PROJECT_CONFIG_DIR = join(process.cwd(), ".opencode")

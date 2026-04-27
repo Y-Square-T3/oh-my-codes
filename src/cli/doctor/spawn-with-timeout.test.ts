@@ -5,7 +5,10 @@ describe("spawnWithTimeout", () => {
   describe("#given a command that completes quickly", () => {
     it("returns stdout and exit code", async () => {
       // when
-      const result = await spawnWithTimeout(["echo", "hello"], { stdout: "pipe", stderr: "pipe" })
+      const result = await spawnWithTimeout(["echo", "hello"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      })
 
       // then
       expect(result.timedOut).toBe(false)
@@ -18,10 +21,10 @@ describe("spawnWithTimeout", () => {
   describe("#given a command that writes to stderr", () => {
     it("captures stderr output", async () => {
       // when
-      const result = await spawnWithTimeout(
-        ["bash", "-c", "echo err >&2"],
-        { stdout: "pipe", stderr: "pipe" }
-      )
+      const result = await spawnWithTimeout(["bash", "-c", "echo err >&2"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      })
 
       // then
       expect(result.timedOut).toBe(false)
@@ -32,7 +35,10 @@ describe("spawnWithTimeout", () => {
   describe("#given a command that fails", () => {
     it("returns non-zero exit code without timing out", async () => {
       // when
-      const result = await spawnWithTimeout(["false"], { stdout: "pipe", stderr: "pipe" })
+      const result = await spawnWithTimeout(["false"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      })
 
       // then
       expect(result.timedOut).toBe(false)
@@ -46,7 +52,7 @@ describe("spawnWithTimeout", () => {
       const result = await spawnWithTimeout(
         ["bash", "-c", "while true; do :; done"],
         { stdout: "pipe", stderr: "pipe" },
-        200
+        200,
       )
 
       // then
@@ -62,7 +68,7 @@ describe("spawnWithTimeout", () => {
       const result = await spawnWithTimeout(
         ["nonexistent-binary-that-does-not-exist-12345"],
         { stdout: "pipe", stderr: "pipe" },
-        2000
+        2000,
       )
 
       // then

@@ -24,7 +24,9 @@ describe("background-agent spawner agent-not-found fallback", () => {
           callCount++
           promptCalls.push({ body: { ...args.body }, path: { ...args.path } })
           if (callCount === 1) {
-            throw new Error('Agent not found: "Sisyphus-Junior". Available agents: build, explore, general, plan')
+            throw new Error(
+              'Agent not found: "Sisyphus-Junior". Available agents: build, explore, general, plan',
+            )
           }
           return { data: {} }
         },
@@ -67,7 +69,7 @@ describe("background-agent spawner agent-not-found fallback", () => {
     await startTask(item as any, ctx as any)
 
     // Wait for the fire-and-forget prompt chain to settle
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
 
     //#then
     // Should have called promptAsync twice: once with original agent, once with fallback
@@ -134,7 +136,7 @@ describe("background-agent spawner agent-not-found fallback", () => {
 
     //#when
     await startTask(item as any, ctx as any)
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
 
     //#then
     // Only one attempt — no retry for non-agent errors
@@ -151,7 +153,9 @@ describe("background-agent spawner agent-not-found fallback", () => {
         create: async () => ({ data: { id: "session-fallback" } }),
         promptAsync: async () => {
           callCount++
-          throw new Error('Agent not found: "Sisyphus-Junior". Available agents: build, explore, general, plan')
+          throw new Error(
+            'Agent not found: "Sisyphus-Junior". Available agents: build, explore, general, plan',
+          )
         },
       },
     } as any
@@ -187,7 +191,7 @@ describe("background-agent spawner agent-not-found fallback", () => {
 
     //#when
     await startTask(item as any, ctx as any)
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
 
     //#then
     // Verify retry was attempted (2 calls: original + fallback)
@@ -208,7 +212,9 @@ describe("background-agent spawner agent-not-found fallback", () => {
           callCount++
           promptCalls.push({ body: { ...args.body } })
           if (callCount === 1) {
-            throw new Error("Cannot read properties of undefined (reading 'agent.name')")
+            throw new Error(
+              "Cannot read properties of undefined (reading 'agent.name')",
+            )
           }
           return { data: {} }
         },
@@ -249,7 +255,7 @@ describe("background-agent spawner agent-not-found fallback", () => {
 
     //#when
     await startTask(item as any, ctx as any)
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
 
     //#then
     expect(promptCalls).toHaveLength(2)
@@ -271,7 +277,10 @@ describe("background-agent spawner agent-not-found fallback", () => {
           callCount++
           promptCalls.push({ body: { ...args.body } })
           if (callCount === 1) {
-            throw { message: 'Agent not found: "Custom-Agent"', name: "UnknownError" }
+            throw {
+              message: 'Agent not found: "Custom-Agent"',
+              name: "UnknownError",
+            }
           }
           return { data: {} }
         },
@@ -312,7 +321,7 @@ describe("background-agent spawner agent-not-found fallback", () => {
 
     //#when
     await startTask(item as any, ctx as any)
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
 
     //#then
     expect(promptCalls).toHaveLength(2)

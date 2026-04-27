@@ -1,12 +1,17 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk"
 import type { MessageData, ResumeConfig } from "./types"
-import { createInternalAgentTextPart, resolveInheritedPromptTools } from "../../shared"
+import {
+  createInternalAgentTextPart,
+  resolveInheritedPromptTools,
+} from "../../shared"
 
 const RECOVERY_RESUME_TEXT = "[session recovered - continuing previous task]"
 
 type Client = ReturnType<typeof createOpencodeClient>
 
-export function findLastUserMessage(messages: MessageData[]): MessageData | undefined {
+export function findLastUserMessage(
+  messages: MessageData[],
+): MessageData | undefined {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].info?.role === "user") {
       return messages[i]
@@ -15,7 +20,10 @@ export function findLastUserMessage(messages: MessageData[]): MessageData | unde
   return undefined
 }
 
-export function extractResumeConfig(userMessage: MessageData | undefined, sessionID: string): ResumeConfig {
+export function extractResumeConfig(
+  userMessage: MessageData | undefined,
+  sessionID: string,
+): ResumeConfig {
   return {
     sessionID,
     agent: userMessage?.info?.agent,
@@ -24,9 +32,15 @@ export function extractResumeConfig(userMessage: MessageData | undefined, sessio
   }
 }
 
-export async function resumeSession(client: Client, config: ResumeConfig): Promise<boolean> {
+export async function resumeSession(
+  client: Client,
+  config: ResumeConfig,
+): Promise<boolean> {
   try {
-    const inheritedTools = resolveInheritedPromptTools(config.sessionID, config.tools)
+    const inheritedTools = resolveInheritedPromptTools(
+      config.sessionID,
+      config.tools,
+    )
     const launchModel = config.model
       ? { providerID: config.model.providerID, modelID: config.model.modelID }
       : undefined

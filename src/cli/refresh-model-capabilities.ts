@@ -45,7 +45,9 @@ export async function refreshModelCapabilities(
 
     return 0
   } catch (error) {
-    stderr.write(`Failed to refresh model capabilities cache: ${String(error)}\n`)
+    stderr.write(
+      `Failed to refresh model capabilities cache: ${String(error)}\n`,
+    )
     return 1
   }
 }

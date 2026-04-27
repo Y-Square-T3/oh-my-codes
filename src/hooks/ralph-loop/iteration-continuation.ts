@@ -4,7 +4,10 @@ import { log } from "../../shared/logger"
 import { HOOK_NAME } from "./constants"
 import { buildContinuationPrompt } from "./continuation-prompt-builder"
 import { injectContinuationPrompt } from "./continuation-prompt-injector"
-import { createIterationSession, selectSessionInTui } from "./session-reset-strategy"
+import {
+  createIterationSession,
+  selectSessionInTui,
+} from "./session-reset-strategy"
 
 type ContinuationOptions = {
   directory: string

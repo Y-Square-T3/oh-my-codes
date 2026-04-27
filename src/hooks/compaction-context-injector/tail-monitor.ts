@@ -36,7 +36,10 @@ export function shouldTreatAssistantPartAsOutput(part: {
     return !!part.text?.trim()
   }
 
-  return typeof part.type === "string" && MEANINGFUL_ASSISTANT_PART_TYPES.has(part.type)
+  return (
+    typeof part.type === "string" &&
+    MEANINGFUL_ASSISTANT_PART_TYPES.has(part.type)
+  )
 }
 
 export function trackAssistantOutput(

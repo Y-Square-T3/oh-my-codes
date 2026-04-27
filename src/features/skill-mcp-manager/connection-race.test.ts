@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, mock, afterAll } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  afterAll,
+} from "bun:test"
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js"
 import type { ClaudeCodeMcpServer } from "../claude-code-mcp-loader/types"
@@ -21,7 +29,7 @@ class MockClient {
 
   constructor(
     _clientInfo: { name: string; version: string },
-    _options: { capabilities: Record<string, never> }
+    _options: { capabilities: Record<string, never> },
   ) {
     createdClients.push(this)
   }
@@ -51,7 +59,9 @@ class MockStdioClientTransport {
   }
 }
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { disconnectAll, disconnectSession } = await import("./cleanup")
 const { getOrCreateClient } = await import("./connection")
@@ -146,13 +156,20 @@ describe("getOrCreateClient disconnect race", () => {
     const pendingConnect = createDeferred<void>()
     pendingConnects.push(pendingConnect)
 
-    const clientPromise = getOrCreateClient({ state, clientKey, info, config: stdioConfig })
+    const clientPromise = getOrCreateClient({
+      state,
+      clientKey,
+      info,
+      config: stdioConfig,
+    })
     expect(state.pendingConnections.has(clientKey)).toBe(true)
 
     await disconnectSession(state, info.sessionID)
     pendingConnect.resolve(undefined)
 
-    await expect(clientPromise).rejects.toThrow(/disconnected during MCP connection setup/)
+    await expect(clientPromise).rejects.toThrow(
+      /disconnected during MCP connection setup/,
+    )
     expect(state.clients.has(clientKey)).toBe(false)
     expect(state.pendingConnections.has(clientKey)).toBe(false)
     expect(state.disconnectedSessions.has(info.sessionID)).toBe(false)
@@ -167,7 +184,12 @@ describe("getOrCreateClient disconnect race", () => {
     const clientKey = createClientKey(info)
     state.disconnectedSessions.set(info.sessionID, 1)
 
-    const client = await getOrCreateClient({ state, clientKey, info, config: stdioConfig })
+    const client = await getOrCreateClient({
+      state,
+      clientKey,
+      info,
+      config: stdioConfig,
+    })
 
     expect(state.disconnectedSessions.has(info.sessionID)).toBe(false)
     expect(state.clients.get(clientKey)?.client).toBe(client)
@@ -192,13 +214,20 @@ describe("getOrCreateClient disconnectAll race", () => {
     const pendingConnect = createDeferred<void>()
     pendingConnects.push(pendingConnect)
 
-    const clientPromise = getOrCreateClient({ state, clientKey, info, config: stdioConfig })
+    const clientPromise = getOrCreateClient({
+      state,
+      clientKey,
+      info,
+      config: stdioConfig,
+    })
     expect(state.pendingConnections.has(clientKey)).toBe(true)
 
     await disconnectAll(state)
     pendingConnect.resolve(undefined)
 
-    await expect(clientPromise).rejects.toThrow(/connection completed after shutdown/)
+    await expect(clientPromise).rejects.toThrow(
+      /connection completed after shutdown/,
+    )
     expect(state.clients.has(clientKey)).toBe(false)
   })
 
@@ -209,7 +238,9 @@ describe("getOrCreateClient disconnectAll race", () => {
 
     await disconnectAll(state)
 
-    await expect(getOrCreateClient({ state, clientKey, info, config: stdioConfig })).rejects.toThrow(/has been shut down/)
+    await expect(
+      getOrCreateClient({ state, clientKey, info, config: stdioConfig }),
+    ).rejects.toThrow(/has been shut down/)
     expect(state.clients.size).toBe(0)
     expect(state.pendingConnections.size).toBe(0)
     expect(state.inFlightConnections.size).toBe(0)
@@ -223,7 +254,10 @@ describe("getOrCreateClient multi-key disconnect race", () => {
   it("#given 2 pending connections for session A #when disconnectSession(A) before both complete #then both old connections are rejected", async () => {
     const state = createState()
     const infoKey1 = createClientInfo("session-a")
-    const infoKey2 = { ...createClientInfo("session-a"), serverName: "server-2" }
+    const infoKey2 = {
+      ...createClientInfo("session-a"),
+      serverName: "server-2",
+    }
     const clientKey1 = createClientKey(infoKey1)
     const clientKey2 = `${infoKey2.sessionID}:${infoKey2.skillName}:${infoKey2.serverName}`
     const pendingConnect1 = createDeferred<void>()
@@ -231,17 +265,31 @@ describe("getOrCreateClient multi-key disconnect race", () => {
     pendingConnects.push(pendingConnect1)
     pendingConnects.push(pendingConnect2)
 
-    const promise1 = getOrCreateClient({ state, clientKey: clientKey1, info: infoKey1, config: stdioConfig })
-    const promise2 = getOrCreateClient({ state, clientKey: clientKey2, info: infoKey2, config: stdioConfig })
+    const promise1 = getOrCreateClient({
+      state,
+      clientKey: clientKey1,
+      info: infoKey1,
+      config: stdioConfig,
+    })
+    const promise2 = getOrCreateClient({
+      state,
+      clientKey: clientKey2,
+      info: infoKey2,
+      config: stdioConfig,
+    })
     expect(state.pendingConnections.size).toBe(2)
 
     await disconnectSession(state, "session-a")
 
     pendingConnect1.resolve(undefined)
-    await expect(promise1).rejects.toThrow(/disconnected during MCP connection setup/)
+    await expect(promise1).rejects.toThrow(
+      /disconnected during MCP connection setup/,
+    )
 
     pendingConnect2.resolve(undefined)
-    await expect(promise2).rejects.toThrow(/disconnected during MCP connection setup/)
+    await expect(promise2).rejects.toThrow(
+      /disconnected during MCP connection setup/,
+    )
 
     expect(state.clients.has(clientKey1)).toBe(false)
     expect(state.clients.has(clientKey2)).toBe(false)
@@ -253,15 +301,23 @@ describe("getOrCreateClient multi-key disconnect race", () => {
     const info = createClientInfo("session-a")
     const clientKey = createClientKey(info)
     const pendingConnect = createDeferred<void>()
-    const supersedingConnection = createDeferred<Awaited<ReturnType<typeof getOrCreateClient>>>()
+    const supersedingConnection =
+      createDeferred<Awaited<ReturnType<typeof getOrCreateClient>>>()
     pendingConnects.push(pendingConnect)
 
-    const clientPromise = getOrCreateClient({ state, clientKey, info, config: stdioConfig })
+    const clientPromise = getOrCreateClient({
+      state,
+      clientKey,
+      info,
+      config: stdioConfig,
+    })
     state.pendingConnections.set(clientKey, supersedingConnection.promise)
 
     pendingConnect.resolve(undefined)
 
-    await expect(clientPromise).rejects.toThrow(/superseded by a newer connection attempt/)
+    await expect(clientPromise).rejects.toThrow(
+      /superseded by a newer connection attempt/,
+    )
     expect(state.clients.has(clientKey)).toBe(false)
     expect(createdClients[0]?.close).toHaveBeenCalledTimes(1)
   })
@@ -271,37 +327,56 @@ describe("getOrCreateClient multi-key disconnect race", () => {
     const info = createClientInfo("session-a")
     const clientKey = createClientKey(info)
     const pendingConnect = createDeferred<void>()
-    const supersedingConnection = createDeferred<Awaited<ReturnType<typeof getOrCreateClient>>>()
+    const supersedingConnection =
+      createDeferred<Awaited<ReturnType<typeof getOrCreateClient>>>()
     pendingConnects.push(pendingConnect)
 
     const newerClient = new MockClient(
       { name: "newer-client", version: "1.0.0" },
       { capabilities: {} },
     )
-    const newerTransport = new MockStdioClientTransport({ command: "mock-mcp-server" })
+    const newerTransport = new MockStdioClientTransport({
+      command: "mock-mcp-server",
+    })
     let replacedEntry = false
     const originalSet = state.clients.set.bind(state.clients)
-    Reflect.set(state.clients, "set", (key: string, value: SkillMcpManagerState["clients"] extends Map<string, infer TValue> ? TValue : never) => {
-      originalSet(key, value)
-      if (!replacedEntry && key === clientKey) {
-        replacedEntry = true
-        originalSet(key, {
-          client: newerClient as never,
-          transport: newerTransport as never,
-          skillName: info.skillName,
-          lastUsedAt: Date.now(),
-          connectionType: "stdio",
-        })
-      }
-      return state.clients
-    })
+    Reflect.set(
+      state.clients,
+      "set",
+      (
+        key: string,
+        value: SkillMcpManagerState["clients"] extends Map<string, infer TValue>
+          ? TValue
+          : never,
+      ) => {
+        originalSet(key, value)
+        if (!replacedEntry && key === clientKey) {
+          replacedEntry = true
+          originalSet(key, {
+            client: newerClient as never,
+            transport: newerTransport as never,
+            skillName: info.skillName,
+            lastUsedAt: Date.now(),
+            connectionType: "stdio",
+          })
+        }
+        return state.clients
+      },
+    )
 
-    const clientPromise = getOrCreateClient({ state, clientKey, info, config: stdioConfig })
+    const clientPromise = getOrCreateClient({
+      state,
+      clientKey,
+      info,
+      config: stdioConfig,
+    })
     state.pendingConnections.set(clientKey, supersedingConnection.promise)
 
     pendingConnect.resolve(undefined)
 
-    await expect(clientPromise).rejects.toThrow(/superseded by a newer connection attempt/)
+    await expect(clientPromise).rejects.toThrow(
+      /superseded by a newer connection attempt/,
+    )
     expect(state.clients.get(clientKey)?.client.close).toBe(newerClient.close)
     expect(newerClient.close).not.toHaveBeenCalled()
   })

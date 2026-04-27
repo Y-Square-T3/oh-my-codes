@@ -116,7 +116,8 @@ export const GOOGLE_CATEGORIES: BuiltinCategoryDefinition[] = [
   {
     name: "artistry",
     config: { model: "google/gemini-3.1-pro", variant: "high" },
-    description: "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
+    description:
+      "Complex problem-solving with unconventional, creative approaches - beyond standard patterns",
     promptAppend: ARTISTRY_CATEGORY_PROMPT_APPEND,
   },
 ]

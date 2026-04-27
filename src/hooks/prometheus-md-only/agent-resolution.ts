@@ -1,6 +1,9 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 
-import { findNearestMessageWithFields, findFirstMessageWithAgent } from "../../features/hook-message-injector"
+import {
+  findNearestMessageWithFields,
+  findFirstMessageWithAgent,
+} from "../../features/hook-message-injector"
 import {
   findFirstMessageWithAgentFromSDK,
   findNearestMessageWithFieldsFromSDK,
@@ -18,14 +21,15 @@ function isCompactionAgent(agent: string): boolean {
 
 async function getAgentFromMessageFiles(
   sessionID: string,
-  client?: OpencodeClient
+  client?: OpencodeClient,
 ): Promise<string | undefined> {
   if (isSqliteBackend() && client) {
     const firstAgent = await findFirstMessageWithAgentFromSDK(client, sessionID)
     if (firstAgent && !isCompactionAgent(firstAgent)) return firstAgent
 
     const nearest = await findNearestMessageWithFieldsFromSDK(client, sessionID)
-    if (nearest?.agent && !isCompactionAgent(nearest.agent)) return nearest.agent
+    if (nearest?.agent && !isCompactionAgent(nearest.agent))
+      return nearest.agent
     return undefined
   }
 
@@ -53,7 +57,7 @@ async function getAgentFromMessageFiles(
 export async function getAgentFromSession(
   sessionID: string,
   directory: string,
-  client?: OpencodeClient
+  client?: OpencodeClient,
 ): Promise<string | undefined> {
   // Check in-memory first (current session)
   const memoryAgent = getSessionAgent(sessionID)

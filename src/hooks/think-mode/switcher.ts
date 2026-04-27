@@ -39,17 +39,16 @@ function extractModelPrefix(modelID: string): { prefix: string; base: string } {
   }
 }
 
-
 // Maps model IDs to their "high reasoning" variant (internal convention)
 // For OpenAI models, this signals that reasoning_effort should be set to "high"
 const HIGH_VARIANT_MAP: Record<string, string> = {
   // Claude
   "claude-sonnet-4-6": "claude-sonnet-4-6-high",
   "claude-opus-4-7": "claude-opus-4-7-high",
-   // Gemini
-   "gemini-3-1-pro": "gemini-3-1-pro-high",
-   "gemini-3-1-pro-low": "gemini-3-1-pro-high",
-   "gemini-3-flash": "gemini-3-flash-high",
+  // Gemini
+  "gemini-3-1-pro": "gemini-3-1-pro-high",
+  "gemini-3-1-pro-low": "gemini-3-1-pro-high",
+  "gemini-3-flash": "gemini-3-flash-high",
   // GPT-5
   "gpt-5": "gpt-5-high",
   "gpt-5-mini": "gpt-5-mini-high",
@@ -72,7 +71,6 @@ const HIGH_VARIANT_MAP: Record<string, string> = {
 }
 
 const ALREADY_HIGH: Set<string> = new Set(Object.values(HIGH_VARIANT_MAP))
-
 
 export function getHighVariant(modelID: string): string | null {
   const normalized = normalizeModelID(modelID)

@@ -51,7 +51,10 @@ function isChatHeadersOutput(raw: unknown): raw is ChatHeadersOutput {
 }
 
 function isCopilotProvider(providerID: string): boolean {
-  return providerID === "github-copilot" || providerID === "github-copilot-enterprise"
+  return (
+    providerID === "github-copilot" ||
+    providerID === "github-copilot-enterprise"
+  )
 }
 
 async function hasInternalMarker(
@@ -80,7 +83,11 @@ async function hasInternalMarker(
     }
 
     const hasMarker = data.parts.some((part) => {
-      if (!isRecord(part) || part.type !== "text" || typeof part.text !== "string") {
+      if (
+        !isRecord(part) ||
+        part.type !== "text" ||
+        typeof part.text !== "string"
+      ) {
         return false
       }
 
@@ -102,7 +109,10 @@ async function hasInternalMarker(
   }
 }
 
-async function isOmoInternalMessage(input: ChatHeadersInput, client: PluginContext["client"]): Promise<boolean> {
+async function isOmoInternalMessage(
+  input: ChatHeadersInput,
+  client: PluginContext["client"],
+): Promise<boolean> {
   if (input.message.role !== "user") {
     return false
   }
@@ -114,7 +124,9 @@ async function isOmoInternalMessage(input: ChatHeadersInput, client: PluginConte
   return hasInternalMarker(client, input.sessionID, input.message.id)
 }
 
-export function createChatHeadersHandler(args: { ctx: PluginContext }): (input: unknown, output: unknown) => Promise<void> {
+export function createChatHeadersHandler(args: {
+  ctx: PluginContext
+}): (input: unknown, output: unknown) => Promise<void> {
   const { ctx } = args
 
   return async (input, output): Promise<void> => {
@@ -128,10 +140,14 @@ export function createChatHeadersHandler(args: { ctx: PluginContext }): (input: 
     // OpenCode's copilot fetch wrapper already sets x-initiator based on
     // the actual request body content. Overriding it here causes a mismatch
     // that the Copilot API rejects with "invalid initiator".
-    const model = isRecord(input) && isRecord((input as Record<string, unknown>).model)
-      ? (input as Record<string, unknown>).model as Record<string, unknown>
-      : undefined
-    const api = model && isRecord(model.api) ? model.api as Record<string, unknown> : undefined
+    const model =
+      isRecord(input) && isRecord((input as Record<string, unknown>).model)
+        ? ((input as Record<string, unknown>).model as Record<string, unknown>)
+        : undefined
+    const api =
+      model && isRecord(model.api)
+        ? (model.api as Record<string, unknown>)
+        : undefined
     if (api?.npm === "@ai-sdk/github-copilot") return
 
     if (!(await isOmoInternalMessage(normalizedInput, ctx.client))) return

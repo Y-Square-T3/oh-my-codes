@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import { resolveGateway, validateGatewayUrl, normalizeReplyListenerConfig } from "../config"
+import {
+  resolveGateway,
+  validateGatewayUrl,
+  normalizeReplyListenerConfig,
+} from "../config"
 import type { OpenClawConfig } from "../types"
 import { OpenClawConfigSchema } from "../../config/schema/openclaw"
 

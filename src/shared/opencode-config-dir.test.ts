@@ -42,7 +42,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns the custom path
       expect(result).toBe("/custom/opencode/path")
@@ -55,7 +58,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns default ~/.config/opencode
       expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -68,7 +74,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns default ~/.config/opencode
       expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -81,7 +90,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns default ~/.config/opencode
       expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -93,7 +105,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns resolved absolute path
       expect(result).toBe(resolve("./my-opencode-config"))
@@ -106,7 +121,10 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "linux" })
 
       // when getOpenCodeConfigDir is called with binary="opencode"
-      const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+      const result = getOpenCodeConfigDir({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then OPENCODE_CONFIG_DIR takes priority
       expect(result).toBe("/custom/opencode/path")
@@ -147,7 +165,10 @@ describe("opencode-config-dir", () => {
         delete process.env.OPENCODE_CONFIG_DIR
 
         // when getOpenCodeConfigDir is called with binary="opencode"
-        const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode",
+          version: "1.0.200",
+        })
 
         // then returns ~/.config/opencode
         expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -160,7 +181,10 @@ describe("opencode-config-dir", () => {
         delete process.env.OPENCODE_CONFIG_DIR
 
         // when getOpenCodeConfigDir is called with binary="opencode"
-        const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode",
+          version: "1.0.200",
+        })
 
         // then returns $XDG_CONFIG_HOME/opencode
         expect(result).toBe("/custom/config/opencode")
@@ -173,7 +197,10 @@ describe("opencode-config-dir", () => {
         delete process.env.OPENCODE_CONFIG_DIR
 
         // when getOpenCodeConfigDir is called with binary="opencode"
-        const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200" })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode",
+          version: "1.0.200",
+        })
 
         // then returns ~/.config/opencode
         expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -187,7 +214,11 @@ describe("opencode-config-dir", () => {
         delete process.env.OPENCODE_CONFIG_DIR
 
         // when getOpenCodeConfigDir is called with binary="opencode"
-        const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode",
+          version: "1.0.200",
+          checkExisting: false,
+        })
 
         // then returns ~/.config/opencode (cross-platform default)
         expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -202,7 +233,11 @@ describe("opencode-config-dir", () => {
         delete process.env.OPENCODE_CONFIG_DIR
 
         // when getOpenCodeConfigDir is called with binary="opencode"
-        const result = getOpenCodeConfigDir({ binary: "opencode", version: "1.0.200", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode",
+          version: "1.0.200",
+          checkExisting: false,
+        })
 
         // then returns ~/.config/opencode (ignores APPDATA entirely for CLI)
         expect(result).toBe(join(homedir(), ".config", "opencode"))
@@ -216,7 +251,11 @@ describe("opencode-config-dir", () => {
         delete process.env.XDG_CONFIG_HOME
 
         // when getOpenCodeConfigDir is called with binary="opencode-desktop"
-        const result = getOpenCodeConfigDir({ binary: "opencode-desktop", version: "1.0.200", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode-desktop",
+          version: "1.0.200",
+          checkExisting: false,
+        })
 
         // then returns ~/.config/ai.opencode.desktop
         expect(result).toBe(join(homedir(), ".config", TAURI_APP_IDENTIFIER))
@@ -227,10 +266,21 @@ describe("opencode-config-dir", () => {
         Object.defineProperty(process, "platform", { value: "darwin" })
 
         // when getOpenCodeConfigDir is called with binary="opencode-desktop"
-        const result = getOpenCodeConfigDir({ binary: "opencode-desktop", version: "1.0.200", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode-desktop",
+          version: "1.0.200",
+          checkExisting: false,
+        })
 
         // then returns ~/Library/Application Support/ai.opencode.desktop
-        expect(result).toBe(join(homedir(), "Library", "Application Support", TAURI_APP_IDENTIFIER))
+        expect(result).toBe(
+          join(
+            homedir(),
+            "Library",
+            "Application Support",
+            TAURI_APP_IDENTIFIER,
+          ),
+        )
       })
 
       test("returns %APPDATA%/ai.opencode.desktop on Windows", () => {
@@ -239,12 +289,20 @@ describe("opencode-config-dir", () => {
         process.env.APPDATA = "C:\\Users\\TestUser\\AppData\\Roaming"
 
         // when getOpenCodeConfigDir is called with binary="opencode-desktop"
-        const result = getOpenCodeConfigDir({ binary: "opencode-desktop", version: "1.0.200", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode-desktop",
+          version: "1.0.200",
+          checkExisting: false,
+        })
 
         // then returns %APPDATA%/ai.opencode.desktop using Windows path semantics
-        expect(result).toBe(win32.join("C:\\Users\\TestUser\\AppData\\Roaming", TAURI_APP_IDENTIFIER))
+        expect(result).toBe(
+          win32.join(
+            "C:\\Users\\TestUser\\AppData\\Roaming",
+            TAURI_APP_IDENTIFIER,
+          ),
+        )
       })
-
     })
 
     describe("dev build detection", () => {
@@ -254,10 +312,16 @@ describe("opencode-config-dir", () => {
         delete process.env.XDG_CONFIG_HOME
 
         // when getOpenCodeConfigDir is called with dev version
-        const result = getOpenCodeConfigDir({ binary: "opencode-desktop", version: "1.0.0-dev.123", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode-desktop",
+          version: "1.0.0-dev.123",
+          checkExisting: false,
+        })
 
         // then returns path with ai.opencode.desktop.dev
-        expect(result).toBe(join(homedir(), ".config", TAURI_APP_IDENTIFIER_DEV))
+        expect(result).toBe(
+          join(homedir(), ".config", TAURI_APP_IDENTIFIER_DEV),
+        )
       })
 
       test("returns ai.opencode.desktop.dev on macOS for dev build", () => {
@@ -265,10 +329,21 @@ describe("opencode-config-dir", () => {
         Object.defineProperty(process, "platform", { value: "darwin" })
 
         // when getOpenCodeConfigDir is called with dev version
-        const result = getOpenCodeConfigDir({ binary: "opencode-desktop", version: "1.0.0-dev", checkExisting: false })
+        const result = getOpenCodeConfigDir({
+          binary: "opencode-desktop",
+          version: "1.0.0-dev",
+          checkExisting: false,
+        })
 
         // then returns path with ai.opencode.desktop.dev
-        expect(result).toBe(join(homedir(), "Library", "Application Support", TAURI_APP_IDENTIFIER_DEV))
+        expect(result).toBe(
+          join(
+            homedir(),
+            "Library",
+            "Application Support",
+            TAURI_APP_IDENTIFIER_DEV,
+          ),
+        )
       })
     })
   })
@@ -281,7 +356,10 @@ describe("opencode-config-dir", () => {
       delete process.env.OPENCODE_CONFIG_DIR
 
       // when getOpenCodeConfigPaths is called
-      const paths = getOpenCodeConfigPaths({ binary: "opencode", version: "1.0.200" })
+      const paths = getOpenCodeConfigPaths({
+        binary: "opencode",
+        version: "1.0.200",
+      })
 
       // then returns all expected paths
       const expectedDir = join(homedir(), ".config", "opencode")
@@ -297,10 +375,19 @@ describe("opencode-config-dir", () => {
       Object.defineProperty(process, "platform", { value: "darwin" })
 
       // when getOpenCodeConfigPaths is called
-      const paths = getOpenCodeConfigPaths({ binary: "opencode-desktop", version: "1.0.200", checkExisting: false })
+      const paths = getOpenCodeConfigPaths({
+        binary: "opencode-desktop",
+        version: "1.0.200",
+        checkExisting: false,
+      })
 
       // then returns all expected paths
-      const expectedDir = join(homedir(), "Library", "Application Support", TAURI_APP_IDENTIFIER)
+      const expectedDir = join(
+        homedir(),
+        "Library",
+        "Application Support",
+        TAURI_APP_IDENTIFIER,
+      )
       expect(paths.configDir).toBe(expectedDir)
       expect(paths.configJson).toBe(join(expectedDir, "opencode.json"))
       expect(paths.configJsonc).toBe(join(expectedDir, "opencode.jsonc"))

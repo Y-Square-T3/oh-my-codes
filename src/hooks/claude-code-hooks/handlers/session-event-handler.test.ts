@@ -1,9 +1,19 @@
 import { describe, expect, test } from "bun:test"
 
 import { ContextCollector } from "../../../features/context-injector"
-import { cacheToolInput, getToolInput, stopToolInputCacheCleanup } from "../tool-input-cache"
-import { buildTranscriptFromSession, hasTranscriptCacheEntry } from "../transcript"
-import { createSessionEventHandler, disposeSessionEventHandler } from "./session-event-handler"
+import {
+  cacheToolInput,
+  getToolInput,
+  stopToolInputCacheCleanup,
+} from "../tool-input-cache"
+import {
+  buildTranscriptFromSession,
+  hasTranscriptCacheEntry,
+} from "../transcript"
+import {
+  createSessionEventHandler,
+  disposeSessionEventHandler,
+} from "./session-event-handler"
 
 function createMockClient() {
   return {
@@ -25,12 +35,25 @@ describe("createSessionEventHandler", () => {
       content: "pending hook context",
     })
     cacheToolInput("ses_cleanup", "Read", "call-1", { path: "/tmp/a" })
-    await buildTranscriptFromSession(createMockClient(), "ses_cleanup", "/tmp", "Read", { path: "/tmp/a" })
-    const handler = createSessionEventHandler(createMockClient() as never, {}, collector)
+    await buildTranscriptFromSession(
+      createMockClient(),
+      "ses_cleanup",
+      "/tmp",
+      "Read",
+      { path: "/tmp/a" },
+    )
+    const handler = createSessionEventHandler(
+      createMockClient() as never,
+      {},
+      collector,
+    )
 
     //#when
     await handler({
-      event: { type: "session.deleted", properties: { info: { id: "ses_cleanup" } } },
+      event: {
+        type: "session.deleted",
+        properties: { info: { id: "ses_cleanup" } },
+      },
     })
 
     //#then
@@ -54,8 +77,20 @@ describe("createSessionEventHandler", () => {
     })
     cacheToolInput("ses_one", "Read", "call-1", { path: "/tmp/one" })
     cacheToolInput("ses_two", "Read", "call-2", { path: "/tmp/two" })
-    await buildTranscriptFromSession(createMockClient(), "ses_one", "/tmp", "Read", { path: "/tmp/one" })
-    await buildTranscriptFromSession(createMockClient(), "ses_two", "/tmp", "Read", { path: "/tmp/two" })
+    await buildTranscriptFromSession(
+      createMockClient(),
+      "ses_one",
+      "/tmp",
+      "Read",
+      { path: "/tmp/one" },
+    )
+    await buildTranscriptFromSession(
+      createMockClient(),
+      "ses_two",
+      "/tmp",
+      "Read",
+      { path: "/tmp/two" },
+    )
 
     //#when
     disposeSessionEventHandler(collector)
@@ -125,7 +160,10 @@ describe("createSessionEventHandler", () => {
       event: { type: "session.idle", properties: { sessionID: "ses_reset" } },
     })
     await handler({
-      event: { type: "session.deleted", properties: { info: { id: "ses_reset" } } },
+      event: {
+        type: "session.deleted",
+        properties: { info: { id: "ses_reset" } },
+      },
     })
 
     //#when

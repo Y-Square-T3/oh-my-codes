@@ -1,7 +1,11 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import { afterEach, describe, expect, it } from "bun:test"
-import { disconnectSession, registerProcessCleanup, unregisterProcessCleanup } from "./cleanup"
+import {
+  disconnectSession,
+  registerProcessCleanup,
+  unregisterProcessCleanup,
+} from "./cleanup"
 import type { ManagedClient, SkillMcpManagerState } from "./types"
 
 const trackedStates: SkillMcpManagerState[] = []
@@ -39,9 +43,11 @@ function createManagedClient(skillName: string): ManagedClient {
   return {
     client: new Client(
       { name: `test-${skillName}`, version: "1.0.0" },
-      { capabilities: {} }
+      { capabilities: {} },
     ),
-    transport: new StreamableHTTPClientTransport(new URL("https://example.com/mcp")),
+    transport: new StreamableHTTPClientTransport(
+      new URL("https://example.com/mcp"),
+    ),
     skillName,
     lastUsedAt: Date.now(),
     connectionType: "http",
@@ -55,7 +61,10 @@ describe("disconnectSession cleanup registration", () => {
     const signalIntCountBeforeRegister = process.listenerCount("SIGINT")
     const signalTermCountBeforeRegister = process.listenerCount("SIGTERM")
 
-    state.clients.set("session-1:skill-1:server-1", createManagedClient("skill-1"))
+    state.clients.set(
+      "session-1:skill-1:server-1",
+      createManagedClient("skill-1"),
+    )
     registerProcessCleanup(state)
 
     // when
@@ -74,8 +83,14 @@ describe("disconnectSession cleanup registration", () => {
     const signalIntCountBeforeRegister = process.listenerCount("SIGINT")
     const signalTermCountBeforeRegister = process.listenerCount("SIGTERM")
 
-    state.clients.set("session-1:skill-1:server-1", createManagedClient("skill-1"))
-    state.clients.set("session-2:skill-2:server-2", createManagedClient("skill-2"))
+    state.clients.set(
+      "session-1:skill-1:server-1",
+      createManagedClient("skill-1"),
+    )
+    state.clients.set(
+      "session-2:skill-2:server-2",
+      createManagedClient("skill-2"),
+    )
     registerProcessCleanup(state)
 
     // when
@@ -85,8 +100,12 @@ describe("disconnectSession cleanup registration", () => {
     expect(state.clients.has("session-2:skill-2:server-2")).toBe(true)
     expect(state.cleanupRegistered).toBe(true)
     expect(state.cleanupHandlers).toHaveLength(expectedCleanupHandlerCount)
-    expect(process.listenerCount("SIGINT")).toBe(signalIntCountBeforeRegister + 1)
-    expect(process.listenerCount("SIGTERM")).toBe(signalTermCountBeforeRegister + 1)
+    expect(process.listenerCount("SIGINT")).toBe(
+      signalIntCountBeforeRegister + 1,
+    )
+    expect(process.listenerCount("SIGTERM")).toBe(
+      signalTermCountBeforeRegister + 1,
+    )
   })
 
   it("#given state with 2 clients in different sessions #when both sessions disconnected #then process cleanup handlers are unregistered", async () => {
@@ -95,8 +114,14 @@ describe("disconnectSession cleanup registration", () => {
     const signalIntCountBeforeRegister = process.listenerCount("SIGINT")
     const signalTermCountBeforeRegister = process.listenerCount("SIGTERM")
 
-    state.clients.set("session-1:skill-1:server-1", createManagedClient("skill-1"))
-    state.clients.set("session-2:skill-2:server-2", createManagedClient("skill-2"))
+    state.clients.set(
+      "session-1:skill-1:server-1",
+      createManagedClient("skill-1"),
+    )
+    state.clients.set(
+      "session-2:skill-2:server-2",
+      createManagedClient("skill-2"),
+    )
     registerProcessCleanup(state)
 
     // when
@@ -117,8 +142,14 @@ describe("disconnectSession cleanup registration", () => {
     const signalTermCountBeforeRegister = process.listenerCount("SIGTERM")
     const pendingClient = createManagedClient("skill-pending").client
 
-    state.clients.set("session-1:skill-1:server-1", createManagedClient("skill-1"))
-    state.pendingConnections.set("session-2:skill-2:server-2", Promise.resolve(pendingClient))
+    state.clients.set(
+      "session-1:skill-1:server-1",
+      createManagedClient("skill-1"),
+    )
+    state.pendingConnections.set(
+      "session-2:skill-2:server-2",
+      Promise.resolve(pendingClient),
+    )
     registerProcessCleanup(state)
 
     await disconnectSession(state, "session-1")
@@ -127,7 +158,11 @@ describe("disconnectSession cleanup registration", () => {
     expect(state.pendingConnections.size).toBe(1)
     expect(state.cleanupRegistered).toBe(true)
     expect(state.cleanupHandlers).toHaveLength(expectedCleanupHandlerCount)
-    expect(process.listenerCount("SIGINT")).toBe(signalIntCountBeforeRegister + 1)
-    expect(process.listenerCount("SIGTERM")).toBe(signalTermCountBeforeRegister + 1)
+    expect(process.listenerCount("SIGINT")).toBe(
+      signalIntCountBeforeRegister + 1,
+    )
+    expect(process.listenerCount("SIGTERM")).toBe(
+      signalTermCountBeforeRegister + 1,
+    )
   })
 })

@@ -13,7 +13,8 @@ import * as actualSessionStateModule from "./session-state"
 import type { SessionStateStore } from "./session-state"
 
 let createdSessionStateStore: SessionStateStore | undefined
-const createActualSessionStateStore = actualSessionStateModule.createSessionStateStore
+const createActualSessionStateStore =
+  actualSessionStateModule.createSessionStateStore
 
 const mockModule = mock as typeof mock & {
   module: (specifier: string, factory: () => unknown) => void
@@ -79,7 +80,9 @@ describe("todo-continuation-enforcer dispose", () => {
     // given
     const originalClearInterval = globalThis.clearInterval
     const clearIntervalCalls: Array<Parameters<typeof clearInterval>[0]> = []
-    globalThis.clearInterval = ((timer?: Parameters<typeof clearInterval>[0]) => {
+    globalThis.clearInterval = ((
+      timer?: Parameters<typeof clearInterval>[0],
+    ) => {
       clearIntervalCalls.push(timer)
       return originalClearInterval(timer)
     }) as typeof clearInterval
@@ -90,7 +93,9 @@ describe("todo-continuation-enforcer dispose", () => {
       })
       const sessionStateStore = getCreatedSessionStateStore()
 
-      await enforcer.handler({ event: { type: "session.idle", properties: { sessionID: "session-1" } } })
+      await enforcer.handler({
+        event: { type: "session.idle", properties: { sessionID: "session-1" } },
+      })
 
       enforcer.markRecovering("session-1")
       enforcer.markRecovering("session-2")

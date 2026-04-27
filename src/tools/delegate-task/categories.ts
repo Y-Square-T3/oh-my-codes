@@ -26,9 +26,14 @@ export interface ResolveCategoryConfigResult {
  */
 export function resolveCategoryConfig(
   categoryName: string,
-  options: ResolveCategoryConfigOptions
+  options: ResolveCategoryConfigOptions,
 ): ResolveCategoryConfigResult | null {
-  const { userCategories, inheritedModel: _inheritedModel, systemDefaultModel, availableModels } = options
+  const {
+    userCategories,
+    inheritedModel: _inheritedModel,
+    systemDefaultModel,
+    availableModels,
+  } = options
 
   const defaultConfig = DEFAULT_CATEGORIES[categoryName]
   const userConfig = userCategories?.[categoryName]
@@ -41,7 +46,9 @@ export function resolveCategoryConfig(
   const categoryReq = CATEGORY_MODEL_REQUIREMENTS[categoryName]
   if (categoryReq?.requiresModel && availableModels && !hasExplicitUserConfig) {
     if (!isModelAvailable(categoryReq.requiresModel, availableModels)) {
-      log(`[resolveCategoryConfig] Category ${categoryName} requires ${categoryReq.requiresModel} but not available`)
+      log(
+        `[resolveCategoryConfig] Category ${categoryName} requires ${categoryReq.requiresModel} but not available`,
+      )
       return null
     }
   }

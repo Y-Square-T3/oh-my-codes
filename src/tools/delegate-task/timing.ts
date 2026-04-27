@@ -35,12 +35,22 @@ export function __resetTimingConfig(): void {
   SESSION_CONTINUATION_STABILITY_MS = 5000
 }
 
-export function __setTimingConfig(overrides: Partial<ReturnType<typeof getTimingConfig>>): void {
-  if (overrides.POLL_INTERVAL_MS !== undefined) POLL_INTERVAL_MS = overrides.POLL_INTERVAL_MS
-  if (overrides.MIN_STABILITY_TIME_MS !== undefined) MIN_STABILITY_TIME_MS = overrides.MIN_STABILITY_TIME_MS
-  if (overrides.STABILITY_POLLS_REQUIRED !== undefined) STABILITY_POLLS_REQUIRED = overrides.STABILITY_POLLS_REQUIRED
-  if (overrides.WAIT_FOR_SESSION_INTERVAL_MS !== undefined) WAIT_FOR_SESSION_INTERVAL_MS = overrides.WAIT_FOR_SESSION_INTERVAL_MS
-  if (overrides.WAIT_FOR_SESSION_TIMEOUT_MS !== undefined) WAIT_FOR_SESSION_TIMEOUT_MS = overrides.WAIT_FOR_SESSION_TIMEOUT_MS
-  if (overrides.MAX_POLL_TIME_MS !== undefined) MAX_POLL_TIME_MS = overrides.MAX_POLL_TIME_MS
-  if (overrides.SESSION_CONTINUATION_STABILITY_MS !== undefined) SESSION_CONTINUATION_STABILITY_MS = overrides.SESSION_CONTINUATION_STABILITY_MS
+export function __setTimingConfig(
+  overrides: Partial<ReturnType<typeof getTimingConfig>>,
+): void {
+  if (overrides.POLL_INTERVAL_MS !== undefined)
+    POLL_INTERVAL_MS = overrides.POLL_INTERVAL_MS
+  if (overrides.MIN_STABILITY_TIME_MS !== undefined)
+    MIN_STABILITY_TIME_MS = overrides.MIN_STABILITY_TIME_MS
+  if (overrides.STABILITY_POLLS_REQUIRED !== undefined)
+    STABILITY_POLLS_REQUIRED = overrides.STABILITY_POLLS_REQUIRED
+  if (overrides.WAIT_FOR_SESSION_INTERVAL_MS !== undefined)
+    WAIT_FOR_SESSION_INTERVAL_MS = overrides.WAIT_FOR_SESSION_INTERVAL_MS
+  if (overrides.WAIT_FOR_SESSION_TIMEOUT_MS !== undefined)
+    WAIT_FOR_SESSION_TIMEOUT_MS = overrides.WAIT_FOR_SESSION_TIMEOUT_MS
+  if (overrides.MAX_POLL_TIME_MS !== undefined)
+    MAX_POLL_TIME_MS = overrides.MAX_POLL_TIME_MS
+  if (overrides.SESSION_CONTINUATION_STABILITY_MS !== undefined)
+    SESSION_CONTINUATION_STABILITY_MS =
+      overrides.SESSION_CONTINUATION_STABILITY_MS
 }

@@ -29,7 +29,9 @@ describe("model-capability-guardrails", () => {
     const brokenSnapshot: ModelCapabilitiesSnapshot = {
       ...bundledSnapshot,
       models: Object.fromEntries(
-        Object.entries(bundledSnapshot.models).filter(([modelID]) => modelID !== "gemini-3-pro-preview"),
+        Object.entries(bundledSnapshot.models).filter(
+          ([modelID]) => modelID !== "gemini-3-pro-preview",
+        ),
       ),
     }
 

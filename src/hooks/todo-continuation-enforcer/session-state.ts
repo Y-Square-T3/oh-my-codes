@@ -55,8 +55,10 @@ function getTodoSnapshot(todos: Todo[]): string {
       status: todo.status,
     }))
     .sort((left, right) => {
-      const leftKey = left.id ?? `${left.content}:${left.priority}:${left.status}`
-      const rightKey = right.id ?? `${right.content}:${right.priority}:${right.status}`
+      const leftKey =
+        left.id ?? `${left.content}:${left.priority}:${left.status}`
+      const rightKey =
+        right.id ?? `${right.content}:${right.priority}:${right.status}`
       if (leftKey !== rightKey) {
         return leftKey.localeCompare(rightKey)
       }
@@ -94,7 +96,10 @@ export function createSessionStateStore(): SessionStateStore {
         }
       }
     }, SESSION_STATE_PRUNE_INTERVAL_MS)
-    if (typeof pruneInterval === "object" && typeof pruneInterval.unref === "function") {
+    if (
+      typeof pruneInterval === "object" &&
+      typeof pruneInterval.unref === "function"
+    ) {
       pruneInterval.unref()
     }
   }
@@ -147,22 +152,26 @@ export function createSessionStateStore(): SessionStateStore {
     const state = trackedSession.state
     const previousIncompleteCount = state.lastIncompleteCount
     const previousStagnationCount = state.stagnationCount
-    const currentCompletedCount = todos?.filter((todo) => todo.status === "completed").length
+    const currentCompletedCount = todos?.filter(
+      (todo) => todo.status === "completed",
+    ).length
     const currentTodoSnapshot = todos ? getTodoSnapshot(todos) : undefined
     const currentActivitySignalCount = trackedSession.activitySignalCount
     const hasCompletedMoreTodos =
-      currentCompletedCount !== undefined
-      && trackedSession.lastCompletedCount !== undefined
-      && currentCompletedCount > trackedSession.lastCompletedCount
+      currentCompletedCount !== undefined &&
+      trackedSession.lastCompletedCount !== undefined &&
+      currentCompletedCount > trackedSession.lastCompletedCount
     const hasTodoSnapshotChanged =
-      currentTodoSnapshot !== undefined
-      && trackedSession.lastTodoSnapshot !== undefined
-      && currentTodoSnapshot !== trackedSession.lastTodoSnapshot
+      currentTodoSnapshot !== undefined &&
+      trackedSession.lastTodoSnapshot !== undefined &&
+      currentTodoSnapshot !== trackedSession.lastTodoSnapshot
     const hasObservedExternalActivity =
-      options.allowActivityProgress === true
-      && trackedSession.lastObservedActivitySignalCount !== undefined
-      && currentActivitySignalCount > trackedSession.lastObservedActivitySignalCount
-    const hadSuccessfulInjectionAwaitingProgressCheck = state.awaitingPostInjectionProgressCheck === true
+      options.allowActivityProgress === true &&
+      trackedSession.lastObservedActivitySignalCount !== undefined &&
+      currentActivitySignalCount >
+        trackedSession.lastObservedActivitySignalCount
+    const hadSuccessfulInjectionAwaitingProgressCheck =
+      state.awaitingPostInjectionProgressCheck === true
 
     state.lastIncompleteCount = incompleteCount
     if (currentCompletedCount !== undefined) {
@@ -184,11 +193,14 @@ export function createSessionStateStore(): SessionStateStore {
       }
     }
 
-    const progressSource = incompleteCount < previousIncompleteCount || hasCompletedMoreTodos || hasTodoSnapshotChanged
-      ? "todo"
-      : hasObservedExternalActivity
-        ? "activity"
-        : "none"
+    const progressSource =
+      incompleteCount < previousIncompleteCount ||
+      hasCompletedMoreTodos ||
+      hasTodoSnapshotChanged
+        ? "todo"
+        : hasObservedExternalActivity
+          ? "activity"
+          : "none"
 
     if (progressSource !== "none") {
       state.stagnationCount = 0

@@ -17,12 +17,12 @@ bunx oh-my-codes doctor --json       # Machine-readable output
 
 ## CHECK CATEGORIES
 
-| Category | File | Validates |
-|----------|------|-----------|
-| **SYSTEM** | `checks/system.ts` | OpenCode binary found + version ≥1.0.150, plugin registered in opencode.json, loaded plugin version matches installed |
-| **CONFIG** | `checks/config.ts` | JSONC validity, Zod schema passes, no unknown keys, model override syntax correct |
-| **TOOLS** | `checks/tools.ts` | AST-Grep CLI + NAPI, comment-checker binary, LSP servers reachable, GitHub CLI auth, built-in MCP reachability |
-| **MODELS** | `checks/model-resolution.ts` | models.json cache exists, per-agent fallback resolution, category overrides valid, provider availability |
+| Category   | File                         | Validates                                                                                                             |
+| ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **SYSTEM** | `checks/system.ts`           | OpenCode binary found + version ≥1.0.150, plugin registered in opencode.json, loaded plugin version matches installed |
+| **CONFIG** | `checks/config.ts`           | JSONC validity, Zod schema passes, no unknown keys, model override syntax correct                                     |
+| **TOOLS**  | `checks/tools.ts`            | AST-Grep CLI + NAPI, comment-checker binary, LSP servers reachable, GitHub CLI auth, built-in MCP reachability        |
+| **MODELS** | `checks/model-resolution.ts` | models.json cache exists, per-agent fallback resolution, category overrides valid, provider availability              |
 
 ## SUPPORTING CHECK FILES (25 total)
 
@@ -61,12 +61,12 @@ doctor command
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | CLI command entry, flag parsing |
-| `runner.ts` | Parallel `Promise.allSettled()` orchestration, 30s timeout per check |
-| `formatter.ts` | Pretty printing: colored status, hierarchical output |
-| `types.ts` | `DoctorCheck`, `CheckResult`, `DoctorReport` types |
+| File           | Purpose                                                              |
+| -------------- | -------------------------------------------------------------------- |
+| `index.ts`     | CLI command entry, flag parsing                                      |
+| `runner.ts`    | Parallel `Promise.allSettled()` orchestration, 30s timeout per check |
+| `formatter.ts` | Pretty printing: colored status, hierarchical output                 |
+| `types.ts`     | `DoctorCheck`, `CheckResult`, `DoctorReport` types                   |
 
 ## HOW TO ADD A CHECK
 

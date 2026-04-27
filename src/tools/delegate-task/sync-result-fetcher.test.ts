@@ -11,12 +11,20 @@ describe("fetchSyncResult", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+              },
               parts: [{ type: "text", text: "First response" }],
             },
             { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
             {
-              info: { id: "msg_004", role: "assistant", time: { created: 4000 } },
+              info: {
+                id: "msg_004",
+                role: "assistant",
+                time: { created: 4000 },
+              },
               parts: [{ type: "text", text: "Latest response" }],
             },
           ],
@@ -41,12 +49,20 @@ describe("fetchSyncResult", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+              },
               parts: [{ type: "text", text: "First response" }],
             },
             { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
             {
-              info: { id: "msg_004", role: "assistant", time: { created: 4000 } },
+              info: {
+                id: "msg_004",
+                role: "assistant",
+                time: { created: 4000 },
+              },
               parts: [{ type: "text", text: "After anchor response" }],
             },
           ],
@@ -71,7 +87,11 @@ describe("fetchSyncResult", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -97,17 +117,29 @@ describe("fetchSyncResult", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+              },
               parts: [{ type: "text", text: "First response" }],
             },
             { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
             {
-              info: { id: "msg_004", role: "assistant", time: { created: 3500 } },
+              info: {
+                id: "msg_004",
+                role: "assistant",
+                time: { created: 3500 },
+              },
               parts: [{ type: "text", text: "Middle response" }],
             },
             { info: { id: "msg_005", role: "user", time: { created: 4000 } } },
             {
-              info: { id: "msg_006", role: "assistant", time: { created: 4500 } },
+              info: {
+                id: "msg_006",
+                role: "assistant",
+                time: { created: 4500 },
+              },
               parts: [{ type: "text", text: "Latest response" }],
             },
           ],

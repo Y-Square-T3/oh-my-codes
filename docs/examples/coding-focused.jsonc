@@ -16,7 +16,10 @@
     "hephaestus": {
       "model": "openai/gpt-5.4",
       "prompt_append": "You are the primary implementation agent. Own the codebase. Explore, decide, execute. Use LSP and AST-grep aggressively.",
-      "permission": { "edit": "allow", "bash": { "git": "allow", "test": "allow" } },
+      "permission": {
+        "edit": "allow",
+        "bash": { "git": "allow", "test": "allow" },
+      },
     },
 
     // Lightweight planner: quick planning for coding tasks
@@ -41,7 +44,9 @@
     "metis": { "model": "opencode/gpt-5-nano" },
 
     // Code review focus
-    "momus": { "prompt_append": "Focus on code quality, edge cases, and test coverage." },
+    "momus": {
+      "prompt_append": "Focus on code quality, edge cases, and test coverage.",
+    },
 
     // Long-running coding sessions
     "atlas": {},
@@ -61,7 +66,10 @@
     "unspecified-high": { "model": "openai/gpt-5.3-codex" },
 
     // Visual work
-    "visual-engineering": { "model": "google/gemini-3.1-pro", "variant": "high" },
+    "visual-engineering": {
+      "model": "google/gemini-3.1-pro",
+      "variant": "high",
+    },
 
     // Deep autonomous work
     "deep": { "model": "openai/gpt-5.4" },

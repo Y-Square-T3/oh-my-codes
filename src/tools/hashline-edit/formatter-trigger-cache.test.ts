@@ -1,9 +1,15 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test"
 
-import { clearFormatterCache, resolveFormatters, type FormatterClient } from "./formatter-trigger"
+import {
+  clearFormatterCache,
+  resolveFormatters,
+  type FormatterClient,
+} from "./formatter-trigger"
 
 function createDirectoryAwareClient(
-  resolveConfig: (directory: string) => Promise<Record<string, unknown> | undefined>,
+  resolveConfig: (
+    directory: string,
+  ) => Promise<Record<string, unknown> | undefined>,
 ): FormatterClient {
   return {
     config: {
@@ -50,8 +56,16 @@ describe("resolveFormatters cache behavior", () => {
 
     //#then
     expect(client.config.get).toHaveBeenCalledTimes(2)
-    expect(firstProjectAResult.get(".ts")?.[0]?.command).toEqual(["prettier", "--write", "$FILE"])
-    expect(projectBResult.get(".ts")?.[0]?.command).toEqual(["biome", "format", "$FILE"])
+    expect(firstProjectAResult.get(".ts")?.[0]?.command).toEqual([
+      "prettier",
+      "--write",
+      "$FILE",
+    ])
+    expect(projectBResult.get(".ts")?.[0]?.command).toEqual([
+      "biome",
+      "format",
+      "$FILE",
+    ])
     expect(secondProjectAResult).toBe(firstProjectAResult)
   })
 
@@ -83,7 +97,11 @@ describe("resolveFormatters cache behavior", () => {
     //#then
     expect(get).toHaveBeenCalledTimes(2)
     expect(firstResult.size).toBe(0)
-    expect(secondResult.get(".ts")?.[0]?.command).toEqual(["prettier", "--write", "$FILE"])
+    expect(secondResult.get(".ts")?.[0]?.command).toEqual([
+      "prettier",
+      "--write",
+      "$FILE",
+    ])
   })
 
   it("does not cache missing config data", async () => {
@@ -112,6 +130,10 @@ describe("resolveFormatters cache behavior", () => {
     //#then
     expect(client.config.get).toHaveBeenCalledTimes(2)
     expect(firstResult.size).toBe(0)
-    expect(secondResult.get(".ts")?.[0]?.command).toEqual(["prettier", "--write", "$FILE"])
+    expect(secondResult.get(".ts")?.[0]?.command).toEqual([
+      "prettier",
+      "--write",
+      "$FILE",
+    ])
   })
 })

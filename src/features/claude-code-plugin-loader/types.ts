@@ -1,6 +1,6 @@
 /**
  * Claude Code Plugin Types
- * 
+ *
  * Type definitions for Claude Code plugin system compatibility.
  * Based on https://code.claude.com/docs/en/plugins-reference
  */
@@ -100,7 +100,7 @@ export interface PluginManifest {
   repository?: string
   license?: string
   keywords?: string[]
-  
+
   // Component paths (can be string or array)
   commands?: string | string[]
   agents?: string | string[]
@@ -118,7 +118,13 @@ export type HookEntry =
   | { type: "command"; command?: string }
   | { type: "prompt"; prompt?: string }
   | { type: "agent"; agent?: string }
-  | { type: "http"; url: string; headers?: Record<string, string>; allowedEnvVars?: string[]; timeout?: number }
+  | {
+      type: "http"
+      url: string
+      headers?: Record<string, string>
+      allowedEnvVars?: string[]
+      timeout?: number
+    }
 
 export interface HookMatcher {
   matcher?: string
@@ -195,7 +201,7 @@ export interface LoadedPlugin {
   installPath: string
   manifest?: PluginManifest
   pluginKey: string
-  
+
   // Resolved paths for components
   commandsDir?: string
   agentsDir?: string
@@ -248,7 +254,7 @@ export interface PluginLoaderOptions {
    * Override enabled plugins from oh-my-codes config.
    * Key format: "pluginName@marketplace" (e.g., "shell-scripting@claude-code-workflows")
    * Value: true = enabled, false = disabled
-   * 
+   *
    * This takes precedence over ~/.claude/settings.json enabledPlugins
    */
   enabledPluginsOverride?: Record<string, boolean>

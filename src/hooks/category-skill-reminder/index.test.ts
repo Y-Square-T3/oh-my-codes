@@ -1,6 +1,10 @@
 import { describe, expect, test, beforeEach, afterEach, spyOn } from "bun:test"
 import { createCategorySkillReminderHook } from "./index"
-import { updateSessionAgent, clearSessionAgent, _resetForTesting } from "../../features/claude-code-session-state"
+import {
+  updateSessionAgent,
+  clearSessionAgent,
+  _resetForTesting,
+} from "../../features/claude-code-session-state"
 import type { AvailableSkill } from "../../agents/dynamic-agent-prompt-builder"
 import * as sharedModule from "../../shared"
 
@@ -11,9 +15,11 @@ describe("category-skill-reminder hook", () => {
   beforeEach(() => {
     _resetForTesting()
     logCalls = []
-    logSpy = spyOn(sharedModule, "log").mockImplementation((msg: string, data?: unknown) => {
-      logCalls.push({ msg, data })
-    })
+    logSpy = spyOn(sharedModule, "log").mockImplementation(
+      (msg: string, data?: unknown) => {
+        logCalls.push({ msg, data })
+      },
+    )
   })
 
   afterEach(() => {
@@ -31,7 +37,10 @@ describe("category-skill-reminder hook", () => {
   }
 
   function createHook(availableSkills: AvailableSkill[] = []) {
-    return createCategorySkillReminderHook(createMockPluginInput(), availableSkills)
+    return createCategorySkillReminderHook(
+      createMockPluginInput(),
+      availableSkills,
+    )
   }
 
   describe("target agent detection", () => {
@@ -44,9 +53,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "file content", metadata: {} }
 
       // when - 3 edit tool calls are made
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should be injected
       expect(output.output).toContain("[Category+Skill Reminder]")
@@ -64,9 +82,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - 3 tool calls are made
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should be injected
       expect(output.output).toContain("[Category+Skill Reminder]")
@@ -83,9 +110,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - 3 tool calls are made
-      await hook["tool.execute.after"]({ tool: "write", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "write", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "write", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "write", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "write", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "write", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should be injected
       expect(output.output).toContain("[Category+Skill Reminder]")
@@ -102,9 +138,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - 3 tool calls are made
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should NOT be injected
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -120,9 +165,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - 3 tool calls with agent in input
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1", agent: "Sisyphus" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2", agent: "Sisyphus" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3", agent: "Sisyphus" }, output)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1", agent: "Sisyphus" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2", agent: "Sisyphus" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3", agent: "Sisyphus" },
+        output,
+      )
 
       // then - reminder should be injected
       expect(output.output).toContain("[Category+Skill Reminder]")
@@ -139,10 +193,22 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - task is used, then more tool calls
-      await hook["tool.execute.after"]({ tool: "task", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output)
+      await hook["tool.execute.after"](
+        { tool: "task", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output,
+      )
 
       // then - reminder should NOT be injected (delegation was used)
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -159,10 +225,22 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - call_omo_agent is used first
-      await hook["tool.execute.after"]({ tool: "call_omo_agent", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output)
+      await hook["tool.execute.after"](
+        { tool: "call_omo_agent", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output,
+      )
 
       // then - reminder should NOT be injected
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -179,10 +257,22 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - task tool is used
-      await hook["tool.execute.after"]({ tool: "task", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output)
+      await hook["tool.execute.after"](
+        { tool: "task", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output,
+      )
 
       // then - reminder should NOT be injected
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -201,8 +291,14 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - only 2 tool calls are made
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
 
       // then - reminder should NOT be injected yet
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -220,12 +316,30 @@ describe("category-skill-reminder hook", () => {
       const output2 = { title: "", output: "result2", metadata: {} }
 
       // when - 6 tool calls are made (should trigger at 3, not again at 6)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "5" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "6" }, output2)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "5" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "6" },
+        output2,
+      )
 
       // then - reminder should be in output1 but not output2
       expect(output1.output).toContain("[Category+Skill Reminder]")
@@ -243,9 +357,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - non-delegatable tools are called (should not count)
-      await hook["tool.execute.after"]({ tool: "lsp_goto_definition", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "lsp_find_references", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "lsp_symbols", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "lsp_goto_definition", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "lsp_find_references", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "lsp_symbols", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should NOT be injected (LSP tools don't count)
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -262,18 +385,41 @@ describe("category-skill-reminder hook", () => {
       updateSessionAgent(sessionID, "Sisyphus")
 
       const output1 = { title: "", output: "result1", metadata: {} }
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output1)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output1,
+      )
       expect(output1.output).toContain("[Category+Skill Reminder]")
 
       // when - session is deleted and new session starts
-      await hook.event({ event: { type: "session.deleted", properties: { info: { id: sessionID } } } })
+      await hook.event({
+        event: {
+          type: "session.deleted",
+          properties: { info: { id: sessionID } },
+        },
+      })
 
       const output2 = { title: "", output: "result2", metadata: {} }
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "5" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "6" }, output2)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "5" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "6" },
+        output2,
+      )
 
       // then - reminder should be shown again (state was reset)
       expect(output2.output).toContain("[Category+Skill Reminder]")
@@ -288,18 +434,38 @@ describe("category-skill-reminder hook", () => {
       updateSessionAgent(sessionID, "Sisyphus")
 
       const output1 = { title: "", output: "result1", metadata: {} }
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output1)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output1)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output1,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output1,
+      )
       expect(output1.output).toContain("[Category+Skill Reminder]")
 
       // when - session is compacted
-      await hook.event({ event: { type: "session.compacted", properties: { sessionID } } })
+      await hook.event({
+        event: { type: "session.compacted", properties: { sessionID } },
+      })
 
       const output2 = { title: "", output: "result2", metadata: {} }
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "5" }, output2)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "6" }, output2)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "5" },
+        output2,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "6" },
+        output2,
+      )
 
       // then - reminder should be shown again (state was reset)
       expect(output2.output).toContain("[Category+Skill Reminder]")
@@ -318,9 +484,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - tool calls with different cases
-      await hook["tool.execute.after"]({ tool: "EDIT", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "Edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "EDIT", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "Edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
 
       // then - reminder should be injected (all counted)
       expect(output.output).toContain("[Category+Skill Reminder]")
@@ -337,10 +512,22 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when - TASK in uppercase is used
-      await hook["tool.execute.after"]({ tool: "TASK", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "4" }, output)
+      await hook["tool.execute.after"](
+        { tool: "TASK", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "4" },
+        output,
+      )
 
       // then - reminder should NOT be injected (delegation was detected)
       expect(output.output).not.toContain("[Category+Skill Reminder]")
@@ -353,9 +540,21 @@ describe("category-skill-reminder hook", () => {
     test("shows built-in skills when only built-in skills are available", async () => {
       // given
       const availableSkills: AvailableSkill[] = [
-        { name: "frontend-ui-ux", description: "Frontend UI/UX work", location: "plugin" },
-        { name: "git-master", description: "Git operations", location: "plugin" },
-        { name: "playwright", description: "Browser automation", location: "plugin" },
+        {
+          name: "frontend-ui-ux",
+          description: "Frontend UI/UX work",
+          location: "plugin",
+        },
+        {
+          name: "git-master",
+          description: "Git operations",
+          location: "plugin",
+        },
+        {
+          name: "playwright",
+          description: "Browser automation",
+          location: "plugin",
+        },
       ]
       const hook = createHook(availableSkills)
       const sessionID = "builtins-only"
@@ -363,23 +562,44 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "edit", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "edit", sessionID, callID: "3" },
+        output,
+      )
 
       // then
       expect(output.output).toContain("**Built-in**:")
       expect(output.output).toContain("frontend-ui-ux")
       expect(output.output).toContain("**⚡ YOUR SKILLS (PRIORITY)**")
-      expect(output.output).toContain("load_skills=[\"frontend-ui-ux\"")
+      expect(output.output).toContain('load_skills=["frontend-ui-ux"')
     })
 
     test("emphasizes user skills with PRIORITY and uses first user skill in example", async () => {
       // given
       const availableSkills: AvailableSkill[] = [
-        { name: "frontend-ui-ux", description: "Frontend UI/UX work", location: "plugin" },
-        { name: "react-19", description: "React 19 expertise", location: "user" },
-        { name: "web-designer", description: "Visual design", location: "user" },
+        {
+          name: "frontend-ui-ux",
+          description: "Frontend UI/UX work",
+          location: "plugin",
+        },
+        {
+          name: "react-19",
+          description: "React 19 expertise",
+          location: "user",
+        },
+        {
+          name: "web-designer",
+          description: "Visual design",
+          location: "user",
+        },
       ]
       const hook = createHook(availableSkills)
       const sessionID = "user-skills"
@@ -387,15 +607,24 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "bash", sessionID, callID: "3" },
+        output,
+      )
 
       // then
       expect(output.output).toContain("**⚡ YOUR SKILLS (PRIORITY)**")
       expect(output.output).toContain("react-19")
       expect(output.output).toContain("> User-installed skills OVERRIDE")
-      expect(output.output).toContain("load_skills=[\"react-19\"")
+      expect(output.output).toContain('load_skills=["react-19"')
     })
 
     test("still injects a generic reminder when no skills are provided", async () => {
@@ -406,9 +635,18 @@ describe("category-skill-reminder hook", () => {
       const output = { title: "", output: "result", metadata: {} }
 
       // when
-      await hook["tool.execute.after"]({ tool: "read", sessionID, callID: "1" }, output)
-      await hook["tool.execute.after"]({ tool: "read", sessionID, callID: "2" }, output)
-      await hook["tool.execute.after"]({ tool: "read", sessionID, callID: "3" }, output)
+      await hook["tool.execute.after"](
+        { tool: "read", sessionID, callID: "1" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "read", sessionID, callID: "2" },
+        output,
+      )
+      await hook["tool.execute.after"](
+        { tool: "read", sessionID, callID: "3" },
+        output,
+      )
 
       // then
       expect(output.output).toContain("[Category+Skill Reminder]")

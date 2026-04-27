@@ -24,7 +24,7 @@ interface MessageWithParts {
 type MessagesTransformHook = {
   "experimental.chat.messages.transform"?: (
     input: Record<string, never>,
-    output: { messages: MessageWithParts[] }
+    output: { messages: MessageWithParts[] },
   ) => Promise<void>
 }
 
@@ -43,7 +43,9 @@ function isSignedThinkingPart(part: Part): part is SignedThinkingPart {
 
   const signature = (part as { signature?: unknown }).signature
   const synthetic = (part as { synthetic?: unknown }).synthetic
-  return typeof signature === "string" && signature.length > 0 && synthetic !== true
+  return (
+    typeof signature === "string" && signature.length > 0 && synthetic !== true
+  )
 }
 
 /**
@@ -56,9 +58,11 @@ function isSignedThinkingPart(part: Part): part is SignedThinkingPart {
  * Model-name checks are unreliable (miss GPT+thinking, custom model IDs, etc.)
  * so we inspect the messages themselves.
  */
-function hasSignedThinkingBlocksInHistory(messages: MessageWithParts[]): boolean {
+function hasSignedThinkingBlocksInHistory(
+  messages: MessageWithParts[],
+): boolean {
   return messages.some(
-    m =>
+    (m) =>
       m.info.role === "assistant" &&
       m.parts?.some((p: Part) => isSignedThinkingPart(p)),
   )
@@ -85,7 +89,9 @@ function startsWithThinkingBlock(parts: Part[]): boolean {
 
   const firstPart = parts[0]
   const type = firstPart.type as string
-  return type === "thinking" || type === "redacted_thinking" || type === "reasoning"
+  return (
+    type === "thinking" || type === "redacted_thinking" || type === "reasoning"
+  )
 }
 
 /**
@@ -98,7 +104,10 @@ function startsWithThinkingBlock(parts: Part[]): boolean {
  * rejected by the API with "Invalid `signature` in `thinking` block".
  * Synthetic parts injected by a previous run of this hook are also skipped.
  */
-function findPreviousThinkingPart(messages: MessageWithParts[], currentIndex: number): SignedThinkingPart | null {
+function findPreviousThinkingPart(
+  messages: MessageWithParts[],
+  currentIndex: number,
+): SignedThinkingPart | null {
   // Search backwards from current message
   for (let i = currentIndex - 1; i >= 0; i--) {
     const msg = messages[i]
@@ -124,7 +133,10 @@ function findPreviousThinkingPart(messages: MessageWithParts[], currentIndex: nu
  * the Anthropic API validates the `signature` field against the thinking
  * content.  Any synthetic block we create ourselves would fail that check.
  */
-function prependThinkingBlock(message: MessageWithParts, thinkingPart: SignedThinkingPart): void {
+function prependThinkingBlock(
+  message: MessageWithParts,
+  thinkingPart: SignedThinkingPart,
+): void {
   if (!message.parts) {
     message.parts = []
   }

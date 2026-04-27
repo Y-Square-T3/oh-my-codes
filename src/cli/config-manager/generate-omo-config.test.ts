@@ -28,7 +28,9 @@ describe("generateOmoConfig - model fallback system", () => {
     expect([
       "github-copilot/claude-opus-4.7",
       "github-copilot/claude-opus-4-7",
-    ]).toContain((result.agents as Record<string, { model: string }>).sisyphus.model)
+    ]).toContain(
+      (result.agents as Record<string, { model: string }>).sisyphus.model,
+    )
   })
 
   test("uses ultimate fallback when no providers configured", () => {
@@ -50,8 +52,12 @@ describe("generateOmoConfig - model fallback system", () => {
     const result = generateOmoConfig(config)
 
     //#then
-    expect(result.$schema).toBe("https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json")
-    expect((result.agents as Record<string, { model: string }>).sisyphus).toBeUndefined()
+    expect(result.$schema).toBe(
+      "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json",
+    )
+    expect(
+      (result.agents as Record<string, { model: string }>).sisyphus,
+    ).toBeUndefined()
   })
 
   test("uses ZAI model for librarian when Z.ai is available", () => {
@@ -73,8 +79,12 @@ describe("generateOmoConfig - model fallback system", () => {
     const result = generateOmoConfig(config)
 
     //#then
-    expect((result.agents as Record<string, { model: string }>).librarian.model).toBe("zai-coding-plan/glm-4.7")
-    expect((result.agents as Record<string, { model: string }>).sisyphus.model).toBe("anthropic/claude-opus-4-7")
+    expect(
+      (result.agents as Record<string, { model: string }>).librarian.model,
+    ).toBe("zai-coding-plan/glm-4.7")
+    expect(
+      (result.agents as Record<string, { model: string }>).sisyphus.model,
+    ).toBe("anthropic/claude-opus-4-7")
   })
 
   test("uses native OpenAI models when only ChatGPT available", () => {
@@ -96,10 +106,21 @@ describe("generateOmoConfig - model fallback system", () => {
     const result = generateOmoConfig(config)
 
     //#then
-    expect((result.agents as Record<string, { model: string; variant?: string }>).sisyphus.model).toBe("openai/gpt-5.4")
-    expect((result.agents as Record<string, { model: string; variant?: string }>).sisyphus.variant).toBe("medium")
-    expect((result.agents as Record<string, { model: string }>).oracle.model).toBe("openai/gpt-5.4")
-    expect((result.agents as Record<string, { model: string }>)['multimodal-looker'].model).toBe("openai/gpt-5.4")
+    expect(
+      (result.agents as Record<string, { model: string; variant?: string }>)
+        .sisyphus.model,
+    ).toBe("openai/gpt-5.4")
+    expect(
+      (result.agents as Record<string, { model: string; variant?: string }>)
+        .sisyphus.variant,
+    ).toBe("medium")
+    expect(
+      (result.agents as Record<string, { model: string }>).oracle.model,
+    ).toBe("openai/gpt-5.4")
+    expect(
+      (result.agents as Record<string, { model: string }>)["multimodal-looker"]
+        .model,
+    ).toBe("openai/gpt-5.4")
   })
 
   test("adds fallback_models when multiple providers are available", () => {
@@ -119,16 +140,22 @@ describe("generateOmoConfig - model fallback system", () => {
 
     //#when
     const result = generateOmoConfig(config)
-    const agents = result.agents as Record<string, {
-      model: string
-      variant?: string
-      fallback_models?: Array<{ model: string; variant?: string }>
-    }>
-    const categories = result.categories as Record<string, {
-      model: string
-      variant?: string
-      fallback_models?: Array<{ model: string; variant?: string }>
-    }>
+    const agents = result.agents as Record<
+      string,
+      {
+        model: string
+        variant?: string
+        fallback_models?: Array<{ model: string; variant?: string }>
+      }
+    >
+    const categories = result.categories as Record<
+      string,
+      {
+        model: string
+        variant?: string
+        fallback_models?: Array<{ model: string; variant?: string }>
+      }
+    >
 
     //#then
     expect(agents.sisyphus.model).toBe("anthropic/claude-opus-4-7")
@@ -166,7 +193,9 @@ describe("generateOmoConfig - model fallback system", () => {
     const result = generateOmoConfig(config)
 
     //#then
-    expect((result.agents as Record<string, { model: string }>).explore.model).toBe("anthropic/claude-haiku-4-5")
+    expect(
+      (result.agents as Record<string, { model: string }>).explore.model,
+    ).toBe("anthropic/claude-haiku-4-5")
   })
 
   test("uses haiku for explore regardless of max20 flag", () => {
@@ -188,6 +217,8 @@ describe("generateOmoConfig - model fallback system", () => {
     const result = generateOmoConfig(config)
 
     //#then
-    expect((result.agents as Record<string, { model: string }>).explore.model).toBe("anthropic/claude-haiku-4-5")
+    expect(
+      (result.agents as Record<string, { model: string }>).explore.model,
+    ).toBe("anthropic/claude-haiku-4-5")
   })
 })

@@ -132,14 +132,18 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
 
     test("prompt override is ignored (discipline text preserved)", () => {
       // given
-      const override = { prompt: "Completely new prompt that replaces everything" }
+      const override = {
+        prompt: "Completely new prompt that replaces everything",
+      }
 
       // when
       const result = createSisyphusJuniorAgentWithOverrides(override)
 
       // then
       expect(result.prompt).toContain("Sisyphus-Junior")
-      expect(result.prompt).not.toBe("Completely new prompt that replaces everything")
+      expect(result.prompt).not.toBe(
+        "Completely new prompt that replaces everything",
+      )
     })
   })
 
@@ -222,7 +226,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       } as { permission: Record<string, string> }
 
       // when
-      const result = createSisyphusJuniorAgentWithOverrides(override as Parameters<typeof createSisyphusJuniorAgentWithOverrides>[0])
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override as Parameters<
+          typeof createSisyphusJuniorAgentWithOverrides
+        >[0],
+      )
 
       // then - task blocked, but call_omo_agent allowed for explore/librarian spawning
       const tools = result.tools as Record<string, boolean> | undefined
@@ -244,7 +252,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       const override = { model: "anthropic/claude-sonnet-4-6" }
 
       //#when
-      const result = createSisyphusJuniorAgentWithOverrides(override, undefined, true)
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override,
+        undefined,
+        true,
+      )
 
       //#then
       expect(result.prompt).toContain("task_create")
@@ -257,7 +269,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       const override = { model: "openai/gpt-5.4" }
 
       //#when
-      const result = createSisyphusJuniorAgentWithOverrides(override, undefined, true)
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override,
+        undefined,
+        true,
+      )
 
       //#then
       expect(result.prompt).toContain("Task Discipline")
@@ -282,7 +298,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       const override = { model: "anthropic/claude-sonnet-4-6" }
 
       //#when
-      const result = createSisyphusJuniorAgentWithOverrides(override, undefined, true)
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override,
+        undefined,
+        true,
+      )
 
       //#then
       expect(result.prompt).toContain("task_create")
@@ -294,7 +314,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       const override = { model: "openai/gpt-5.4" }
 
       //#when
-      const result = createSisyphusJuniorAgentWithOverrides(override, undefined, true)
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override,
+        undefined,
+        true,
+      )
 
       //#then
       expect(result.prompt).toContain("task_create")
@@ -306,7 +330,11 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       const override = { model: "anthropic/claude-sonnet-4-6" }
 
       //#when
-      const result = createSisyphusJuniorAgentWithOverrides(override, undefined, false)
+      const result = createSisyphusJuniorAgentWithOverrides(
+        override,
+        undefined,
+        false,
+      )
 
       //#then
       expect(result.prompt).toContain("todowrite")
@@ -393,13 +421,18 @@ describe("createSisyphusJuniorAgentWithOverrides", () => {
       // when
       const gpt54Result = createSisyphusJuniorAgentWithOverrides(gpt54Override)
       const gpt53Result = createSisyphusJuniorAgentWithOverrides(gpt53Override)
-      const gptGenericResult = createSisyphusJuniorAgentWithOverrides(gptGenericOverride)
-      const claudeResult = createSisyphusJuniorAgentWithOverrides(claudeOverride)
+      const gptGenericResult =
+        createSisyphusJuniorAgentWithOverrides(gptGenericOverride)
+      const claudeResult =
+        createSisyphusJuniorAgentWithOverrides(claudeOverride)
 
       // then
       expect(gpt54Result.permission ?? {}).toHaveProperty("apply_patch", "deny")
       expect(gpt53Result.permission ?? {}).toHaveProperty("apply_patch", "deny")
-      expect(gptGenericResult.permission ?? {}).toHaveProperty("apply_patch", "deny")
+      expect(gptGenericResult.permission ?? {}).toHaveProperty(
+        "apply_patch",
+        "deny",
+      )
       expect(claudeResult.permission ?? {}).not.toHaveProperty("apply_patch")
     })
 

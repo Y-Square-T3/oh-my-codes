@@ -1,10 +1,13 @@
 import type { OhMyCodesConfig } from "../config"
 import { stripInvisibleAgentCharacters } from "./agent-display-names"
-import { AGENT_MODEL_REQUIREMENTS, CATEGORY_MODEL_REQUIREMENTS } from "./model-requirements"
+import {
+  AGENT_MODEL_REQUIREMENTS,
+  CATEGORY_MODEL_REQUIREMENTS,
+} from "./model-requirements"
 
 export function resolveAgentVariant(
   config: OhMyCodesConfig,
-  agentName?: string
+  agentName?: string,
 ): string | undefined {
   if (!agentName) {
     return undefined
@@ -15,8 +18,10 @@ export function resolveAgentVariant(
     | Record<string, { variant?: string; category?: string }>
     | undefined
   const agentOverride = agentOverrides
-    ? agentOverrides[stripped]
-      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === stripped.toLowerCase())?.[1]
+    ? (agentOverrides[stripped] ??
+      Object.entries(agentOverrides).find(
+        ([key]) => key.toLowerCase() === stripped.toLowerCase(),
+      )?.[1])
     : undefined
   if (!agentOverride) {
     return undefined
@@ -44,8 +49,10 @@ export function resolveVariantForModel(
     | Record<string, { variant?: string; category?: string }>
     | undefined
   const agentOverride = agentOverrides
-    ? agentOverrides[stripped]
-      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === stripped.toLowerCase())?.[1]
+    ? (agentOverrides[stripped] ??
+      Object.entries(agentOverrides).find(
+        ([key]) => key.toLowerCase() === stripped.toLowerCase(),
+      )?.[1])
     : undefined
   if (agentOverride?.variant) {
     return agentOverride.variant
@@ -72,8 +79,8 @@ function findVariantInChain(
 ): string | undefined {
   for (const entry of fallbackChain) {
     if (
-      entry.providers.includes(currentModel.providerID)
-      && entry.model === currentModel.modelID
+      entry.providers.includes(currentModel.providerID) &&
+      entry.model === currentModel.modelID
     ) {
       return entry.variant
     }
@@ -92,7 +99,7 @@ function findVariantInChain(
 export function applyAgentVariant(
   config: OhMyCodesConfig,
   agentName: string | undefined,
-  message: { variant?: string }
+  message: { variant?: string },
 ): void {
   const variant = resolveAgentVariant(config, agentName)
   if (variant !== undefined && message.variant === undefined) {

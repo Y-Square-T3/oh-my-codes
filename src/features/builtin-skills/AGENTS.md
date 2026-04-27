@@ -27,20 +27,21 @@ builtin-skills/
 
 ## SKILL CATALOG
 
-| Skill | LOC | MCP | Purpose |
-|-------|-----|-----|---------|
-| **git-master** | 1111 | -- | Atomic commits, rebase, history search |
-| **playwright** | 312 | @playwright/mcp | Browser automation via MCP |
-| **playwright-cli** | 268 | -- | Browser automation via CLI |
-| **agent-browser** | (in playwright.ts) | -- | Browser via agent-browser tool |
-| **dev-browser** | 221 | -- | Persistent page state browser |
-| **frontend-ui-ux** | 79 | -- | Design-first UI development |
-| **review-work** | ~500 | -- | 5-agent post-implementation review |
-| **ai-slop-remover** | ~300 | -- | Remove AI code patterns |
+| Skill               | LOC                | MCP             | Purpose                                |
+| ------------------- | ------------------ | --------------- | -------------------------------------- |
+| **git-master**      | 1111               | --              | Atomic commits, rebase, history search |
+| **playwright**      | 312                | @playwright/mcp | Browser automation via MCP             |
+| **playwright-cli**  | 268                | --              | Browser automation via CLI             |
+| **agent-browser**   | (in playwright.ts) | --              | Browser via agent-browser tool         |
+| **dev-browser**     | 221                | --              | Persistent page state browser          |
+| **frontend-ui-ux**  | 79                 | --              | Design-first UI development            |
+| **review-work**     | ~500               | --              | 5-agent post-implementation review     |
+| **ai-slop-remover** | ~300               | --              | Remove AI code patterns                |
 
 ## BROWSER VARIANT SELECTION
 
 Config `browser_automation_engine` selects which browser skill loads:
+
 - `"playwright"` (default) -> playwright with @playwright/mcp
 - `"playwright-cli"` -> CLI-based playwright
 - `"agent-browser"` -> agent-browser tool

@@ -13,11 +13,15 @@ describe("buildReadyNotificationContent", () => {
               data: [
                 {
                   info: { role: "user" },
-                  parts: [{ type: "text", text: "Investigate\nthis flaky test" }],
+                  parts: [
+                    { type: "text", text: "Investigate\nthis flaky test" },
+                  ],
                 },
                 {
                   info: { role: "assistant" },
-                  parts: [{ type: "text", text: "First line\nFinal answer line" }],
+                  parts: [
+                    { type: "text", text: "First line\nFinal answer line" },
+                  ],
                 },
               ],
             }),
@@ -33,7 +37,8 @@ describe("buildReadyNotificationContent", () => {
 
       expect(result).toEqual({
         title: "OpenCode · Bugfix session",
-        message: "Agent is ready for input\nUser: Investigate this flaky test\nAssistant: Final answer line",
+        message:
+          "Agent is ready for input\nUser: Investigate this flaky test\nAssistant: Final answer line",
       })
     })
   })

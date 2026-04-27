@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from "bun:test"
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
@@ -7,10 +13,15 @@ import { PACKAGE_NAME } from "../constants"
 import { PLUGIN_NAME } from "../../../shared/plugin-identity"
 import { resolveSymlink } from "../../../shared/file-utils"
 
-const systemLoadedVersionModulePath = "./system-loaded-version?system-loaded-version-test"
+const systemLoadedVersionModulePath =
+  "./system-loaded-version?system-loaded-version-test"
 
-const { getLoadedPluginVersion, getSuggestedInstallTag }: typeof import("./system-loaded-version") =
-  await import(systemLoadedVersionModulePath)
+const {
+  getLoadedPluginVersion,
+  getSuggestedInstallTag,
+}: typeof import("./system-loaded-version") = await import(
+  systemLoadedVersionModulePath
+)
 
 const originalOpencodeConfigDir = process.env.OPENCODE_CONFIG_DIR
 const originalXdgCacheHome = process.env.XDG_CACHE_HOME
@@ -22,7 +33,10 @@ function createTemporaryDirectory(prefix: string): string {
   return directory
 }
 
-function writeJson(filePath: string, value: Record<string, string | Record<string, string>>): void {
+function writeJson(
+  filePath: string,
+  value: Record<string, string | Record<string, string>>,
+): void {
   mkdirSync(dirname(filePath), { recursive: true })
   writeFileSync(filePath, JSON.stringify(value), "utf-8")
 }
@@ -74,8 +88,12 @@ describe("system loaded version", () => {
 
       //#then
       expect(loadedVersion.cacheDir).toBe(configDir)
-      expect(loadedVersion.cachePackagePath).toBe(join(configDir, "package.json"))
-      expect(loadedVersion.installedPackagePath).toBe(join(configDir, "node_modules", PACKAGE_NAME, "package.json"))
+      expect(loadedVersion.cachePackagePath).toBe(
+        join(configDir, "package.json"),
+      )
+      expect(loadedVersion.installedPackagePath).toBe(
+        join(configDir, "node_modules", PACKAGE_NAME, "package.json"),
+      )
       expect(loadedVersion.expectedVersion).toBe("1.2.3")
       expect(loadedVersion.loadedVersion).toBe("1.2.3")
     })
@@ -101,8 +119,12 @@ describe("system loaded version", () => {
 
       //#then
       expect(loadedVersion.cacheDir).toBe(cacheDir)
-      expect(loadedVersion.cachePackagePath).toBe(join(cacheDir, "package.json"))
-      expect(loadedVersion.installedPackagePath).toBe(join(cacheDir, "node_modules", PACKAGE_NAME, "package.json"))
+      expect(loadedVersion.cachePackagePath).toBe(
+        join(cacheDir, "package.json"),
+      )
+      expect(loadedVersion.installedPackagePath).toBe(
+        join(cacheDir, "node_modules", PACKAGE_NAME, "package.json"),
+      )
       expect(loadedVersion.expectedVersion).toBe("2.3.4")
       expect(loadedVersion.loadedVersion).toBe("2.3.4")
     })
@@ -124,7 +146,9 @@ describe("system loaded version", () => {
       const loadedVersion = getLoadedPluginVersion()
 
       //#then
-      expect(loadedVersion.installedPackagePath).toBe(join(configDir, "node_modules", PLUGIN_NAME, "package.json"))
+      expect(loadedVersion.installedPackagePath).toBe(
+        join(configDir, "node_modules", PLUGIN_NAME, "package.json"),
+      )
       expect(loadedVersion.expectedVersion).toBe("5.6.7")
       expect(loadedVersion.loadedVersion).toBe("5.6.7")
     })
@@ -135,15 +159,22 @@ describe("system loaded version", () => {
       const symlinkBaseDir = createTemporaryDirectory("omo-symlink-base-")
       const symlinkConfigDir = join(symlinkBaseDir, "config-link")
 
-      symlinkSync(realConfigDir, symlinkConfigDir, process.platform === "win32" ? "junction" : "dir")
+      symlinkSync(
+        realConfigDir,
+        symlinkConfigDir,
+        process.platform === "win32" ? "junction" : "dir",
+      )
       process.env.OPENCODE_CONFIG_DIR = symlinkConfigDir
 
       writeJson(join(realConfigDir, "package.json"), {
         dependencies: { [PACKAGE_NAME]: "4.5.6" },
       })
-      writeJson(join(realConfigDir, "node_modules", PACKAGE_NAME, "package.json"), {
-        version: "4.5.6",
-      })
+      writeJson(
+        join(realConfigDir, "node_modules", PACKAGE_NAME, "package.json"),
+        {
+          version: "4.5.6",
+        },
+      )
 
       //#when
       const loadedVersion = getLoadedPluginVersion()

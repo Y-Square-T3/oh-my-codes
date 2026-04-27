@@ -29,7 +29,7 @@ function compareVersions(a: string, b: string): number {
 
 export function checkVersionCompatibility(
   currentVersion: string | null,
-  newVersion: string
+  newVersion: string,
 ): VersionCompatibility {
   if (!currentVersion) {
     return {

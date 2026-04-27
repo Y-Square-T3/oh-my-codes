@@ -18,13 +18,13 @@ refactor(delegate-task): split constants.ts into focused modules
 
 ## Changes
 
-| New File | Responsibility | LOC |
-|----------|---------------|-----|
-| `default-categories.ts` | `DEFAULT_CATEGORIES`, `CATEGORY_DESCRIPTIONS` | ~25 |
-| `category-prompt-appends.ts` | 8 `*_PROMPT_APPEND` constants + `CATEGORY_PROMPT_APPENDS` record | ~300 (prompt-exempt) |
-| `plan-agent-prompt.ts` | Plan system prompt constants + `buildPlanAgentSystemPrepend()` | ~250 (prompt-exempt) |
-| `plan-agent-names.ts` | `PLAN_AGENT_NAMES`, `isPlanAgent`, `PLAN_FAMILY_NAMES`, `isPlanFamily` | ~30 |
-| `constants.ts` (updated) | 4-line re-export barrel | 4 |
+| New File                     | Responsibility                                                         | LOC                  |
+| ---------------------------- | ---------------------------------------------------------------------- | -------------------- |
+| `default-categories.ts`      | `DEFAULT_CATEGORIES`, `CATEGORY_DESCRIPTIONS`                          | ~25                  |
+| `category-prompt-appends.ts` | 8 `*_PROMPT_APPEND` constants + `CATEGORY_PROMPT_APPENDS` record       | ~300 (prompt-exempt) |
+| `plan-agent-prompt.ts`       | Plan system prompt constants + `buildPlanAgentSystemPrepend()`         | ~250 (prompt-exempt) |
+| `plan-agent-names.ts`        | `PLAN_AGENT_NAMES`, `isPlanAgent`, `PLAN_FAMILY_NAMES`, `isPlanFamily` | ~30                  |
+| `constants.ts` (updated)     | 4-line re-export barrel                                                | 4                    |
 
 ## Backward Compatibility
 

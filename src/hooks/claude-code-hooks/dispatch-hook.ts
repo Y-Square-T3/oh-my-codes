@@ -12,16 +12,14 @@ export function getHookIdentifier(hook: HookAction): string {
 export async function dispatchHook(
   hook: HookAction,
   stdinJson: string,
-  cwd: string
+  cwd: string,
 ): Promise<CommandResult> {
   if (hook.type === "http") {
     return executeHttpHook(hook, stdinJson)
   }
 
-  return executeHookCommand(
-    hook.command,
-    stdinJson,
-    cwd,
-    { forceZsh: DEFAULT_CONFIG.forceZsh, zshPath: DEFAULT_CONFIG.zshPath }
-  )
+  return executeHookCommand(hook.command, stdinJson, cwd, {
+    forceZsh: DEFAULT_CONFIG.forceZsh,
+    zshPath: DEFAULT_CONFIG.zshPath,
+  })
 }

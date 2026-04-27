@@ -30,7 +30,10 @@ export function getCachedVersion(): string | null {
       return readPackageVersion(pkgPath)
     }
   } catch (err) {
-    log("[auto-update-checker] Failed to resolve version from current directory:", err)
+    log(
+      "[auto-update-checker] Failed to resolve version from current directory:",
+      err,
+    )
   }
 
   try {

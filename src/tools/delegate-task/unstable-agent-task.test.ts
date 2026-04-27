@@ -1,4 +1,11 @@
-const { describe, test, expect, beforeEach, afterEach, mock } = require("bun:test")
+const {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+} = require("bun:test")
 
 describe("executeUnstableAgentTask - interrupt detection", () => {
   beforeEach(() => {
@@ -33,7 +40,11 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
       error: "Agent not found" as string | undefined,
     }
 
-    const launchState = { ...taskState, status: "running" as string, error: undefined as string | undefined }
+    const launchState = {
+      ...taskState,
+      status: "running" as string,
+      error: undefined as string | undefined,
+    }
 
     const mockManager = {
       launch: async () => launchState,
@@ -42,7 +53,9 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
 
     const mockClient = {
       session: {
-        status: async () => ({ data: { [taskState.sessionID!]: { type: "idle" } } }),
+        status: async () => ({
+          data: { [taskState.sessionID!]: { type: "idle" } },
+        }),
         messages: async () => ({ data: [] }),
       },
     }
@@ -77,8 +90,14 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
     //#when - executeUnstableAgentTask encounters an interrupted task
     const startTime = Date.now()
     const result = await executeUnstableAgentTask(
-      args, mockCtx, mockExecutorCtx, parentContext,
-      "test-agent", undefined, undefined, "test-model"
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      parentContext,
+      "test-agent",
+      undefined,
+      undefined,
+      "test-model",
     )
     const elapsed = Date.now() - startTime
 
@@ -100,7 +119,11 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
       error: "Rate limit exceeded" as string | undefined,
     }
 
-    const launchState = { ...taskState, status: "running" as string, error: undefined as string | undefined }
+    const launchState = {
+      ...taskState,
+      status: "running" as string,
+      error: undefined as string | undefined,
+    }
 
     const mockManager = {
       launch: async () => launchState,
@@ -109,7 +132,9 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
 
     const mockClient = {
       session: {
-        status: async () => ({ data: { [taskState.sessionID!]: { type: "idle" } } }),
+        status: async () => ({
+          data: { [taskState.sessionID!]: { type: "idle" } },
+        }),
         messages: async () => ({ data: [] }),
       },
     }
@@ -144,8 +169,14 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
     //#when - executeUnstableAgentTask encounters an errored task
     const startTime = Date.now()
     const result = await executeUnstableAgentTask(
-      args, mockCtx, mockExecutorCtx, parentContext,
-      "test-agent", undefined, undefined, "test-model"
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      parentContext,
+      "test-agent",
+      undefined,
+      undefined,
+      "test-model",
     )
     const elapsed = Date.now() - startTime
 
@@ -167,7 +198,11 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
       error: "Stale timeout" as string | undefined,
     }
 
-    const launchState = { ...taskState, status: "running" as string, error: undefined as string | undefined }
+    const launchState = {
+      ...taskState,
+      status: "running" as string,
+      error: undefined as string | undefined,
+    }
 
     const mockManager = {
       launch: async () => launchState,
@@ -176,7 +211,9 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
 
     const mockClient = {
       session: {
-        status: async () => ({ data: { [taskState.sessionID!]: { type: "idle" } } }),
+        status: async () => ({
+          data: { [taskState.sessionID!]: { type: "idle" } },
+        }),
         messages: async () => ({ data: [] }),
       },
     }
@@ -211,8 +248,14 @@ describe("executeUnstableAgentTask - interrupt detection", () => {
     //#when - executeUnstableAgentTask encounters a cancelled task
     const startTime = Date.now()
     const result = await executeUnstableAgentTask(
-      args, mockCtx, mockExecutorCtx, parentContext,
-      "test-agent", undefined, undefined, "test-model"
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      parentContext,
+      "test-agent",
+      undefined,
+      undefined,
+      "test-model",
     )
     const elapsed = Date.now() - startTime
 

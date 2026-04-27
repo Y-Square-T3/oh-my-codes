@@ -2,7 +2,12 @@ import type { HookDeps } from "./types"
 import type { AutoRetryHelpers } from "./auto-retry"
 import { HOOK_NAME } from "./constants"
 import { log } from "../../shared/logger"
-import { extractStatusCode, extractErrorName, classifyErrorType, isRetryableError } from "./error-classifier"
+import {
+  extractStatusCode,
+  extractErrorName,
+  classifyErrorType,
+  isRetryableError,
+} from "./error-classifier"
 import { createFallbackState } from "./fallback-state"
 import { getFallbackModelsForSession } from "./fallback-models"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
@@ -12,8 +17,21 @@ import { dispatchFallbackRetry } from "./fallback-retry-dispatcher"
 import { createSessionStatusHandler } from "./session-status-handler"
 
 export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
-  const { config, pluginConfig, sessionStates, sessionLastAccess, sessionRetryInFlight, sessionAwaitingFallbackResult, sessionFallbackTimeouts, sessionStatusRetryKeys } = deps
-  const sessionStatusHandler = createSessionStatusHandler(deps, helpers, sessionStatusRetryKeys)
+  const {
+    config,
+    pluginConfig,
+    sessionStates,
+    sessionLastAccess,
+    sessionRetryInFlight,
+    sessionAwaitingFallbackResult,
+    sessionFallbackTimeouts,
+    sessionStatusRetryKeys,
+  } = deps
+  const sessionStatusHandler = createSessionStatusHandler(
+    deps,
+    helpers,
+    sessionStatusRetryKeys,
+  )
   const cancelledSessions = new Set<string>()
 
   const resetRetryState = (sessionID: string) => {
@@ -29,7 +47,9 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
   }
 
   const handleSessionCreated = (props: Record<string, unknown> | undefined) => {
-    const sessionInfo = props?.info as { id?: string; model?: string } | undefined
+    const sessionInfo = props?.info as
+      | { id?: string; model?: string }
+      | undefined
     const sessionID = sessionInfo?.id
     const model = sessionInfo?.model
 
@@ -57,18 +77,25 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
     }
   }
 
-  const handleSessionStop = async (props: Record<string, unknown> | undefined) => {
+  const handleSessionStop = async (
+    props: Record<string, unknown> | undefined,
+  ) => {
     const sessionID = props?.sessionID as string | undefined
     if (!sessionID) return
 
-    if (sessionRetryInFlight.has(sessionID) || sessionAwaitingFallbackResult.has(sessionID)) {
+    if (
+      sessionRetryInFlight.has(sessionID) ||
+      sessionAwaitingFallbackResult.has(sessionID)
+    ) {
       await helpers.abortSessionRequest(sessionID, "session.stop")
     }
 
     cancelledSessions.add(sessionID)
     resetRetryState(sessionID)
 
-    log(`[${HOOK_NAME}] Cleared fallback retry state on session.stop`, { sessionID })
+    log(`[${HOOK_NAME}] Cleared fallback retry state on session.stop`, {
+      sessionID,
+    })
   }
 
   const handleMessageUpdated = (props: Record<string, unknown> | undefined) => {
@@ -86,12 +113,18 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
 
     if (cancelledSessions.has(sessionID)) {
       resetRetryState(sessionID)
-      log(`[${HOOK_NAME}] Cleared fallback retry state for cancelled session on idle`, { sessionID })
+      log(
+        `[${HOOK_NAME}] Cleared fallback retry state for cancelled session on idle`,
+        { sessionID },
+      )
       return
     }
 
     if (sessionAwaitingFallbackResult.has(sessionID)) {
-      log(`[${HOOK_NAME}] session.idle while awaiting fallback result; keeping timeout armed`, { sessionID })
+      log(
+        `[${HOOK_NAME}] session.idle while awaiting fallback result; keeping timeout armed`,
+        { sessionID },
+      )
       return
     }
 
@@ -106,11 +139,15 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
     }
 
     if (hadTimeout) {
-      log(`[${HOOK_NAME}] Cleared fallback timeout after session completion`, { sessionID })
+      log(`[${HOOK_NAME}] Cleared fallback timeout after session completion`, {
+        sessionID,
+      })
     }
   }
 
-  const handleSessionError = async (props: Record<string, unknown> | undefined) => {
+  const handleSessionError = async (
+    props: Record<string, unknown> | undefined,
+  ) => {
     const sessionID = props?.sessionID as string | undefined
     const error = props?.error
     const agent = props?.agent as string | undefined
@@ -120,12 +157,18 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
       return
     }
 
-    const resolvedAgent = await helpers.resolveAgentForSessionFromContext(sessionID, agent)
+    const resolvedAgent = await helpers.resolveAgentForSessionFromContext(
+      sessionID,
+      agent,
+    )
 
     if (isAbortError(error)) {
       cancelledSessions.add(sessionID)
       resetRetryState(sessionID)
-      log(`[${HOOK_NAME}] session.error matched cancellation; cleared retry state`, { sessionID, resolvedAgent })
+      log(
+        `[${HOOK_NAME}] session.error matched cancellation; cleared retry state`,
+        { sessionID, resolvedAgent },
+      )
       return
     }
 
@@ -161,7 +204,11 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
     }
 
     let state = sessionStates.get(sessionID)
-    const fallbackModels = getFallbackModelsForSession(sessionID, resolvedAgent, pluginConfig)
+    const fallbackModels = getFallbackModelsForSession(
+      sessionID,
+      resolvedAgent,
+      pluginConfig,
+    )
 
     if (fallbackModels.length === 0) {
       log(`[${HOOK_NAME}] No fallback models configured`, { sessionID, agent })
@@ -177,7 +224,9 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
         pluginConfig,
       })
       if (!initialModel) {
-        log(`[${HOOK_NAME}] No model info available, cannot fallback`, { sessionID })
+        log(`[${HOOK_NAME}] No model info available, cannot fallback`, {
+          sessionID,
+        })
         return
       }
 
@@ -197,17 +246,42 @@ export function createEventHandler(deps: HookDeps, helpers: AutoRetryHelpers) {
     })
   }
 
-  return async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  return async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     if (!config.enabled) return
 
     const props = event.properties as Record<string, unknown> | undefined
 
-    if (event.type === "session.created") { handleSessionCreated(props); return }
-    if (event.type === "session.deleted") { handleSessionDeleted(props); return }
-    if (event.type === "session.stop") { await handleSessionStop(props); return }
-    if (event.type === "message.updated") { handleMessageUpdated(props); return }
-    if (event.type === "session.idle") { handleSessionIdle(props); return }
-    if (event.type === "session.status") { await sessionStatusHandler(props); return }
-    if (event.type === "session.error") { await handleSessionError(props); return }
+    if (event.type === "session.created") {
+      handleSessionCreated(props)
+      return
+    }
+    if (event.type === "session.deleted") {
+      handleSessionDeleted(props)
+      return
+    }
+    if (event.type === "session.stop") {
+      await handleSessionStop(props)
+      return
+    }
+    if (event.type === "message.updated") {
+      handleMessageUpdated(props)
+      return
+    }
+    if (event.type === "session.idle") {
+      handleSessionIdle(props)
+      return
+    }
+    if (event.type === "session.status") {
+      await sessionStatusHandler(props)
+      return
+    }
+    if (event.type === "session.error") {
+      await handleSessionError(props)
+      return
+    }
   }
 }

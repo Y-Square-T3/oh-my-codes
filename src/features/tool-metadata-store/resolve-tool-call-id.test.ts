@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test"
 
-import { resolveToolCallID, type ToolCallIDCarrier } from "./resolve-tool-call-id"
+import {
+  resolveToolCallID,
+  type ToolCallIDCarrier,
+} from "./resolve-tool-call-id"
 
 describe("resolveToolCallID", () => {
-  function makeCtx(overrides: Partial<ToolCallIDCarrier> = {}): ToolCallIDCarrier {
+  function makeCtx(
+    overrides: Partial<ToolCallIDCarrier> = {},
+  ): ToolCallIDCarrier {
     return {
       ...overrides,
     }

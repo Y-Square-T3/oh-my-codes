@@ -81,7 +81,8 @@ export class ContextCollector {
 
   private sortEntries(entries: ContextEntry[]): ContextEntry[] {
     return entries.sort((a, b) => {
-      const priorityDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
+      const priorityDiff =
+        PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
       if (priorityDiff !== 0) return priorityDiff
       return a.registrationOrder - b.registrationOrder
     })

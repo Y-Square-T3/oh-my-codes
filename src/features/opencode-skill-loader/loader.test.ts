@@ -6,7 +6,11 @@ import { tmpdir } from "os"
 const TEST_DIR = join(tmpdir(), "skill-loader-test-" + Date.now())
 const SKILLS_DIR = join(TEST_DIR, ".opencode", "skills")
 
-function createTestSkill(name: string, content: string, mcpJson?: object): string {
+function createTestSkill(
+  name: string,
+  content: string,
+  mcpJson?: object,
+): string {
   const skillDir = join(SKILLS_DIR, name)
   mkdirSync(skillDir, { recursive: true })
   const skillPath = join(skillDir, "SKILL.md")
@@ -54,7 +58,7 @@ This is the skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "test-skill")
+        const skill = skills.find((s) => s.name === "test-skill")
 
         // then
         expect(skill).toBeDefined()
@@ -64,7 +68,7 @@ This is the skill body.
         expect(skill?.mcpConfig?.sqlite?.args).toEqual([
           "mcp-server-sqlite",
           "--db-path",
-          "./data.db"
+          "./data.db",
         ])
         expect(skill?.mcpConfig?.memory).toBeDefined()
         expect(skill?.mcpConfig?.memory?.command).toBe("npx")
@@ -90,7 +94,7 @@ This is a simple skill.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "simple-skill")
+        const skill = skills.find((s) => s.name === "simple-skill")
 
         // then
         expect(skill).toBeDefined()
@@ -123,11 +127,15 @@ Skill with env vars.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "env-skill")
+        const skill = skills.find((s) => s.name === "env-skill")
 
         // then
-        expect(skill?.mcpConfig?.["api-server"]?.env?.API_KEY).toBe("${API_KEY}")
-        expect(skill?.mcpConfig?.["api-server"]?.env?.DB_PATH).toBe("${HOME}/data.db")
+        expect(skill?.mcpConfig?.["api-server"]?.env?.API_KEY).toBe(
+          "${API_KEY}",
+        )
+        expect(skill?.mcpConfig?.["api-server"]?.env?.DB_PATH).toBe(
+          "${HOME}/data.db",
+        )
       } finally {
         process.chdir(originalCwd)
       }
@@ -151,7 +159,7 @@ Skill body.
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
         // then - when YAML fails, skill uses directory name as fallback
-        const skill = skills.find(s => s.name === "bad-yaml-skill")
+        const skill = skills.find((s) => s.name === "bad-yaml-skill")
 
         expect(skill).toBeDefined()
         expect(skill?.mcpConfig).toBeUndefined()
@@ -174,9 +182,9 @@ Skill body.
         mcpServers: {
           playwright: {
             command: "npx",
-            args: ["@playwright/mcp@latest"]
-          }
-        }
+            args: ["@playwright/mcp@latest"],
+          },
+        },
       }
       createTestSkill("ampcode-skill", skillContent, mcpJson)
 
@@ -187,14 +195,16 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "ampcode-skill")
+        const skill = skills.find((s) => s.name === "ampcode-skill")
 
         // then
         expect(skill).toBeDefined()
         expect(skill?.mcpConfig).toBeDefined()
         expect(skill?.mcpConfig?.playwright).toBeDefined()
         expect(skill?.mcpConfig?.playwright?.command).toBe("npx")
-        expect(skill?.mcpConfig?.playwright?.args).toEqual(["@playwright/mcp@latest"])
+        expect(skill?.mcpConfig?.playwright?.args).toEqual([
+          "@playwright/mcp@latest",
+        ])
       } finally {
         process.chdir(originalCwd)
       }
@@ -215,9 +225,9 @@ Skill body.
         mcpServers: {
           "from-json": {
             command: "json-cmd",
-            args: ["json-arg"]
-          }
-        }
+            args: ["json-arg"],
+          },
+        },
       }
       createTestSkill("priority-skill", skillContent, mcpJson)
 
@@ -228,7 +238,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "priority-skill")
+        const skill = skills.find((s) => s.name === "priority-skill")
 
         // then - mcp.json should take priority
         expect(skill?.mcpConfig?.["from-json"]).toBeDefined()
@@ -248,8 +258,8 @@ Skill body.
       const mcpJson = {
         sqlite: {
           command: "uvx",
-          args: ["mcp-server-sqlite"]
-        }
+          args: ["mcp-server-sqlite"],
+        },
       }
       createTestSkill("direct-format", skillContent, mcpJson)
 
@@ -260,7 +270,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "direct-format")
+        const skill = skills.find((s) => s.name === "direct-format")
 
         // then
         expect(skill?.mcpConfig?.sqlite).toBeDefined()
@@ -268,7 +278,7 @@ Skill body.
       } finally {
         process.chdir(originalCwd)
       }
-      })
+    })
   })
 
   describe("allowed-tools parsing", () => {
@@ -290,7 +300,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "space-separated-tools")
+        const skill = skills.find((s) => s.name === "space-separated-tools")
 
         // then
         expect(skill).toBeDefined()
@@ -318,7 +328,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "yaml-inline-array")
+        const skill = skills.find((s) => s.name === "yaml-inline-array")
 
         // then
         expect(skill).toBeDefined()
@@ -350,7 +360,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "yaml-multiline-array")
+        const skill = skills.find((s) => s.name === "yaml-multiline-array")
 
         // then
         expect(skill).toBeDefined()
@@ -377,7 +387,7 @@ Skill body.
 
       try {
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
-        const skill = skills.find(s => s.name === "no-allowed-tools")
+        const skill = skills.find((s) => s.name === "no-allowed-tools")
 
         // then
         expect(skill).toBeDefined()
@@ -403,9 +413,15 @@ Skill body.
       process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir
       process.env.CLAUDE_CONFIG_DIR = join(TEST_DIR, "claude-user")
 
-      mkdirSync(join(opencodeProjectSkillsDir, "duplicate-skill"), { recursive: true })
-      mkdirSync(join(opencodeGlobalSkillsDir, "duplicate-skill"), { recursive: true })
-      mkdirSync(join(projectClaudeSkillsDir, "duplicate-skill"), { recursive: true })
+      mkdirSync(join(opencodeProjectSkillsDir, "duplicate-skill"), {
+        recursive: true,
+      })
+      mkdirSync(join(opencodeGlobalSkillsDir, "duplicate-skill"), {
+        recursive: true,
+      })
+      mkdirSync(join(projectClaudeSkillsDir, "duplicate-skill"), {
+        recursive: true,
+      })
 
       writeFileSync(
         join(opencodeProjectSkillsDir, "duplicate-skill", "SKILL.md"),
@@ -414,7 +430,7 @@ name: duplicate-skill
 description: From opencode-project (highest priority)
 ---
 opencode-project body.
-`
+`,
       )
 
       writeFileSync(
@@ -424,7 +440,7 @@ name: duplicate-skill
 description: From opencode-global (middle priority)
 ---
 opencode-global body.
-`
+`,
       )
 
       writeFileSync(
@@ -434,7 +450,7 @@ name: duplicate-skill
 description: From claude project (lowest priority among these)
 ---
 claude project body.
-`
+`,
       )
 
       // when
@@ -443,12 +459,14 @@ claude project body.
 
       try {
         const skills = await discoverSkills()
-        const duplicates = skills.filter(s => s.name === "duplicate-skill")
+        const duplicates = skills.filter((s) => s.name === "duplicate-skill")
 
         // then
         expect(duplicates).toHaveLength(1)
         expect(duplicates[0]?.scope).toBe("opencode-project")
-        expect(duplicates[0]?.definition.description).toContain("opencode-project")
+        expect(duplicates[0]?.definition.description).toContain(
+          "opencode-project",
+        )
       } finally {
         process.chdir(originalCwd)
         if (originalOpenCodeConfigDir === undefined) {
@@ -476,8 +494,12 @@ claude project body.
       process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir
       process.env.CLAUDE_CONFIG_DIR = join(TEST_DIR, "claude-user")
 
-      mkdirSync(join(opencodeGlobalSkillsDir, "global-over-project"), { recursive: true })
-      mkdirSync(join(projectClaudeSkillsDir, "global-over-project"), { recursive: true })
+      mkdirSync(join(opencodeGlobalSkillsDir, "global-over-project"), {
+        recursive: true,
+      })
+      mkdirSync(join(projectClaudeSkillsDir, "global-over-project"), {
+        recursive: true,
+      })
 
       writeFileSync(
         join(opencodeGlobalSkillsDir, "global-over-project", "SKILL.md"),
@@ -486,7 +508,7 @@ name: global-over-project
 description: From opencode-global (should win)
 ---
 opencode-global body.
-`
+`,
       )
 
       writeFileSync(
@@ -496,7 +518,7 @@ name: global-over-project
 description: From claude project (should lose)
 ---
 claude project body.
-`
+`,
       )
 
       const { discoverSkills } = await import("./loader")
@@ -504,7 +526,7 @@ claude project body.
 
       try {
         const skills = await discoverSkills()
-        const matches = skills.filter(s => s.name === "global-over-project")
+        const matches = skills.filter((s) => s.name === "global-over-project")
 
         expect(matches).toHaveLength(1)
         expect(matches[0]?.scope).toBe("opencode")
@@ -547,12 +569,12 @@ Skill body.
         const skills = await discoverSkills({ includeClaudeCodePaths: false })
 
         // then
-        const names = skills.map(s => s.name)
+        const names = skills.map((s) => s.name)
         const uniqueNames = [...new Set(names)]
         expect(names.length).toBe(uniqueNames.length)
       } finally {
         process.chdir(originalCwd)
-         if (originalOpenCodeConfigDir === undefined) {
+        if (originalOpenCodeConfigDir === undefined) {
           delete process.env.OPENCODE_CONFIG_DIR
         } else {
           process.env.OPENCODE_CONFIG_DIR = originalOpenCodeConfigDir
@@ -582,12 +604,14 @@ Skill body.
 
       try {
         const skills = await discoverProjectAgentsSkills()
-        const skill = skills.find(s => s.name === "agent-project-skill")
+        const skill = skills.find((s) => s.name === "agent-project-skill")
 
         //#then
         expect(skill).toBeDefined()
         expect(skill?.scope).toBe("project")
-        expect(skill?.definition.description).toContain("A skill from project .agents/skills directory")
+        expect(skill?.definition.description).toContain(
+          "A skill from project .agents/skills directory",
+        )
       } finally {
         process.chdir(originalCwd)
       }
@@ -609,7 +633,7 @@ Skill body.
       //#when
       const { discoverProjectAgentsSkills } = await import("./loader")
       const skills = await discoverProjectAgentsSkills(TEST_DIR)
-      const skill = skills.find(s => s.name === "agent-dir-skill")
+      const skill = skills.find((s) => s.name === "agent-dir-skill")
 
       //#then
       expect(skill).toBeDefined()
@@ -635,7 +659,9 @@ Skill body.
       // when
       const { discoverProjectAgentsSkills } = await import("./loader")
       const skills = await discoverProjectAgentsSkills(childDir)
-      const skill = skills.find((candidate) => candidate.name === "ancestor-agent-skill")
+      const skill = skills.find(
+        (candidate) => candidate.name === "ancestor-agent-skill",
+      )
 
       // then
       expect(skill).toBeDefined()
@@ -654,7 +680,12 @@ Skill body.
 `
       const projectDir = join(TEST_DIR, "project")
       const childDir = join(projectDir, "packages", "cli")
-      const skillsDir = join(projectDir, ".opencode", "skills", "ancestor-opencode-skill")
+      const skillsDir = join(
+        projectDir,
+        ".opencode",
+        "skills",
+        "ancestor-opencode-skill",
+      )
       mkdirSync(childDir, { recursive: true })
       mkdirSync(skillsDir, { recursive: true })
       writeFileSync(join(skillsDir, "SKILL.md"), skillContent)
@@ -662,7 +693,9 @@ Skill body.
       // when
       const { discoverOpencodeProjectSkills } = await import("./loader")
       const skills = await discoverOpencodeProjectSkills(childDir)
-      const skill = skills.find((candidate) => candidate.name === "ancestor-opencode-skill")
+      const skill = skills.find(
+        (candidate) => candidate.name === "ancestor-opencode-skill",
+      )
 
       // then
       expect(skill).toBeDefined()
@@ -693,7 +726,9 @@ Skill body.
 
       try {
         const skills = await discoverOpencodeProjectSkills()
-        const skill = skills.find((candidate) => candidate.name === "singular-opencode-skill")
+        const skill = skills.find(
+          (candidate) => candidate.name === "singular-opencode-skill",
+        )
 
         // then
         expect(skill).toBeDefined()

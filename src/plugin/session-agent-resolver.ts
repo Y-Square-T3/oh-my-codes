@@ -10,7 +10,9 @@ interface SessionMessage {
 
 type SessionClient = {
   session: {
-    messages: (opts: { path: { id: string } }) => Promise<{ data?: SessionMessage[] }>
+    messages: (opts: {
+      path: { id: string }
+    }) => Promise<{ data?: SessionMessage[] }>
   }
 }
 
@@ -19,7 +21,9 @@ export async function resolveSessionAgent(
   sessionId: string,
 ): Promise<string | undefined> {
   try {
-    const messagesResp = await client.session.messages({ path: { id: sessionId } })
+    const messagesResp = await client.session.messages({
+      path: { id: sessionId },
+    })
     const messages = normalizeSDKResponse(messagesResp, [] as SessionMessage[])
 
     for (const msg of messages) {

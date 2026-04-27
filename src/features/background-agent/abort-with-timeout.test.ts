@@ -11,7 +11,9 @@ import type { OpencodeClient } from "./opencode-client"
 const { abortWithTimeout } = await import("./abort-with-timeout")
 mock.restore()
 
-function createClient(abort: (...args: Array<unknown>) => Promise<unknown>): OpencodeClient {
+function createClient(
+  abort: (...args: Array<unknown>) => Promise<unknown>,
+): OpencodeClient {
   return {
     session: {
       abort: abort as never,
@@ -45,7 +47,10 @@ describe("abortWithTimeout", () => {
     const result = await Promise.race([
       abortWithTimeout(createClient(abort), "session-2", 1),
       new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("abort timeout test exceeded wait budget")), 100)
+        setTimeout(
+          () => reject(new Error("abort timeout test exceeded wait budget")),
+          100,
+        )
       }),
     ])
 

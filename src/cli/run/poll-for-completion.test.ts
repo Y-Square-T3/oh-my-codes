@@ -1,13 +1,23 @@
-import { afterEach, beforeEach, describe, it, expect, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+} from "bun:test"
 import type { RunContext, Todo, ChildSession, SessionStatus } from "./types"
 import { createEventState } from "./events"
 import { pollForCompletion } from "./poll-for-completion"
 
-const createMockContext = (overrides: {
-  todo?: Todo[]
-  childrenBySession?: Record<string, ChildSession[]>
-  statuses?: Record<string, SessionStatus>
-} = {}): RunContext => {
+const createMockContext = (
+  overrides: {
+    todo?: Todo[]
+    childrenBySession?: Record<string, ChildSession[]>
+    statuses?: Record<string, SessionStatus>
+  } = {},
+): RunContext => {
   const {
     todo = [],
     childrenBySession = { "test-session": [] },
@@ -19,7 +29,7 @@ const createMockContext = (overrides: {
       session: {
         todo: mock(() => Promise.resolve({ data: todo })),
         children: mock((opts: { path: { id: string } }) =>
-          Promise.resolve({ data: childrenBySession[opts.path.id] ?? [] })
+          Promise.resolve({ data: childrenBySession[opts.path.id] ?? [] }),
         ),
         status: mock(() => Promise.resolve({ data: statuses })),
       },
@@ -65,7 +75,8 @@ describe("pollForCompletion", () => {
 
     //#then - exits with 0 but only after 3 consecutive checks
     expect(result).toBe(0)
-    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>).mock.calls.length
+    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>)
+      .mock.calls.length
     expect(todoCallCount).toBeGreaterThanOrEqual(3)
   })
 
@@ -87,7 +98,8 @@ describe("pollForCompletion", () => {
 
     //#then - should be aborted, not completed (stabilization blocked completion check)
     expect(result).toBe(130)
-    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>).mock.calls.length
+    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>)
+      .mock.calls.length
     expect(todoCallCount).toBe(0)
   })
 
@@ -110,7 +122,8 @@ describe("pollForCompletion", () => {
 
     //#then - should be aborted, not completed (tool blocked exit)
     expect(result).toBe(130)
-    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>).mock.calls.length
+    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>)
+      .mock.calls.length
     expect(todoCallCount).toBe(0)
   })
 
@@ -129,15 +142,17 @@ describe("pollForCompletion", () => {
       if (todoCallCount === 1 && !busyInserted) {
         busyInserted = true
         eventState.mainSessionIdle = false
-        setTimeout(() => { eventState.mainSessionIdle = true }, 15)
+        setTimeout(() => {
+          eventState.mainSessionIdle = true
+        }, 15)
       }
       return { data: [] }
     })
     ;(ctx.client.session as any).children = mock(() =>
-      Promise.resolve({ data: [] })
+      Promise.resolve({ data: [] }),
     )
     ;(ctx.client.session as any).status = mock(() =>
-      Promise.resolve({ data: {} })
+      Promise.resolve({ data: {} }),
     )
 
     //#when
@@ -208,7 +223,8 @@ describe("pollForCompletion", () => {
 
     //#then
     expect(result).toBe(130)
-    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>).mock.calls.length
+    const todoCallCount = (ctx.client.session.todo as ReturnType<typeof mock>)
+      .mock.calls.length
     expect(todoCallCount).toBe(0)
   })
 
@@ -330,10 +346,10 @@ describe("pollForCompletion", () => {
       return { data: [] }
     })
     ;(ctx.client.session as any).children = mock(() =>
-      Promise.resolve({ data: [] })
+      Promise.resolve({ data: [] }),
     )
     ;(ctx.client.session as any).status = mock(() =>
-      Promise.resolve({ data: {} })
+      Promise.resolve({ data: {} }),
     )
 
     //#when - abort after tool stays in-flight
@@ -366,7 +382,11 @@ describe("pollForCompletion", () => {
     //#then - returns 1 (not 130/timeout), error message printed
     expect(result).toBe(1)
     const errorCalls = (console.error as ReturnType<typeof mock>).mock.calls
-    expect(errorCalls.some((call: unknown[]) => String(call[0] ?? "").includes("Session ended with error"))).toBe(true)
+    expect(
+      errorCalls.some((call: unknown[]) =>
+        String(call[0] ?? "").includes("Session ended with error"),
+      ),
+    ).toBe(true)
   })
 
   it("returns 1 when session errors while tool is active (error not masked by tool gate)", async () => {
@@ -389,5 +409,4 @@ describe("pollForCompletion", () => {
     //#then - returns 1
     expect(result).toBe(1)
   })
-
 })

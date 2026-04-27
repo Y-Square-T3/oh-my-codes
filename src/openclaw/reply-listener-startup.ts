@@ -25,7 +25,9 @@ export function getReplyListenerStartupTimeoutMs(): number {
   if (!raw) return DEFAULT_REPLY_LISTENER_STARTUP_TIMEOUT_MS
 
   const parsed = Number.parseInt(raw, 10)
-  return isPositiveInteger(parsed) ? parsed : DEFAULT_REPLY_LISTENER_STARTUP_TIMEOUT_MS
+  return isPositiveInteger(parsed)
+    ? parsed
+    : DEFAULT_REPLY_LISTENER_STARTUP_TIMEOUT_MS
 }
 
 function isReadyState(
@@ -34,11 +36,11 @@ function isReadyState(
   startupToken: string,
 ): state is ReplyListenerDaemonState {
   return Boolean(
-    state
-      && state.isRunning
-      && state.pid === pid
-      && state.startupToken === startupToken
-      && state.lastPollAt !== null,
+    state &&
+    state.isRunning &&
+    state.pid === pid &&
+    state.startupToken === startupToken &&
+    state.lastPollAt !== null,
   )
 }
 

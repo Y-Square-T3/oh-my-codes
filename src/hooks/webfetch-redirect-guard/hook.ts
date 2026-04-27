@@ -32,18 +32,26 @@ function isWebFetchTool(toolName: string): boolean {
 }
 
 function getWebFetchUrl(args: Record<string, unknown>): string | undefined {
-  return typeof args.url === "string" && args.url.length > 0 ? args.url : undefined
+  return typeof args.url === "string" && args.url.length > 0
+    ? args.url
+    : undefined
 }
 
 function getWebFetchFormat(args: Record<string, unknown>): WebFetchFormat {
-  return args.format === "text" || args.format === "html" ? args.format : "markdown"
+  return args.format === "text" || args.format === "html"
+    ? args.format
+    : "markdown"
 }
 
 function getTimeoutSeconds(args: Record<string, unknown>): number | undefined {
-  return typeof args.timeout === "number" && Number.isFinite(args.timeout) ? args.timeout : undefined
+  return typeof args.timeout === "number" && Number.isFinite(args.timeout)
+    ? args.timeout
+    : undefined
 }
 
-function cleanupStaleEntries(pendingFailures: Map<string, PendingRedirectFailure>): void {
+function cleanupStaleEntries(
+  pendingFailures: Map<string, PendingRedirectFailure>,
+): void {
   const now = Date.now()
   for (const [key, value] of pendingFailures) {
     if (now - value.storedAt > WEBFETCH_REDIRECT_GUARD_STALE_TIMEOUT_MS) {
@@ -53,7 +61,9 @@ function cleanupStaleEntries(pendingFailures: Map<string, PendingRedirectFailure
 }
 
 function isRedirectLoopError(output: string): boolean {
-  return WEBFETCH_REDIRECT_ERROR_PATTERNS.some((pattern) => pattern.test(output))
+  return WEBFETCH_REDIRECT_ERROR_PATTERNS.some((pattern) =>
+    pattern.test(output),
+  )
 }
 
 function isToolErrorOutput(output: string): boolean {
@@ -69,7 +79,10 @@ export function createWebFetchRedirectGuardHook(_ctx: PluginInput) {
   const pendingFailures = new Map<string, PendingRedirectFailure>()
 
   return {
-    "tool.execute.before": async (input: ToolExecuteInput, output: ToolExecuteBeforeOutput) => {
+    "tool.execute.before": async (
+      input: ToolExecuteInput,
+      output: ToolExecuteBeforeOutput,
+    ) => {
       if (!isWebFetchTool(input.tool)) return
 
       const url = getWebFetchUrl(output.args)
@@ -103,7 +116,10 @@ export function createWebFetchRedirectGuardHook(_ctx: PluginInput) {
       }
     },
 
-    "tool.execute.after": async (input: ToolExecuteInput, output: ToolExecuteAfterOutput) => {
+    "tool.execute.after": async (
+      input: ToolExecuteInput,
+      output: ToolExecuteAfterOutput,
+    ) => {
       if (!isWebFetchTool(input.tool)) return
       if (typeof output.output !== "string") return
 
@@ -115,7 +131,10 @@ export function createWebFetchRedirectGuardHook(_ctx: PluginInput) {
         return
       }
 
-      if (isToolErrorOutput(output.output) && isRedirectLoopError(output.output)) {
+      if (
+        isToolErrorOutput(output.output) &&
+        isRedirectLoopError(output.output)
+      ) {
         output.output = buildRedirectLimitMessage()
       }
     },

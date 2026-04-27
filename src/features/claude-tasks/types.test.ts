@@ -1,13 +1,25 @@
 import { describe, test, expect } from "bun:test"
-import { TaskSchema, TaskStatusSchema, type Task, type TaskStatus } from "./types"
+import {
+  TaskSchema,
+  TaskStatusSchema,
+  type Task,
+  type TaskStatus,
+} from "./types"
 
 describe("TaskStatusSchema", () => {
   test("accepts valid status values", () => {
     //#given
-    const validStatuses: TaskStatus[] = ["pending", "in_progress", "completed", "deleted"]
+    const validStatuses: TaskStatus[] = [
+      "pending",
+      "in_progress",
+      "completed",
+      "deleted",
+    ]
 
     //#when
-    const results = validStatuses.map((status) => TaskStatusSchema.safeParse(status))
+    const results = validStatuses.map((status) =>
+      TaskStatusSchema.safeParse(status),
+    )
 
     //#then
     results.forEach((result) => {
@@ -20,7 +32,9 @@ describe("TaskStatusSchema", () => {
     const invalidStatuses = ["open", "closed", "archived", ""]
 
     //#when
-    const results = invalidStatuses.map((status) => TaskStatusSchema.safeParse(status))
+    const results = invalidStatuses.map((status) =>
+      TaskStatusSchema.safeParse(status),
+    )
 
     //#then
     results.forEach((result) => {
@@ -77,7 +91,10 @@ describe("TaskSchema", () => {
     if (result.success) {
       expect(result.data.activeForm).toBe("Deploying app")
       expect(result.data.owner).toBe("sisyphus")
-      expect(result.data.metadata).toEqual({ priority: "high", tags: ["urgent"] })
+      expect(result.data.metadata).toEqual({
+        priority: "high",
+        tags: ["urgent"],
+      })
     }
   })
 
@@ -108,12 +125,48 @@ describe("TaskSchema", () => {
   test("rejects Task missing required fields", () => {
     //#given
     const invalidTasks = [
-      { subject: "No ID", description: "Missing id", status: "pending", blocks: [], blockedBy: [] },
-      { id: "1", description: "No subject", status: "pending", blocks: [], blockedBy: [] },
-      { id: "1", subject: "No description", status: "pending", blocks: [], blockedBy: [] },
-      { id: "1", subject: "No status", description: "Missing status", blocks: [], blockedBy: [] },
-      { id: "1", subject: "No blocks", description: "Missing blocks", status: "pending", blockedBy: [] },
-      { id: "1", subject: "No blockedBy", description: "Missing blockedBy", status: "pending", blocks: [] },
+      {
+        subject: "No ID",
+        description: "Missing id",
+        status: "pending",
+        blocks: [],
+        blockedBy: [],
+      },
+      {
+        id: "1",
+        description: "No subject",
+        status: "pending",
+        blocks: [],
+        blockedBy: [],
+      },
+      {
+        id: "1",
+        subject: "No description",
+        status: "pending",
+        blocks: [],
+        blockedBy: [],
+      },
+      {
+        id: "1",
+        subject: "No status",
+        description: "Missing status",
+        blocks: [],
+        blockedBy: [],
+      },
+      {
+        id: "1",
+        subject: "No blocks",
+        description: "Missing blocks",
+        status: "pending",
+        blockedBy: [],
+      },
+      {
+        id: "1",
+        subject: "No blockedBy",
+        description: "Missing blockedBy",
+        status: "pending",
+        blocks: [],
+      },
     ]
 
     //#when

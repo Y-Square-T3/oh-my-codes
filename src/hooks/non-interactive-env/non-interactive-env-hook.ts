@@ -1,5 +1,9 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import { HOOK_NAME, NON_INTERACTIVE_ENV, SHELL_COMMAND_PATTERNS } from "./constants"
+import {
+  HOOK_NAME,
+  NON_INTERACTIVE_ENV,
+  SHELL_COMMAND_PATTERNS,
+} from "./constants"
 import { log, buildEnvPrefix } from "../../shared"
 import { detectShellType } from "../../shared/shell-env"
 
@@ -24,7 +28,7 @@ export function createNonInteractiveEnvHook(_ctx: PluginInput) {
   return {
     "tool.execute.before": async (
       input: { tool: string; sessionID: string; callID: string },
-      output: { args: Record<string, unknown>; message?: string }
+      output: { args: Record<string, unknown>; message?: string },
     ): Promise<void> => {
       if (input.tool.toLowerCase() !== "bash") {
         return
@@ -55,7 +59,7 @@ export function createNonInteractiveEnvHook(_ctx: PluginInput) {
 
       const shellType = detectShellType()
       const envPrefix = buildEnvPrefix(NON_INTERACTIVE_ENV, shellType)
-      
+
       // Check if the command already starts with the prefix to avoid stacking.
       // This maintains the non-interactive behavior and makes the operation idempotent.
       if (command.trim().startsWith(envPrefix.trim())) {

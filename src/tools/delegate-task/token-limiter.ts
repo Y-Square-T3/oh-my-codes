@@ -10,7 +10,10 @@ export function estimateTokenCount(text: string): number {
   return Math.ceil(text.length / CHARACTERS_PER_TOKEN)
 }
 
-export function truncateToTokenBudget(content: string, maxTokens: number): string {
+export function truncateToTokenBudget(
+  content: string,
+  maxTokens: number,
+): string {
   if (!content || maxTokens <= 0) {
     return ""
   }
@@ -38,7 +41,10 @@ function joinSystemParts(parts: string[]): string | undefined {
   return filtered.join("\n\n")
 }
 
-function reduceSegmentToFitBudget(content: string, overflowTokens: number): string {
+function reduceSegmentToFitBudget(
+  content: string,
+  overflowTokens: number,
+): string {
   if (overflowTokens <= 0 || !content) {
     return content
   }
@@ -50,7 +56,7 @@ function reduceSegmentToFitBudget(content: string, overflowTokens: number): stri
 
 export function buildSystemContentWithTokenLimit(
   input: BuildSystemContentInput,
-  maxTokens: number | undefined
+  maxTokens: number | undefined,
 ): string | undefined {
   const skillParts = input.skillContents?.length
     ? [...input.skillContents]
@@ -69,7 +75,11 @@ export function buildSystemContentWithTokenLimit(
   let nextAgentsContext = agentsContext
 
   const buildCurrentContent = (): string | undefined =>
-    joinSystemParts([nextAgentsContext, ...nextSkills, nextCategoryPromptAppend])
+    joinSystemParts([
+      nextAgentsContext,
+      ...nextSkills,
+      nextCategoryPromptAppend,
+    ])
 
   let systemContent = buildCurrentContent()
   if (!systemContent) {
@@ -79,7 +89,11 @@ export function buildSystemContentWithTokenLimit(
   let overflowTokens = estimateTokenCount(systemContent) - maxTokens
 
   if (overflowTokens > 0) {
-    for (let index = 0; index < nextSkills.length && overflowTokens > 0; index += 1) {
+    for (
+      let index = 0;
+      index < nextSkills.length && overflowTokens > 0;
+      index += 1
+    ) {
       const skill = nextSkills[index]
       const reducedSkill = reduceSegmentToFitBudget(skill, overflowTokens)
       nextSkills[index] = reducedSkill
@@ -99,7 +113,10 @@ export function buildSystemContentWithTokenLimit(
   }
 
   if (overflowTokens > 0 && nextCategoryPromptAppend) {
-    nextCategoryPromptAppend = reduceSegmentToFitBudget(nextCategoryPromptAppend, overflowTokens)
+    nextCategoryPromptAppend = reduceSegmentToFitBudget(
+      nextCategoryPromptAppend,
+      overflowTokens,
+    )
     systemContent = buildCurrentContent()
     if (!systemContent) {
       return undefined
@@ -108,7 +125,10 @@ export function buildSystemContentWithTokenLimit(
   }
 
   if (overflowTokens > 0 && nextAgentsContext) {
-    nextAgentsContext = reduceSegmentToFitBudget(nextAgentsContext, overflowTokens)
+    nextAgentsContext = reduceSegmentToFitBudget(
+      nextAgentsContext,
+      overflowTokens,
+    )
     systemContent = buildCurrentContent()
     if (!systemContent) {
       return undefined

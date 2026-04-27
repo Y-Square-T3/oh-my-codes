@@ -6,7 +6,10 @@ export function escapePowerShellSingleQuotedText(input: string): string {
   return input.replace(/'/g, "''")
 }
 
-export function buildWindowsToastScript(title: string, message: string): string {
+export function buildWindowsToastScript(
+  title: string,
+  message: string,
+): string {
   const psTitle = escapePowerShellSingleQuotedText(title)
   const psMessage = escapePowerShellSingleQuotedText(message)
 
@@ -21,5 +24,7 @@ $SerializedXml.LoadXml($RawXml.OuterXml)
 $Toast = [Windows.UI.Notifications.ToastNotification]::new($SerializedXml)
 $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('OpenCode')
 $Notifier.Show($Toast)
-`.trim().replace(/\n/g, "; ")
+`
+    .trim()
+    .replace(/\n/g, "; ")
 }

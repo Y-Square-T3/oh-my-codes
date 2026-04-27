@@ -16,22 +16,33 @@ function isEmptyOrWhitespace(content: string): boolean {
   return content.trim().length === 0
 }
 
-export function parseOpenCodeConfigFileWithError(path: string): ParseConfigResult {
+export function parseOpenCodeConfigFileWithError(
+  path: string,
+): ParseConfigResult {
   try {
     const stat = statSync(path)
     if (stat.size === 0) {
-      return { config: null, error: `Config file is empty: ${path}. Delete it or add valid JSON content.` }
+      return {
+        config: null,
+        error: `Config file is empty: ${path}. Delete it or add valid JSON content.`,
+      }
     }
 
     const content = readFileSync(path, "utf-8")
     if (isEmptyOrWhitespace(content)) {
-      return { config: null, error: `Config file contains only whitespace: ${path}. Delete it or add valid JSON content.` }
+      return {
+        config: null,
+        error: `Config file contains only whitespace: ${path}. Delete it or add valid JSON content.`,
+      }
     }
 
     const config = parseJsonc<OpenCodeConfig>(content)
 
     if (config == null) {
-      return { config: null, error: `Config file parsed to null/undefined: ${path}. Ensure it contains valid JSON.` }
+      return {
+        config: null,
+        error: `Config file parsed to null/undefined: ${path}. Ensure it contains valid JSON.`,
+      }
     }
 
     if (typeof config !== "object" || Array.isArray(config)) {
@@ -43,6 +54,9 @@ export function parseOpenCodeConfigFileWithError(path: string): ParseConfigResul
 
     return { config }
   } catch (err) {
-    return { config: null, error: formatErrorWithSuggestion(err, `parse config file ${path}`) }
+    return {
+      config: null,
+      error: formatErrorWithSuggestion(err, `parse config file ${path}`),
+    }
   }
 }

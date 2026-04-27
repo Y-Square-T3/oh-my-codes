@@ -27,7 +27,11 @@ function mapRawEventToOpenClawEvents(rawEvent: string): string[] {
   }
 
   const mapped = aliases[rawEvent]
-  return Array.from(new Set([rawEvent, mapped].filter((value): value is string => Boolean(value))))
+  return Array.from(
+    new Set(
+      [rawEvent, mapped].filter((value): value is string => Boolean(value)),
+    ),
+  )
 }
 
 function normalizePlatform(platform?: string): string | undefined {
@@ -36,11 +40,19 @@ function normalizePlatform(platform?: string): string | undefined {
   return platform
 }
 
-function shouldRegisterReplyCorrelation(result: WakeResult, params: DispatchOpenClawEventParams): boolean {
+function shouldRegisterReplyCorrelation(
+  result: WakeResult,
+  params: DispatchOpenClawEventParams,
+): boolean {
   if (params.rawEvent === "session.deleted") return false
   if (!result.success) return false
   if (!result.messageId || !result.platform) return false
-  if (!params.context.sessionId || !params.context.projectPath || !params.context.tmuxPaneId) return false
+  if (
+    !params.context.sessionId ||
+    !params.context.projectPath ||
+    !params.context.tmuxPaneId
+  )
+    return false
   return true
 }
 
@@ -63,10 +75,21 @@ export async function dispatchOpenClawEvent(
     }
   }
 
-  if (shouldRegisterReplyCorrelation(result ?? { gateway: "", success: false }, params)) {
+  if (
+    shouldRegisterReplyCorrelation(
+      result ?? { gateway: "", success: false },
+      params,
+    )
+  ) {
     const tmuxSession = params.context.tmuxSession ?? getCurrentTmuxSession()
     const platform = normalizePlatform(result?.platform)
-    if (tmuxSession && platform && params.context.sessionId && params.context.projectPath && params.context.tmuxPaneId) {
+    if (
+      tmuxSession &&
+      platform &&
+      params.context.sessionId &&
+      params.context.projectPath &&
+      params.context.tmuxPaneId
+    ) {
       registerMessage({
         sessionId: params.context.sessionId,
         tmuxSession,

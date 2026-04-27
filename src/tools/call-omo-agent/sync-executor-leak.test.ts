@@ -39,9 +39,14 @@ function createContext(promptAsync: ReturnType<typeof mock>) {
   }
 }
 
-function createDependencies(overrides?: Partial<ExecuteSyncDeps>): ExecuteSyncDeps {
+function createDependencies(
+  overrides?: Partial<ExecuteSyncDeps>,
+): ExecuteSyncDeps {
   return {
-    createOrGetSession: mock(async () => ({ sessionID: "ses-default", isNew: true })),
+    createOrGetSession: mock(async () => ({
+      sessionID: "ses-default",
+      isNew: true,
+    })),
     waitForCompletion: mock(async () => {}),
     processMessages: mock(async () => "agent response"),
     setSessionFallbackChain: mock(() => {}),
@@ -83,7 +88,12 @@ describe("executeSync session cleanup", () => {
       expect(syncSubagentSessions.has(sessionID)).toBe(false)
 
       // when
-      const result = await executeSync(args, toolContext, createContext(promptAsync) as never, deps)
+      const result = await executeSync(
+        args,
+        toolContext,
+        createContext(promptAsync) as never,
+        deps,
+      )
 
       // then
       expect(result).toContain(`session_id: ${sessionID}`)
@@ -112,7 +122,12 @@ describe("executeSync session cleanup", () => {
       })
 
       // when
-      const resultPromise = executeSync(args, toolContext, createContext(promptAsync) as never, deps)
+      const resultPromise = executeSync(
+        args,
+        toolContext,
+        createContext(promptAsync) as never,
+        deps,
+      )
 
       // then
       let thrownError: Error | undefined
@@ -153,7 +168,12 @@ describe("executeSync session cleanup", () => {
       expect(syncSubagentSessions.has(sessionID)).toBe(false)
 
       // when
-      const result = await executeSync(args, toolContext, createContext(promptAsync) as never, deps)
+      const result = await executeSync(
+        args,
+        toolContext,
+        createContext(promptAsync) as never,
+        deps,
+      )
 
       // then
       expect(result).toContain(`session_id: ${sessionID}`)
@@ -175,7 +195,13 @@ describe("executeSync session cleanup", () => {
       const fallbackChain = [{ providers: ["openai"], model: "gpt-5.4" }]
 
       // when
-      await executeSync(args, toolContext, createContext(promptAsync) as never, deps, fallbackChain)
+      await executeSync(
+        args,
+        toolContext,
+        createContext(promptAsync) as never,
+        deps,
+        fallbackChain,
+      )
 
       // then
       expect(clearSessionFallbackChain).toHaveBeenCalledWith(sessionID)

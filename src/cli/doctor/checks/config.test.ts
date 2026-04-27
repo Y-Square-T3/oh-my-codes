@@ -39,7 +39,8 @@ describe("config check", () => {
         process.env.OPENCODE_CONFIG_DIR = testConfigDir
         writeFileSync(
           join(testConfigDir, "oh-my-openagent.json"),
-          JSON.stringify({ disabled_hooks: ["comment-checker"] }, null, 2) + "\n",
+          JSON.stringify({ disabled_hooks: ["comment-checker"] }, null, 2) +
+            "\n",
           "utf-8",
         )
 

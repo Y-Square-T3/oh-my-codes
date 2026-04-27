@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, mock } from "bun:test"
-import type { CheckDefinition, CheckResult, DoctorResult, SystemInfo, ToolsSummary } from "./types"
+import type {
+  CheckDefinition,
+  CheckResult,
+  DoctorResult,
+  SystemInfo,
+  ToolsSummary,
+} from "./types"
 
 function createSystemInfo(): SystemInfo {
   return {
@@ -16,7 +22,9 @@ function createSystemInfo(): SystemInfo {
 
 function createTools(): ToolsSummary {
   return {
-    lspServers: [{ id: "typescript", extensions: [".ts", ".tsx", ".js", ".jsx"] }],
+    lspServers: [
+      { id: "typescript", extensions: [".ts", ".tsx", ".js", ".jsx"] },
+    ],
     astGrepCli: true,
     astGrepNapi: false,
     commentChecker: true,
@@ -56,7 +64,9 @@ describe("runner", () => {
           throw new Error("boom")
         },
       }
-      const { runCheck } = await import(`./runner?run-check-error=${Date.now()}`)
+      const { runCheck } = await import(
+        `./runner?run-check-error=${Date.now()}`
+      )
 
       //#when
       const result = await runCheck(check)
@@ -73,7 +83,9 @@ describe("runner", () => {
   describe("calculateSummary", () => {
     it("counts statuses correctly", async () => {
       //#given
-      const { calculateSummary } = await import(`./runner?summary=${Date.now()}`)
+      const { calculateSummary } = await import(
+        `./runner?summary=${Date.now()}`
+      )
       const results: CheckResult[] = [
         { name: "1", status: "pass", message: "", issues: [] },
         { name: "2", status: "pass", message: "", issues: [] },
@@ -98,7 +110,9 @@ describe("runner", () => {
   describe("determineExitCode", () => {
     it("returns zero when no failures exist", async () => {
       //#given
-      const { determineExitCode } = await import(`./runner?exit-ok=${Date.now()}`)
+      const { determineExitCode } = await import(
+        `./runner?exit-ok=${Date.now()}`
+      )
       const results: CheckResult[] = [
         { name: "1", status: "pass", message: "", issues: [] },
         { name: "2", status: "warn", message: "", issues: [] },
@@ -113,7 +127,9 @@ describe("runner", () => {
 
     it("returns one when any failure exists", async () => {
       //#given
-      const { determineExitCode } = await import(`./runner?exit-fail=${Date.now()}`)
+      const { determineExitCode } = await import(
+        `./runner?exit-fail=${Date.now()}`
+      )
       const results: CheckResult[] = [
         { name: "1", status: "pass", message: "", issues: [] },
         { name: "2", status: "fail", message: "", issues: [] },
@@ -191,8 +207,12 @@ describe("runner", () => {
         exitCode: 0,
       }
 
-      const formatDoctorOutputMock = mock((result: DoctorResult) => result.summary.total.toString())
-      const formatJsonOutputMock = mock((result: DoctorResult) => JSON.stringify(result))
+      const formatDoctorOutputMock = mock((result: DoctorResult) =>
+        result.summary.total.toString(),
+      )
+      const formatJsonOutputMock = mock((result: DoctorResult) =>
+        JSON.stringify(result),
+      )
 
       mock.module("./checks", () => ({
         getAllCheckDefinitions: () => checks,
@@ -222,7 +242,12 @@ describe("runner", () => {
 
       //#then
       console.log = originalLog
-      expect(startedBeforeResolve.sort()).toEqual(["config", "models", "system", "tools"])
+      expect(startedBeforeResolve.sort()).toEqual([
+        "config",
+        "models",
+        "system",
+        "tools",
+      ])
       expect(result.results.length).toBe(4)
       expect(result.exitCode).toBe(0)
       expect(formatDoctorOutputMock).toHaveBeenCalledTimes(1)

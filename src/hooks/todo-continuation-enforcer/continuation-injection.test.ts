@@ -12,7 +12,11 @@ describe("injectContinuation", () => {
       directory: "/tmp/test",
       client: {
         session: {
-          todo: async () => ({ data: [{ id: "1", content: "todo", status: "pending", priority: "high" }] }),
+          todo: async () => ({
+            data: [
+              { id: "1", content: "todo", status: "pending", priority: "high" },
+            ],
+          }),
           promptAsync: async (input: {
             body: {
               agent?: string
@@ -25,7 +29,11 @@ describe("injectContinuation", () => {
       },
     }
     const sessionStateStore = {
-      getExistingState: () => ({ inFlight: false, lastInjectedAt: 0, consecutiveFailures: 0 }),
+      getExistingState: () => ({
+        inFlight: false,
+        lastInjectedAt: 0,
+        consecutiveFailures: 0,
+      }),
     }
 
     // when
@@ -51,7 +59,11 @@ describe("injectContinuation", () => {
       directory: "/tmp/test",
       client: {
         session: {
-          todo: async () => ({ data: [{ id: "1", content: "todo", status: "pending", priority: "high" }] }),
+          todo: async () => ({
+            data: [
+              { id: "1", content: "todo", status: "pending", priority: "high" },
+            ],
+          }),
           promptAsync: async (input: {
             body: {
               tools?: Record<string, boolean>
@@ -66,7 +78,11 @@ describe("injectContinuation", () => {
       },
     }
     const sessionStateStore = {
-      getExistingState: () => ({ inFlight: false, lastInjectedAt: 0, consecutiveFailures: 0 }),
+      getExistingState: () => ({
+        inFlight: false,
+        lastInjectedAt: 0,
+        consecutiveFailures: 0,
+      }),
     }
 
     // when
@@ -93,7 +109,11 @@ describe("injectContinuation", () => {
       directory: "/tmp/test",
       client: {
         session: {
-          todo: async () => ({ data: [{ id: "1", content: "todo", status: "pending", priority: "high" }] }),
+          todo: async () => ({
+            data: [
+              { id: "1", content: "todo", status: "pending", priority: "high" },
+            ],
+          }),
           promptAsync: async () => {
             injected = true
             return {}
@@ -102,7 +122,11 @@ describe("injectContinuation", () => {
       },
     }
     const sessionStateStore = {
-      getExistingState: () => ({ inFlight: false, lastInjectedAt: 0, consecutiveFailures: 0 }),
+      getExistingState: () => ({
+        inFlight: false,
+        lastInjectedAt: 0,
+        consecutiveFailures: 0,
+      }),
     }
 
     // when
@@ -132,7 +156,11 @@ describe("injectContinuation", () => {
       directory: "/tmp/test",
       client: {
         session: {
-          todo: async () => ({ data: [{ id: "1", content: "todo", status: "pending", priority: "high" }] }),
+          todo: async () => ({
+            data: [
+              { id: "1", content: "todo", status: "pending", priority: "high" },
+            ],
+          }),
           promptAsync: async (input: {
             body: {
               model?: { providerID: string; modelID: string }
@@ -146,7 +174,11 @@ describe("injectContinuation", () => {
       },
     }
     const sessionStateStore = {
-      getExistingState: () => ({ inFlight: false, lastInjectedAt: 0, consecutiveFailures: 0 }),
+      getExistingState: () => ({
+        inFlight: false,
+        lastInjectedAt: 0,
+        consecutiveFailures: 0,
+      }),
     }
     const model = {
       providerID: "openai",

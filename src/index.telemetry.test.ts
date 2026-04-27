@@ -45,7 +45,10 @@ function installModuleMocks(): void {
     initConfigContext: mockInitConfigContext,
   }))
   mock.module("./shared/external-plugin-detector", () => ({
-    detectExternalSkillPlugin: mock(() => ({ detected: false, pluginName: null })),
+    detectExternalSkillPlugin: mock(() => ({
+      detected: false,
+      pluginName: null,
+    })),
     getSkillPluginConflictWarning: mock(() => ""),
   }))
   mock.module("./shared", () => ({
@@ -118,7 +121,9 @@ describe("oh-my-openagent telemetry isolation", () => {
 
   it("does not crash plugin load when telemetry throws", async () => {
     // given
-    const { default: plugin } = await import(`./index?telemetry=${Date.now()}-${Math.random()}`)
+    const { default: plugin } = await import(
+      `./index?telemetry=${Date.now()}-${Math.random()}`
+    )
 
     // when
     const result = await plugin.server({

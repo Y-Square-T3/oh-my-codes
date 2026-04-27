@@ -2,7 +2,11 @@ import type { BackgroundTask, LaunchInput } from "./types"
 import type { FallbackEntry } from "../../shared/model-requirements"
 import type { ConcurrencyManager } from "./concurrency"
 import type { OpencodeClient, QueueItem } from "./constants"
-import { log, readConnectedProvidersCache, readProviderModelsCache } from "../../shared"
+import {
+  log,
+  readConnectedProvidersCache,
+  readProviderModelsCache,
+} from "../../shared"
 import {
   shouldRetryError,
   getNextFallback,
@@ -22,7 +26,16 @@ export async function tryFallbackRetry(args: {
   queuesByKey: Map<string, QueueItem[]>
   processKey: (key: string) => void
 }): Promise<boolean> {
-  const { task, errorInfo, source, concurrencyManager, client, idleDeferralTimers, queuesByKey, processKey } = args
+  const {
+    task,
+    errorInfo,
+    source,
+    concurrencyManager,
+    client,
+    idleDeferralTimers,
+    queuesByKey,
+    processKey,
+  } = args
   const fallbackChain = task.fallbackChain
   const canRetry =
     shouldRetryError(errorInfo) &&
@@ -34,13 +47,20 @@ export async function tryFallbackRetry(args: {
 
   const attemptCount = task.attemptCount ?? 0
   const providerModelsCache = readProviderModelsCache()
-  const connectedProviders = providerModelsCache?.connected ?? readConnectedProvidersCache()
-  const connectedSet = connectedProviders ? new Set(connectedProviders.map(p => p.toLowerCase())) : null
+  const connectedProviders =
+    providerModelsCache?.connected ?? readConnectedProvidersCache()
+  const connectedSet = connectedProviders
+    ? new Set(connectedProviders.map((p) => p.toLowerCase()))
+    : null
   const preferredProvider = task.model?.providerID?.toLowerCase()
 
   const isReachable = (entry: FallbackEntry): boolean => {
     if (!connectedSet) return true
-    if (entry.providers.some((provider) => connectedSet.has(provider.toLowerCase()))) {
+    if (
+      entry.providers.some((provider) =>
+        connectedSet.has(provider.toLowerCase()),
+      )
+    ) {
       return true
     }
     return preferredProvider ? connectedSet.has(preferredProvider) : false
@@ -94,7 +114,10 @@ export async function tryFallbackRetry(args: {
   const previousSessionID = task.sessionID
 
   task.attemptCount = selectedAttemptCount
-  const transformedModelId = transformModelForProvider(providerID, nextFallback.model)
+  const transformedModelId = transformModelForProvider(
+    providerID,
+    nextFallback.model,
+  )
   task.model = {
     providerID,
     modelID: transformedModelId,
@@ -106,7 +129,9 @@ export async function tryFallbackRetry(args: {
   task.queuedAt = new Date()
   task.error = undefined
 
-  const key = task.model ? `${task.model.providerID}/${task.model.modelID}` : task.agent
+  const key = task.model
+    ? `${task.model.providerID}/${task.model.modelID}`
+    : task.agent
   const queue = queuesByKey.get(key) ?? []
   const retryInput: LaunchInput = {
     description: task.description,

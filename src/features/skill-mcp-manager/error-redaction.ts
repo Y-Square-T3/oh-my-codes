@@ -42,6 +42,8 @@ export function redactSensitiveData(input: string): string {
 export function redactErrorSensitiveData(error: Error): Error {
   const redactedMessage = redactSensitiveData(error.message)
   const redactedError = new Error(redactedMessage)
-  redactedError.stack = error.stack ? redactSensitiveData(error.stack) : undefined
+  redactedError.stack = error.stack
+    ? redactSensitiveData(error.stack)
+    : undefined
   return redactedError
 }

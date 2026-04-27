@@ -41,7 +41,9 @@ describe("resolvePromptAppend", () => {
     symlinkSync(absoluteFilePath, linkedAbsolutePath)
 
     moduleImportCounter += 1
-    ;({ resolvePromptAppend } = await import(`./resolve-file-uri?test=${moduleImportCounter}`))
+    ;({ resolvePromptAppend } = await import(
+      `./resolve-file-uri?test=${moduleImportCounter}`
+    ))
   })
 
   afterAll(() => {

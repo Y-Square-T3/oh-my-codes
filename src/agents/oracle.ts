@@ -1,9 +1,9 @@
-import type { AgentConfig } from "@opencode-ai/sdk";
-import type { AgentMode, AgentPromptMetadata } from "./types";
-import { isGptModel } from "./types";
-import { createAgentToolRestrictions } from "../shared/permission-compat";
+import type { AgentConfig } from "@opencode-ai/sdk"
+import type { AgentMode, AgentPromptMetadata } from "./types"
+import { isGptModel } from "./types"
+import { createAgentToolRestrictions } from "../shared/permission-compat"
 
-const MODE: AgentMode = "subagent";
+const MODE: AgentMode = "subagent"
 
 export const ORACLE_PROMPT_METADATA: AgentPromptMetadata = {
   category: "advisor",
@@ -35,7 +35,7 @@ export const ORACLE_PROMPT_METADATA: AgentPromptMetadata = {
     "Trivial decisions (variable names, formatting)",
     "Things you can infer from existing code patterns",
   ],
-};
+}
 
 /**
  * Default Oracle prompt - used for Claude and other non-GPT models.
@@ -150,7 +150,7 @@ Before finalizing answers on architecture, security, or performance:
 
 <delivery>
 Your response goes directly to the user with no intermediate processing. Make your final message self-contained: a clear recommendation they can act on immediately, covering both what to do and why.
-</delivery>`;
+</delivery>`
 
 /**
  * GPT-5.4 Optimized Oracle System Prompt
@@ -240,7 +240,7 @@ Before finalizing answers on architecture, security, or performance: re-scan for
 
 <delivery>
 Your response goes directly to the user with no intermediate processing. Make your final message self-contained: a clear recommendation they can act on immediately, covering both what to do and why. Dense and useful beats long and thorough. Deliver actionable insight, not exhaustive analysis.
-</delivery>`;
+</delivery>`
 
 export function createOracleAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
@@ -248,7 +248,7 @@ export function createOracleAgent(model: string): AgentConfig {
     "edit",
     "apply_patch",
     "task",
-  ]);
+  ])
 
   const base = {
     description:
@@ -258,7 +258,7 @@ export function createOracleAgent(model: string): AgentConfig {
     temperature: 0.1,
     ...restrictions,
     prompt: ORACLE_DEFAULT_PROMPT,
-  } as AgentConfig;
+  } as AgentConfig
 
   if (isGptModel(model)) {
     return {
@@ -266,12 +266,12 @@ export function createOracleAgent(model: string): AgentConfig {
       prompt: ORACLE_GPT_PROMPT,
       reasoningEffort: "medium",
       textVerbosity: "high",
-    } as AgentConfig;
+    } as AgentConfig
   }
 
   return {
     ...base,
     thinking: { type: "enabled", budgetTokens: 32000 },
-  } as AgentConfig;
+  } as AgentConfig
 }
-createOracleAgent.mode = MODE;
+createOracleAgent.mode = MODE

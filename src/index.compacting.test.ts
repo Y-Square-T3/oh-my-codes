@@ -24,7 +24,9 @@ function createCompactingHandler(hooks: {
       output,
     )
     if (hooks.compactionContextInjector) {
-      output.context.push(hooks.compactionContextInjector.inject(input.sessionID))
+      output.context.push(
+        hooks.compactionContextInjector.inject(input.sessionID),
+      )
     }
   }
 }

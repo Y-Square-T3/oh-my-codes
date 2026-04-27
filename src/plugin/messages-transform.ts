@@ -11,7 +11,10 @@ type MessagesTransformOutput = { messages: MessageWithParts[] }
 
 export function createMessagesTransformHandler(args: {
   hooks: CreatedHooks
-}): (input: Record<string, never>, output: MessagesTransformOutput) => Promise<void> {
+}): (
+  input: Record<string, never>,
+  output: MessagesTransformOutput,
+) => Promise<void> {
   return async (input, output): Promise<void> => {
     await args.hooks.contextInjectorMessagesTransform?.[
       "experimental.chat.messages.transform"

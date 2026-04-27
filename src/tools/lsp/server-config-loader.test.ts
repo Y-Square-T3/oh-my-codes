@@ -2,7 +2,11 @@ import { describe, it, expect } from "bun:test"
 import { writeFileSync, unlinkSync, mkdirSync, rmSync } from "fs"
 import { join } from "path"
 import { tmpdir } from "os"
-import { loadJsonFile, getConfigPaths, getMergedServers } from "./server-config-loader"
+import {
+  loadJsonFile,
+  getConfigPaths,
+  getMergedServers,
+} from "./server-config-loader"
 
 describe("loadJsonFile", () => {
   it("parses JSONC config files with comments correctly", () => {
@@ -11,9 +15,9 @@ describe("loadJsonFile", () => {
       lsp: {
         typescript: {
           command: ["tsserver"],
-          extensions: [".ts", ".tsx"]
-        }
-      }
+          extensions: [".ts", ".tsx"],
+        },
+      },
     }
     const jsoncContent = `{
   // LSP configuration for TypeScript
@@ -39,7 +43,10 @@ describe("loadJsonFile", () => {
 
   it("discovers JSONC-only user config (oh-my-codes.jsonc)", () => {
     const originalEnv = process.env.OPENCODE_CONFIG_DIR
-    const tempBase = join(tmpdir(), `omo-test-user-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    const tempBase = join(
+      tmpdir(),
+      `omo-test-user-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     try {
       mkdirSync(tempBase, { recursive: true })
       process.env.OPENCODE_CONFIG_DIR = tempBase
@@ -57,7 +64,9 @@ describe("loadJsonFile", () => {
       writeFileSync(userPath, userJsonc, "utf-8")
 
       const servers = getMergedServers()
-      const found = servers.find(s => s.id === "user-jsonc" && s.source === "user")
+      const found = servers.find(
+        (s) => s.id === "user-jsonc" && s.source === "user",
+      )
       expect(found !== undefined).toBe(true)
     } finally {
       if (originalEnv === undefined) delete process.env.OPENCODE_CONFIG_DIR
@@ -68,7 +77,10 @@ describe("loadJsonFile", () => {
 
   it("discovers JSONC-only opencode config (opencode.jsonc)", () => {
     const originalEnv = process.env.OPENCODE_CONFIG_DIR
-    const tempBase = join(tmpdir(), `omo-test-oc-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    const tempBase = join(
+      tmpdir(),
+      `omo-test-oc-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     try {
       mkdirSync(tempBase, { recursive: true })
       process.env.OPENCODE_CONFIG_DIR = tempBase
@@ -86,7 +98,9 @@ describe("loadJsonFile", () => {
       writeFileSync(opencodePath, opencodeJsonc, "utf-8")
 
       const servers = getMergedServers()
-      const found = servers.find(s => s.id === "opencode-jsonc" && s.source === "opencode")
+      const found = servers.find(
+        (s) => s.id === "opencode-jsonc" && s.source === "opencode",
+      )
       expect(found !== undefined).toBe(true)
     } finally {
       if (originalEnv === undefined) delete process.env.OPENCODE_CONFIG_DIR
@@ -97,7 +111,10 @@ describe("loadJsonFile", () => {
 
   it("discovers JSONC-only project config (.opencode/oh-my-codes.jsonc)", () => {
     const originalCwd = process.cwd()
-    const tempProject = join(tmpdir(), `omo-test-project-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    const tempProject = join(
+      tmpdir(),
+      `omo-test-project-jsonc-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     try {
       mkdirSync(join(tempProject, ".opencode"), { recursive: true })
       const projectJsonc = `{
@@ -109,12 +126,18 @@ describe("loadJsonFile", () => {
     }
   }
 }`
-      const projectPath = join(tempProject, ".opencode", "oh-my-openagent.jsonc")
+      const projectPath = join(
+        tempProject,
+        ".opencode",
+        "oh-my-openagent.jsonc",
+      )
       writeFileSync(projectPath, projectJsonc, "utf-8")
 
       process.chdir(tempProject)
       const servers = getMergedServers()
-      const found = servers.find(s => s.id === "project-jsonc" && s.source === "project")
+      const found = servers.find(
+        (s) => s.id === "project-jsonc" && s.source === "project",
+      )
       expect(found !== undefined).toBe(true)
     } finally {
       process.chdir(originalCwd)
@@ -124,7 +147,10 @@ describe("loadJsonFile", () => {
 
   it("prefers .jsonc over .json when both exist for same config id", () => {
     const originalEnv = process.env.OPENCODE_CONFIG_DIR
-    const tempBase = join(tmpdir(), `omo-test-precedence-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    const tempBase = join(
+      tmpdir(),
+      `omo-test-precedence-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     try {
       mkdirSync(tempBase, { recursive: true })
       process.env.OPENCODE_CONFIG_DIR = tempBase
@@ -146,12 +172,26 @@ describe("loadJsonFile", () => {
     }
   }
 }`
-      writeFileSync(join(tempBase, "oh-my-openagent.json"), jsonContent, "utf-8")
-      writeFileSync(join(tempBase, "oh-my-openagent.jsonc"), jsoncContent, "utf-8")
+      writeFileSync(
+        join(tempBase, "oh-my-openagent.json"),
+        jsonContent,
+        "utf-8",
+      )
+      writeFileSync(
+        join(tempBase, "oh-my-openagent.jsonc"),
+        jsoncContent,
+        "utf-8",
+      )
 
       const servers = getMergedServers()
-      const found = servers.find(s => s.id === "conflict" && s.source === "user")
-      expect(found?.command && Array.isArray(found.command) && found.command[0] === "from-jsonc").toBe(true)
+      const found = servers.find(
+        (s) => s.id === "conflict" && s.source === "user",
+      )
+      expect(
+        found?.command &&
+          Array.isArray(found.command) &&
+          found.command[0] === "from-jsonc",
+      ).toBe(true)
     } finally {
       if (originalEnv === undefined) delete process.env.OPENCODE_CONFIG_DIR
       else process.env.OPENCODE_CONFIG_DIR = originalEnv

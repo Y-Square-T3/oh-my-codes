@@ -12,7 +12,7 @@ type Client = ReturnType<typeof createOpencodeClient>
 export async function recoverThinkingDisabledViolation(
   client: Client,
   sessionID: string,
-  _failedAssistantMsg: MessageData
+  _failedAssistantMsg: MessageData,
 ): Promise<boolean> {
   if (isSqliteBackend()) {
     return recoverThinkingDisabledViolationFromSDK(client, sessionID)
@@ -35,11 +35,13 @@ export async function recoverThinkingDisabledViolation(
 
 async function recoverThinkingDisabledViolationFromSDK(
   client: Client,
-  sessionID: string
+  sessionID: string,
 ): Promise<boolean> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
 
     const messageIDsWithThinking: string[] = []
     for (const msg of messages) {
@@ -47,7 +49,9 @@ async function recoverThinkingDisabledViolationFromSDK(
       if (!msg.info?.id) continue
       if (!msg.parts) continue
 
-      const hasThinking = msg.parts.some((part) => THINKING_TYPES.has(part.type))
+      const hasThinking = msg.parts.some((part) =>
+        THINKING_TYPES.has(part.type),
+      )
       if (hasThinking) {
         messageIDsWithThinking.push(msg.info.id)
       }

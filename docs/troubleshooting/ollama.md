@@ -24,6 +24,7 @@ Ollama returns **NDJSON** (newline-delimited JSON) when `stream: true` is used i
 Claude Code SDK expects a single JSON object, not multiple NDJSON lines, causing the parse error.
 
 **Why this happens:**
+
 - **Ollama API**: Returns streaming responses as NDJSON by design
 - **Claude Code SDK**: Doesn't properly handle NDJSON responses for tool calls
 - **oh-my-openagent**: Passes through the SDK's behavior (can't fix at this layer)
@@ -43,11 +44,13 @@ Configure your Ollama provider to use `stream: false`:
 ```
 
 **Pros:**
+
 - Works immediately
 - No code changes needed
 - Simple configuration
 
 **Cons:**
+
 - Slightly slower response time (no streaming)
 - Less interactive feedback
 
@@ -75,25 +78,25 @@ Until the SDK is fixed, here's how to implement NDJSON parsing (for SDK maintain
 
 ```typescript
 async function parseOllamaStreamResponse(response: string): Promise<object> {
-  const lines = response.split('\n').filter(line => line.trim());
-  const mergedMessage = { tool_calls: [] };
+  const lines = response.split("\n").filter((line) => line.trim())
+  const mergedMessage = { tool_calls: [] }
 
   for (const line of lines) {
     try {
-      const json = JSON.parse(line);
+      const json = JSON.parse(line)
       if (json.message?.tool_calls) {
-        mergedMessage.tool_calls.push(...json.message.tool_calls);
+        mergedMessage.tool_calls.push(...json.message.tool_calls)
       }
       if (json.message?.content) {
-        mergedMessage.content = json.message.content;
+        mergedMessage.content = json.message.content
       }
     } catch (e) {
       // Skip malformed lines
-      console.warn('Skipping malformed NDJSON line:', line);
+      console.warn("Skipping malformed NDJSON line:", line)
     }
   }
 
-  return mergedMessage;
+  return mergedMessage
 }
 ```
 

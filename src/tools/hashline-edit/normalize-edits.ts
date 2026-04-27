@@ -1,4 +1,9 @@
-import type { AppendEdit, HashlineEdit, PrependEdit, ReplaceEdit } from "./types"
+import type {
+  AppendEdit,
+  HashlineEdit,
+  PrependEdit,
+  ReplaceEdit,
+} from "./types"
 
 type HashlineToolOp = "replace" | "append" | "prepend"
 
@@ -17,7 +22,9 @@ function normalizeAnchor(value: string | undefined): string | undefined {
 
 function requireLines(edit: RawHashlineEdit, index: number): string | string[] {
   if (edit.lines === undefined) {
-    throw new Error(`Edit ${index}: lines is required for ${edit.op ?? "unknown"}`)
+    throw new Error(
+      `Edit ${index}: lines is required for ${edit.op ?? "unknown"}`,
+    )
   }
   if (edit.lines === null) {
     return []
@@ -25,14 +32,23 @@ function requireLines(edit: RawHashlineEdit, index: number): string | string[] {
   return edit.lines
 }
 
-function requireLine(anchor: string | undefined, index: number, op: HashlineToolOp): string {
+function requireLine(
+  anchor: string | undefined,
+  index: number,
+  op: HashlineToolOp,
+): string {
   if (!anchor) {
-    throw new Error(`Edit ${index}: ${op} requires at least one anchor line reference (pos or end)`)
+    throw new Error(
+      `Edit ${index}: ${op} requires at least one anchor line reference (pos or end)`,
+    )
   }
   return anchor
 }
 
-function normalizeReplaceEdit(edit: RawHashlineEdit, index: number): HashlineEdit {
+function normalizeReplaceEdit(
+  edit: RawHashlineEdit,
+  index: number,
+): HashlineEdit {
   const pos = normalizeAnchor(edit.pos)
   const end = normalizeAnchor(edit.end)
   const anchor = requireLine(pos ?? end, index, "replace")
@@ -47,7 +63,10 @@ function normalizeReplaceEdit(edit: RawHashlineEdit, index: number): HashlineEdi
   return normalized
 }
 
-function normalizeAppendEdit(edit: RawHashlineEdit, index: number): HashlineEdit {
+function normalizeAppendEdit(
+  edit: RawHashlineEdit,
+  index: number,
+): HashlineEdit {
   const pos = normalizeAnchor(edit.pos)
   const end = normalizeAnchor(edit.end)
   const anchor = pos ?? end
@@ -61,7 +80,10 @@ function normalizeAppendEdit(edit: RawHashlineEdit, index: number): HashlineEdit
   return normalized
 }
 
-function normalizePrependEdit(edit: RawHashlineEdit, index: number): HashlineEdit {
+function normalizePrependEdit(
+  edit: RawHashlineEdit,
+  index: number,
+): HashlineEdit {
   const pos = normalizeAnchor(edit.pos)
   const end = normalizeAnchor(edit.end)
   const anchor = pos ?? end
@@ -75,7 +97,9 @@ function normalizePrependEdit(edit: RawHashlineEdit, index: number): HashlineEdi
   return normalized
 }
 
-export function normalizeHashlineEdits(rawEdits: RawHashlineEdit[]): HashlineEdit[] {
+export function normalizeHashlineEdits(
+  rawEdits: RawHashlineEdit[],
+): HashlineEdit[] {
   return rawEdits.map((rawEdit, index) => {
     const edit = rawEdit ?? {}
 
@@ -88,7 +112,7 @@ export function normalizeHashlineEdits(rawEdits: RawHashlineEdit[]): HashlineEdi
         return normalizePrependEdit(edit, index)
       default:
         throw new Error(
-          `Edit ${index}: unsupported op "${String(edit.op)}". Legacy format was removed; use op/pos/end/lines.`
+          `Edit ${index}: unsupported op "${String(edit.op)}". Legacy format was removed; use op/pos/end/lines.`,
         )
     }
   })

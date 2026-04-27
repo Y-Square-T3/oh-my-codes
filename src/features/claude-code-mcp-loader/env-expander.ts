@@ -8,7 +8,10 @@ export interface ExpandEnvVarsOptions {
   trusted?: boolean
 }
 
-export function expandEnvVars(value: string, options: ExpandEnvVarsOptions = {}): string {
+export function expandEnvVars(
+  value: string,
+  options: ExpandEnvVarsOptions = {},
+): string {
   const { trusted = false } = options
   return value.replace(
     /\$\{([^}:]+)(?::-([^}]*))?\}/g,
@@ -30,11 +33,14 @@ export function expandEnvVars(value: string, options: ExpandEnvVarsOptions = {})
       if (envValue !== undefined) return envValue
       if (defaultValue !== undefined) return defaultValue
       return ""
-    }
+    },
   )
 }
 
-export function expandEnvVarsInObject<T>(obj: T, options: ExpandEnvVarsOptions = {}): T {
+export function expandEnvVarsInObject<T>(
+  obj: T,
+  options: ExpandEnvVarsOptions = {},
+): T {
   if (obj == null) return obj
   if (typeof obj === "string") return expandEnvVars(obj, options) as T
   if (Array.isArray(obj)) {

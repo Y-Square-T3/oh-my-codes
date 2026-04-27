@@ -1,7 +1,9 @@
 import type { DoctorOptions } from "./types"
 import { runDoctor } from "./runner"
 
-export async function doctor(options: DoctorOptions = { mode: "default" }): Promise<number> {
+export async function doctor(
+  options: DoctorOptions = { mode: "default" },
+): Promise<number> {
   const result = await runDoctor(options)
   return result.exitCode
 }

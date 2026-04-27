@@ -15,7 +15,9 @@ describe("TaskStatusSchema", () => {
     const validStatuses = ["pending", "in_progress", "completed", "deleted"]
 
     //#when
-    const results = validStatuses.map((status) => TaskStatusSchema.safeParse(status))
+    const results = validStatuses.map((status) =>
+      TaskStatusSchema.safeParse(status),
+    )
 
     //#then
     expect(results.every((r) => r.success)).toBe(true)
@@ -26,7 +28,9 @@ describe("TaskStatusSchema", () => {
     const invalidStatuses = ["open", "done", "archived", "unknown"]
 
     //#when
-    const results = invalidStatuses.map((status) => TaskStatusSchema.safeParse(status))
+    const results = invalidStatuses.map((status) =>
+      TaskStatusSchema.safeParse(status),
+    )
 
     //#then
     expect(results.every((r) => !r.success)).toBe(true)

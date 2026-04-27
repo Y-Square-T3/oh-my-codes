@@ -4,12 +4,19 @@ export interface LogoutOptions {
   serverUrl?: string
 }
 
-export async function logout(serverName: string, options?: LogoutOptions): Promise<number> {
+export async function logout(
+  serverName: string,
+  options?: LogoutOptions,
+): Promise<number> {
   try {
     const serverUrl = options?.serverUrl
     if (!serverUrl) {
-      console.error(`Error: --server-url is required for logout. Token storage uses server URLs, not names.`)
-      console.error(`  Usage: mcp oauth logout ${serverName} --server-url https://your-server.example.com`)
+      console.error(
+        `Error: --server-url is required for logout. Token storage uses server URLs, not names.`,
+      )
+      console.error(
+        `  Usage: mcp oauth logout ${serverName} --server-url https://your-server.example.com`,
+      )
       return 1
     }
 
@@ -24,7 +31,9 @@ export async function logout(serverName: string, options?: LogoutOptions): Promi
     return 1
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`Error: Failed to remove tokens for ${serverName}: ${message}`)
+    console.error(
+      `Error: Failed to remove tokens for ${serverName}: ${message}`,
+    )
     return 1
   }
 }

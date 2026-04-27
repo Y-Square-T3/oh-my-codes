@@ -1,6 +1,15 @@
 import { describe, expect, it } from "bun:test"
-import { applyHashlineEdits, applyHashlineEditsWithReport } from "./edit-operations"
-import { applyAppend, applyInsertAfter, applyPrepend, applyReplaceLines, applySetLine } from "./edit-operation-primitives"
+import {
+  applyHashlineEdits,
+  applyHashlineEditsWithReport,
+} from "./edit-operations"
+import {
+  applyAppend,
+  applyInsertAfter,
+  applyPrepend,
+  applyReplaceLines,
+  applySetLine,
+} from "./edit-operation-primitives"
 import { computeLineHash } from "./hash-computation"
 import type { HashlineEdit } from "./types"
 
@@ -25,7 +34,12 @@ describe("hashline edit operations", () => {
     const lines = ["line 1", "line 2", "line 3", "line 4"]
 
     //#when
-    const result = applyReplaceLines(lines, anchorFor(lines, 2), anchorFor(lines, 3), "replaced")
+    const result = applyReplaceLines(
+      lines,
+      anchorFor(lines, 2),
+      anchorFor(lines, 3),
+      "replaced",
+    )
 
     //#then
     expect(result).toEqual(["line 1", "replaced", "line 4"])
@@ -47,22 +61,22 @@ describe("hashline edit operations", () => {
     const lines = ["line 1", "line 2", "line 3"]
 
     //#when
-    const result = applyHashlineEdits(
-      lines.join("\n"),
-      [{ op: "prepend", pos: anchorFor(lines, 2), lines: "before 2" }]
-    )
+    const result = applyHashlineEdits(lines.join("\n"), [
+      { op: "prepend", pos: anchorFor(lines, 2), lines: "before 2" },
+    ])
 
     //#then
     expect(result).toEqual("line 1\nbefore 2\nline 2\nline 3")
   })
-
 
   it("throws when insert_after receives empty text array", () => {
     //#given
     const lines = ["line 1", "line 2"]
 
     //#when / #then
-    expect(() => applyInsertAfter(lines, anchorFor(lines, 1), [])).toThrow(/non-empty/i)
+    expect(() => applyInsertAfter(lines, anchorFor(lines, 1), [])).toThrow(
+      /non-empty/i,
+    )
   })
 
   it("throws when insert_before receives empty text array", () => {
@@ -71,10 +85,11 @@ describe("hashline edit operations", () => {
 
     //#when / #then
     expect(() =>
-      applyHashlineEdits(lines.join("\n"), [{ op: "prepend", pos: anchorFor(lines, 1), lines: [] }])
+      applyHashlineEdits(lines.join("\n"), [
+        { op: "prepend", pos: anchorFor(lines, 1), lines: [] },
+      ]),
     ).toThrow(/non-empty/i)
   })
-
 
   it("applies mixed edits in one pass", () => {
     //#given
@@ -140,7 +155,11 @@ describe("hashline edit operations", () => {
     const lines = ["line 1", "line 2", "line 3"]
 
     //#when
-    const result = applySetLine(lines, anchorFor(lines, 2), "1#VK|first\n2#NP|second")
+    const result = applySetLine(
+      lines,
+      anchorFor(lines, 2),
+      "1#VK|first\n2#NP|second",
+    )
 
     //#then
     expect(result).toEqual(["line 1", "first", "second", "line 3"])
@@ -151,7 +170,10 @@ describe("hashline edit operations", () => {
     const lines = ["line 1", "line 2"]
 
     //#when
-    const result = applyInsertAfter(lines, anchorFor(lines, 1), ["line 1", "inserted"])
+    const result = applyInsertAfter(lines, anchorFor(lines, 1), [
+      "line 1",
+      "inserted",
+    ])
 
     //#then
     expect(result).toEqual(["line 1", "inserted", "line 2"])
@@ -162,7 +184,9 @@ describe("hashline edit operations", () => {
     const lines = ["line 1", "line 2"]
 
     //#when / #then
-    expect(() => applyInsertAfter(lines, anchorFor(lines, 1), ["line 1"])).toThrow(/non-empty/i)
+    expect(() =>
+      applyInsertAfter(lines, anchorFor(lines, 1), ["line 1"]),
+    ).toThrow(/non-empty/i)
   })
 
   it("restores indentation for paired single-line replacement", () => {
@@ -207,20 +231,24 @@ describe("hashline edit operations", () => {
       lines,
       anchorFor(lines, 2),
       anchorFor(lines, 3),
-      ["before", "new 1", "new 2", "after"]
+      ["before", "new 1", "new 2", "after"],
     )
 
     //#then
     expect(result).toEqual(["before", "new 1", "new 2", "after"])
   })
 
-
   it("restores indentation for first replace_lines entry", () => {
     //#given
     const lines = ["if (x) {", "  return 1", "  return 2", "}"]
 
     //#when
-    const result = applyReplaceLines(lines, anchorFor(lines, 2), anchorFor(lines, 3), ["return 3", "return 4"])
+    const result = applyReplaceLines(
+      lines,
+      anchorFor(lines, 2),
+      anchorFor(lines, 3),
+      ["return 3", "return 4"],
+    )
 
     //#then
     expect(result).toEqual(["if (x) {", "  return 3", "  return 4", "}"])
@@ -228,24 +256,48 @@ describe("hashline edit operations", () => {
 
   it("preserves blank lines and indentation in range replace (no false unwrap)", () => {
     //#given, reproduces the 애국가 bug where blank+indented lines collapse
-    const lines = ["", "동해물과 백두산이 마르고 닳도록", "하느님이 보우하사 우리나라 만세", "", "무궁화 삼천리 화려강산", "대한사람 대한으로 길이 보전하세", ""]
+    const lines = [
+      "",
+      "동해물과 백두산이 마르고 닳도록",
+      "하느님이 보우하사 우리나라 만세",
+      "",
+      "무궁화 삼천리 화려강산",
+      "대한사람 대한으로 길이 보전하세",
+      "",
+    ]
 
     //#when, replace the range with indented version (blank lines preserved)
     const result = applyReplaceLines(
       lines,
       anchorFor(lines, 1),
       anchorFor(lines, 7),
-      ["", "  동해물과 백두산이 마르고 닳도록", "  하느님이 보우하사 우리나라 만세", "", "  무궁화 삼천리 화려강산", "  대한사람 대한으로 길이 보전하세", ""]
+      [
+        "",
+        "  동해물과 백두산이 마르고 닳도록",
+        "  하느님이 보우하사 우리나라 만세",
+        "",
+        "  무궁화 삼천리 화려강산",
+        "  대한사람 대한으로 길이 보전하세",
+        "",
+      ],
     )
 
     //#then, all 7 lines preserved with indentation, not collapsed to 3
-    expect(result).toEqual(["", "  동해물과 백두산이 마르고 닳도록", "  하느님이 보우하사 우리나라 만세", "", "  무궁화 삼천리 화려강산", "  대한사람 대한으로 길이 보전하세", ""])
+    expect(result).toEqual([
+      "",
+      "  동해물과 백두산이 마르고 닳도록",
+      "  하느님이 보우하사 우리나라 만세",
+      "",
+      "  무궁화 삼천리 화려강산",
+      "  대한사람 대한으로 길이 보전하세",
+      "",
+    ])
   })
 
   it("collapses wrapped replacement span back to unique original single line", () => {
     //#given
     const lines = [
-      "const request = buildRequest({ method: \"GET\", retries: 3 })",
+      'const request = buildRequest({ method: "GET", retries: 3 })',
       "const done = true",
     ]
 
@@ -254,22 +306,31 @@ describe("hashline edit operations", () => {
       lines,
       anchorFor(lines, 1),
       anchorFor(lines, 1),
-      ["const request = buildRequest({", "method: \"GET\", retries: 3 })"]
+      ["const request = buildRequest({", 'method: "GET", retries: 3 })'],
     )
 
     //#then
     expect(result).toEqual([
-      "const request = buildRequest({ method: \"GET\", retries: 3 })",
+      'const request = buildRequest({ method: "GET", retries: 3 })',
       "const done = true",
     ])
   })
 
   it("keeps wrapped replacement when canonical match is not unique in original lines", () => {
     //#given
-    const lines = ["const query = a + b", "const query = a+b", "const done = true"]
+    const lines = [
+      "const query = a + b",
+      "const query = a+b",
+      "const done = true",
+    ]
 
     //#when
-    const result = applyReplaceLines(lines, anchorFor(lines, 1), anchorFor(lines, 2), ["const query = a +", "b"])
+    const result = applyReplaceLines(
+      lines,
+      anchorFor(lines, 1),
+      anchorFor(lines, 2),
+      ["const query = a +", "b"],
+    )
 
     //#then
     expect(result).toEqual(["const query = a +", "b", "const done = true"])
@@ -277,15 +338,23 @@ describe("hashline edit operations", () => {
 
   it("keeps wrapped replacement when same canonical candidate appears multiple times", () => {
     //#given
-    const lines = ["const expression = alpha + beta + gamma", "const done = true"]
+    const lines = [
+      "const expression = alpha + beta + gamma",
+      "const done = true",
+    ]
 
     //#when
-    const result = applyReplaceLines(lines, anchorFor(lines, 1), anchorFor(lines, 1), [
-      "const expression = alpha +",
-      "beta + gamma",
-      "const expression = alpha +",
-      "beta + gamma",
-    ])
+    const result = applyReplaceLines(
+      lines,
+      anchorFor(lines, 1),
+      anchorFor(lines, 1),
+      [
+        "const expression = alpha +",
+        "beta + gamma",
+        "const expression = alpha +",
+        "beta + gamma",
+      ],
+    )
 
     //#then
     expect(result).toEqual([
@@ -302,7 +371,12 @@ describe("hashline edit operations", () => {
     const lines = ["a + b", "const done = true"]
 
     //#when
-    const result = applyReplaceLines(lines, anchorFor(lines, 1), anchorFor(lines, 1), ["a +", "b"])
+    const result = applyReplaceLines(
+      lines,
+      anchorFor(lines, 1),
+      anchorFor(lines, 1),
+      ["a +", "b"],
+    )
 
     //#then
     expect(result).toEqual(["a +", "b", "const done = true"])
@@ -353,7 +427,7 @@ describe("hashline edit operations", () => {
       lines,
       anchorFor(lines, 1),
       anchorFor(lines, 2),
-      "const a = 10; const b = 20;"
+      "const a = 10; const b = 20;",
     )
 
     //#then
@@ -365,8 +439,18 @@ describe("hashline edit operations", () => {
     const content = "line 1\nline 2\nline 3\nline 4\nline 5"
     const lines = content.split("\n")
     const edits: HashlineEdit[] = [
-      { op: "replace", pos: anchorFor(lines, 1), end: anchorFor(lines, 3), lines: "replaced A" },
-      { op: "replace", pos: anchorFor(lines, 2), end: anchorFor(lines, 4), lines: "replaced B" },
+      {
+        op: "replace",
+        pos: anchorFor(lines, 1),
+        end: anchorFor(lines, 3),
+        lines: "replaced A",
+      },
+      {
+        op: "replace",
+        pos: anchorFor(lines, 2),
+        end: anchorFor(lines, 4),
+        lines: "replaced B",
+      },
     ]
 
     //#when / #then
@@ -378,8 +462,18 @@ describe("hashline edit operations", () => {
     const content = "line 1\nline 2\nline 3\nline 4\nline 5"
     const lines = content.split("\n")
     const edits: HashlineEdit[] = [
-      { op: "replace", pos: anchorFor(lines, 1), end: anchorFor(lines, 2), lines: "replaced A" },
-      { op: "replace", pos: anchorFor(lines, 4), end: anchorFor(lines, 5), lines: "replaced B" },
+      {
+        op: "replace",
+        pos: anchorFor(lines, 1),
+        end: anchorFor(lines, 2),
+        lines: "replaced A",
+      },
+      {
+        op: "replace",
+        pos: anchorFor(lines, 4),
+        end: anchorFor(lines, 5),
+        lines: "replaced B",
+      },
     ]
 
     //#when

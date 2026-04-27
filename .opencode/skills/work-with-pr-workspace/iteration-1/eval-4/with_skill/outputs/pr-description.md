@@ -6,7 +6,7 @@
 
 ## Body
 
-```markdown
+````markdown
 ## Summary
 
 Closes #100
@@ -31,15 +31,17 @@ Enabled by default. Disable with:
 ```jsonc
 // .opencode/oh-my-codes.jsonc
 {
-  "disabled_mcps": ["arxiv"]
+  "disabled_mcps": ["arxiv"],
 }
 ```
+````
 
 ## Validation
 
 - [x] `bun run typecheck` passes
 - [x] `bun test src/mcp/` passes
 - [x] `bun run build` passes
+
 ```
 
 ## Labels
@@ -49,3 +51,4 @@ Enabled by default. Disable with:
 ## Base branch
 
 `dev`
+```

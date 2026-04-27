@@ -30,7 +30,9 @@ describe("BackgroundTaskConfigSchema", () => {
   describe("syncPollTimeoutMs", () => {
     describe("#given valid syncPollTimeoutMs (120000)", () => {
       test("#when parsed #then returns correct value", () => {
-        const result = BackgroundTaskConfigSchema.parse({ syncPollTimeoutMs: 120000 })
+        const result = BackgroundTaskConfigSchema.parse({
+          syncPollTimeoutMs: 120000,
+        })
 
         expect(result.syncPollTimeoutMs).toBe(120000)
       })

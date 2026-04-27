@@ -1,4 +1,13 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock, test } from "bun:test"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  test,
+} from "bun:test"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js"
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js"
 import type { ClaudeCodeMcpServer } from "../claude-code-mcp-loader/types"
@@ -21,7 +30,7 @@ class MockClient {
 
   constructor(
     _clientInfo: { name: string; version: string },
-    _options: { capabilities: Record<string, never> }
+    _options: { capabilities: Record<string, never> },
   ) {}
 
   async connect(_transport: Transport): Promise<void> {
@@ -58,7 +67,9 @@ function getHeaderValue(
   }
 
   if (Array.isArray(headers)) {
-    const entry = headers.find(([headerName]) => headerName.toLowerCase() === name.toLowerCase())
+    const entry = headers.find(
+      ([headerName]) => headerName.toLowerCase() === name.toLowerCase(),
+    )
     return entry?.[1]
   }
 
@@ -137,7 +148,8 @@ beforeEach(() => {
   })
   setHttpClientDependenciesForTesting({
     createClient: (clientInfo, options) => new MockClient(clientInfo, options),
-    createTransport: (url, options) => new MockStreamableHTTPClientTransport(url, options),
+    createTransport: (url, options) =>
+      new MockStreamableHTTPClientTransport(url, options),
   })
 })
 
@@ -167,7 +179,7 @@ describe("getOrCreateClient env var expansion", () => {
       ["local", "Authorization:Bearer "],
       ["user", "Authorization:Bearer xoxp-scope-token"],
       ["builtin", "Authorization:Bearer xoxp-scope-token"],
-    ] satisfies Array<[NonNullable<SkillMcpClientInfo["scope"]>, string]>) (
+    ] satisfies Array<[NonNullable<SkillMcpClientInfo["scope"]>, string]>)(
       "#when creating the client for %s scope #then args expand to %s",
       async (scope, expectedAuthorizationHeader) => {
         // given
@@ -191,7 +203,9 @@ describe("getOrCreateClient env var expansion", () => {
 
         // then
         expect(createdStdioTransports).toHaveLength(1)
-        expect(createdStdioTransports[0]?.options.args?.[4]).toBe(expectedAuthorizationHeader)
+        expect(createdStdioTransports[0]?.options.args?.[4]).toBe(
+          expectedAuthorizationHeader,
+        )
       },
     )
 
@@ -276,7 +290,9 @@ describe("getOrCreateClient env var expansion", () => {
 
       // then
       expect(createdStdioTransports).toHaveLength(1)
-      expect(createdStdioTransports[0]?.options.env?.SLACK_BOT_USER_ID).toBe("token-123")
+      expect(createdStdioTransports[0]?.options.env?.SLACK_BOT_USER_ID).toBe(
+        "token-123",
+      )
     })
   })
 
@@ -297,11 +313,14 @@ describe("getOrCreateClient env var expansion", () => {
       // when
       await getOrCreateClient({ state, clientKey, info, config })
 
-        // then
-        expect(createdHttpTransports).toHaveLength(1)
-        expect(getHeaderValue(createdHttpTransports[0]?.options?.requestInit?.headers, "Authorization")).toBe(
-          "Bearer xoxp-http-secret"
-        )
-      })
+      // then
+      expect(createdHttpTransports).toHaveLength(1)
+      expect(
+        getHeaderValue(
+          createdHttpTransports[0]?.options?.requestInit?.headers,
+          "Authorization",
+        ),
+      ).toBe("Bearer xoxp-http-secret")
+    })
   })
 })

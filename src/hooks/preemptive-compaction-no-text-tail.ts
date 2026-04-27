@@ -29,7 +29,10 @@ export function isStepOnlyNoTextParts(parts: unknown): boolean {
   })
 }
 
-function findMessageByID(messages: SessionMessage[], messageID?: string): SessionMessage | undefined {
+function findMessageByID(
+  messages: SessionMessage[],
+  messageID?: string,
+): SessionMessage | undefined {
   if (!messageID) return undefined
   return messages.find((message) => message.info?.id === messageID)
 }
@@ -60,7 +63,8 @@ export async function resolveNoTextTailFromSession(args: {
     })
     if (!Array.isArray(messages) || messages.length === 0) return false
 
-    const target = findMessageByID(messages, messageID) ?? messages[messages.length - 1]
+    const target =
+      findMessageByID(messages, messageID) ?? messages[messages.length - 1]
     if (target.info?.role !== "assistant") return false
 
     return isStepOnlyNoTextParts(target.parts)

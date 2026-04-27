@@ -154,7 +154,10 @@ function parseCountOutput(output: string): CountResult[] {
   return results
 }
 
-export async function runRg(options: GrepOptions, resolvedCli?: ResolvedCli): Promise<GrepResult> {
+export async function runRg(
+  options: GrepOptions,
+  resolvedCli?: ResolvedCli,
+): Promise<GrepResult> {
   await rgSemaphore.acquire()
   try {
     return await runRgInternal(options, resolvedCli)
@@ -163,10 +166,16 @@ export async function runRg(options: GrepOptions, resolvedCli?: ResolvedCli): Pr
   }
 }
 
-async function runRgInternal(options: GrepOptions, resolvedCli?: ResolvedCli): Promise<GrepResult> {
+async function runRgInternal(
+  options: GrepOptions,
+  resolvedCli?: ResolvedCli,
+): Promise<GrepResult> {
   const cli = resolvedCli ?? resolveGrepCli()
   const args = buildArgs(options, cli.backend)
-  const timeout = Math.min(options.timeout ?? DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
+  const timeout = Math.min(
+    options.timeout ?? DEFAULT_TIMEOUT_MS,
+    DEFAULT_TIMEOUT_MS,
+  )
 
   if (cli.backend === "rg") {
     args.push("--", options.pattern)
@@ -190,12 +199,17 @@ async function runRgInternal(options: GrepOptions, resolvedCli?: ResolvedCli): P
   })
 
   try {
-    const stdout = await Promise.race([new Response(proc.stdout).text(), timeoutPromise])
+    const stdout = await Promise.race([
+      new Response(proc.stdout).text(),
+      timeoutPromise,
+    ])
     const stderr = await new Response(proc.stderr).text()
     const exitCode = await proc.exited
 
     const truncated = stdout.length >= DEFAULT_MAX_OUTPUT_BYTES
-    const outputToProcess = truncated ? stdout.substring(0, DEFAULT_MAX_OUTPUT_BYTES) : stdout
+    const outputToProcess = truncated
+      ? stdout.substring(0, DEFAULT_MAX_OUTPUT_BYTES)
+      : stdout
 
     if (exitCode > 1 && stderr.trim()) {
       return {
@@ -207,17 +221,23 @@ async function runRgInternal(options: GrepOptions, resolvedCli?: ResolvedCli): P
       }
     }
 
-    const matches = parseOutput(outputToProcess, options.outputMode === "files_with_matches")
-    const limited = options.headLimit && options.headLimit > 0
-      ? matches.slice(0, options.headLimit)
-      : matches
+    const matches = parseOutput(
+      outputToProcess,
+      options.outputMode === "files_with_matches",
+    )
+    const limited =
+      options.headLimit && options.headLimit > 0
+        ? matches.slice(0, options.headLimit)
+        : matches
     const filesSearched = new Set(limited.map((m) => m.file)).size
 
     return {
       matches: limited,
       totalMatches: limited.length,
       filesSearched,
-      truncated: truncated || (options.headLimit ? matches.length > options.headLimit : false),
+      truncated:
+        truncated ||
+        (options.headLimit ? matches.length > options.headLimit : false),
     }
   } catch (e) {
     return {
@@ -232,7 +252,7 @@ async function runRgInternal(options: GrepOptions, resolvedCli?: ResolvedCli): P
 
 export async function runRgCount(
   options: Omit<GrepOptions, "context">,
-  resolvedCli?: ResolvedCli
+  resolvedCli?: ResolvedCli,
 ): Promise<CountResult[]> {
   await rgSemaphore.acquire()
   try {
@@ -244,7 +264,7 @@ export async function runRgCount(
 
 async function runRgCountInternal(
   options: Omit<GrepOptions, "context">,
-  resolvedCli?: ResolvedCli
+  resolvedCli?: ResolvedCli,
 ): Promise<CountResult[]> {
   const cli = resolvedCli ?? resolveGrepCli()
   const args = buildArgs({ ...options, context: 0 }, cli.backend)
@@ -258,7 +278,10 @@ async function runRgCountInternal(
   const paths = options.paths?.length ? options.paths : ["."]
   args.push(...paths)
 
-  const timeout = Math.min(options.timeout ?? DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
+  const timeout = Math.min(
+    options.timeout ?? DEFAULT_TIMEOUT_MS,
+    DEFAULT_TIMEOUT_MS,
+  )
   const proc = spawn([cli.path, ...args], {
     stdout: "pipe",
     stderr: "pipe",
@@ -273,9 +296,14 @@ async function runRgCountInternal(
   })
 
   try {
-    const stdout = await Promise.race([new Response(proc.stdout).text(), timeoutPromise])
+    const stdout = await Promise.race([
+      new Response(proc.stdout).text(),
+      timeoutPromise,
+    ])
     return parseCountOutput(stdout)
   } catch (e) {
-    throw new Error(`Count search failed: ${e instanceof Error ? e.message : String(e)}`)
+    throw new Error(
+      `Count search failed: ${e instanceof Error ? e.message : String(e)}`,
+    )
   }
 }

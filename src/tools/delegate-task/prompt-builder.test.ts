@@ -15,7 +15,10 @@ const { describe, test, expect } = require("bun:test") as {
 }
 
 import { buildSystemContent } from "./prompt-builder"
-import type { AvailableSkill, AvailableCategory } from "../../agents/dynamic-agent-prompt-builder"
+import type {
+  AvailableSkill,
+  AvailableCategory,
+} from "../../agents/dynamic-agent-prompt-builder"
 
 describe("prompt-builder", () => {
   describe("buildSystemContent", () => {
@@ -23,11 +26,23 @@ describe("prompt-builder", () => {
       test("#when availableSkills contains project-level skills #then system content includes available_skills section", () => {
         // given
         const availableSkills: AvailableSkill[] = [
-          { name: "git-master", description: "Git workflow automation", location: "plugin" },
-          { name: "my-project-skill", description: "Project-specific deployment", location: "project" },
+          {
+            name: "git-master",
+            description: "Git workflow automation",
+            location: "plugin",
+          },
+          {
+            name: "my-project-skill",
+            description: "Project-specific deployment",
+            location: "project",
+          },
         ]
         const availableCategories: AvailableCategory[] = [
-          { name: "quick", description: "Trivial tasks", model: "openai/gpt-5.4-mini" },
+          {
+            name: "quick",
+            description: "Trivial tasks",
+            model: "openai/gpt-5.4-mini",
+          },
         ]
 
         // when
@@ -46,7 +61,11 @@ describe("prompt-builder", () => {
       test("#when agent is explore #then system content includes available_skills section", () => {
         // given
         const availableSkills: AvailableSkill[] = [
-          { name: "review-work", description: "Review code quality", location: "project" },
+          {
+            name: "review-work",
+            description: "Review code quality",
+            location: "project",
+          },
         ]
 
         // when
@@ -81,10 +100,18 @@ describe("prompt-builder", () => {
       test("#when availableSkills provided #then system content includes plan agent prepend with skills", () => {
         // given
         const availableSkills: AvailableSkill[] = [
-          { name: "git-master", description: "Git workflow automation", location: "plugin" },
+          {
+            name: "git-master",
+            description: "Git workflow automation",
+            location: "plugin",
+          },
         ]
         const availableCategories: AvailableCategory[] = [
-          { name: "quick", description: "Trivial tasks", model: "openai/gpt-5.4-mini" },
+          {
+            name: "quick",
+            description: "Trivial tasks",
+            model: "openai/gpt-5.4-mini",
+          },
         ]
 
         // when
@@ -105,7 +132,11 @@ describe("prompt-builder", () => {
       test("#when agentsContext is provided #then it takes precedence and skills section is appended", () => {
         // given
         const availableSkills: AvailableSkill[] = [
-          { name: "deploy-skill", description: "Deployment automation", location: "project" },
+          {
+            name: "deploy-skill",
+            description: "Deployment automation",
+            location: "project",
+          },
         ]
 
         // when

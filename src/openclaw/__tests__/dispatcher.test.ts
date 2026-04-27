@@ -35,13 +35,20 @@ describe("OpenClaw Dispatcher", () => {
     try {
       const result = await wakeGateway(
         "test",
-        { url: "https://example.com", method: "POST", timeout: 1000, type: "http" },
+        {
+          url: "https://example.com",
+          method: "POST",
+          timeout: 1000,
+          type: "http",
+        },
         { foo: "bar" },
       )
 
       expect(result.success).toBe(true)
       expect(fetchSpy).toHaveBeenCalled()
-      const call = fetchSpy.mock.calls.find(c => c[0] === "https://example.com")
+      const call = fetchSpy.mock.calls.find(
+        (c) => c[0] === "https://example.com",
+      )
       expect(call).toBeDefined()
       if (!call) {
         throw new Error("Expected fetch call for https://example.com")
@@ -72,7 +79,12 @@ describe("OpenClaw Dispatcher", () => {
     try {
       const result = await wakeGateway(
         "test",
-        { url: "https://example.com", method: "POST", timeout: 1000, type: "http" },
+        {
+          url: "https://example.com",
+          method: "POST",
+          timeout: 1000,
+          type: "http",
+        },
         { foo: "bar" },
       )
 
@@ -107,7 +119,12 @@ describe("OpenClaw Dispatcher", () => {
     try {
       const result = await wakeGateway(
         "test",
-        { url: "https://example.com", method: "POST", timeout: 1000, type: "http" },
+        {
+          url: "https://example.com",
+          method: "POST",
+          timeout: 1000,
+          type: "http",
+        },
         { foo: "bar" },
       )
 
@@ -124,7 +141,16 @@ describe("OpenClaw Dispatcher", () => {
   })
 
   test("wakeGateway fails on invalid URL", async () => {
-    const result = await wakeGateway("test", { url: "http://example.com", method: "POST", timeout: 1000, type: "http" }, {})
+    const result = await wakeGateway(
+      "test",
+      {
+        url: "http://example.com",
+        method: "POST",
+        timeout: 1000,
+        type: "http",
+      },
+      {},
+    )
     expect(result.success).toBe(false)
     expect(result.error).toContain("Invalid URL")
   })
@@ -137,7 +163,8 @@ describe("OpenClaw Dispatcher", () => {
       // Call without explicit envTimeoutRaw so the function reads from process.env itself
       expect(resolveCommandTimeoutMs(undefined)).toBe(4321)
     } finally {
-      if (original === undefined) delete process.env.OMO_OPENCLAW_COMMAND_TIMEOUT_MS
+      if (original === undefined)
+        delete process.env.OMO_OPENCLAW_COMMAND_TIMEOUT_MS
       else process.env.OMO_OPENCLAW_COMMAND_TIMEOUT_MS = original
     }
   })
@@ -184,7 +211,8 @@ describe("OpenClaw Dispatcher", () => {
       {
         type: "command",
         method: "POST",
-        command: "printf '%s' '{\"messageId\":\"55\",\"platform\":\"telegram\",\"threadId\":\"thr\"}'",
+        command:
+          'printf \'%s\' \'{"messageId":"55","platform":"telegram","threadId":"thr"}\'',
         timeout: 1000,
       },
       {},

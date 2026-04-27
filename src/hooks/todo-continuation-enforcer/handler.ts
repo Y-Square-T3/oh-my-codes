@@ -1,9 +1,7 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 
 import type { BackgroundManager } from "../../features/background-agent"
-import {
-  clearContinuationMarker,
-} from "../../features/run-continuation-state"
+import { clearContinuationMarker } from "../../features/run-continuation-state"
 import { log } from "../../shared/logger"
 
 import { DEFAULT_SKIP_AGENTS, HOOK_NAME } from "./constants"
@@ -19,7 +17,9 @@ export function createTodoContinuationHandler(args: {
   backgroundManager?: BackgroundManager
   skipAgents?: string[]
   isContinuationStopped?: (sessionID: string) => boolean
-}): (input: { event: { type: string; properties?: unknown } }) => Promise<void> {
+}): (input: {
+  event: { type: string; properties?: unknown }
+}) => Promise<void> {
   const {
     ctx,
     sessionStateStore,
@@ -28,15 +28,24 @@ export function createTodoContinuationHandler(args: {
     isContinuationStopped,
   } = args
 
-  return async ({ event }: { event: { type: string; properties?: unknown } }): Promise<void> => {
+  return async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }): Promise<void> => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.error") {
       const sessionID = props?.sessionID as string | undefined
       if (!sessionID) return
 
-      const error = props?.error as { name?: string; message?: string } | undefined
-      if (error?.name === "MessageAbortedError" || error?.name === "AbortError") {
+      const error = props?.error as
+        | { name?: string; message?: string }
+        | undefined
+      if (
+        error?.name === "MessageAbortedError" ||
+        error?.name === "AbortError"
+      ) {
         const state = sessionStateStore.getState(sessionID)
         state.wasCancelled = true
         state.abortDetectedAt = Date.now()
@@ -45,11 +54,18 @@ export function createTodoContinuationHandler(args: {
         state.awaitingPostInjectionProgressCheck = false
         state.stagnationCount = 0
         state.consecutiveFailures = 0
-        log(`[${HOOK_NAME}] Abort detected via session.error`, { sessionID, errorName: error.name })
+        log(`[${HOOK_NAME}] Abort detected via session.error`, {
+          sessionID,
+          errorName: error.name,
+        })
       } else if (isTokenLimitError(error)) {
         const state = sessionStateStore.getState(sessionID)
         state.tokenLimitDetected = true
-        log(`[${HOOK_NAME}] Token limit error detected via session.error`, { sessionID, errorName: error?.name, errorMessage: error?.message })
+        log(`[${HOOK_NAME}] Token limit error detected via session.error`, {
+          sessionID,
+          errorName: error?.name,
+          errorMessage: error?.message,
+        })
       }
 
       sessionStateStore.cancelCountdown(sessionID)
@@ -74,12 +90,16 @@ export function createTodoContinuationHandler(args: {
     }
 
     if (event.type === "session.compacted") {
-      const sessionID = (props?.sessionID ?? (props?.info as { id?: string } | undefined)?.id) as string | undefined
+      const sessionID = (props?.sessionID ??
+        (props?.info as { id?: string } | undefined)?.id) as string | undefined
       if (sessionID) {
         const state = sessionStateStore.getState(sessionID)
         const compactionEpoch = armCompactionGuard(state, Date.now())
         sessionStateStore.cancelCountdown(sessionID)
-        log(`[${HOOK_NAME}] Session compacted: armed compaction guard`, { sessionID, compactionEpoch })
+        log(`[${HOOK_NAME}] Session compacted: armed compaction guard`, {
+          sessionID,
+          compactionEpoch,
+        })
       }
       return
     }

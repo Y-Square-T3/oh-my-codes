@@ -4,7 +4,12 @@ import { parseImageDimensions } from "./image-dimensions"
 import { calculateTargetDimensions, resizeImage } from "./image-resizer"
 import { log } from "../../shared"
 import { getSessionModel } from "../../shared/session-model-state"
-const SUPPORTED_IMAGE_MIMES = new Set(["image/png", "image/jpeg", "image/gif", "image/webp"])
+const SUPPORTED_IMAGE_MIMES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+])
 const TOKEN_DIVISOR = 750
 interface ResizeEntry {
   filename: string
@@ -31,7 +36,9 @@ function isImageAttachmentRecord(
     (typeof filename === "undefined" || typeof filename === "string")
   )
 }
-function extractImageAttachments(output: Record<string, unknown>): ImageAttachment[] {
+function extractImageAttachments(
+  output: Record<string, unknown>,
+): ImageAttachment[] {
   const attachmentsValue = output.attachments
   if (!Array.isArray(attachmentsValue)) {
     return []
@@ -67,7 +74,9 @@ function calculateTokens(width: number, height: number): number {
   return Math.ceil((width * height) / TOKEN_DIVISOR)
 }
 function formatResizeAppendix(entries: ResizeEntry[]): string {
-  const header = entries.some((entry) => entry.status === "resized") ? "[Image Resize Info]" : "[Image Info]"
+  const header = entries.some((entry) => entry.status === "resized")
+    ? "[Image Resize Info]"
+    : "[Image Info]"
   const lines = [`\n\n${header}`]
 
   for (const entry of entries) {
@@ -81,17 +90,23 @@ function formatResizeAppendix(entries: ResizeEntry[]): string {
     const originalTokens = calculateTokens(original.width, original.height)
 
     if (entry.status === "within-limits") {
-      lines.push(`- ${entry.filename}: ${originalText} (within limits, tokens: ${originalTokens})`)
+      lines.push(
+        `- ${entry.filename}: ${originalText} (within limits, tokens: ${originalTokens})`,
+      )
       continue
     }
 
     if (entry.status === "resize-skipped") {
-      lines.push(`- ${entry.filename}: ${originalText} (exceeds provider limits, image removed to prevent API error)`)
+      lines.push(
+        `- ${entry.filename}: ${originalText} (exceeds provider limits, image removed to prevent API error)`,
+      )
       continue
     }
 
     if (!entry.resizedDims) {
-      lines.push(`- ${entry.filename}: ${originalText} (resize skipped, tokens: ${originalTokens})`)
+      lines.push(
+        `- ${entry.filename}: ${originalText} (resize skipped, tokens: ${originalTokens})`,
+      )
       continue
     }
 
@@ -143,13 +158,24 @@ export function createReadImageResizerHook(_ctx: PluginInput) {
         const filename = resolveFilename(attachment, index)
 
         try {
-          const originalDims = parseImageDimensions(attachment.url, attachment.mime)
+          const originalDims = parseImageDimensions(
+            attachment.url,
+            attachment.mime,
+          )
           if (!originalDims) {
-            entries.push({ filename, originalDims: null, resizedDims: null, status: "unknown-dims" })
+            entries.push({
+              filename,
+              originalDims: null,
+              resizedDims: null,
+              status: "unknown-dims",
+            })
             continue
           }
 
-          const targetDims = calculateTargetDimensions(originalDims.width, originalDims.height)
+          const targetDims = calculateTargetDimensions(
+            originalDims.width,
+            originalDims.height,
+          )
           if (!targetDims) {
             entries.push({
               filename,
@@ -160,7 +186,11 @@ export function createReadImageResizerHook(_ctx: PluginInput) {
             continue
           }
 
-          const resizedResult = await resizeImage(attachment.url, attachment.mime, targetDims)
+          const resizedResult = await resizeImage(
+            attachment.url,
+            attachment.mime,
+            targetDims,
+          )
           if (!resizedResult) {
             attachmentsToRemove.push(attachment)
             entries.push({
@@ -185,7 +215,12 @@ export function createReadImageResizerHook(_ctx: PluginInput) {
             error: error instanceof Error ? error.message : String(error),
             filename,
           })
-          entries.push({ filename, originalDims: null, resizedDims: null, status: "unknown-dims" })
+          entries.push({
+            filename,
+            originalDims: null,
+            resizedDims: null,
+            status: "unknown-dims",
+          })
         }
       }
 

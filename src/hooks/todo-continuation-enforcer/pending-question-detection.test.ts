@@ -17,9 +17,7 @@ describe("hasUnansweredQuestion", () => {
       { info: { role: "user" } },
       {
         info: { role: "assistant" },
-        parts: [
-          { type: "tool_use", name: "question" },
-        ],
+        parts: [{ type: "tool_use", name: "question" }],
       },
     ]
     expect(hasUnansweredQuestion(messages)).toBe(true)
@@ -30,9 +28,7 @@ describe("hasUnansweredQuestion", () => {
       { info: { role: "user" } },
       {
         info: { role: "assistant" },
-        parts: [
-          { type: "tool-invocation", toolName: "question" },
-        ],
+        parts: [{ type: "tool-invocation", toolName: "question" }],
       },
     ]
     expect(hasUnansweredQuestion(messages)).toBe(true)
@@ -42,9 +38,7 @@ describe("hasUnansweredQuestion", () => {
     const messages = [
       {
         info: { role: "assistant" },
-        parts: [
-          { type: "tool_use", name: "question" },
-        ],
+        parts: [{ type: "tool_use", name: "question" }],
       },
       { info: { role: "user" } },
     ]
@@ -56,9 +50,7 @@ describe("hasUnansweredQuestion", () => {
       { info: { role: "user" } },
       {
         info: { role: "assistant" },
-        parts: [
-          { type: "tool_use", name: "bash" },
-        ],
+        parts: [{ type: "tool_use", name: "bash" }],
       },
     ]
     expect(hasUnansweredQuestion(messages)).toBe(false)
@@ -77,9 +69,7 @@ describe("hasUnansweredQuestion", () => {
       { role: "user" },
       {
         role: "assistant",
-        parts: [
-          { type: "tool_use", name: "question" },
-        ],
+        parts: [{ type: "tool_use", name: "question" }],
       },
     ]
     expect(hasUnansweredQuestion(messages)).toBe(true)

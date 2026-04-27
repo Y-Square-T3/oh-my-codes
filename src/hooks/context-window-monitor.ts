@@ -3,9 +3,12 @@ import {
   resolveActualContextLimit,
   type ContextLimitModelCacheState,
 } from "../shared/context-limit-resolver"
-import { createSystemDirective, SystemDirectiveTypes } from "../shared/system-directive"
+import {
+  createSystemDirective,
+  SystemDirectiveTypes,
+} from "../shared/system-directive"
 
-const CONTEXT_WARNING_THRESHOLD = 0.70
+const CONTEXT_WARNING_THRESHOLD = 0.7
 
 function createContextReminder(actualLimit: number): string {
   const limitTokens = actualLimit.toLocaleString()
@@ -39,7 +42,7 @@ export function createContextWindowMonitorHook(
 
   const toolExecuteAfter = async (
     input: { tool: string; sessionID: string; callID: string },
-    output: { title: string; output: string; metadata: unknown }
+    output: { title: string; output: string; metadata: unknown },
   ) => {
     const { sessionID } = input
 
@@ -57,7 +60,8 @@ export function createContextWindowMonitorHook(
     if (!actualLimit) return
 
     const lastTokens = cached.tokens
-    const totalInputTokens = (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)
+    const totalInputTokens =
+      (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)
 
     const actualUsagePercentage = totalInputTokens / actualLimit
 
@@ -74,7 +78,11 @@ export function createContextWindowMonitorHook(
 [Context Status: ${usedPct}% used (${usedTokens}/${limitTokens} tokens), ${remainingPct}% remaining]`
   }
 
-  const eventHandler = async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  const eventHandler = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {
@@ -86,14 +94,16 @@ export function createContextWindowMonitorHook(
     }
 
     if (event.type === "message.updated") {
-      const info = props?.info as {
-        role?: string
-        sessionID?: string
-        providerID?: string
-        modelID?: string
-        finish?: boolean
-        tokens?: TokenInfo
-      } | undefined
+      const info = props?.info as
+        | {
+            role?: string
+            sessionID?: string
+            providerID?: string
+            modelID?: string
+            finish?: boolean
+            tokens?: TokenInfo
+          }
+        | undefined
 
       if (!info || info.role !== "assistant" || !info.finish) return
       if (!info.sessionID || !info.providerID || !info.tokens) return

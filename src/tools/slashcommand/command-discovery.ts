@@ -43,7 +43,11 @@ function discoverCommandsFromDir(
         ? `${prefix}${NESTED_COMMAND_SEPARATOR}${entry.name}`
         : entry.name
       commands.push(
-        ...discoverCommandsFromDir(join(commandsDir, entry.name), scope, nestedPrefix),
+        ...discoverCommandsFromDir(
+          join(commandsDir, entry.name),
+          scope,
+          nestedPrefix,
+        ),
       )
       continue
     }
@@ -60,12 +64,16 @@ function discoverCommandsFromDir(
       const content = readFileSync(commandPath, "utf-8")
       const { data, body } = parseFrontmatter<CommandFrontmatter>(content)
 
-      const isOpencodeSource = scope === "opencode" || scope === "opencode-project"
+      const isOpencodeSource =
+        scope === "opencode" || scope === "opencode-project"
       const metadata: CommandMetadata = {
         name: commandName,
         description: data.description || "",
         argumentHint: data["argument-hint"],
-        model: sanitizeModelField(data.model, isOpencodeSource ? "opencode" : "claude-code"),
+        model: sanitizeModelField(
+          data.model,
+          isOpencodeSource ? "opencode" : "claude-code",
+        ),
         agent: data.agent,
         subtask: Boolean(data.subtask),
       }
@@ -85,7 +93,9 @@ function discoverCommandsFromDir(
   return commands
 }
 
-function discoverPluginCommands(options?: CommandDiscoveryOptions): CommandInfo[] {
+function discoverPluginCommands(
+  options?: CommandDiscoveryOptions,
+): CommandInfo[] {
   const pluginDefinitions = discoverPluginCommandDefinitions(options)
 
   return Object.entries(pluginDefinitions).map(([name, definition]) => ({
@@ -123,13 +133,19 @@ export function discoverCommandsSync(
   options?: CommandDiscoveryOptions,
 ): CommandInfo[] {
   const userCommandsDir = join(getClaudeConfigDir(), "commands")
-  const projectCommandsDir = join(directory ?? process.cwd(), ".claude", "commands")
+  const projectCommandsDir = join(
+    directory ?? process.cwd(),
+    ".claude",
+    "commands",
+  )
   const opencodeGlobalDirs = getOpenCodeCommandDirs({ binary: "opencode" })
-  const opencodeProjectDirs = findProjectOpencodeCommandDirs(directory ?? process.cwd())
+  const opencodeProjectDirs = findProjectOpencodeCommandDirs(
+    directory ?? process.cwd(),
+  )
 
   const userCommands = discoverCommandsFromDir(userCommandsDir, "user")
   const opencodeGlobalCommands = opencodeGlobalDirs.flatMap((commandsDir) =>
-    discoverCommandsFromDir(commandsDir, "opencode")
+    discoverCommandsFromDir(commandsDir, "opencode"),
   )
   const projectCommands = discoverCommandsFromDir(projectCommandsDir, "project")
   const opencodeProjectCommands = opencodeProjectDirs.flatMap((commandsDir) =>
@@ -138,19 +154,21 @@ export function discoverCommandsSync(
   const pluginCommands = discoverPluginCommands(options)
 
   const builtinCommandsMap = loadBuiltinCommands()
-  const builtinCommands: CommandInfo[] = Object.values(builtinCommandsMap).map((command) => ({
-    name: command.name,
-    metadata: {
+  const builtinCommands: CommandInfo[] = Object.values(builtinCommandsMap).map(
+    (command) => ({
       name: command.name,
-      description: command.description || "",
-      argumentHint: command.argumentHint,
-      model: command.model,
-      agent: command.agent,
-      subtask: command.subtask,
-    },
-    content: command.template,
-    scope: "builtin",
-  }))
+      metadata: {
+        name: command.name,
+        description: command.description || "",
+        argumentHint: command.argumentHint,
+        model: command.model,
+        agent: command.agent,
+        subtask: command.subtask,
+      },
+      content: command.template,
+      scope: "builtin",
+    }),
+  )
 
   return deduplicateCommandInfosByName([
     ...projectCommands,

@@ -29,7 +29,7 @@ export function createPreemptiveCompactionHook(
 
   const toolExecuteAfter = async (
     input: { tool: string; sessionID: string; callID: string },
-    _output: { title: string; output: string; metadata: unknown }
+    _output: { title: string; output: string; metadata: unknown },
   ) => {
     await runPreemptiveCompactionIfNeeded({
       ctx,
@@ -43,7 +43,11 @@ export function createPreemptiveCompactionHook(
     })
   }
 
-  const eventHandler = async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  const eventHandler = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {
@@ -59,8 +63,9 @@ export function createPreemptiveCompactionHook(
     }
 
     if (event.type === "session.compacted") {
-      const sessionID = (props?.sessionID as string | undefined)
-        ?? (props?.info as { id?: string } | undefined)?.id
+      const sessionID =
+        (props?.sessionID as string | undefined) ??
+        (props?.info as { id?: string } | undefined)?.id
       if (sessionID) {
         postCompactionMonitor.onSessionCompacted(sessionID)
       }
@@ -68,17 +73,20 @@ export function createPreemptiveCompactionHook(
     }
 
     if (event.type === "message.updated") {
-      const info = props?.info as {
-        id?: string
-        role?: string
-        sessionID?: string
-        providerID?: string
-        modelID?: string
-        finish?: boolean
-        tokens?: TokenInfo
-      } | undefined
+      const info = props?.info as
+        | {
+            id?: string
+            role?: string
+            sessionID?: string
+            providerID?: string
+            modelID?: string
+            finish?: boolean
+            tokens?: TokenInfo
+          }
+        | undefined
 
-      if (!info || info.role !== "assistant" || !info.finish || !info.sessionID) return
+      if (!info || info.role !== "assistant" || !info.finish || !info.sessionID)
+        return
 
       if (info.providerID && info.tokens) {
         tokenCache.set(info.sessionID, {

@@ -8,12 +8,14 @@ const mockCheckForLegacyPluginEntry = mock(() => ({
   legacyEntries: [] as string[],
 }))
 
-const mockAutoMigrate = mock((): MigrationResult => ({
-  migrated: false,
-  from: null,
-  to: null,
-  configPath: null,
-}))
+const mockAutoMigrate = mock(
+  (): MigrationResult => ({
+    migrated: false,
+    from: null,
+    to: null,
+    configPath: null,
+  }),
+)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockShowToast = mock((_arg: any) => Promise.resolve())
@@ -53,7 +55,12 @@ describe("createLegacyPluginToastHook", () => {
       hasCanonicalEntry: true,
       legacyEntries: [],
     })
-    mockAutoMigrate.mockReturnValue({ migrated: false, from: null, to: null, configPath: null })
+    mockAutoMigrate.mockReturnValue({
+      migrated: false,
+      from: null,
+      to: null,
+      configPath: null,
+    })
     mockShowToast.mockResolvedValue(undefined)
   })
 
@@ -99,7 +106,9 @@ describe("createLegacyPluginToastHook", () => {
 
       // then
       expect(mockShowToast).toHaveBeenCalledTimes(1)
-      const toastArg = mockShowToast.mock.calls[0][0] as { body: { variant: string } }
+      const toastArg = mockShowToast.mock.calls[0][0] as {
+        body: { variant: string }
+      }
       expect(toastArg.body.variant).toBe("success")
     })
   })
@@ -129,7 +138,9 @@ describe("createLegacyPluginToastHook", () => {
 
       // then
       expect(mockShowToast).toHaveBeenCalledTimes(1)
-      const toastArg2 = mockShowToast.mock.calls[0][0] as { body: { variant: string } }
+      const toastArg2 = mockShowToast.mock.calls[0][0] as {
+        body: { variant: string }
+      }
       expect(toastArg2.body.variant).toBe("warning")
     })
   })

@@ -30,13 +30,25 @@ describe("dispatchOpenClawEvent", () => {
 
     await dispatchOpenClawEvent({
       config: createConfig({
-        "session-start": { enabled: true, gateway: "gateway", instruction: "hi" },
+        "session-start": {
+          enabled: true,
+          gateway: "gateway",
+          instruction: "hi",
+        },
       }),
       rawEvent: "session.created",
-      context: { sessionId: "ses-1", projectPath: "/tmp/project", tmuxPaneId: "%1", tmuxSession: "main" },
+      context: {
+        sessionId: "ses-1",
+        projectPath: "/tmp/project",
+        tmuxPaneId: "%1",
+        tmuxSession: "main",
+      },
     })
 
-    expect(wakeSpy.mock.calls.map((call) => call[1])).toEqual(["session.created", "session-start"])
+    expect(wakeSpy.mock.calls.map((call) => call[1])).toEqual([
+      "session.created",
+      "session-start",
+    ])
   })
 
   test("registers reply correlation when wake returns outbound metadata", async () => {
@@ -48,11 +60,18 @@ describe("dispatchOpenClawEvent", () => {
       channelId: "chan-1",
       threadId: "thread-1",
     })
-    const registerSpy = spyOn(sessionRegistryModule, "registerMessage").mockReturnValue(true)
+    const registerSpy = spyOn(
+      sessionRegistryModule,
+      "registerMessage",
+    ).mockReturnValue(true)
 
     await dispatchOpenClawEvent({
       config: createConfig({
-        "session.created": { enabled: true, gateway: "gateway", instruction: "hi" },
+        "session.created": {
+          enabled: true,
+          gateway: "gateway",
+          instruction: "hi",
+        },
       }),
       rawEvent: "session.created",
       context: {
@@ -78,7 +97,10 @@ describe("dispatchOpenClawEvent", () => {
 
   test("cleans up session mappings on session.deleted", async () => {
     spyOn(openclawModule, "wakeOpenClaw").mockResolvedValue(null)
-    const removeSpy = spyOn(sessionRegistryModule, "removeSession").mockImplementation(() => {})
+    const removeSpy = spyOn(
+      sessionRegistryModule,
+      "removeSession",
+    ).mockImplementation(() => {})
 
     await dispatchOpenClawEvent({
       config: createConfig({}),

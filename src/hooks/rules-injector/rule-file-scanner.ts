@@ -1,17 +1,19 @@
-import { existsSync, readdirSync, realpathSync } from "node:fs";
-import { join } from "node:path";
-import { EXCLUDED_DIRS } from "../../shared";
-import { GITHUB_INSTRUCTIONS_PATTERN, RULE_EXTENSIONS } from "./constants";
+import { existsSync, readdirSync, realpathSync } from "node:fs"
+import { join } from "node:path"
+import { EXCLUDED_DIRS } from "../../shared"
+import { GITHUB_INSTRUCTIONS_PATTERN, RULE_EXTENSIONS } from "./constants"
 
 function isGitHubInstructionsDir(dir: string): boolean {
-  return dir.includes(".github/instructions") || dir.endsWith(".github/instructions");
+  return (
+    dir.includes(".github/instructions") || dir.endsWith(".github/instructions")
+  )
 }
 
 function isValidRuleFile(fileName: string, dir: string): boolean {
   if (isGitHubInstructionsDir(dir)) {
-    return GITHUB_INSTRUCTIONS_PATTERN.test(fileName);
+    return GITHUB_INSTRUCTIONS_PATTERN.test(fileName)
   }
-  return RULE_EXTENSIONS.some((ext) => fileName.endsWith(ext));
+  return RULE_EXTENSIONS.some((ext) => fileName.endsWith(ext))
 }
 
 /**
@@ -21,19 +23,19 @@ function isValidRuleFile(fileName: string, dir: string): boolean {
  * @param results - Array to accumulate results
  */
 export function findRuleFilesRecursive(dir: string, results: string[]): void {
-  if (!existsSync(dir)) return;
+  if (!existsSync(dir)) return
 
   try {
-    const entries = readdirSync(dir, { withFileTypes: true });
+    const entries = readdirSync(dir, { withFileTypes: true })
     for (const entry of entries) {
-      const fullPath = join(dir, entry.name);
+      const fullPath = join(dir, entry.name)
 
       if (entry.isDirectory()) {
-        if (EXCLUDED_DIRS.has(entry.name)) continue;
-        findRuleFilesRecursive(fullPath, results);
+        if (EXCLUDED_DIRS.has(entry.name)) continue
+        findRuleFilesRecursive(fullPath, results)
       } else if (entry.isFile()) {
         if (isValidRuleFile(entry.name, dir)) {
-          results.push(fullPath);
+          results.push(fullPath)
         }
       }
     }
@@ -50,8 +52,8 @@ export function findRuleFilesRecursive(dir: string, results: string[]): void {
  */
 export function safeRealpathSync(filePath: string): string {
   try {
-    return realpathSync(filePath);
+    return realpathSync(filePath)
   } catch {
-    return filePath;
+    return filePath
   }
 }

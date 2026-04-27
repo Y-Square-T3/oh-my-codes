@@ -16,7 +16,10 @@ function parseHttpsUrl(value: string, label: string): URL {
   return parsed
 }
 
-function readStringField(source: Record<string, unknown>, field: string): string {
+function readStringField(
+  source: Record<string, unknown>,
+  field: string,
+): string {
   const value = source[field]
   if (typeof value !== "string" || value.length === 0) {
     throw new Error(`OAuth metadata missing ${field}`)
@@ -24,31 +27,45 @@ function readStringField(source: Record<string, unknown>, field: string): string
   return value
 }
 
-async function fetchMetadata(url: string): Promise<{ ok: true; json: Record<string, unknown> } | { ok: false; status: number }> {
+async function fetchMetadata(
+  url: string,
+): Promise<
+  { ok: true; json: Record<string, unknown> } | { ok: false; status: number }
+> {
   const response = await fetch(url, { headers: { accept: "application/json" } })
   if (!response.ok) {
     return { ok: false, status: response.status }
   }
-  const json = (await response.json().catch(() => null)) as Record<string, unknown> | null
+  const json = (await response.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null
   if (!json || typeof json !== "object") {
     throw new Error("OAuth metadata response is not valid JSON")
   }
   return { ok: true, json }
 }
 
-function parseMetadataFields(json: Record<string, unknown>, resource: string): OAuthServerMetadata {
+function parseMetadataFields(
+  json: Record<string, unknown>,
+  resource: string,
+): OAuthServerMetadata {
   const authorizationEndpoint = parseHttpsUrl(
     readStringField(json, "authorization_endpoint"),
-    "authorization_endpoint"
+    "authorization_endpoint",
   ).toString()
   const tokenEndpoint = parseHttpsUrl(
     readStringField(json, "token_endpoint"),
-    "token_endpoint"
+    "token_endpoint",
   ).toString()
   const registrationEndpointValue = json.registration_endpoint
   const registrationEndpoint =
-    typeof registrationEndpointValue === "string" && registrationEndpointValue.length > 0
-      ? parseHttpsUrl(registrationEndpointValue, "registration_endpoint").toString()
+    typeof registrationEndpointValue === "string" &&
+    registrationEndpointValue.length > 0
+      ? parseHttpsUrl(
+          registrationEndpointValue,
+          "registration_endpoint",
+        ).toString()
       : undefined
 
   return {
@@ -59,15 +76,24 @@ function parseMetadataFields(json: Record<string, unknown>, resource: string): O
   }
 }
 
-async function fetchAuthorizationServerMetadata(issuer: string, resource: string): Promise<OAuthServerMetadata> {
+async function fetchAuthorizationServerMetadata(
+  issuer: string,
+  resource: string,
+): Promise<OAuthServerMetadata> {
   const issuerUrl = parseHttpsUrl(issuer, "Authorization server URL")
   const issuerPath = issuerUrl.pathname.replace(/\/+$/, "")
-  const metadataUrl = new URL(`/.well-known/oauth-authorization-server${issuerPath}`, issuerUrl).toString()
+  const metadataUrl = new URL(
+    `/.well-known/oauth-authorization-server${issuerPath}`,
+    issuerUrl,
+  ).toString()
   const metadata = await fetchMetadata(metadataUrl)
 
   if (!metadata.ok) {
     if (metadata.status === 404 && issuerPath !== "") {
-      const rootMetadataUrl = new URL("/.well-known/oauth-authorization-server", issuerUrl).toString()
+      const rootMetadataUrl = new URL(
+        "/.well-known/oauth-authorization-server",
+        issuerUrl,
+      ).toString()
       const rootMetadata = await fetchMetadata(rootMetadataUrl)
       if (rootMetadata.ok) {
         return parseMetadataFields(rootMetadata.json, resource)
@@ -76,19 +102,28 @@ async function fetchAuthorizationServerMetadata(issuer: string, resource: string
     if (metadata.status === 404) {
       throw new Error("OAuth authorization server metadata not found")
     }
-    throw new Error(`OAuth authorization server metadata fetch failed (${metadata.status})`)
+    throw new Error(
+      `OAuth authorization server metadata fetch failed (${metadata.status})`,
+    )
   }
 
   return parseMetadataFields(metadata.json, resource)
 }
 
-function parseAuthorizationServers(metadata: Record<string, unknown>): string[] {
+function parseAuthorizationServers(
+  metadata: Record<string, unknown>,
+): string[] {
   const servers = metadata.authorization_servers
   if (!Array.isArray(servers)) return []
-  return servers.filter((server): server is string => typeof server === "string" && server.length > 0)
+  return servers.filter(
+    (server): server is string =>
+      typeof server === "string" && server.length > 0,
+  )
 }
 
-export async function discoverOAuthServerMetadata(resource: string): Promise<OAuthServerMetadata> {
+export async function discoverOAuthServerMetadata(
+  resource: string,
+): Promise<OAuthServerMetadata> {
   const resourceUrl = parseHttpsUrl(resource, "Resource server URL")
   const resourceKey = resourceUrl.toString()
 
@@ -99,19 +134,26 @@ export async function discoverOAuthServerMetadata(resource: string): Promise<OAu
   if (pending) return pending
 
   const discoveryPromise = (async () => {
-    const prmUrl = new URL("/.well-known/oauth-protected-resource", resourceUrl).toString()
+    const prmUrl = new URL(
+      "/.well-known/oauth-protected-resource",
+      resourceUrl,
+    ).toString()
     const prmResponse = await fetchMetadata(prmUrl)
 
     if (prmResponse.ok) {
       const authServers = parseAuthorizationServers(prmResponse.json)
       if (authServers.length === 0) {
-        throw new Error("OAuth protected resource metadata missing authorization_servers")
+        throw new Error(
+          "OAuth protected resource metadata missing authorization_servers",
+        )
       }
       return fetchAuthorizationServerMetadata(authServers[0], resource)
     }
 
     if (prmResponse.status !== 404) {
-      throw new Error(`OAuth protected resource metadata fetch failed (${prmResponse.status})`)
+      throw new Error(
+        `OAuth protected resource metadata fetch failed (${prmResponse.status})`,
+      )
     }
 
     return fetchAuthorizationServerMetadata(resourceKey, resource)

@@ -54,25 +54,37 @@ describe("Atlas prompts auto-continue policy", () => {
 
   test("all variants should require immediate continuation after verification passes", () => {
     // given
-    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+    const prompts = [
+      ATLAS_SYSTEM_PROMPT,
+      ATLAS_GPT_SYSTEM_PROMPT,
+      ATLAS_GEMINI_SYSTEM_PROMPT,
+    ]
 
     // when / then
     for (const prompt of prompts) {
       const lowerPrompt = prompt.toLowerCase()
-      expect(lowerPrompt).toMatch(/auto-continue immediately after verification/)
+      expect(lowerPrompt).toMatch(
+        /auto-continue immediately after verification/,
+      )
       expect(lowerPrompt).toMatch(/immediately delegate next task/)
     }
   })
 
   test("all variants should define when user interaction is actually needed", () => {
     // given
-    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+    const prompts = [
+      ATLAS_SYSTEM_PROMPT,
+      ATLAS_GPT_SYSTEM_PROMPT,
+      ATLAS_GEMINI_SYSTEM_PROMPT,
+    ]
 
     // when / then
     for (const prompt of prompts) {
       const lowerPrompt = prompt.toLowerCase()
       expect(lowerPrompt).toMatch(/only pause.*truly blocked/)
-      expect(lowerPrompt).toMatch(/plan needs clarification|blocked by external/)
+      expect(lowerPrompt).toMatch(
+        /plan needs clarification|blocked by external/,
+      )
     }
   })
 })
@@ -80,7 +92,11 @@ describe("Atlas prompts auto-continue policy", () => {
 describe("Atlas prompts anti-duplication coverage", () => {
   test("all variants should include anti-duplication rules for delegated exploration", () => {
     // given
-    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+    const prompts = [
+      ATLAS_SYSTEM_PROMPT,
+      ATLAS_GPT_SYSTEM_PROMPT,
+      ATLAS_GEMINI_SYSTEM_PROMPT,
+    ]
 
     // when / then
     for (const prompt of prompts) {
@@ -123,7 +139,11 @@ describe("Atlas prompts plan path consistency", () => {
 
   test("all variants should read plan file after verification", () => {
     // given
-    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+    const prompts = [
+      ATLAS_SYSTEM_PROMPT,
+      ATLAS_GPT_SYSTEM_PROMPT,
+      ATLAS_GEMINI_SYSTEM_PROMPT,
+    ]
 
     // when / then
     for (const prompt of prompts) {
@@ -133,7 +153,11 @@ describe("Atlas prompts plan path consistency", () => {
 
   test("all variants should distinguish top-level plan tasks from nested checkboxes", () => {
     // given
-    const prompts = [ATLAS_SYSTEM_PROMPT, ATLAS_GPT_SYSTEM_PROMPT, ATLAS_GEMINI_SYSTEM_PROMPT]
+    const prompts = [
+      ATLAS_SYSTEM_PROMPT,
+      ATLAS_GPT_SYSTEM_PROMPT,
+      ATLAS_GEMINI_SYSTEM_PROMPT,
+    ]
 
     // when / then
     for (const prompt of prompts) {

@@ -29,16 +29,26 @@ function extractMessage(error: unknown): string {
   return String(error)
 }
 
-export function parseModelSuggestion(error: unknown): ModelSuggestionInfo | null {
+export function parseModelSuggestion(
+  error: unknown,
+): ModelSuggestionInfo | null {
   if (!error) return null
 
   if (typeof error === "object") {
     const errObj = error as Record<string, unknown>
 
-    if (errObj.name === "ProviderModelNotFoundError" && typeof errObj.data === "object" && errObj.data !== null) {
+    if (
+      errObj.name === "ProviderModelNotFoundError" &&
+      typeof errObj.data === "object" &&
+      errObj.data !== null
+    ) {
       const data = errObj.data as Record<string, unknown>
       const suggestions = data.suggestions
-      if (Array.isArray(suggestions) && suggestions.length > 0 && typeof suggestions[0] === "string") {
+      if (
+        Array.isArray(suggestions) &&
+        suggestions.length > 0 &&
+        typeof suggestions[0] === "string"
+      ) {
         return {
           providerID: String(data.providerID ?? ""),
           modelID: String(data.modelID ?? ""),
@@ -60,7 +70,9 @@ export function parseModelSuggestion(error: unknown): ModelSuggestionInfo | null
   const message = extractMessage(error)
   if (!message) return null
 
-  const modelMatch = message.match(/model not found:\s*([^/\s]+)\s*\/\s*([^.\s]+)/i)
+  const modelMatch = message.match(
+    /model not found:\s*([^/\s]+)\s*\/\s*([^.\s]+)/i,
+  )
   const suggestionMatch = message.match(/did you mean:\s*([^,?]+)/i)
 
   if (modelMatch && suggestionMatch) {

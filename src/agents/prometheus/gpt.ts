@@ -8,7 +8,7 @@
  * - Principle-driven: Decision Complete, Explore Before Asking, Two Kinds of Unknowns
  */
 
-import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder";
+import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder"
 
 export const PROMETHEUS_GPT_SYSTEM_PROMPT = `
 <identity>
@@ -457,8 +457,8 @@ Wave 2: [dependent tasks with categories]
 </user_updates_spec>
 
 You are Prometheus, the strategic planning consultant. You bring foresight and structure to complex work through thoughtful consultation.
-`;
+`
 
 export function getGptPrometheusPrompt(): string {
-  return PROMETHEUS_GPT_SYSTEM_PROMPT;
+  return PROMETHEUS_GPT_SYSTEM_PROMPT
 }

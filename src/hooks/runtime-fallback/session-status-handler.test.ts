@@ -49,14 +49,22 @@ function createDeps(): HookDeps {
   }
 }
 
-function createHelpers(abortCalls: string[], retryCalls: Array<{ sessionID: string; model: string; source: string }>): AutoRetryHelpers {
+function createHelpers(
+  abortCalls: string[],
+  retryCalls: Array<{ sessionID: string; model: string; source: string }>,
+): AutoRetryHelpers {
   return {
     abortSessionRequest: async (sessionID: string) => {
       abortCalls.push(sessionID)
     },
     clearSessionFallbackTimeout: () => {},
     scheduleSessionFallbackTimeout: () => {},
-    autoRetryWithFallback: async (sessionID: string, model: string, _resolvedAgent: string | undefined, source: string) => {
+    autoRetryWithFallback: async (
+      sessionID: string,
+      model: string,
+      _resolvedAgent: string | undefined,
+      source: string,
+    ) => {
       retryCalls.push({ sessionID, model, source })
     },
     resolveAgentForSessionFromContext: async () => undefined,
@@ -73,7 +81,11 @@ describe("createSessionStatusHandler", () => {
 
     const deps = createDeps()
     const abortCalls: string[] = []
-    const retryCalls: Array<{ sessionID: string; model: string; source: string }> = []
+    const retryCalls: Array<{
+      sessionID: string
+      model: string
+      source: string
+    }> = []
     const state = createFallbackState("anthropic/claude-opus-4-7")
     state.currentModel = "openai/gpt-5.4"
     state.fallbackIndex = 0
@@ -82,7 +94,11 @@ describe("createSessionStatusHandler", () => {
     state.failedModels.set("anthropic/claude-opus-4-7", Date.now())
     deps.sessionStates.set(sessionID, state)
 
-    const handler = createSessionStatusHandler(deps, createHelpers(abortCalls, retryCalls), deps.sessionStatusRetryKeys)
+    const handler = createSessionStatusHandler(
+      deps,
+      createHelpers(abortCalls, retryCalls),
+      deps.sessionStatusRetryKeys,
+    )
 
     // when
     await handler({
@@ -91,7 +107,8 @@ describe("createSessionStatusHandler", () => {
       status: {
         type: "retry",
         attempt: 2,
-        message: "All credentials for model gpt-5.4 are cooling down [retrying in 7m 56s attempt #2]",
+        message:
+          "All credentials for model gpt-5.4 are cooling down [retrying in 7m 56s attempt #2]",
       },
     })
 

@@ -28,7 +28,11 @@ export async function getContinuationState(
   const marker = readContinuationMarker(directory, sessionID)
 
   return {
-    hasActiveBoulder: await hasActiveBoulderContinuation(directory, sessionID, client),
+    hasActiveBoulder: await hasActiveBoulderContinuation(
+      directory,
+      sessionID,
+      client,
+    ),
     hasActiveRalphLoop: hasActiveRalphLoopContinuation(directory, sessionID),
     hasHookMarker: marker !== null,
     hasTodoHookMarker: marker?.sources.todo !== undefined,
@@ -55,7 +59,11 @@ async function hasActiveBoulderContinuation(
     return false
   }
 
-  const isTrackedDescendant = await isTrackedDescendantSession(client, sessionID, boulder.session_ids)
+  const isTrackedDescendant = await isTrackedDescendantSession(
+    client,
+    sessionID,
+    boulder.session_ids,
+  )
 
   if (isTrackedSession && sessionOrigin === "direct") {
     return true
@@ -65,8 +73,9 @@ async function hasActiveBoulderContinuation(
     return false
   }
 
-  const sessionAgent = await getLastAgentFromSession(sessionID, client)
-    ?? getSessionAgent(sessionID)
+  const sessionAgent =
+    (await getLastAgentFromSession(sessionID, client)) ??
+    getSessionAgent(sessionID)
   if (!sessionAgent) {
     return false
   }
@@ -74,8 +83,11 @@ async function hasActiveBoulderContinuation(
   const requiredAgentKey = getAgentConfigKey(boulder.agent ?? "atlas")
   const sessionAgentKey = getAgentConfigKey(sessionAgent)
   if (
-    sessionAgentKey !== requiredAgentKey
-    && !(requiredAgentKey === getAgentConfigKey("atlas") && sessionAgentKey === getAgentConfigKey("sisyphus"))
+    sessionAgentKey !== requiredAgentKey &&
+    !(
+      requiredAgentKey === getAgentConfigKey("atlas") &&
+      sessionAgentKey === getAgentConfigKey("sisyphus")
+    )
   ) {
     return false
   }
@@ -88,7 +100,9 @@ async function isTrackedDescendantSession(
   sessionID: string,
   trackedSessionIDs: string[],
 ): Promise<boolean> {
-  const ancestorSessionIDs = trackedSessionIDs.filter((trackedSessionID) => trackedSessionID !== sessionID)
+  const ancestorSessionIDs = trackedSessionIDs.filter(
+    (trackedSessionID) => trackedSessionID !== sessionID,
+  )
   if (ancestorSessionIDs.length === 0) {
     return false
   }
@@ -100,7 +114,10 @@ async function isTrackedDescendantSession(
   })
 }
 
-function hasActiveRalphLoopContinuation(directory: string, sessionID: string): boolean {
+function hasActiveRalphLoopContinuation(
+  directory: string,
+  sessionID: string,
+): boolean {
   const state = readRalphLoopState(directory)
   if (!state || !state.active) return false
 

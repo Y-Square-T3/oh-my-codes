@@ -30,7 +30,9 @@ function resolveFilePath(from: string, configDir?: string): string {
   return resolve(baseDir, filePath)
 }
 
-function loadSkillFromFile(filePath: string): { template: string; metadata: SkillMetadata } | null {
+function loadSkillFromFile(
+  filePath: string,
+): { template: string; metadata: SkillMetadata } | null {
   try {
     if (!existsSync(filePath)) return null
     const content = readFileSync(filePath, "utf-8")
@@ -44,7 +46,7 @@ function loadSkillFromFile(filePath: string): { template: string; metadata: Skil
 export function configEntryToLoadedSkill(
   name: string,
   entry: SkillDefinition,
-  configDir?: string
+  configDir?: string,
 ): LoadedSkill | null {
   let template = entry.template || ""
   let fileMetadata: SkillMetadata = {}
@@ -55,11 +57,14 @@ export function configEntryToLoadedSkill(
     const projectRoot = configDir || process.cwd()
 
     if (!isWithinProject(sourcePath, projectRoot)) {
-      log("[config-skill-entry-loader] Rejected skill entry file outside project root", {
-        from: entry.from,
-        filePath: sourcePath,
-        projectRoot,
-      })
+      log(
+        "[config-skill-entry-loader] Rejected skill entry file outside project root",
+        {
+          from: entry.from,
+          filePath: sourcePath,
+          projectRoot,
+        },
+      )
       return null
     }
 
@@ -77,9 +82,14 @@ export function configEntryToLoadedSkill(
   }
 
   const description = entry.description || fileMetadata.description || ""
-  const resolvedPath = sourcePath ? dirname(sourcePath) : configDir || process.cwd()
+  const resolvedPath = sourcePath
+    ? dirname(sourcePath)
+    : configDir || process.cwd()
 
-  const resolvedTemplate = resolveSkillPathReferences(template.trim(), resolvedPath)
+  const resolvedTemplate = resolveSkillPathReferences(
+    template.trim(),
+    resolvedPath,
+  )
   const wrappedTemplate = `<skill-instruction>
 Base directory for this skill: ${resolvedPath}/
 File references (@path) in this skill are relative to this directory.
@@ -101,7 +111,8 @@ $ARGUMENTS
     argumentHint: entry["argument-hint"] || fileMetadata["argument-hint"],
   }
 
-  const allowedTools = entry["allowed-tools"] || parseAllowedTools(fileMetadata["allowed-tools"])
+  const allowedTools =
+    entry["allowed-tools"] || parseAllowedTools(fileMetadata["allowed-tools"])
 
   return {
     name,
@@ -111,7 +122,9 @@ $ARGUMENTS
     scope: "config",
     license: entry.license || fileMetadata.license,
     compatibility: entry.compatibility || fileMetadata.compatibility,
-    metadata: (entry.metadata as Record<string, string> | undefined) || fileMetadata.metadata,
+    metadata:
+      (entry.metadata as Record<string, string> | undefined) ||
+      fileMetadata.metadata,
     allowedTools,
   }
 }

@@ -1,1 +1,1 @@
-export { createAnthropicEffortHook } from "./hook";
+export { createAnthropicEffortHook } from "./hook"

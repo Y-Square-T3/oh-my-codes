@@ -1,6 +1,9 @@
 import { log } from "../../shared/logger"
 import { getTaskToastManager } from "../../features/task-toast-manager"
-import type { ChatMessageHandlerOutput, ChatMessageInput } from "../../plugin/chat-message"
+import type {
+  ChatMessageHandlerOutput,
+  ChatMessageInput,
+} from "../../plugin/chat-message"
 
 export async function applyFallbackToChatMessage(params: {
   input: ChatMessageInput

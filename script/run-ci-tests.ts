@@ -8,7 +8,9 @@ type CiTestPlan = {
 
 const TEST_ROOTS = ["bin", "script", "src"] as const
 const MODULE_MOCK_PATTERN = "mock.module("
-const ALWAYS_ISOLATED_TEST_FILES = ["src/openclaw/__tests__/reply-listener-discord.test.ts"] as const
+const ALWAYS_ISOLATED_TEST_FILES = [
+  "src/openclaw/__tests__/reply-listener-discord.test.ts",
+] as const
 
 async function collectTestFiles(rootDirectory: string): Promise<string[]> {
   const testFiles: string[] = []
@@ -16,7 +18,9 @@ async function collectTestFiles(rootDirectory: string): Promise<string[]> {
   for (const testRoot of TEST_ROOTS) {
     const glob = new Bun.Glob("**/*.test.ts")
 
-    for await (const testFile of glob.scan({ cwd: `${rootDirectory}/${testRoot}` })) {
+    for await (const testFile of glob.scan({
+      cwd: `${rootDirectory}/${testRoot}`,
+    })) {
       testFiles.push(`${testRoot}/${testFile}`)
     }
   }
@@ -24,7 +28,10 @@ async function collectTestFiles(rootDirectory: string): Promise<string[]> {
   return testFiles.sort((left, right) => left.localeCompare(right))
 }
 
-async function usesModuleMock(rootDirectory: string, testFile: string): Promise<boolean> {
+async function usesModuleMock(
+  rootDirectory: string,
+  testFile: string,
+): Promise<boolean> {
   const testContents = await Bun.file(`${rootDirectory}/${testFile}`).text()
   return testContents.includes(MODULE_MOCK_PATTERN)
 }
@@ -34,18 +41,25 @@ function toIsolatedTarget(testFile: string): string {
 }
 
 function isCoveredByTarget(testFile: string, isolatedTarget: string): boolean {
-  return testFile === isolatedTarget || testFile.startsWith(`${isolatedTarget}/`)
+  return (
+    testFile === isolatedTarget || testFile.startsWith(`${isolatedTarget}/`)
+  )
 }
 
 function collapseNestedTargets(isolatedTargets: string[]): string[] {
   return isolatedTargets.filter((isolatedTarget) => {
     return !isolatedTargets.some((otherTarget) => {
-      return otherTarget !== isolatedTarget && isolatedTarget.startsWith(`${otherTarget}/`)
+      return (
+        otherTarget !== isolatedTarget &&
+        isolatedTarget.startsWith(`${otherTarget}/`)
+      )
     })
   })
 }
 
-export async function createCiTestPlan(rootDirectory: string = process.cwd()): Promise<CiTestPlan> {
+export async function createCiTestPlan(
+  rootDirectory: string = process.cwd(),
+): Promise<CiTestPlan> {
   const allTestFiles = await collectTestFiles(rootDirectory)
   const isolatedModuleMockFiles: string[] = []
 
@@ -56,15 +70,22 @@ export async function createCiTestPlan(rootDirectory: string = process.cwd()): P
   }
 
   const isolatedTestFiles = Array.from(
-    new Set([...isolatedModuleMockFiles, ...ALWAYS_ISOLATED_TEST_FILES.filter((testFile) => allTestFiles.includes(testFile))]),
+    new Set([
+      ...isolatedModuleMockFiles,
+      ...ALWAYS_ISOLATED_TEST_FILES.filter((testFile) =>
+        allTestFiles.includes(testFile),
+      ),
+    ]),
   )
   const isolatedTestTargets = collapseNestedTargets(
-    isolatedTestFiles.map((testFile) => toIsolatedTarget(testFile)).sort((left, right) =>
-      left.localeCompare(right),
-    ),
+    isolatedTestFiles
+      .map((testFile) => toIsolatedTarget(testFile))
+      .sort((left, right) => left.localeCompare(right)),
   )
   const sharedTestFiles = allTestFiles.filter((testFile) => {
-    return !isolatedTestTargets.some((isolatedTarget) => isCoveredByTarget(testFile, isolatedTarget))
+    return !isolatedTestTargets.some((isolatedTarget) =>
+      isCoveredByTarget(testFile, isolatedTarget),
+    )
   })
 
   return {
@@ -80,16 +101,18 @@ async function runBunTest(testFiles: string[], label: string): Promise<void> {
   }
 
   console.log(`::group::${label}`)
-  
+
   // For directory paths, exclude _auc* directories which are separate isolated targets
-  const args = testFiles.map(tf => {
-    if (tf.includes('/') && !tf.endsWith('.test.ts')) {
-      // It's a directory path, add negation glob
-      return [tf, '!_auc-*/**/*.test.ts']
-    }
-    return tf
-  }).flat()
-  
+  const args = testFiles
+    .map((tf) => {
+      if (tf.includes("/") && !tf.endsWith(".test.ts")) {
+        // It's a directory path, add negation glob
+        return [tf, "!_auc-*/**/*.test.ts"]
+      }
+      return tf
+    })
+    .flat()
+
   const command = ["bun", "test", ...args]
   const spawnedProcess = Bun.spawn(command, {
     cwd: process.cwd(),

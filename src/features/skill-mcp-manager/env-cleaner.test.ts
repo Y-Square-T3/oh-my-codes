@@ -225,7 +225,9 @@ describe("EXCLUDED_ENV_PATTERNS", () => {
     ]
 
     for (const { pattern, shouldMatch } of testCases) {
-      const matches = EXCLUDED_ENV_PATTERNS.some((regex: RegExp) => regex.test(pattern))
+      const matches = EXCLUDED_ENV_PATTERNS.some((regex: RegExp) =>
+        regex.test(pattern),
+      )
       expect(matches).toBe(shouldMatch)
     }
   })
@@ -246,7 +248,8 @@ describe("secret env var filtering", () => {
 
   it("filters out AWS_SECRET_ACCESS_KEY", () => {
     // given
-    process.env.AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    process.env.AWS_SECRET_ACCESS_KEY =
+      "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
     process.env.AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
     process.env.HOME = "/home/user"
 
@@ -520,5 +523,5 @@ describe("safe environment variables preserved", () => {
 
     // then
     expect(cleanEnv.TMPDIR).toBe("/tmp")
-})
+  })
 })

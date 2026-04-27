@@ -58,7 +58,9 @@ export const OhMyCodesConfigSchema = z.object({
    * Set to false to disable, or use object for advanced config:
    * { "enabled": true, "retry_on_errors": [400, 429], "timeout_seconds": 30 }
    */
-  runtime_fallback: z.union([z.boolean(), RuntimeFallbackConfigSchema]).optional(),
+  runtime_fallback: z
+    .union([z.boolean(), RuntimeFallbackConfigSchema])
+    .optional(),
   background_task: BackgroundTaskConfigSchema.optional(),
   notification: NotificationConfigSchema.optional(),
   model_capabilities: ModelCapabilitiesConfigSchema.optional(),

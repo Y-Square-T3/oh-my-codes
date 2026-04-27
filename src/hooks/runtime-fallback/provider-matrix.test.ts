@@ -8,7 +8,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "InsufficientQuotaError",
-        message: "You exceeded your current quota. Please check your plan and billing details.",
+        message:
+          "You exceeded your current quota. Please check your plan and billing details.",
         provider: "openai",
       }
 
@@ -25,7 +26,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "BillingError",
-        message: "Billing hard limit reached. You have exceeded your hard limit.",
+        message:
+          "Billing hard limit reached. You have exceeded your hard limit.",
         provider: "openai",
       }
 
@@ -58,7 +60,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "QuotaExceededError",
-        message: "Your account has exceeded its quota. Please upgrade your plan.",
+        message:
+          "Your account has exceeded its quota. Please upgrade your plan.",
         provider: "anthropic",
       }
 
@@ -75,7 +78,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "AI_APICallError",
-        message: "Subscription quota exceeded. You can continue using free models.",
+        message:
+          "Subscription quota exceeded. You can continue using free models.",
         provider: "anthropic",
       }
 
@@ -92,7 +96,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "AI_APICallError",
-        message: "All credentials for model claude-opus-4-7 are cooling down [retrying in ~2 weeks]",
+        message:
+          "All credentials for model claude-opus-4-7 are cooling down [retrying in ~2 weeks]",
         provider: "anthropic",
       }
 
@@ -129,7 +134,8 @@ describe("runtime-fallback provider matrix quota tests", () => {
       //#given
       const error = {
         name: "QuotaExceededError",
-        message: "Quota exceeded for quota metric 'Generate Content API requests'",
+        message:
+          "Quota exceeded for quota metric 'Generate Content API requests'",
         provider: "google",
       }
 

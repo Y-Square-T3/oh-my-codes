@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { OhMyCodesConfigSchema } from "../../../config"
-import { detectPluginConfigFile, getOpenCodeConfigDir, parseJsonc } from "../../../shared"
+import {
+  detectPluginConfigFile,
+  getOpenCodeConfigDir,
+  parseJsonc,
+} from "../../../shared"
 import { CHECK_IDS, CHECK_NAMES, PACKAGE_NAME } from "../constants"
 import type { CheckResult, DoctorIssue } from "../types"
 import { loadAvailableModelsFromCache } from "./model-resolution-cache"
@@ -47,18 +51,28 @@ function validateConfig(): ConfigValidationResult {
         path: configPath,
         valid: false,
         config: rawConfig,
-        errors: schemaResult.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`),
+        errors: schemaResult.error.issues.map(
+          (issue) => `${issue.path.join(".")}: ${issue.message}`,
+        ),
       }
     }
 
-    return { exists: true, path: configPath, valid: true, config: rawConfig, errors: [] }
+    return {
+      exists: true,
+      path: configPath,
+      valid: true,
+      config: rawConfig,
+      errors: [],
+    }
   } catch (error) {
     return {
       exists: true,
       path: configPath,
       valid: false,
       config: null,
-      errors: [error instanceof Error ? error.message : "Failed to parse config"],
+      errors: [
+        error instanceof Error ? error.message : "Failed to parse config",
+      ],
     }
   }
 }
@@ -69,10 +83,10 @@ function collectModelResolutionIssues(config: OmoConfig): DoctorIssue[] {
   const resolution = getModelResolutionInfoWithOverrides(config)
 
   const invalidAgentOverrides = resolution.agents.filter(
-    (agent) => agent.userOverride && !agent.userOverride.includes("/")
+    (agent) => agent.userOverride && !agent.userOverride.includes("/"),
   )
   const invalidCategoryOverrides = resolution.categories.filter(
-    (category) => category.userOverride && !category.userOverride.includes("/")
+    (category) => category.userOverride && !category.userOverride.includes("/"),
   )
 
   for (const invalidAgent of invalidAgentOverrides) {
@@ -138,7 +152,7 @@ export async function checkConfig(): Promise<CheckResult> {
         description: error,
         severity: "error" as const,
         affects: ["plugin startup"],
-      }))
+      })),
     )
 
     return {
@@ -157,7 +171,10 @@ export async function checkConfig(): Promise<CheckResult> {
   return {
     name: CHECK_NAMES[CHECK_IDS.CONFIG],
     status: issues.length > 0 ? "warn" : "pass",
-    message: issues.length > 0 ? `${issues.length} configuration warning(s)` : "Configuration is valid",
+    message:
+      issues.length > 0
+        ? `${issues.length} configuration warning(s)`
+        : "Configuration is valid",
     details: validation.path ? [`Path: ${validation.path}`] : undefined,
     issues,
   }

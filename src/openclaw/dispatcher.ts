@@ -22,9 +22,8 @@ export function shellEscapeArg(value: string): string {
 
 export function resolveCommandTimeoutMs(
   gatewayTimeout?: number,
-  envTimeoutRaw =
-    process.env.OMO_OPENCLAW_COMMAND_TIMEOUT_MS
-    ?? process.env.OMX_OPENCLAW_COMMAND_TIMEOUT_MS,
+  envTimeoutRaw = process.env.OMO_OPENCLAW_COMMAND_TIMEOUT_MS ??
+    process.env.OMX_OPENCLAW_COMMAND_TIMEOUT_MS,
 ): number {
   const parseFinite = (value: unknown): number | undefined => {
     if (typeof value !== "number" || !Number.isFinite(value)) return undefined
@@ -48,39 +47,68 @@ export function resolveCommandTimeoutMs(
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : null
 }
 
-function firstStringValue(record: Record<string, unknown>, keys: string[]): string | undefined {
+function firstStringValue(
+  record: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
   for (const key of keys) {
     const value = record[key]
     if (typeof value === "string" && value.trim().length > 0) return value
-    if (typeof value === "number" && Number.isFinite(value)) return String(value)
+    if (typeof value === "number" && Number.isFinite(value))
+      return String(value)
   }
   return undefined
 }
 
-function extractWakeMetadata(payload: unknown): Pick<WakeResult, "messageId" | "platform" | "channelId" | "threadId"> {
+function extractWakeMetadata(
+  payload: unknown,
+): Pick<WakeResult, "messageId" | "platform" | "channelId" | "threadId"> {
   const record = asRecord(payload)
   if (!record) return {}
 
-  const nestedCandidates = [record, asRecord(record.data), asRecord(record.result), asRecord(record.message)]
-    .filter((candidate): candidate is Record<string, unknown> => candidate !== null)
+  const nestedCandidates = [
+    record,
+    asRecord(record.data),
+    asRecord(record.result),
+    asRecord(record.message),
+  ].filter(
+    (candidate): candidate is Record<string, unknown> => candidate !== null,
+  )
 
-  let bestMatch: Pick<WakeResult, "messageId" | "platform" | "channelId" | "threadId"> = {}
+  let bestMatch: Pick<
+    WakeResult,
+    "messageId" | "platform" | "channelId" | "threadId"
+  > = {}
   let bestScore = -1
 
   for (const candidate of nestedCandidates) {
-    const messageId = firstStringValue(candidate, ["messageId", "message_id", "id"])
+    const messageId = firstStringValue(candidate, [
+      "messageId",
+      "message_id",
+      "id",
+    ])
     const platform = firstStringValue(candidate, ["platform", "source"])
-    const channelId = firstStringValue(candidate, ["channelId", "channel_id", "channel"])
-    const threadId = firstStringValue(candidate, ["threadId", "thread_id", "thread"])
+    const channelId = firstStringValue(candidate, [
+      "channelId",
+      "channel_id",
+      "channel",
+    ])
+    const threadId = firstStringValue(candidate, [
+      "threadId",
+      "thread_id",
+      "thread",
+    ])
 
     const score =
-      (messageId ? 4 : 0)
-      + (platform ? 3 : 0)
-      + (channelId ? 2 : 0)
-      + (threadId ? 1 : 0)
+      (messageId ? 4 : 0) +
+      (platform ? 3 : 0) +
+      (channelId ? 2 : 0) +
+      (threadId ? 1 : 0)
 
     if (score > bestScore) {
       bestMatch = { messageId, platform, channelId, threadId }
@@ -91,14 +119,18 @@ function extractWakeMetadata(payload: unknown): Pick<WakeResult, "messageId" | "
   return bestScore > 0 ? bestMatch : {}
 }
 
-function parseWakeMetadata(raw: string): Pick<WakeResult, "messageId" | "platform" | "channelId" | "threadId"> {
+function parseWakeMetadata(
+  raw: string,
+): Pick<WakeResult, "messageId" | "platform" | "channelId" | "threadId"> {
   const trimmed = raw.trim()
   if (!trimmed) return {}
   try {
     return extractWakeMetadata(JSON.parse(trimmed))
   } catch {
     const messageId = trimmed.match(/message\s+id:\s*([^\s]+)/i)?.[1]
-    const platform = trimmed.match(/sent\s+via\s+([a-z0-9_-]+)/i)?.[1]?.toLowerCase()
+    const platform = trimmed
+      .match(/sent\s+via\s+([a-z0-9_-]+)/i)?.[1]
+      ?.toLowerCase()
     return {
       ...(messageId ? { messageId } : {}),
       ...(platform ? { platform } : {}),
@@ -150,7 +182,12 @@ export async function wakeGateway(
 
     const metadata = parseWakeMetadata(await response.text())
 
-    return { gateway: gatewayName, success: true, statusCode: response.status, ...metadata }
+    return {
+      gateway: gatewayName,
+      success: true,
+      statusCode: response.status,
+      ...metadata,
+    }
   } catch (error) {
     return {
       gateway: gatewayName,
@@ -176,11 +213,14 @@ export async function wakeCommandGateway(
   try {
     const timeout = resolveCommandTimeoutMs(gatewayConfig.timeout)
 
-    const interpolated = gatewayConfig.command.replace(/\{\{(\w+)\}\}/g, (_match, key) => {
-      const value = variables[key]
-      if (value === undefined) return _match
-      return shellEscapeArg(value)
-    })
+    const interpolated = gatewayConfig.command.replace(
+      /\{\{(\w+)\}\}/g,
+      (_match, key) => {
+        const value = variables[key]
+        if (value === undefined) return _match
+        return shellEscapeArg(value)
+      },
+    )
 
     const proc = spawn(["sh", "-c", interpolated], {
       env: { ...process.env },
@@ -227,7 +267,10 @@ type KillableProcess = {
   kill: (signal?: NodeJS.Signals) => void
 }
 
-export function terminateCommandProcess(proc: KillableProcess, signal: NodeJS.Signals): void {
+export function terminateCommandProcess(
+  proc: KillableProcess,
+  signal: NodeJS.Signals,
+): void {
   try {
     if (process.platform !== "win32" && proc.pid) {
       try {

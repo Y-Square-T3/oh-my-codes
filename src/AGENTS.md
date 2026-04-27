@@ -8,13 +8,13 @@ Entry point `index.ts` orchestrates 5-step initialization: loadConfig → create
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | Plugin entry, default-exports `pluginModule: PluginModule` with `{ id, server }` |
-| `plugin-config.ts` | JSONC parse, multi-level merge, Zod v4 validation |
-| `create-managers.ts` | TmuxSessionManager, BackgroundManager, SkillMcpManager, ConfigHandler |
-| `create-tools.ts` | SkillContext + AvailableCategories + ToolRegistry (26 tools) |
-| `create-hooks.ts` | 3-tier: Core(43) + Continuation(7) + Skill(2) = 52 hooks |
+| File                  | Purpose                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.ts`            | Plugin entry, default-exports `pluginModule: PluginModule` with `{ id, server }`                                                                                                                        |
+| `plugin-config.ts`    | JSONC parse, multi-level merge, Zod v4 validation                                                                                                                                                       |
+| `create-managers.ts`  | TmuxSessionManager, BackgroundManager, SkillMcpManager, ConfigHandler                                                                                                                                   |
+| `create-tools.ts`     | SkillContext + AvailableCategories + ToolRegistry (26 tools)                                                                                                                                            |
+| `create-hooks.ts`     | 3-tier: Core(43) + Continuation(7) + Skill(2) = 52 hooks                                                                                                                                                |
 | `plugin-interface.ts` | 10 OpenCode hook handlers: config, tool, chat.message, chat.params, chat.headers, event, tool.execute.before, tool.execute.after, experimental.chat.messages.transform, experimental.session.compacting |
 
 ## CONFIG LOADING

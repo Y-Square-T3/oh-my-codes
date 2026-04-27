@@ -1,9 +1,9 @@
-import type { AgentConfig } from "@opencode-ai/sdk";
-import type { AgentMode, AgentPromptMetadata } from "./types";
-import { isGptModel } from "./types";
-import { createAgentToolRestrictions } from "../shared/permission-compat";
+import type { AgentConfig } from "@opencode-ai/sdk"
+import type { AgentMode, AgentPromptMetadata } from "./types"
+import { isGptModel } from "./types"
+import { createAgentToolRestrictions } from "../shared/permission-compat"
 
-const MODE: AgentMode = "subagent";
+const MODE: AgentMode = "subagent"
 
 /**
  * Momus - Plan Reviewer Agent
@@ -196,7 +196,7 @@ If REJECT:
 **Your job is to UNBLOCK work, not to BLOCK it with perfectionism.**
 
 **Response Language**: Match the language of the plan content.
-`;
+`
 
 /**
  * GPT-5.4 Optimized Momus System Prompt
@@ -277,9 +277,9 @@ If REJECT - **Blocking Issues** (max 3): numbered list, each with specific issue
 Approve by default. Max 3 issues. Be specific - "Task X needs Y" not "needs more clarity". No design opinions. Trust developers. Your job is to unblock work, not block it with perfectionism.
 
 Response language: match the language of the plan content.
-</final_rules>`;
+</final_rules>`
 
-export { MOMUS_DEFAULT_PROMPT as MOMUS_SYSTEM_PROMPT };
+export { MOMUS_DEFAULT_PROMPT as MOMUS_SYSTEM_PROMPT }
 
 export function createMomusAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions([
@@ -287,7 +287,7 @@ export function createMomusAgent(model: string): AgentConfig {
     "edit",
     "apply_patch",
     "task",
-  ]);
+  ])
 
   const base = {
     description:
@@ -297,7 +297,7 @@ export function createMomusAgent(model: string): AgentConfig {
     temperature: 0.1,
     ...restrictions,
     prompt: MOMUS_DEFAULT_PROMPT,
-  } as AgentConfig;
+  } as AgentConfig
 
   if (isGptModel(model)) {
     return {
@@ -305,15 +305,15 @@ export function createMomusAgent(model: string): AgentConfig {
       prompt: MOMUS_GPT_PROMPT,
       reasoningEffort: "medium",
       textVerbosity: "high",
-    } as AgentConfig;
+    } as AgentConfig
   }
 
   return {
     ...base,
     thinking: { type: "enabled", budgetTokens: 32000 },
-  } as AgentConfig;
+  } as AgentConfig
 }
-createMomusAgent.mode = MODE;
+createMomusAgent.mode = MODE
 
 export const momusPromptMetadata: AgentPromptMetadata = {
   category: "advisor",
@@ -343,5 +343,5 @@ export const momusPromptMetadata: AgentPromptMetadata = {
     "For trivial plans that don't need formal review",
   ],
   keyTrigger:
-    "Work plan saved to `.sisyphus/plans/*.md` → invoke Momus with the file path as the sole prompt (e.g. `prompt=\".sisyphus/plans/my-plan.md\"`). Do NOT invoke Momus for inline plans or todo lists.",
-};
+    'Work plan saved to `.sisyphus/plans/*.md` → invoke Momus with the file path as the sole prompt (e.g. `prompt=".sisyphus/plans/my-plan.md"`). Do NOT invoke Momus for inline plans or todo lists.',
+}

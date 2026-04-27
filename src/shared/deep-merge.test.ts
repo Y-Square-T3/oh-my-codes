@@ -270,7 +270,9 @@ describe("deepMerge", () => {
     test("ignores __proto__ key", () => {
       // given
       const base: AnyObject = { a: 1 }
-      const override: AnyObject = JSON.parse('{"__proto__": {"polluted": true}, "b": 2}')
+      const override: AnyObject = JSON.parse(
+        '{"__proto__": {"polluted": true}, "b": 2}',
+      )
 
       // when
       const result = deepMerge(base, override)

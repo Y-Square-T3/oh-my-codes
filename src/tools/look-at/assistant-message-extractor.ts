@@ -27,7 +27,14 @@ function asSessionMessage(value: unknown): SessionMessage | null {
     info: isObject(info)
       ? {
           role: typeof info["role"] === "string" ? info["role"] : undefined,
-          time: isObject(info["time"]) ? { created: typeof info["time"]["created"] === "number" ? info["time"]["created"] : undefined } : undefined,
+          time: isObject(info["time"])
+            ? {
+                created:
+                  typeof info["time"]["created"] === "number"
+                    ? info["time"]["created"]
+                    : undefined,
+              }
+            : undefined,
         }
       : undefined,
     parts,

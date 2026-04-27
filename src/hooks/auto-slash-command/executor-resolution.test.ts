@@ -9,11 +9,18 @@ let resolveFileReferencesInTextSpy: { mockRestore: () => void } | undefined
 let discoverCommandsSyncSpy: { mockRestore: () => void } | undefined
 
 function setupExecutorSpies(): void {
-  resolveCommandsInTextSpy = spyOn(shared, "resolveCommandsInText")
-    .mockImplementation(async (content: string) => content)
-  resolveFileReferencesInTextSpy = spyOn(shared, "resolveFileReferencesInText")
-    .mockImplementation(async (content: string) => content)
-  discoverCommandsSyncSpy = spyOn(slashcommand, "discoverCommandsSync").mockReturnValue([
+  resolveCommandsInTextSpy = spyOn(
+    shared,
+    "resolveCommandsInText",
+  ).mockImplementation(async (content: string) => content)
+  resolveFileReferencesInTextSpy = spyOn(
+    shared,
+    "resolveFileReferencesInText",
+  ).mockImplementation(async (content: string) => content)
+  discoverCommandsSyncSpy = spyOn(
+    slashcommand,
+    "discoverCommandsSync",
+  ).mockReturnValue([
     {
       name: "shadowed",
       metadata: { name: "shadowed", description: "builtin" },
@@ -83,11 +90,15 @@ describe("executeSlashCommand resolution semantics", () => {
     }
 
     //#when
-    const result = await executeSlashCommand(parsed, { skills: [createRestrictedSkill()] })
+    const result = await executeSlashCommand(parsed, {
+      skills: [createRestrictedSkill()],
+    })
 
     //#then
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Skill "restricted-skill" is restricted to agent "hephaestus"')
+    expect(result.error).toBe(
+      'Skill "restricted-skill" is restricted to agent "hephaestus"',
+    )
   })
 
   it("allows slash skill invocation when invoking agent matches restriction", async () => {

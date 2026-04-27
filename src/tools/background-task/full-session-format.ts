@@ -1,5 +1,9 @@
 import type { BackgroundTask } from "../../features/background-agent"
-import type { BackgroundOutputClient, BackgroundOutputMessagesResult, BackgroundOutputMessage } from "./clients"
+import type {
+  BackgroundOutputClient,
+  BackgroundOutputMessagesResult,
+  BackgroundOutputMessage,
+} from "./clients"
 import { extractMessages, getErrorMessage } from "./session-messages"
 import { formatMessageTime } from "./time-format"
 import { truncateText } from "./truncate-text"
@@ -8,7 +12,9 @@ import { formatTaskStatus } from "./task-status-format"
 const MAX_MESSAGE_LIMIT = 100
 const THINKING_MAX_CHARS = 2000
 
-function extractToolResultText(part: NonNullable<BackgroundOutputMessage["parts"]>[number]): string[] {
+function extractToolResultText(
+  part: NonNullable<BackgroundOutputMessage["parts"]>[number],
+): string[] {
   if (typeof part.content === "string" && part.content.length > 0) {
     return [part.content]
   }
@@ -39,15 +45,16 @@ export async function formatFullSession(
     sinceMessageId?: string
     includeToolResults: boolean
     thinkingMaxChars?: number
-  }
+  },
 ): Promise<string> {
   if (!task.sessionID) {
     return formatTaskStatus(task)
   }
 
-  const messagesResult: BackgroundOutputMessagesResult = await client.session.messages({
-    path: { id: task.sessionID },
-  })
+  const messagesResult: BackgroundOutputMessagesResult =
+    await client.session.messages({
+      path: { id: task.sessionID },
+    })
 
   const errorMessage = getErrorMessage(messagesResult)
   if (errorMessage) {
@@ -67,7 +74,9 @@ export async function formatFullSession(
 
   let filteredMessages = sortedMessages
   if (options.sinceMessageId) {
-    const index = filteredMessages.findIndex((message) => message.id === options.sinceMessageId)
+    const index = filteredMessages.findIndex(
+      (message) => message.id === options.sinceMessageId,
+    )
     if (index === -1) {
       return `Error: since_message_id not found: ${options.sinceMessageId}`
     }
@@ -97,9 +106,15 @@ export async function formatFullSession(
     normalizedMessages.push({ ...message, parts })
   }
 
-  const limit = typeof options.messageLimit === "number" ? Math.min(options.messageLimit, MAX_MESSAGE_LIMIT) : undefined
+  const limit =
+    typeof options.messageLimit === "number"
+      ? Math.min(options.messageLimit, MAX_MESSAGE_LIMIT)
+      : undefined
   const hasMore = limit !== undefined && normalizedMessages.length > limit
-  const visibleMessages = limit !== undefined ? normalizedMessages.slice(0, limit) : normalizedMessages
+  const visibleMessages =
+    limit !== undefined
+      ? normalizedMessages.slice(0, limit)
+      : normalizedMessages
 
   const lines: string[] = []
   lines.push("# Full Session Output")
@@ -132,7 +147,9 @@ export async function formatFullSession(
       if (part.type === "text" && part.text) {
         lines.push(part.text.trim())
       } else if (part.type === "thinking" && part.thinking) {
-        lines.push(`[thinking] ${truncateText(part.thinking, thinkingMaxChars)}`)
+        lines.push(
+          `[thinking] ${truncateText(part.thinking, thinkingMaxChars)}`,
+        )
       } else if (part.type === "reasoning" && part.text) {
         lines.push(`[thinking] ${truncateText(part.text, thinkingMaxChars)}`)
       } else if (part.type === "tool_result") {

@@ -167,7 +167,10 @@ describe("findMatchingHooks", () => {
   const mockHooks: ClaudeHooksConfig = {
     PreToolUse: [
       { matcher: "bash", hooks: [{ type: "command", command: "/test/hook1" }] },
-      { matcher: "edit*", hooks: [{ type: "command", command: "/test/hook2" }] },
+      {
+        matcher: "edit*",
+        hooks: [{ type: "command", command: "/test/hook2" }],
+      },
       { matcher: "*", hooks: [{ type: "command", command: "/test/hook3" }] },
     ],
   }

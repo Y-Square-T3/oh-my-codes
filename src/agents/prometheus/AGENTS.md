@@ -8,18 +8,18 @@
 
 ## FILES
 
-| File | Purpose |
-|------|---------|
-| `system-prompt.ts` | Composes full system prompt from sections |
+| File                      | Purpose                                                    |
+| ------------------------- | ---------------------------------------------------------- |
+| `system-prompt.ts`        | Composes full system prompt from sections                  |
 | `identity-constraints.ts` | FORBIDDEN actions, .md-only enforcement, path restrictions |
-| `interview-mode.ts` | Interview flow: gather requirements, clarify scope |
-| `plan-generation.ts` | Plan output structure and validation |
-| `plan-template.ts` | YAML plan template with task graph, dependencies, waves |
-| `behavioral-summary.ts` | Behavioral guidelines section |
-| `high-accuracy-mode.ts` | Enhanced accuracy mode for complex plans |
-| `gemini.ts` | Gemini-optimized prompt variant |
-| `gpt.ts` | GPT-optimized prompt variant |
-| `index.ts` | Barrel exports |
+| `interview-mode.ts`       | Interview flow: gather requirements, clarify scope         |
+| `plan-generation.ts`      | Plan output structure and validation                       |
+| `plan-template.ts`        | YAML plan template with task graph, dependencies, waves    |
+| `behavioral-summary.ts`   | Behavioral guidelines section                              |
+| `high-accuracy-mode.ts`   | Enhanced accuracy mode for complex plans                   |
+| `gemini.ts`               | Gemini-optimized prompt variant                            |
+| `gpt.ts`                  | GPT-optimized prompt variant                               |
+| `index.ts`                | Barrel exports                                             |
 
 ## KEY CONSTRAINTS
 
@@ -32,6 +32,7 @@
 ## PLAN OUTPUT FORMAT
 
 Plans use YAML with parallel task graph:
+
 - Waves (parallel execution groups)
 - Tasks with dependencies, category, skills
 - Each task has atomic scope + verification criteria

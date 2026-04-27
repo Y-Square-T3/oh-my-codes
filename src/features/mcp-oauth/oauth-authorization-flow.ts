@@ -24,7 +24,7 @@ export function buildAuthorizationUrl(
     state: string
     scopes?: string[]
     resource?: string
-  }
+  },
 ): string {
   const url = new URL(authorizationEndpoint)
   url.searchParams.set("response_type", "code")
@@ -44,7 +44,9 @@ export function buildAuthorizationUrl(
 
 const CALLBACK_TIMEOUT_MS = 5 * 60 * 1000
 
-export function startCallbackServer(port: number): Promise<OAuthCallbackResult> {
+export function startCallbackServer(
+  port: number,
+): Promise<OAuthCallbackResult> {
   return new Promise((resolve, reject) => {
     let timeoutId: ReturnType<typeof setTimeout>
 
@@ -57,7 +59,8 @@ export function startCallbackServer(port: number): Promise<OAuthCallbackResult> 
       const error = requestUrl.searchParams.get("error")
 
       if (error) {
-        const errorDescription = requestUrl.searchParams.get("error_description") ?? error
+        const errorDescription =
+          requestUrl.searchParams.get("error_description") ?? error
         response.writeHead(400, { "content-type": "text/html" })
         response.end("<html><body><h1>Authorization failed</h1></body></html>")
         server.close()
@@ -74,7 +77,9 @@ export function startCallbackServer(port: number): Promise<OAuthCallbackResult> 
       }
 
       response.writeHead(200, { "content-type": "text/html" })
-      response.end("<html><body><h1>Authorization successful. You can close this tab.</h1></body></html>")
+      response.end(
+        "<html><body><h1>Authorization successful. You can close this tab.</h1></body></html>",
+      )
       server.close()
       resolve({ code, state })
     })
@@ -129,14 +134,17 @@ export async function runAuthorizationCodeRedirect(options: {
   const challenge = generateCodeChallenge(verifier)
   const state = randomBytes(16).toString("hex")
 
-  const authorizationUrl = buildAuthorizationUrl(options.authorizationEndpoint, {
-    clientId: options.clientId,
-    redirectUri: options.redirectUri,
-    codeChallenge: challenge,
-    state,
-    scopes: options.scopes,
-    resource: options.resource,
-  })
+  const authorizationUrl = buildAuthorizationUrl(
+    options.authorizationEndpoint,
+    {
+      clientId: options.clientId,
+      redirectUri: options.redirectUri,
+      codeChallenge: challenge,
+      state,
+      scopes: options.scopes,
+      resource: options.resource,
+    },
+  )
 
   const callbackPromise = startCallbackServer(options.callbackPort)
   openBrowser(authorizationUrl)

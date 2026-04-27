@@ -13,7 +13,10 @@
  * R7: Malformed agent entries (null, missing name, non-string name, whitespace-only) are skipped gracefully
  */
 const { describe, test, expect, mock, beforeEach } = require("bun:test")
-const { resolveCallableAgents, clearCallableAgentsCache } = require("./agent-resolver")
+const {
+  resolveCallableAgents,
+  clearCallableAgentsCache,
+} = require("./agent-resolver")
 const { ALLOWED_AGENTS } = require("./constants")
 
 function createMockClient(agents: Array<Record<string, unknown>>) {
@@ -125,7 +128,9 @@ describe("resolveCallableAgents", () => {
 
         const result = await resolveCallableAgents(client)
 
-        const exploreCount = result.filter((n: string) => n === "explore").length
+        const exploreCount = result.filter(
+          (n: string) => n === "explore",
+        ).length
         expect(exploreCount).toBe(1)
       })
     })

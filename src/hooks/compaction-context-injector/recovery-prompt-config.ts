@@ -46,7 +46,8 @@ function matchesExpectedTools(
 }
 
 export function createExpectedRecoveryPromptConfig(
-  checkpoint: Pick<RecoveryPromptConfig, "agent"> & CompactionAgentConfigCheckpoint,
+  checkpoint: Pick<RecoveryPromptConfig, "agent"> &
+    CompactionAgentConfigCheckpoint,
   currentPromptConfig: CompactionAgentConfigCheckpoint,
 ): RecoveryPromptConfig {
   const model = checkpoint.model ?? currentPromptConfig.model
@@ -67,11 +68,15 @@ export function isPromptConfigRecovered(
   const agentMatches =
     typeof actualAgent === "string" &&
     !isCompactionAgent(actualAgent) &&
-    stripInvisibleAgentCharacters(actualAgent).toLowerCase() === stripInvisibleAgentCharacters(expectedPromptConfig.agent).toLowerCase()
+    stripInvisibleAgentCharacters(actualAgent).toLowerCase() ===
+      stripInvisibleAgentCharacters(expectedPromptConfig.agent).toLowerCase()
 
   return (
     agentMatches &&
-    matchesExpectedModel(actualPromptConfig.model, expectedPromptConfig.model) &&
+    matchesExpectedModel(
+      actualPromptConfig.model,
+      expectedPromptConfig.model,
+    ) &&
     matchesExpectedTools(actualPromptConfig.tools, expectedPromptConfig.tools)
   )
 }

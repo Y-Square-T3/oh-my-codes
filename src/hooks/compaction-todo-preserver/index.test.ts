@@ -31,14 +31,24 @@ function createMockContext(todoResponses: Array<Todo>[]): PluginInput {
   const request = new Request("http://localhost")
   const response = new Response()
   client.session.todo = mock((_: SessionTodoOptions): SessionTodoResult => {
-    const current = todoResponses[Math.min(callIndex, todoResponses.length - 1)] ?? []
+    const current =
+      todoResponses[Math.min(callIndex, todoResponses.length - 1)] ?? []
     callIndex += 1
-    return Promise.resolve({ data: current, error: undefined, request, response })
+    return Promise.resolve({
+      data: current,
+      error: undefined,
+      request,
+      response,
+    })
   })
 
   return {
     client,
-    project: { id: "test-project", worktree: "/tmp/test", time: { created: Date.now() } },
+    project: {
+      id: "test-project",
+      worktree: "/tmp/test",
+      time: { created: Date.now() },
+    },
     directory: "/tmp/test",
     worktree: "/tmp/test",
     serverUrl: new URL("http://localhost"),
@@ -60,7 +70,9 @@ describe("compaction-todo-preserver", () => {
 
     //#when
     await hook.capture(sessionID)
-    await hook.event({ event: { type: "session.compacted", properties: { sessionID } } })
+    await hook.event({
+      event: { type: "session.compacted", properties: { sessionID } },
+    })
 
     //#then
     expect(updateMock).toHaveBeenCalledTimes(1)
@@ -79,7 +91,9 @@ describe("compaction-todo-preserver", () => {
 
     //#when
     await hook.capture(sessionID)
-    await hook.event({ event: { type: "session.compacted", properties: { sessionID } } })
+    await hook.event({
+      event: { type: "session.compacted", properties: { sessionID } },
+    })
 
     //#then
     expect(updateMock).not.toHaveBeenCalled()

@@ -15,11 +15,17 @@ type CompactionMessageLike = {
 }
 
 function isCompactionPart(part: unknown): boolean {
-  return typeof part === "object" && part !== null && (part as CompactionPartLike).type === "compaction"
+  return (
+    typeof part === "object" &&
+    part !== null &&
+    (part as CompactionPartLike).type === "compaction"
+  )
 }
 
 export function isCompactionAgent(agent: unknown): boolean {
-  return typeof agent === "string" && agent.trim().toLowerCase() === "compaction"
+  return (
+    typeof agent === "string" && agent.trim().toLowerCase() === "compaction"
+  )
 }
 
 export function hasCompactionPart(parts: unknown): boolean {
@@ -27,14 +33,19 @@ export function hasCompactionPart(parts: unknown): boolean {
 }
 
 export function isCompactionMessage(message: CompactionMessageLike): boolean {
-  return isCompactionAgent(message.info?.agent ?? message.agent) || hasCompactionPart(message.parts)
+  return (
+    isCompactionAgent(message.info?.agent ?? message.agent) ||
+    hasCompactionPart(message.parts)
+  )
 }
 
 export function getCompactionPartStorageDir(messageID: string): string {
   return join(PART_STORAGE, messageID)
 }
 
-export function hasCompactionPartInStorage(messageID: string | undefined): boolean {
+export function hasCompactionPartInStorage(
+  messageID: string | undefined,
+): boolean {
   if (!messageID) {
     return false
   }

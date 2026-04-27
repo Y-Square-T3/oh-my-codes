@@ -56,11 +56,22 @@ describe("executeUnstableAgentTask cleanup", () => {
   test("cancels launched task when parent aborts during monitoring", async () => {
     // given
     const { executeUnstableAgentTask } = require("./unstable-agent-task")
-    const cancelCalls: Array<{ taskId: string; options?: Record<string, unknown> }> = []
+    const cancelCalls: Array<{
+      taskId: string
+      options?: Record<string, unknown>
+    }> = []
 
     const mockManager = {
-      launch: async () => ({ id: "bg_abort_monitoring", sessionID: "ses_abort_monitoring", status: "running" }),
-      getTask: () => ({ id: "bg_abort_monitoring", sessionID: "ses_abort_monitoring", status: "running" }),
+      launch: async () => ({
+        id: "bg_abort_monitoring",
+        sessionID: "ses_abort_monitoring",
+        status: "running",
+      }),
+      getTask: () => ({
+        id: "bg_abort_monitoring",
+        sessionID: "ses_abort_monitoring",
+        status: "running",
+      }),
       cancelTask: async (taskId: string, options?: Record<string, unknown>) => {
         cancelCalls.push({ taskId, options })
         return true
@@ -84,7 +95,7 @@ describe("executeUnstableAgentTask cleanup", () => {
       "test-agent",
       undefined,
       undefined,
-      "gpt-test"
+      "gpt-test",
     )
 
     // then
@@ -96,11 +107,22 @@ describe("executeUnstableAgentTask cleanup", () => {
   test("cancels launched task when monitored timeout budget is exhausted", async () => {
     // given
     const { executeUnstableAgentTask } = require("./unstable-agent-task")
-    const cancelCalls: Array<{ taskId: string; options?: Record<string, unknown> }> = []
+    const cancelCalls: Array<{
+      taskId: string
+      options?: Record<string, unknown>
+    }> = []
 
     const mockManager = {
-      launch: async () => ({ id: "bg_timeout_cleanup", sessionID: "ses_timeout_cleanup", status: "running" }),
-      getTask: () => ({ id: "bg_timeout_cleanup", sessionID: "ses_timeout_cleanup", status: "running" }),
+      launch: async () => ({
+        id: "bg_timeout_cleanup",
+        sessionID: "ses_timeout_cleanup",
+        status: "running",
+      }),
+      getTask: () => ({
+        id: "bg_timeout_cleanup",
+        sessionID: "ses_timeout_cleanup",
+        status: "running",
+      }),
       cancelTask: async (taskId: string, options?: Record<string, unknown>) => {
         cancelCalls.push({ taskId, options })
         return true
@@ -115,7 +137,9 @@ describe("executeUnstableAgentTask cleanup", () => {
         manager: mockManager,
         client: {
           session: {
-            status: async () => ({ data: { ses_timeout_cleanup: { type: "busy" } } }),
+            status: async () => ({
+              data: { ses_timeout_cleanup: { type: "busy" } },
+            }),
             messages: async () => ({ data: [] }),
           },
         },
@@ -125,7 +149,7 @@ describe("executeUnstableAgentTask cleanup", () => {
       "test-agent",
       undefined,
       undefined,
-      "gpt-test"
+      "gpt-test",
     )
 
     // then
@@ -137,7 +161,10 @@ describe("executeUnstableAgentTask cleanup", () => {
   test("cancels launched task when parent aborts while waiting for session start", async () => {
     // given
     const { executeUnstableAgentTask } = require("./unstable-agent-task")
-    const cancelCalls: Array<{ taskId: string; options?: Record<string, unknown> }> = []
+    const cancelCalls: Array<{
+      taskId: string
+      options?: Record<string, unknown>
+    }> = []
 
     const mockManager = {
       launch: async () => ({ id: "bg_wait_abort", status: "pending" }),
@@ -165,7 +192,7 @@ describe("executeUnstableAgentTask cleanup", () => {
       "test-agent",
       undefined,
       undefined,
-      "gpt-test"
+      "gpt-test",
     )
 
     // then

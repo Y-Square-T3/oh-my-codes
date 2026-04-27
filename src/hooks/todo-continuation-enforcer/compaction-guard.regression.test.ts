@@ -57,10 +57,14 @@ describe("compaction guard regressions", () => {
 
         const currentEpoch = armCompactionGuard(state, 1_000)
 
-        expect(isCompactionGuardActive(state, 1_000 + COMPACTION_GUARD_MS - 1)).toBe(true)
+        expect(
+          isCompactionGuardActive(state, 1_000 + COMPACTION_GUARD_MS - 1),
+        ).toBe(true)
         expect(acknowledgeCompactionGuard(state, currentEpoch)).toBe(true)
         expect(isCompactionGuardActive(state, 1_001)).toBe(false)
-        expect(isCompactionGuardActive(state, 1_000 + COMPACTION_GUARD_MS - 1)).toBe(false)
+        expect(
+          isCompactionGuardActive(state, 1_000 + COMPACTION_GUARD_MS - 1),
+        ).toBe(false)
       })
     })
   })

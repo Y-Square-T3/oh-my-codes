@@ -7,10 +7,12 @@ import { normalizeSDKResponse } from "../../shared"
 type Client = ReturnType<typeof createOpencodeClient>
 type ClientWithPromptAsync = {
   session: {
-    promptAsync: (opts: { path: { id: string }; body: Record<string, unknown> }) => Promise<unknown>
+    promptAsync: (opts: {
+      path: { id: string }
+      body: Record<string, unknown>
+    }) => Promise<unknown>
   }
 }
-
 
 interface ToolUsePart {
   type: "tool_use"
@@ -28,7 +30,11 @@ function isValidToolUseID(id: string | undefined): id is string {
   return typeof id === "string" && /^(toolu_|call_)/.test(id)
 }
 
-function normalizeMessagePart(part: { type: string; id?: string; callID?: string }): MessagePart | null {
+function normalizeMessagePart(part: {
+  type: string
+  id?: string
+  callID?: string
+}): MessagePart | null {
   if (part.type === "tool" || part.type === "tool_use") {
     if (!isValidToolUseID(part.callID)) {
       return null
@@ -47,21 +53,30 @@ function normalizeMessagePart(part: { type: string; id?: string; callID?: string
 }
 
 function extractToolUseIds(parts: MessagePart[]): string[] {
-  return parts.filter((part): part is ToolUsePart => part.type === "tool_use" && isValidToolUseID(part.id)).map((part) => part.id)
+  return parts
+    .filter(
+      (part): part is ToolUsePart =>
+        part.type === "tool_use" && isValidToolUseID(part.id),
+    )
+    .map((part) => part.id)
 }
 
 async function readPartsFromSDKFallback(
   client: Client,
   sessionID: string,
-  messageID: string
+  messageID: string,
 ): Promise<MessagePart[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
     const target = messages.find((m) => m.info?.id === messageID)
     if (!target?.parts) return []
 
-    return target.parts.map((part) => normalizeMessagePart(part)).filter((part): part is MessagePart => part !== null)
+    return target.parts
+      .map((part) => normalizeMessagePart(part))
+      .filter((part): part is MessagePart => part !== null)
   } catch {
     return []
   }
@@ -70,15 +85,21 @@ async function readPartsFromSDKFallback(
 export async function recoverToolResultMissing(
   client: Client,
   sessionID: string,
-  failedAssistantMsg: MessageData
+  failedAssistantMsg: MessageData,
 ): Promise<boolean> {
   let parts = failedAssistantMsg.parts || []
   if (parts.length === 0 && failedAssistantMsg.info?.id) {
     if (isSqliteBackend()) {
-      parts = await readPartsFromSDKFallback(client, sessionID, failedAssistantMsg.info.id)
+      parts = await readPartsFromSDKFallback(
+        client,
+        sessionID,
+        failedAssistantMsg.info.id,
+      )
     } else {
       const storedParts = readParts(failedAssistantMsg.info.id)
-      parts = storedParts.map((part) => normalizeMessagePart(part)).filter((part): part is MessagePart => part !== null)
+      parts = storedParts
+        .map((part) => normalizeMessagePart(part))
+        .filter((part): part is MessagePart => part !== null)
     }
   }
 
@@ -99,7 +120,9 @@ export async function recoverToolResultMissing(
   }
 
   try {
-    await (client as unknown as ClientWithPromptAsync).session.promptAsync(promptInput)
+    await (client as unknown as ClientWithPromptAsync).session.promptAsync(
+      promptInput,
+    )
 
     return true
   } catch {

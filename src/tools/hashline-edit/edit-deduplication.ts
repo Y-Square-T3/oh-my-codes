@@ -24,7 +24,10 @@ function buildDedupeKey(edit: HashlineEdit): string {
   }
 }
 
-export function dedupeEdits(edits: HashlineEdit[]): { edits: HashlineEdit[]; deduplicatedEdits: number } {
+export function dedupeEdits(edits: HashlineEdit[]): {
+  edits: HashlineEdit[]
+  deduplicatedEdits: number
+} {
   const seen = new Set<string>()
   const deduped: HashlineEdit[] = []
   let deduplicatedEdits = 0

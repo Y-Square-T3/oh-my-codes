@@ -10,19 +10,32 @@ function createMockClient(messages: MessageData[]) {
   } as never
 }
 
-function createDeps(overrides?: Partial<Parameters<typeof recoverEmptyContentMessageFromSDK>[4]>) {
+function createDeps(
+  overrides?: Partial<Parameters<typeof recoverEmptyContentMessageFromSDK>[4]>,
+) {
   return {
     placeholderText: "[recovered]",
     replaceEmptyTextPartsAsync: mock(() => Promise.resolve(false)),
     injectTextPartAsync: mock(() => Promise.resolve(false)),
-    findMessagesWithEmptyTextPartsFromSDK: mock(() => Promise.resolve([] as string[])),
+    findMessagesWithEmptyTextPartsFromSDK: mock(() =>
+      Promise.resolve([] as string[]),
+    ),
     ...overrides,
   }
 }
 
-const emptyMsg: MessageData = { info: { id: "msg_1", role: "assistant" }, parts: [] }
-const contentMsg: MessageData = { info: { id: "msg_2", role: "assistant" }, parts: [{ type: "text", text: "Hello" }] }
-const thinkingOnlyMsg: MessageData = { info: { id: "msg_3", role: "assistant" }, parts: [{ type: "thinking", text: "hmm" }] }
+const emptyMsg: MessageData = {
+  info: { id: "msg_1", role: "assistant" },
+  parts: [],
+}
+const contentMsg: MessageData = {
+  info: { id: "msg_2", role: "assistant" },
+  parts: [{ type: "text", text: "Hello" }],
+}
+const thinkingOnlyMsg: MessageData = {
+  info: { id: "msg_3", role: "assistant" },
+  parts: [{ type: "thinking", text: "hmm" }],
+}
 
 describe("recoverEmptyContentMessageFromSDK", () => {
   it("returns false when no empty messages exist", async () => {
@@ -32,7 +45,11 @@ describe("recoverEmptyContentMessageFromSDK", () => {
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", contentMsg, new Error("test"), deps,
+      client,
+      "ses_1",
+      contentMsg,
+      new Error("test"),
+      deps,
     )
 
     //#then
@@ -43,13 +60,19 @@ describe("recoverEmptyContentMessageFromSDK", () => {
     //#given
     const client = createMockClient([emptyMsg])
     const deps = createDeps({
-      findMessagesWithEmptyTextPartsFromSDK: mock(() => Promise.resolve(["msg_1"])),
+      findMessagesWithEmptyTextPartsFromSDK: mock(() =>
+        Promise.resolve(["msg_1"]),
+      ),
       replaceEmptyTextPartsAsync: mock(() => Promise.resolve(true)),
     })
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", emptyMsg, new Error("test"), deps,
+      client,
+      "ses_1",
+      emptyMsg,
+      new Error("test"),
+      deps,
     )
 
     //#then
@@ -65,13 +88,20 @@ describe("recoverEmptyContentMessageFromSDK", () => {
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", thinkingOnlyMsg, new Error("test"), deps,
+      client,
+      "ses_1",
+      thinkingOnlyMsg,
+      new Error("test"),
+      deps,
     )
 
     //#then
     expect(result).toBe(true)
     expect(deps.injectTextPartAsync).toHaveBeenCalledWith(
-      client, "ses_1", "msg_3", "[recovered]",
+      client,
+      "ses_1",
+      "msg_3",
+      "[recovered]",
     )
   })
 
@@ -85,7 +115,11 @@ describe("recoverEmptyContentMessageFromSDK", () => {
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", emptyMsg, error, deps,
+      client,
+      "ses_1",
+      emptyMsg,
+      error,
+      deps,
     )
 
     //#then
@@ -103,24 +137,37 @@ describe("recoverEmptyContentMessageFromSDK", () => {
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", failedMsg, new Error("test"), deps,
+      client,
+      "ses_1",
+      failedMsg,
+      new Error("test"),
+      deps,
     )
 
     //#then
     expect(result).toBe(true)
     expect(deps.injectTextPartAsync).toHaveBeenCalledWith(
-      client, "ses_1", "msg_fail", "[recovered]",
+      client,
+      "ses_1",
+      "msg_fail",
+      "[recovered]",
     )
   })
 
   it("returns false when SDK throws during message read", async () => {
     //#given
-    const client = { session: { messages: mock(() => Promise.reject(new Error("SDK error"))) } } as never
+    const client = {
+      session: { messages: mock(() => Promise.reject(new Error("SDK error"))) },
+    } as never
     const deps = createDeps()
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", emptyMsg, new Error("test"), deps,
+      client,
+      "ses_1",
+      emptyMsg,
+      new Error("test"),
+      deps,
     )
 
     //#then
@@ -137,7 +184,11 @@ describe("recoverEmptyContentMessageFromSDK", () => {
 
     //#when
     const result = await recoverEmptyContentMessageFromSDK(
-      client, "ses_1", empty1, new Error("test"), deps,
+      client,
+      "ses_1",
+      empty1,
+      new Error("test"),
+      deps,
     )
 
     //#then

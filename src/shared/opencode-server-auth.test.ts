@@ -5,7 +5,9 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test"
 let getServerBasicAuthHeader: (typeof import("./opencode-server-auth"))["getServerBasicAuthHeader"]
 let injectServerAuthIntoClient: (typeof import("./opencode-server-auth"))["injectServerAuthIntoClient"]
 
-async function importFreshOpencodeServerAuthModule(): Promise<typeof import("./opencode-server-auth")> {
+async function importFreshOpencodeServerAuthModule(): Promise<
+  typeof import("./opencode-server-auth")
+> {
   return import(`./opencode-server-auth?test=${Date.now()}-${Math.random()}`)
 }
 
@@ -17,7 +19,8 @@ describe("opencode-server-auth", () => {
       OPENCODE_SERVER_PASSWORD: process.env.OPENCODE_SERVER_PASSWORD,
       OPENCODE_SERVER_USERNAME: process.env.OPENCODE_SERVER_USERNAME,
     }
-    ;({ getServerBasicAuthHeader, injectServerAuthIntoClient } = await importFreshOpencodeServerAuthModule())
+    ;({ getServerBasicAuthHeader, injectServerAuthIntoClient } =
+      await importFreshOpencodeServerAuthModule())
   })
 
   afterEach(() => {
@@ -180,7 +183,10 @@ describe("opencode-server-auth", () => {
     delete process.env.OPENCODE_SERVER_USERNAME
 
     let registeredInterceptor:
-      | ((request: Request, options: { headers?: Headers }) => Promise<Request> | Request)
+      | ((
+          request: Request,
+          options: { headers?: Headers },
+        ) => Promise<Request> | Request)
       | undefined
 
     const client = {
@@ -188,7 +194,10 @@ describe("opencode-server-auth", () => {
         interceptors: {
           request: {
             use: (
-              interceptor: (request: Request, options: { headers?: Headers }) => Promise<Request> | Request
+              interceptor: (
+                request: Request,
+                options: { headers?: Headers },
+              ) => Promise<Request> | Request,
             ): number => {
               registeredInterceptor = interceptor
               return 0
@@ -207,7 +216,9 @@ describe("opencode-server-auth", () => {
     const result = await registeredInterceptor(request, {})
 
     //#then
-    expect(result.headers.get("Authorization")).toBe("Basic b3BlbmNvZGU6c2VjcmV0")
+    expect(result.headers.get("Authorization")).toBe(
+      "Basic b3BlbmNvZGU6c2VjcmV0",
+    )
   })
 
   test("#given no server password #when injecting into client with fetch #then does not wrap fetch", async () => {

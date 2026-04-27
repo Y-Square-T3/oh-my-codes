@@ -10,7 +10,9 @@ describe("detectCompletionInSessionMessages", () => {
       const messages = [
         {
           info: { role: "assistant" },
-          parts: [{ type: "text", text: "Old completion <promise>DONE</promise>" }],
+          parts: [
+            { type: "text", text: "Old completion <promise>DONE</promise>" },
+          ],
         },
         {
           info: { role: "assistant" },
@@ -37,11 +39,18 @@ describe("detectCompletionInSessionMessages", () => {
       const messages = [
         {
           info: { role: "assistant" },
-          parts: [{ type: "text", text: "Old completion <promise>DONE</promise>" }],
+          parts: [
+            { type: "text", text: "Old completion <promise>DONE</promise>" },
+          ],
         },
         {
           info: { role: "assistant" },
-          parts: [{ type: "text", text: "Current completion <promise>DONE</promise>" }],
+          parts: [
+            {
+              type: "text",
+              text: "Current completion <promise>DONE</promise>",
+            },
+          ],
         },
       ]
       const ctx = createPluginInput(messages)
@@ -66,7 +75,9 @@ describe("detectCompletionInSessionMessages", () => {
       const messages = [
         {
           info: { role: "assistant" },
-          parts: [{ type: "text", text: "Old completion <promise>DONE</promise>" }],
+          parts: [
+            { type: "text", text: "Old completion <promise>DONE</promise>" },
+          ],
         },
         {
           info: { role: "assistant" },
@@ -101,7 +112,10 @@ describe("detectCompletionInSessionMessages", () => {
         {
           info: { role: "assistant" },
           parts: [
-            { type: "tool_result", text: 'Task completed.\n\nAgent: oracle\n\n<promise>VERIFIED</promise>\n\n<task_metadata>\nsession_id: ses_abc123\n</task_metadata>' },
+            {
+              type: "tool_result",
+              text: "Task completed.\n\nAgent: oracle\n\n<promise>VERIFIED</promise>\n\n<task_metadata>\nsession_id: ses_abc123\n</task_metadata>",
+            },
             { type: "text", text: "Oracle verified the task." },
           ],
         },
@@ -124,7 +138,10 @@ describe("detectCompletionInSessionMessages", () => {
         {
           info: { role: "assistant" },
           parts: [
-            { type: "tool_result", text: "Agent: explore\n\n<promise>VERIFIED</promise>" },
+            {
+              type: "tool_result",
+              text: "Agent: explore\n\n<promise>VERIFIED</promise>",
+            },
             { type: "text", text: "Explore finished checking." },
           ],
         },
@@ -147,7 +164,10 @@ describe("detectCompletionInSessionMessages", () => {
         {
           info: { role: "assistant" },
           parts: [
-            { type: "tool_result", text: 'Background task output <promise>DONE</promise>' },
+            {
+              type: "tool_result",
+              text: "Background task output <promise>DONE</promise>",
+            },
             { type: "text", text: "Task completed successfully." },
           ],
         },
@@ -169,7 +189,10 @@ describe("detectCompletionInSessionMessages", () => {
         {
           info: { role: "assistant" },
           parts: [
-            { type: "tool_use", text: 'prompt containing <promise>VERIFIED</promise> as instruction' },
+            {
+              type: "tool_use",
+              text: "prompt containing <promise>VERIFIED</promise> as instruction",
+            },
             { type: "text", text: "Calling Oracle." },
           ],
         },

@@ -8,10 +8,16 @@ export type ContextLimitModelCacheState = {
 
 function isAnthropicProvider(providerID: string): boolean {
   const normalized = providerID.toLowerCase()
-  return normalized === "anthropic" || normalized === "google-vertex-anthropic" || normalized === "aws-bedrock-anthropic"
+  return (
+    normalized === "anthropic" ||
+    normalized === "google-vertex-anthropic" ||
+    normalized === "aws-bedrock-anthropic"
+  )
 }
 
-function getAnthropicActualLimit(modelCacheState?: ContextLimitModelCacheState): number {
+function getAnthropicActualLimit(
+  modelCacheState?: ContextLimitModelCacheState,
+): number {
   return (modelCacheState?.anthropicContext1MEnabled ?? false) ||
     process.env.ANTHROPIC_1M_CONTEXT === "true" ||
     process.env.VERTEX_ANTHROPIC_1M_CONTEXT === "true"
@@ -32,11 +38,16 @@ export function resolveActualContextLimit(
     const explicit1M = getAnthropicActualLimit(modelCacheState)
     if (explicit1M === 1_000_000) return explicit1M
 
-    const cachedLimit = modelCacheState?.modelContextLimitsCache?.get(`${providerID}/${modelID}`)
+    const cachedLimit = modelCacheState?.modelContextLimitsCache?.get(
+      `${providerID}/${modelID}`,
+    )
     if (cachedLimit && supportsCachedAnthropicLimit(modelID)) return cachedLimit
 
     return DEFAULT_ANTHROPIC_ACTUAL_LIMIT
   }
 
-  return modelCacheState?.modelContextLimitsCache?.get(`${providerID}/${modelID}`) ?? null
+  return (
+    modelCacheState?.modelContextLimitsCache?.get(`${providerID}/${modelID}`) ??
+    null
+  )
 }

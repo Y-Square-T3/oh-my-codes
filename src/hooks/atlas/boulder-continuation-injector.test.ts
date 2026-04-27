@@ -1,6 +1,9 @@
 import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { registerAgentName, _resetForTesting } from "../../features/claude-code-session-state"
+import {
+  registerAgentName,
+  _resetForTesting,
+} from "../../features/claude-code-session-state"
 import { injectBoulderContinuation } from "./boulder-continuation-injector"
 
 describe("injectBoulderContinuation", () => {
@@ -58,7 +61,10 @@ describe("injectBoulderContinuation", () => {
     registerAgentName("atlas")
     const promptAsyncMock = mock(async (_request: unknown) => undefined)
     const messagesMock = mock(async () => ({ data: [] }))
-    const sessionState = { promptFailureCount: 2, lastContinuationInjectedAt: 123 }
+    const sessionState = {
+      promptFailureCount: 2,
+      lastContinuationInjectedAt: 123,
+    }
 
     const ctx = {
       directory: "/tmp",
@@ -80,7 +86,9 @@ describe("injectBoulderContinuation", () => {
       agent: "atlas",
       backgroundManager: {
         getTasksByParentSession: () => [{ status: "running" }],
-      } as unknown as Parameters<typeof injectBoulderContinuation>[0]["backgroundManager"],
+      } as unknown as Parameters<
+        typeof injectBoulderContinuation
+      >[0]["backgroundManager"],
       sessionState,
     })
 
@@ -132,7 +140,7 @@ describe("injectBoulderContinuation", () => {
       }
     }> = []
     const promptAsyncMock = mock(async (request: unknown) => {
-      capturedRequests.push(request as typeof capturedRequests[number])
+      capturedRequests.push(request as (typeof capturedRequests)[number])
       return undefined
     })
     const recentModel = {
@@ -141,14 +149,16 @@ describe("injectBoulderContinuation", () => {
       variant: "max",
     }
     const messagesMock = mock(async () => ({
-      data: [{
-        id: "msg_1",
-        info: {
-          agent: "atlas",
-          model: recentModel,
-          time: { created: Date.now() },
+      data: [
+        {
+          id: "msg_1",
+          info: {
+            agent: "atlas",
+            model: recentModel,
+            time: { created: Date.now() },
+          },
         },
-      }],
+      ],
     }))
 
     const ctx = {

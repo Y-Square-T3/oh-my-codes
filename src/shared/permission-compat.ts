@@ -29,14 +29,12 @@ export function createAgentToolRestrictions(
  * All other tools are denied by default using `*: deny` pattern.
  */
 export function createAgentToolAllowlist(
-  allowTools: string[]
+  allowTools: string[],
 ): PermissionFormat {
   return {
     permission: {
       "*": "deny" as const,
-      ...Object.fromEntries(
-        allowTools.map((tool) => [tool, "allow" as const])
-      ),
+      ...Object.fromEntries(allowTools.map((tool) => [tool, "allow" as const])),
     },
   }
 }
@@ -46,13 +44,13 @@ export function createAgentToolAllowlist(
  * For migrating user configs from older versions.
  */
 export function migrateToolsToPermission(
-  tools: Record<string, boolean>
+  tools: Record<string, boolean>,
 ): Record<string, PermissionValue> {
   return Object.fromEntries(
     Object.entries(tools).map(([key, value]) => [
       key,
       value ? ("allow" as const) : ("deny" as const),
-    ])
+    ]),
   )
 }
 
@@ -61,7 +59,7 @@ export function migrateToolsToPermission(
  * If config has `tools`, converts to `permission`.
  */
 export function migrateAgentConfig(
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): Record<string, unknown> {
   const result = { ...config }
 
@@ -69,7 +67,7 @@ export function migrateAgentConfig(
     const existingPermission =
       (result.permission as Record<string, PermissionValue>) || {}
     const migratedPermission = migrateToolsToPermission(
-      result.tools as Record<string, boolean>
+      result.tools as Record<string, boolean>,
     )
     result.permission = { ...migratedPermission, ...existingPermission }
     delete result.tools

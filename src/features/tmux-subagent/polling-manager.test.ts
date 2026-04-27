@@ -45,9 +45,13 @@ describe("TmuxPollingManager overlap", () => {
     )
 
     //#when
-    const firstPoll = (manager as unknown as { pollSessions: () => Promise<void> }).pollSessions()
+    const firstPoll = (
+      manager as unknown as { pollSessions: () => Promise<void> }
+    ).pollSessions()
     await Promise.resolve()
-    const secondPoll = (manager as unknown as { pollSessions: () => Promise<void> }).pollSessions()
+    const secondPoll = (
+      manager as unknown as { pollSessions: () => Promise<void> }
+    ).pollSessions()
     releaseStatus?.()
     await Promise.all([firstPoll, secondPoll])
 
@@ -96,7 +100,9 @@ describe("TmuxPollingManager overlap", () => {
     })
 
     //#when
-    const pollSessions = (manager as unknown as { pollSessions: () => Promise<void> }).pollSessions
+    const pollSessions = (
+      manager as unknown as { pollSessions: () => Promise<void> }
+    ).pollSessions
     await pollSessions.call(manager)
     await pollSessions.call(manager)
     await pollSessions.call(manager)

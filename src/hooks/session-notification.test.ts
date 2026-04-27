@@ -1,6 +1,18 @@
-import { afterEach, beforeEach, describe, expect, jest, spyOn, test } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  jest,
+  spyOn,
+  test,
+} from "bun:test"
 import { createSessionNotification } from "./session-notification"
-import { setMainSession, subagentSessions, _resetForTesting } from "../features/claude-code-session-state"
+import {
+  setMainSession,
+  subagentSessions,
+  _resetForTesting,
+} from "../features/claude-code-session-state"
 import * as utils from "./session-notification-utils"
 import * as sender from "./session-notification-sender"
 
@@ -15,11 +27,16 @@ describe("session-notification", () => {
     return {
       $: async (cmd: TemplateStringsArray | string, ...values: any[]) => {
         // given - track notification commands (osascript, notify-send, powershell)
-        const cmdStr = typeof cmd === "string" 
-          ? cmd 
-          : cmd.reduce((acc, part, i) => acc + part + (values[i] ?? ""), "")
-        
-        if (cmdStr.includes("osascript") || cmdStr.includes("notify-send") || cmdStr.includes("powershell")) {
+        const cmdStr =
+          typeof cmd === "string"
+            ? cmd
+            : cmd.reduce((acc, part, i) => acc + part + (values[i] ?? ""), "")
+
+        if (
+          cmdStr.includes("osascript") ||
+          cmdStr.includes("notify-send") ||
+          cmdStr.includes("powershell")
+        ) {
           notificationCalls.push(cmdStr)
         }
         return { stdout: "", stderr: "", exitCode: 0 }
@@ -40,7 +57,7 @@ describe("session-notification", () => {
     Date.now = originalDateNow
     _resetForTesting()
     notificationCalls = []
-    
+
     spyOn(utils, "getOsascriptPath").mockResolvedValue("/usr/bin/osascript")
     spyOn(utils, "getNotifySendPath").mockResolvedValue("/usr/bin/notify-send")
     spyOn(utils, "getPowershellPath").mockResolvedValue("powershell")
@@ -54,10 +71,10 @@ describe("session-notification", () => {
         _ctx: Parameters<typeof sender.sendSessionNotification>[0],
         _platform: Parameters<typeof sender.sendSessionNotification>[1],
         _title: Parameters<typeof sender.sendSessionNotification>[2],
-        message: Parameters<typeof sender.sendSessionNotification>[3]
+        message: Parameters<typeof sender.sendSessionNotification>[3],
       ) => {
         notificationCalls.push(message)
-      }
+      },
     )
   })
 
@@ -391,14 +408,20 @@ describe("session-notification", () => {
     const notifyCalls: string[] = []
     const mockCtx = {
       $: (cmd: TemplateStringsArray | string, ...values: any[]) => {
-        const cmdStr = typeof cmd === "string"
-          ? cmd
-          : cmd.reduce((acc, part, i) => acc + part + (values[i] ?? ""), "")
+        const cmdStr =
+          typeof cmd === "string"
+            ? cmd
+            : cmd.reduce((acc, part, i) => acc + part + (values[i] ?? ""), "")
         notifyCalls.push(cmdStr)
         const result = { stdout: "", stderr: "", exitCode: 0 }
         const promise = Promise.resolve(result) as any
         promise.quiet = () => promise
-        promise.nothrow = () => { const p = Promise.resolve(result) as any; p.quiet = () => p; p.nothrow = () => p; return p }
+        promise.nothrow = () => {
+          const p = Promise.resolve(result) as any
+          p.quiet = () => p
+          p.nothrow = () => p
+          return p
+        }
         return promise
       },
     } as any
@@ -409,17 +432,24 @@ describe("session-notification", () => {
     // given - terminal-notifier is available and __CFBundleIdentifier is set
     spyOn(sender, "sendSessionNotification").mockRestore()
     const { mockCtx, notifyCalls } = createSenderMockCtx()
-    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue("/usr/local/bin/terminal-notifier")
+    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue(
+      "/usr/local/bin/terminal-notifier",
+    )
     const originalEnv = process.env.__CFBundleIdentifier
     process.env.__CFBundleIdentifier = "com.mitchellh.ghostty"
 
     try {
       // when - sendSessionNotification is called directly on darwin
-      await sender.sendSessionNotification(mockCtx, "darwin", "Test Title", "Test Message")
+      await sender.sendSessionNotification(
+        mockCtx,
+        "darwin",
+        "Test Title",
+        "Test Message",
+      )
 
       // then - notification uses terminal-notifier with -activate flag
       expect(notifyCalls.length).toBeGreaterThanOrEqual(1)
-      const tnCall = notifyCalls.find(c => c.includes("terminal-notifier"))
+      const tnCall = notifyCalls.find((c) => c.includes("terminal-notifier"))
       expect(tnCall).toBeDefined()
       expect(tnCall).toContain("-activate")
       expect(tnCall).toContain("com.mitchellh.ghostty")
@@ -440,13 +470,18 @@ describe("session-notification", () => {
     spyOn(utils, "getOsascriptPath").mockResolvedValue("/usr/bin/osascript")
 
     // when - sendSessionNotification is called directly on darwin
-    await sender.sendSessionNotification(mockCtx, "darwin", "Test Title", "Test Message")
+    await sender.sendSessionNotification(
+      mockCtx,
+      "darwin",
+      "Test Title",
+      "Test Message",
+    )
 
     // then - notification uses osascript (fallback)
     expect(notifyCalls.length).toBeGreaterThanOrEqual(1)
-    const osascriptCall = notifyCalls.find(c => c.includes("osascript"))
+    const osascriptCall = notifyCalls.find((c) => c.includes("osascript"))
     expect(osascriptCall).toBeDefined()
-    const tnCall = notifyCalls.find(c => c.includes("terminal-notifier"))
+    const tnCall = notifyCalls.find((c) => c.includes("terminal-notifier"))
     expect(tnCall).toBeUndefined()
   })
 
@@ -456,35 +491,65 @@ describe("session-notification", () => {
     const notifyCalls: string[] = []
     const mockCtx = {
       $: (cmd: TemplateStringsArray | string, ...values: unknown[]) => {
-        const cmdStr = typeof cmd === "string"
-          ? cmd
-          : cmd.reduce((acc, part, index) => `${acc}${part}${String(values[index] ?? "")}`, "")
+        const cmdStr =
+          typeof cmd === "string"
+            ? cmd
+            : cmd.reduce(
+                (acc, part, index) =>
+                  `${acc}${part}${String(values[index] ?? "")}`,
+                "",
+              )
         notifyCalls.push(cmdStr)
 
         if (cmdStr.includes("terminal-notifier")) {
-          const err = Object.assign(new Error("terminal-notifier failed"), { stdout: "", stderr: "", exitCode: 1 })
+          const err = Object.assign(new Error("terminal-notifier failed"), {
+            stdout: "",
+            stderr: "",
+            exitCode: 1,
+          })
           const rejected = Promise.reject(err) as any
           rejected.quiet = () => rejected
-          rejected.nothrow = () => { const p = Promise.resolve({ stdout: "", stderr: "", exitCode: 1 }) as any; p.quiet = () => p; p.nothrow = () => p; return p }
+          rejected.nothrow = () => {
+            const p = Promise.resolve({
+              stdout: "",
+              stderr: "",
+              exitCode: 1,
+            }) as any
+            p.quiet = () => p
+            p.nothrow = () => p
+            return p
+          }
           return rejected
         }
 
         const result = { stdout: "", stderr: "", exitCode: 0 }
         const promise = Promise.resolve(result) as any
         promise.quiet = () => promise
-        promise.nothrow = () => { const p = Promise.resolve(result) as any; p.quiet = () => p; p.nothrow = () => p; return p }
+        promise.nothrow = () => {
+          const p = Promise.resolve(result) as any
+          p.quiet = () => p
+          p.nothrow = () => p
+          return p
+        }
         return promise
       },
     } as any
-    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue("/usr/local/bin/terminal-notifier")
+    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue(
+      "/usr/local/bin/terminal-notifier",
+    )
     spyOn(utils, "getOsascriptPath").mockResolvedValue("/usr/bin/osascript")
 
     // when - sendSessionNotification is called directly on darwin
-    await sender.sendSessionNotification(mockCtx, "darwin", "Test Title", "Test Message")
+    await sender.sendSessionNotification(
+      mockCtx,
+      "darwin",
+      "Test Title",
+      "Test Message",
+    )
 
     // then - osascript fallback should be attempted after terminal-notifier failure
-    const tnCall = notifyCalls.find(c => c.includes("terminal-notifier"))
-    const osascriptCall = notifyCalls.find(c => c.includes("osascript"))
+    const tnCall = notifyCalls.find((c) => c.includes("terminal-notifier"))
+    const osascriptCall = notifyCalls.find((c) => c.includes("osascript"))
     expect(tnCall).toBeDefined()
     expect(osascriptCall).toBeDefined()
   })
@@ -496,33 +561,62 @@ describe("session-notification", () => {
     const mockCtx = {
       $: (cmd: TemplateStringsArray | string, ...values: unknown[]) => {
         if (values.some(Array.isArray)) {
-          const err = Object.assign(new Error("array interpolation unsupported"), { stdout: "", stderr: "", exitCode: 1 })
+          const err = Object.assign(
+            new Error("array interpolation unsupported"),
+            { stdout: "", stderr: "", exitCode: 1 },
+          )
           const rejected = Promise.reject(err) as any
           rejected.quiet = () => rejected
-          rejected.nothrow = () => { const p = Promise.resolve({ stdout: "", stderr: "", exitCode: 1 }) as any; p.quiet = () => p; p.nothrow = () => p; return p }
+          rejected.nothrow = () => {
+            const p = Promise.resolve({
+              stdout: "",
+              stderr: "",
+              exitCode: 1,
+            }) as any
+            p.quiet = () => p
+            p.nothrow = () => p
+            return p
+          }
           return rejected
         }
 
-        const commandString = typeof cmd === "string"
-          ? cmd
-          : cmd.reduce((acc, part, index) => `${acc}${part}${String(values[index] ?? "")}`, "")
+        const commandString =
+          typeof cmd === "string"
+            ? cmd
+            : cmd.reduce(
+                (acc, part, index) =>
+                  `${acc}${part}${String(values[index] ?? "")}`,
+                "",
+              )
         notifyCalls.push(commandString)
         const result = { stdout: "", stderr: "", exitCode: 0 }
         const promise = Promise.resolve(result) as any
         promise.quiet = () => promise
-        promise.nothrow = () => { const p = Promise.resolve(result) as any; p.quiet = () => p; p.nothrow = () => p; return p }
+        promise.nothrow = () => {
+          const p = Promise.resolve(result) as any
+          p.quiet = () => p
+          p.nothrow = () => p
+          return p
+        }
         return promise
       },
     } as any
-    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue("/usr/local/bin/terminal-notifier")
+    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue(
+      "/usr/local/bin/terminal-notifier",
+    )
     spyOn(utils, "getOsascriptPath").mockResolvedValue("/usr/bin/osascript")
 
     // when - terminal-notifier command is executed
-    await sender.sendSessionNotification(mockCtx, "darwin", "Test Title", "Test Message")
+    await sender.sendSessionNotification(
+      mockCtx,
+      "darwin",
+      "Test Title",
+      "Test Message",
+    )
 
     // then - terminal-notifier succeeds directly and fallback is not used
-    const tnCall = notifyCalls.find(c => c.includes("terminal-notifier"))
-    const osascriptCall = notifyCalls.find(c => c.includes("osascript"))
+    const tnCall = notifyCalls.find((c) => c.includes("terminal-notifier"))
+    const osascriptCall = notifyCalls.find((c) => c.includes("osascript"))
     expect(tnCall).toBeDefined()
     expect(osascriptCall).toBeUndefined()
   })
@@ -531,17 +625,24 @@ describe("session-notification", () => {
     // given - terminal-notifier available but no bundle ID
     spyOn(sender, "sendSessionNotification").mockRestore()
     const { mockCtx, notifyCalls } = createSenderMockCtx()
-    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue("/usr/local/bin/terminal-notifier")
+    spyOn(utils, "getTerminalNotifierPath").mockResolvedValue(
+      "/usr/local/bin/terminal-notifier",
+    )
     const originalEnv = process.env.__CFBundleIdentifier
     delete process.env.__CFBundleIdentifier
 
     try {
       // when - sendSessionNotification is called directly on darwin
-      await sender.sendSessionNotification(mockCtx, "darwin", "Test Title", "Test Message")
+      await sender.sendSessionNotification(
+        mockCtx,
+        "darwin",
+        "Test Title",
+        "Test Message",
+      )
 
       // then - terminal-notifier used but without -activate flag
       expect(notifyCalls.length).toBeGreaterThanOrEqual(1)
-      const tnCall = notifyCalls.find(c => c.includes("terminal-notifier"))
+      const tnCall = notifyCalls.find((c) => c.includes("terminal-notifier"))
       expect(tnCall).toBeDefined()
       expect(tnCall).not.toContain("-activate")
     } finally {

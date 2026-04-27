@@ -10,10 +10,7 @@ import {
 import { getTmuxPath } from "../../tools/interactive-bash/tmux-path-resolver"
 import { queryWindowState } from "./pane-state-querier"
 import { log } from "../../shared"
-import type {
-  ActionResult,
-  ActionExecutorDeps,
-} from "./action-executor-core"
+import type { ActionResult, ActionExecutorDeps } from "./action-executor-core"
 
 export type { ActionExecutorDeps, ActionResult } from "./action-executor-core"
 
@@ -35,11 +32,15 @@ async function enforceMainPane(
   config: TmuxConfig,
 ): Promise<void> {
   if (!windowState.mainPane) return
-  await enforceMainPaneWidth(windowState.mainPane.paneId, windowState.windowWidth, {
-    mainPaneSize: config.main_pane_size,
-    mainPaneMinWidth: config.main_pane_min_width,
-    agentPaneMinWidth: config.agent_pane_min_width,
-  })
+  await enforceMainPaneWidth(
+    windowState.mainPane.paneId,
+    windowState.windowWidth,
+    {
+      mainPaneSize: config.main_pane_size,
+      mainPaneMinWidth: config.main_pane_min_width,
+      agentPaneMinWidth: config.agent_pane_min_width,
+    },
+  )
 }
 
 async function enforceLayoutAndMainPane(ctx: ExecuteContext): Promise<void> {
@@ -65,7 +66,7 @@ async function enforceLayoutAndMainPane(ctx: ExecuteContext): Promise<void> {
 
 export async function executeAction(
   action: PaneAction,
-  ctx: ExecuteContext
+  ctx: ExecuteContext,
 ): Promise<ActionResult> {
   if (action.type === "close") {
     const success = await closeTmuxPane(action.paneId)
@@ -81,7 +82,7 @@ export async function executeAction(
       action.newSessionId,
       action.description,
       ctx.config,
-      ctx.serverUrl
+      ctx.serverUrl,
     )
     if (result.success) {
       await enforceLayoutAndMainPane(ctx)
@@ -98,7 +99,7 @@ export async function executeAction(
     ctx.config,
     ctx.serverUrl,
     action.targetPaneId,
-    action.splitDirection
+    action.splitDirection,
   )
 
   if (result.success) {
@@ -113,7 +114,7 @@ export async function executeAction(
 
 export async function executeActions(
   actions: PaneAction[],
-  ctx: ExecuteContext
+  ctx: ExecuteContext,
 ): Promise<ExecuteActionsResult> {
   const results: Array<{ action: PaneAction; result: ActionResult }> = []
   let spawnedPaneId: string | undefined
@@ -124,11 +125,17 @@ export async function executeActions(
     results.push({ action, result })
 
     if (!result.success) {
-      log("[action-executor] action failed", { type: action.type, error: result.error })
+      log("[action-executor] action failed", {
+        type: action.type,
+        error: result.error,
+      })
       return { success: false, results }
     }
 
-    if ((action.type === "spawn" || action.type === "replace") && result.paneId) {
+    if (
+      (action.type === "spawn" || action.type === "replace") &&
+      result.paneId
+    ) {
       spawnedPaneId = result.paneId
     }
   }

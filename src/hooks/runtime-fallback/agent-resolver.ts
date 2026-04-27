@@ -17,8 +17,7 @@ export const AGENT_NAMES = [
 ]
 
 export const agentPattern = new RegExp(
-  `\\b(${AGENT_NAMES
-    .sort((a, b) => b.length - a.length)
+  `\\b(${AGENT_NAMES.sort((a, b) => b.length - a.length)
     .map((a) => a.replace(/-/g, "\\-"))
     .join("|")})\\b`,
   "i",
@@ -32,7 +31,9 @@ export function detectAgentFromSession(sessionID: string): string | undefined {
   return undefined
 }
 
-export function normalizeAgentName(agent: string | undefined): string | undefined {
+export function normalizeAgentName(
+  agent: string | undefined,
+): string | undefined {
   if (!agent) return undefined
   const normalized = agent.toLowerCase().trim()
   if (AGENT_NAMES.includes(normalized)) {
@@ -45,7 +46,10 @@ export function normalizeAgentName(agent: string | undefined): string | undefine
   return undefined
 }
 
-export function resolveAgentForSession(sessionID: string, eventAgent?: string): string | undefined {
+export function resolveAgentForSession(
+  sessionID: string,
+  eventAgent?: string,
+): string | undefined {
   return (
     normalizeAgentName(eventAgent) ??
     normalizeAgentName(getSessionAgent(sessionID)) ??

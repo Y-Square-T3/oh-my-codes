@@ -26,7 +26,10 @@ interface PluginExtendedConfigCacheEntry {
 const configCache = new Map<string, PluginExtendedConfigCacheEntry>()
 
 function getUserConfigPath(): string {
-  return join(getOpenCodeConfigDir({ binary: "opencode" }), "opencode-cc-plugin.json")
+  return join(
+    getOpenCodeConfigDir({ binary: "opencode" }),
+    "opencode-cc-plugin.json",
+  )
 }
 
 function getProjectConfigPath(): string {
@@ -55,7 +58,9 @@ export function clearPluginExtendedConfigCache(): void {
   configCache.clear()
 }
 
-async function loadConfigFromPath(path: string): Promise<PluginExtendedConfig | null> {
+async function loadConfigFromPath(
+  path: string,
+): Promise<PluginExtendedConfig | null> {
   if (!existsSync(path)) {
     return null
   }
@@ -71,7 +76,7 @@ async function loadConfigFromPath(path: string): Promise<PluginExtendedConfig | 
 
 function mergeDisabledHooks(
   base: DisabledHooksConfig | undefined,
-  override: DisabledHooksConfig | undefined
+  override: DisabledHooksConfig | undefined,
 ): DisabledHooksConfig {
   if (!override) return base ?? {}
   if (!base) return override
@@ -98,7 +103,7 @@ export async function loadPluginExtendedConfig(): Promise<PluginExtendedConfig> 
   const merged: PluginExtendedConfig = {
     disabledHooks: mergeDisabledHooks(
       userConfig?.disabledHooks,
-      projectConfig?.disabledHooks
+      projectConfig?.disabledHooks,
     ),
   }
 
@@ -137,7 +142,7 @@ function getRegex(pattern: string): RegExp {
 export function isHookCommandDisabled(
   eventType: ClaudeHookEvent,
   command: string,
-  config: PluginExtendedConfig | null
+  config: PluginExtendedConfig | null,
 ): boolean {
   if (!config?.disabledHooks) return false
 

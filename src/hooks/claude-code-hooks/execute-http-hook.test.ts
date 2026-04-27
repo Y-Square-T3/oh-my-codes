@@ -2,7 +2,7 @@ import { describe, it, expect, mock, beforeEach, afterEach } from "bun:test"
 import type { HookHttp } from "./types"
 
 const mockFetch = mock(() =>
-  Promise.resolve(new Response(JSON.stringify({}), { status: 200 }))
+  Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
 )
 
 const originalFetch = globalThis.fetch
@@ -12,7 +12,7 @@ describe("executeHttpHook", () => {
     globalThis.fetch = mockFetch as unknown as typeof fetch
     mockFetch.mockReset()
     mockFetch.mockImplementation(() =>
-      Promise.resolve(new Response(JSON.stringify({}), { status: 200 }))
+      Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     )
   })
 
@@ -25,7 +25,10 @@ describe("executeHttpHook", () => {
       type: "http",
       url: "http://localhost:8080/hooks/pre-tool-use",
     }
-    const stdinData = JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash" })
+    const stdinData = JSON.stringify({
+      hook_event_name: "PreToolUse",
+      tool_name: "Bash",
+    })
 
     it("#when executed #then sends POST request with correct body", async () => {
       const { executeHttpHook } = await import("./execute-http-hook")
@@ -33,7 +36,10 @@ describe("executeHttpHook", () => {
       await executeHttpHook(hook, stdinData)
 
       expect(mockFetch).toHaveBeenCalledTimes(1)
-      const [url, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [url, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       expect(url).toBe("http://localhost:8080/hooks/pre-tool-use")
       expect(options.method).toBe("POST")
       expect(options.body).toBe(stdinData)
@@ -44,7 +50,10 @@ describe("executeHttpHook", () => {
 
       await executeHttpHook(hook, stdinData)
 
-      const [, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       const headers = options.headers as Record<string, string>
       expect(headers["Content-Type"]).toBe("application/json")
     })
@@ -54,7 +63,11 @@ describe("executeHttpHook", () => {
     const originalEnv = process.env
 
     beforeEach(() => {
-      process.env = { ...originalEnv, MY_TOKEN: "secret-123", OTHER_VAR: "other-value" }
+      process.env = {
+        ...originalEnv,
+        MY_TOKEN: "secret-123",
+        OTHER_VAR: "other-value",
+      }
     })
 
     afterEach(() => {
@@ -72,7 +85,10 @@ describe("executeHttpHook", () => {
 
       await executeHttpHook(hook, "{}")
 
-      const [, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       const headers = options.headers as Record<string, string>
       expect(headers["Authorization"]).toBe("Bearer secret-123")
     })
@@ -88,7 +104,10 @@ describe("executeHttpHook", () => {
 
       await executeHttpHook(hook, "{}")
 
-      const [, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       const headers = options.headers as Record<string, string>
       expect(headers["Authorization"]).toBe("Bearer secret-123")
     })
@@ -104,7 +123,10 @@ describe("executeHttpHook", () => {
 
       await executeHttpHook(hook, "{}")
 
-      const [, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       const headers = options.headers as Record<string, string>
       expect(headers["Authorization"]).toBe("Bearer ")
     })
@@ -121,7 +143,10 @@ describe("executeHttpHook", () => {
 
       await executeHttpHook(hook, "{}")
 
-      const [, options] = mockFetch.mock.calls[0] as unknown as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ]
       expect(options.signal).toBeDefined()
     })
   })
@@ -134,7 +159,9 @@ describe("executeHttpHook", () => {
       const result = await executeHttpHook(hook, "{}")
 
       expect(result.exitCode).toBe(1)
-      expect(result.stderr).toContain('HTTP hook URL scheme "file:" is not allowed')
+      expect(result.stderr).toContain(
+        'HTTP hook URL scheme "file:" is not allowed',
+      )
       expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -145,7 +172,9 @@ describe("executeHttpHook", () => {
       const result = await executeHttpHook(hook, "{}")
 
       expect(result.exitCode).toBe(1)
-      expect(result.stderr).toContain('HTTP hook URL scheme "data:" is not allowed')
+      expect(result.stderr).toContain(
+        'HTTP hook URL scheme "data:" is not allowed',
+      )
       expect(mockFetch).not.toHaveBeenCalled()
     })
 
@@ -156,12 +185,17 @@ describe("executeHttpHook", () => {
       const result = await executeHttpHook(hook, "{}")
 
       expect(result.exitCode).toBe(1)
-      expect(result.stderr).toContain('HTTP hook URL scheme "ftp:" is not allowed')
+      expect(result.stderr).toContain(
+        'HTTP hook URL scheme "ftp:" is not allowed',
+      )
       expect(mockFetch).not.toHaveBeenCalled()
     })
 
     it("#when URL uses http:// scheme #then allows hook execution", async () => {
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
       const { executeHttpHook } = await import("./execute-http-hook")
 
       const result = await executeHttpHook(hook, "{}")
@@ -187,7 +221,9 @@ describe("executeHttpHook", () => {
       const result = await executeHttpHook(hook, "{}")
 
       expect(result.exitCode).toBe(1)
-      expect(result.stderr).toContain("HTTP hook URL is invalid: not-a-valid-url")
+      expect(result.stderr).toContain(
+        "HTTP hook URL is invalid: not-a-valid-url",
+      )
       expect(mockFetch).not.toHaveBeenCalled()
     })
   })
@@ -199,10 +235,13 @@ describe("executeHttpHook", () => {
           new Response(JSON.stringify({ decision: "allow", reason: "ok" }), {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          })
-        )
+          }),
+        ),
       )
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
       const { executeHttpHook } = await import("./execute-http-hook")
 
       const result = await executeHttpHook(hook, "{}")
@@ -215,9 +254,12 @@ describe("executeHttpHook", () => {
   describe("#given a failing HTTP response", () => {
     it("#when response status is 4xx #then returns exit code 1", async () => {
       mockFetch.mockImplementation(() =>
-        Promise.resolve(new Response("Bad Request", { status: 400 }))
+        Promise.resolve(new Response("Bad Request", { status: 400 })),
       )
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
       const { executeHttpHook } = await import("./execute-http-hook")
 
       const result = await executeHttpHook(hook, "{}")
@@ -227,8 +269,13 @@ describe("executeHttpHook", () => {
     })
 
     it("#when fetch throws network error #then returns exit code 1", async () => {
-      mockFetch.mockImplementation(() => Promise.reject(new Error("ECONNREFUSED")))
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      mockFetch.mockImplementation(() =>
+        Promise.reject(new Error("ECONNREFUSED")),
+      )
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
       const { executeHttpHook } = await import("./execute-http-hook")
 
       const result = await executeHttpHook(hook, "{}")
@@ -245,10 +292,13 @@ describe("executeHttpHook", () => {
           new Response(JSON.stringify({ exitCode: 2, stderr: "blocked" }), {
             status: 200,
             headers: { "Content-Type": "application/json" },
-          })
-        )
+          }),
+        ),
       )
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
       const { executeHttpHook } = await import("./execute-http-hook")
 
       const result = await executeHttpHook(hook, "{}")

@@ -17,9 +17,12 @@ import type { RalphLoopHook } from "../ralph-loop"
 export function createKeywordDetectorHook(
   ctx: PluginInput,
   _collector?: ContextCollector,
-  _ralphLoop?: Pick<RalphLoopHook, "startLoop">
+  _ralphLoop?: Pick<RalphLoopHook, "startLoop">,
 ) {
-  function getRuntimeVariant(input: { variant?: string }, message: Record<string, unknown>): string | undefined {
+  function getRuntimeVariant(
+    input: { variant?: string },
+    message: Record<string, unknown>,
+  ): string | undefined {
     if (typeof message["variant"] === "string") {
       return message["variant"]
     }
@@ -39,12 +42,14 @@ export function createKeywordDetectorHook(
       output: {
         message: Record<string, unknown>
         parts: Array<{ type: string; text?: string; [key: string]: unknown }>
-      }
+      },
     ): Promise<void> => {
       const promptText = extractPromptText(output.parts)
 
       if (isSystemDirective(promptText)) {
-        log(`[keyword-detector] Skipping system directive message`, { sessionID: input.sessionID })
+        log(`[keyword-detector] Skipping system directive message`, {
+          sessionID: input.sessionID,
+        })
         return
       }
 
@@ -52,20 +57,32 @@ export function createKeywordDetectorHook(
 
       // Skip all keyword injection for non-OMO agents (e.g., OpenCode-Builder, Plan)
       if (isNonOmoAgent(currentAgent)) {
-        log(`[keyword-detector] Skipping keyword injection for non-OMO agent`, { sessionID: input.sessionID, agent: currentAgent })
+        log(`[keyword-detector] Skipping keyword injection for non-OMO agent`, {
+          sessionID: input.sessionID,
+          agent: currentAgent,
+        })
         return
       }
 
       // Remove system-reminder content to prevent automated system messages from triggering mode keywords
       const cleanText = removeSystemReminders(promptText)
       const modelID = input.model?.modelID
-      let detectedKeywords = detectKeywordsWithType(cleanText, currentAgent, modelID)
+      let detectedKeywords = detectKeywordsWithType(
+        cleanText,
+        currentAgent,
+        modelID,
+      )
 
       if (isPlannerAgent(currentAgent)) {
         const preFilterCount = detectedKeywords.length
-        detectedKeywords = detectedKeywords.filter((k) => k.type !== "ultrawork")
+        detectedKeywords = detectedKeywords.filter(
+          (k) => k.type !== "ultrawork",
+        )
         if (preFilterCount > detectedKeywords.length) {
-          log(`[keyword-detector] Filtered ultrawork keywords for planner agent`, { sessionID: input.sessionID, agent: currentAgent })
+          log(
+            `[keyword-detector] Filtered ultrawork keywords for planner agent`,
+            { sessionID: input.sessionID, agent: currentAgent },
+          )
         }
       }
 
@@ -75,20 +92,29 @@ export function createKeywordDetectorHook(
 
       const isBackgroundTaskSession = subagentSessions.has(input.sessionID)
       if (isBackgroundTaskSession) {
-        log(`[keyword-detector] Skipping keyword injection for background task session`, { sessionID: input.sessionID })
+        log(
+          `[keyword-detector] Skipping keyword injection for background task session`,
+          { sessionID: input.sessionID },
+        )
         return
       }
 
       const mainSessionID = getMainSessionID()
-      const isNonMainSession = mainSessionID && input.sessionID !== mainSessionID
+      const isNonMainSession =
+        mainSessionID && input.sessionID !== mainSessionID
 
       if (isNonMainSession) {
-        detectedKeywords = detectedKeywords.filter((k) => k.type === "ultrawork")
+        detectedKeywords = detectedKeywords.filter(
+          (k) => k.type === "ultrawork",
+        )
         if (detectedKeywords.length === 0) {
-          log(`[keyword-detector] Skipping non-ultrawork keywords in non-main session`, {
-            sessionID: input.sessionID,
-            mainSessionID,
-          })
+          log(
+            `[keyword-detector] Skipping non-ultrawork keywords in non-main session`,
+            {
+              sessionID: input.sessionID,
+              mainSessionID,
+            },
+          )
           return
         }
       }
@@ -118,21 +144,25 @@ export function createKeywordDetectorHook(
             log(`[keyword-detector] Failed to show toast`, {
               error: err,
               sessionID: input.sessionID,
-            })
+            }),
           )
-
       }
 
-      const textPartIndex = output.parts.findIndex((p) => p.type === "text" && p.text !== undefined)
+      const textPartIndex = output.parts.findIndex(
+        (p) => p.type === "text" && p.text !== undefined,
+      )
       if (textPartIndex === -1) {
-        log(`[keyword-detector] No text part found, skipping injection`, { sessionID: input.sessionID })
+        log(`[keyword-detector] No text part found, skipping injection`, {
+          sessionID: input.sessionID,
+        })
         return
       }
 
       const allMessages = detectedKeywords.map((k) => k.message).join("\n\n")
       const originalText = output.parts[textPartIndex].text ?? ""
 
-      output.parts[textPartIndex].text = `${allMessages}\n\n---\n\n${originalText}`
+      output.parts[textPartIndex].text =
+        `${allMessages}\n\n---\n\n${originalText}`
 
       log(`[keyword-detector] Detected ${detectedKeywords.length} keywords`, {
         sessionID: input.sessionID,

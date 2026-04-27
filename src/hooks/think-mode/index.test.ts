@@ -29,7 +29,10 @@ function createHookInput(args: {
   }
 }
 
-function createHookOutput(promptText: string, variant?: string): ThinkModeHookOutput {
+function createHookOutput(
+  promptText: string,
+  variant?: string,
+): ThinkModeHookOutput {
   return {
     message: variant ? { variant } : {},
     parts: [{ type: "text", text: promptText }],

@@ -81,7 +81,13 @@ describe("patchPart", () => {
     const body = { content: "test" }
 
     // when
-    const result = await patchPart(mockClient, sessionID, messageID, partID, body)
+    const result = await patchPart(
+      mockClient,
+      sessionID,
+      messageID,
+      partID,
+      body,
+    )
 
     // then
     expect(result).toBe(true)
@@ -91,11 +97,11 @@ describe("patchPart", () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Basic b3BlbmNvZGU6dGVzdHBhc3N3b3Jk",
+          Authorization: "Basic b3BlbmNvZGU6dGVzdHBhc3N3b3Jk",
         },
         body: JSON.stringify(body),
         signal: expect.any(AbortSignal),
-      })
+      }),
     )
   })
 
@@ -109,7 +115,13 @@ describe("patchPart", () => {
     mockFetch.mockRejectedValue(new Error("Network error"))
 
     // when
-    const result = await patchPart(mockClient, "ses123", "msg456", "part789", {})
+    const result = await patchPart(
+      mockClient,
+      "ses123",
+      "msg456",
+      "part789",
+      {},
+    )
 
     // then
     expect(result).toBe(false)
@@ -149,10 +161,10 @@ describe("deletePart", () => {
       expect.objectContaining({
         method: "DELETE",
         headers: {
-          "Authorization": "Basic b3BlbmNvZGU6dGVzdHBhc3N3b3Jk",
+          Authorization: "Basic b3BlbmNvZGU6dGVzdHBhc3N3b3Jk",
         },
         signal: expect.any(AbortSignal),
-      })
+      }),
     )
   })
 

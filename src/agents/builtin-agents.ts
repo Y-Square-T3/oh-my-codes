@@ -1,5 +1,10 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentFactory, AgentPromptMetadata } from "./types"
+import type {
+  BuiltinAgentName,
+  AgentOverrides,
+  AgentFactory,
+  AgentPromptMetadata,
+} from "./types"
 import type { CategoriesConfig, GitMasterConfig } from "../config/schema"
 import type { LoadedSkill } from "../features/opencode-skill-loader/types"
 import type { BrowserAutomationProvider } from "../config/schema"
@@ -7,7 +12,10 @@ import { createSisyphusAgent } from "./sisyphus"
 import { createOracleAgent, ORACLE_PROMPT_METADATA } from "./oracle"
 import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
 import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
-import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
+import {
+  createMultimodalLookerAgent,
+  MULTIMODAL_LOOKER_PROMPT_METADATA,
+} from "./multimodal-looker"
 import { createMetisAgent, metisPromptMetadata } from "./metis"
 import { createAtlasAgent, atlasPromptMetadata } from "./atlas"
 import { createMomusAgent, momusPromptMetadata } from "./momus"
@@ -41,7 +49,8 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   // Note: Atlas is handled specially in createBuiltinAgents()
   // because it needs OrchestratorContext, not just a model string
   atlas: createAtlasAgent as AgentFactory,
-  "sisyphus-junior": createSisyphusJuniorAgentWithOverrides as unknown as AgentFactory,
+  "sisyphus-junior":
+    createSisyphusJuniorAgentWithOverrides as unknown as AgentFactory,
 }
 
 /**
@@ -71,21 +80,23 @@ export async function createBuiltinAgents(
   uiSelectedModel?: string,
   disabledSkills?: Set<string>,
   useTaskSystem = false,
-  disableOmoEnv = false
+  disableOmoEnv = false,
 ): Promise<Record<string, AgentConfig>> {
-
   const connectedProviders = readConnectedProvidersCache()
   const providerModelsConnected = connectedProviders
     ? (readProviderModelsCache()?.connected ?? [])
     : []
   const mergedConnectedProviders = Array.from(
-    new Set([...(connectedProviders ?? []), ...providerModelsConnected])
+    new Set([...(connectedProviders ?? []), ...providerModelsConnected]),
   )
   // IMPORTANT: Do NOT call OpenCode client APIs during plugin initialization.
   // This function is called from config handler, and calling client API causes deadlock.
   // See: https://github.com/vibration-autos/oh-my-codes/issues/1301
   const availableModels = await fetchAvailableModels(undefined, {
-    connectedProviders: mergedConnectedProviders.length > 0 ? mergedConnectedProviders : undefined,
+    connectedProviders:
+      mergedConnectedProviders.length > 0
+        ? mergedConnectedProviders
+        : undefined,
   })
   const isFirstRunNoCache =
     availableModels.size === 0 && mergedConnectedProviders.length === 0
@@ -94,12 +105,21 @@ export async function createBuiltinAgents(
 
   const mergedCategories = mergeCategories(categories)
 
-  const availableCategories: AvailableCategory[] = Object.entries(mergedCategories).map(([name]) => ({
+  const availableCategories: AvailableCategory[] = Object.entries(
+    mergedCategories,
+  ).map(([name]) => ({
     name,
-    description: categories?.[name]?.description ?? CATEGORY_DESCRIPTIONS[name] ?? "General tasks",
+    description:
+      categories?.[name]?.description ??
+      CATEGORY_DESCRIPTIONS[name] ??
+      "General tasks",
   }))
 
-  const availableSkills = buildAvailableSkills(discoveredSkills, browserProvider, disabledSkills)
+  const availableSkills = buildAvailableSkills(
+    discoveredSkills,
+    browserProvider,
+    disabledSkills,
+  )
 
   // Collect general agents first (for availableAgents), but don't add to result yet
   const { pendingAgentConfigs, availableAgents } = collectPendingBuiltinAgents({

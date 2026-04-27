@@ -26,7 +26,9 @@ describe("applyLayout", () => {
   it("applies main-horizontal with main-pane-height option", async () => {
     const { applyLayout } = await import("./layout")
 
-    await applyLayout("tmux", "main-horizontal", 55, { spawnCommand: spawnMock })
+    await applyLayout("tmux", "main-horizontal", 55, {
+      spawnCommand: spawnMock,
+    })
 
     expect(spawnCalls).toEqual([
       ["tmux", "select-layout", "main-horizontal"],

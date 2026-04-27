@@ -9,23 +9,29 @@ interface FormatterConfig {
 }
 
 interface OpencodeConfig {
-  formatter?:
-    | false
-    | Record<string, FormatterConfig>
+  formatter?: false | Record<string, FormatterConfig>
   experimental?: {
     hook?: {
-      file_edited?: Record<string, Array<{ command: string[]; environment?: Record<string, string> }>>
+      file_edited?: Record<
+        string,
+        Array<{ command: string[]; environment?: Record<string, string> }>
+      >
     }
   }
 }
 
 export interface FormatterClient {
   config: {
-    get: (options?: { query?: { directory?: string } }) => Promise<{ data?: OpencodeConfig }>
+    get: (options?: {
+      query?: { directory?: string }
+    }) => Promise<{ data?: OpencodeConfig }>
   }
 }
 
-type FormatterDefinition = { command: string[]; environment: Record<string, string> }
+type FormatterDefinition = {
+  command: string[]
+  environment: Record<string, string>
+}
 type FormatterMap = Map<string, FormatterDefinition[]>
 
 const cachedFormattersByDirectory = new Map<string, FormatterMap>()
@@ -51,7 +57,12 @@ export async function resolveFormatters(
 
     if (config.formatter && typeof config.formatter === "object") {
       for (const [, formatter] of Object.entries(config.formatter)) {
-        if (formatter.disabled || !formatter.command?.length || !formatter.extensions?.length) continue
+        if (
+          formatter.disabled ||
+          !formatter.command?.length ||
+          !formatter.extensions?.length
+        )
+          continue
         for (const ext of formatter.extensions) {
           const normalizedExt = ext.startsWith(".") ? ext : `.${ext}`
           const existing = result.get(normalizedExt) ?? []
@@ -65,7 +76,9 @@ export async function resolveFormatters(
     }
 
     if (config.experimental?.hook?.file_edited) {
-      for (const [ext, commands] of Object.entries(config.experimental.hook.file_edited)) {
+      for (const [ext, commands] of Object.entries(
+        config.experimental.hook.file_edited,
+      )) {
         const normalizedExt = ext.startsWith(".") ? ext : `.${ext}`
         const existing = result.get(normalizedExt) ?? []
         for (const cmd of commands) {
@@ -86,7 +99,10 @@ export async function resolveFormatters(
   return result
 }
 
-export function buildFormatterCommand(command: string[], filePath: string): string[] {
+export function buildFormatterCommand(
+  command: string[],
+  filePath: string,
+): string[] {
   return command.map((arg) => arg.replace(/\$FILE/g, filePath))
 }
 
@@ -105,7 +121,10 @@ export async function runFormattersForFile(
   for (const formatter of matching) {
     const cmd = buildFormatterCommand(formatter.command, filePath)
     try {
-      log("[formatter-trigger] Running formatter", { command: cmd, file: filePath })
+      log("[formatter-trigger] Running formatter", {
+        command: cmd,
+        file: filePath,
+      })
       const proc = Bun.spawn(cmd, {
         cwd: directory,
         env: { ...process.env, ...formatter.environment },
@@ -122,7 +141,10 @@ export async function runFormattersForFile(
         })
       }
     } catch (error) {
-      log("[formatter-trigger] Formatter execution error", { command: cmd, error })
+      log("[formatter-trigger] Formatter execution error", {
+        command: cmd,
+        error,
+      })
     }
   }
 }

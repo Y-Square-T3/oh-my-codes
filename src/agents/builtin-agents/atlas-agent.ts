@@ -1,7 +1,10 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentOverrides } from "../types"
 import type { CategoriesConfig, CategoryConfig } from "../../config/schema"
-import type { AvailableAgent, AvailableSkill } from "../dynamic-agent-prompt-builder"
+import type {
+  AvailableAgent,
+  AvailableSkill,
+} from "../dynamic-agent-prompt-builder"
 import { AGENT_MODEL_REQUIREMENTS } from "../../shared"
 import { applyOverrides } from "./agent-overrides"
 import { applyModelResolution } from "./model-resolution"
@@ -39,7 +42,8 @@ export function maybeCreateAtlasConfig(input: {
   const atlasRequirement = AGENT_MODEL_REQUIREMENTS["atlas"]
 
   const atlasResolution = applyModelResolution({
-    uiSelectedModel: orchestratorOverride?.model !== undefined ? undefined : uiSelectedModel,
+    uiSelectedModel:
+      orchestratorOverride?.model !== undefined ? undefined : uiSelectedModel,
     userModel: orchestratorOverride?.model,
     requirement: atlasRequirement,
     availableModels,
@@ -57,10 +61,18 @@ export function maybeCreateAtlasConfig(input: {
   })
 
   if (atlasResolvedVariant) {
-    orchestratorConfig = { ...orchestratorConfig, variant: atlasResolvedVariant }
+    orchestratorConfig = {
+      ...orchestratorConfig,
+      variant: atlasResolvedVariant,
+    }
   }
 
-  orchestratorConfig = applyOverrides(orchestratorConfig, orchestratorOverride, mergedCategories, directory)
+  orchestratorConfig = applyOverrides(
+    orchestratorConfig,
+    orchestratorOverride,
+    mergedCategories,
+    directory,
+  )
 
   return orchestratorConfig
 }

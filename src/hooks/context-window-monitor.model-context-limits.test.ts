@@ -42,7 +42,10 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
     // when
     const output = createOutput()
-    await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+    await hook["tool.execute.after"](
+      { tool: "bash", sessionID, callID: "call_1" },
+      output,
+    )
 
     // then
     expect(output.output).toBe("original")
@@ -82,12 +85,17 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
     // when
     const output = createOutput()
-    await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+    await hook["tool.execute.after"](
+      { tool: "bash", sessionID, callID: "call_1" },
+      output,
+    )
 
     // then
     expect(output.output).toContain("context remaining")
     expect(output.output).toContain("262,144-token context window")
-    expect(output.output).toContain("[Context Status: 72.5% used (190,000/262,144 tokens), 27.5% remaining]")
+    expect(output.output).toContain(
+      "[Context Status: 72.5% used (190,000/262,144 tokens), 27.5% remaining]",
+    )
     expect(output.output).not.toContain("1,000,000")
   })
 
@@ -127,7 +135,10 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
         // when
         const output = createOutput()
-        await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+        await hook["tool.execute.after"](
+          { tool: "bash", sessionID, callID: "call_1" },
+          output,
+        )
 
         // then
         expect(output.output).toBe("original")
@@ -171,7 +182,10 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
         // when
         const output = createOutput()
-        await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+        await hook["tool.execute.after"](
+          { tool: "bash", sessionID, callID: "call_1" },
+          output,
+        )
 
         // then - 160K/500K = 32%, well below 70% threshold
         expect(output.output).toBe("original")
@@ -213,7 +227,10 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
         // when
         const output = createOutput()
-        await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+        await hook["tool.execute.after"](
+          { tool: "bash", sessionID, callID: "call_1" },
+          output,
+        )
 
         expect(output.output).toContain("context remaining")
         expect(output.output).toContain("500,000-token context window")
@@ -257,7 +274,10 @@ describe("context-window-monitor modelContextLimitsCache", () => {
 
         // when
         const output = createOutput()
-        await hook["tool.execute.after"]({ tool: "bash", sessionID, callID: "call_1" }, output)
+        await hook["tool.execute.after"](
+          { tool: "bash", sessionID, callID: "call_1" },
+          output,
+        )
 
         // then
         expect(output.output).toContain("context remaining")

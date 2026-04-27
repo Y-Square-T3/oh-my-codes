@@ -2,7 +2,11 @@ import * as fs from "node:fs"
 import { log } from "../../../shared/logger"
 import { PACKAGE_NAME } from "../constants"
 
-function replacePluginEntry(configPath: string, oldEntry: string, newEntry: string): boolean {
+function replacePluginEntry(
+  configPath: string,
+  oldEntry: string,
+  newEntry: string,
+): boolean {
   try {
     const content = fs.readFileSync(configPath, "utf-8")
 
@@ -30,11 +34,16 @@ function replacePluginEntry(configPath: string, oldEntry: string, newEntry: stri
     const regex = new RegExp(`["']${escapedOldEntry}["']`)
 
     if (!regex.test(pluginArrayContent)) {
-      log(`[auto-update-checker] Entry "${oldEntry}" not found in plugin array of ${configPath}`)
+      log(
+        `[auto-update-checker] Entry "${oldEntry}" not found in plugin array of ${configPath}`,
+      )
       return false
     }
 
-    const updatedPluginArray = pluginArrayContent.replace(regex, `"${newEntry}"`)
+    const updatedPluginArray = pluginArrayContent.replace(
+      regex,
+      `"${newEntry}"`,
+    )
     const updatedContent = before + updatedPluginArray + after
 
     if (updatedContent === content) {
@@ -43,20 +52,33 @@ function replacePluginEntry(configPath: string, oldEntry: string, newEntry: stri
     }
 
     fs.writeFileSync(configPath, updatedContent, "utf-8")
-    log(`[auto-update-checker] Updated ${configPath}: ${oldEntry} → ${newEntry}`)
+    log(
+      `[auto-update-checker] Updated ${configPath}: ${oldEntry} → ${newEntry}`,
+    )
     return true
   } catch (err) {
-    log(`[auto-update-checker] Failed to update config file ${configPath}:`, err)
+    log(
+      `[auto-update-checker] Failed to update config file ${configPath}:`,
+      err,
+    )
     return false
   }
 }
 
-export function updatePinnedVersion(configPath: string, oldEntry: string, newVersion: string): boolean {
+export function updatePinnedVersion(
+  configPath: string,
+  oldEntry: string,
+  newVersion: string,
+): boolean {
   const newEntry = `${PACKAGE_NAME}@${newVersion}`
   return replacePluginEntry(configPath, oldEntry, newEntry)
 }
 
-export function revertPinnedVersion(configPath: string, failedVersion: string, originalEntry: string): boolean {
+export function revertPinnedVersion(
+  configPath: string,
+  failedVersion: string,
+  originalEntry: string,
+): boolean {
   const failedEntry = `${PACKAGE_NAME}@${failedVersion}`
   return replacePluginEntry(configPath, failedEntry, originalEntry)
 }

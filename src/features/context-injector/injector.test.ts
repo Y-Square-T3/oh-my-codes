@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach } from "bun:test"
 import { ContextCollector } from "./collector"
-import {
-  createContextInjectorMessagesTransformHook,
-} from "./injector"
+import { createContextInjectorMessagesTransformHook } from "./injector"
 
 describe("createContextInjectorMessagesTransformHook", () => {
   let collector: ContextCollector
@@ -14,7 +12,7 @@ describe("createContextInjectorMessagesTransformHook", () => {
   const createMockMessage = (
     role: "user" | "assistant",
     text: string,
-    sessionID: string
+    sessionID: string,
   ) => ({
     info: {
       id: `msg_${Date.now()}_${Math.random()}`,
@@ -85,7 +83,8 @@ describe("createContextInjectorMessagesTransformHook", () => {
     // then
     const firstSyntheticPart = firstOutput.messages[0].parts[0]
     expect(
-      "synthetic" in firstSyntheticPart && firstSyntheticPart.synthetic === true
+      "synthetic" in firstSyntheticPart &&
+        firstSyntheticPart.synthetic === true,
     ).toBe(true)
 
     // given
@@ -104,7 +103,8 @@ describe("createContextInjectorMessagesTransformHook", () => {
     // then
     const secondSyntheticPart = secondOutput.messages[0].parts[0]
     expect(
-      "synthetic" in secondSyntheticPart && secondSyntheticPart.synthetic === true
+      "synthetic" in secondSyntheticPart &&
+        secondSyntheticPart.synthetic === true,
     ).toBe(true)
     expect(secondSyntheticPart.id).toBe(firstSyntheticPart.id)
   })

@@ -74,7 +74,11 @@ describe("formatGrepResult", () => {
           matches: [
             { file: "src/foo.ts", line: 10, text: " function hello() {" },
             { file: "src/foo.ts", line: 25, text: " function world() {" },
-            { file: "src/bar.ts", line: 5, text: ' import { hello } from "./foo"' },
+            {
+              file: "src/bar.ts",
+              line: 5,
+              text: ' import { hello } from "./foo"',
+            },
           ],
           totalMatches: 3,
           filesSearched: 2,

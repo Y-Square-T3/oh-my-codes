@@ -7,7 +7,8 @@ describe("runtime-fallback quota error regressions", () => {
     //#given
     const error = {
       name: "AI_APICallError",
-      message: "Subscription quota exceeded. You can continue using free models.",
+      message:
+        "Subscription quota exceeded. You can continue using free models.",
     }
 
     //#when
@@ -32,7 +33,10 @@ describe("runtime-fallback quota error regressions", () => {
 
   test("keeps HTTP 429 rate limit retryable", () => {
     //#given
-    const error = { statusCode: 429, message: "Too Many Requests: rate limit reached" }
+    const error = {
+      statusCode: 429,
+      message: "Too Many Requests: rate limit reached",
+    }
 
     //#when
     const retryable = isRetryableError(error, [429, 500, 502, 503, 504])

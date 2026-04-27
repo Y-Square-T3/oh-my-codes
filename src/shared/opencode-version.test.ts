@@ -101,7 +101,6 @@ describe("opencode-version", () => {
     })
   })
 
-
   describe("getOpenCodeVersion", () => {
     beforeEach(() => {
       resetVersionCache()
@@ -207,7 +206,9 @@ describe("opencode-version", () => {
       setVersionCache("1.1.37")
 
       // when checking against native agents version
-      const result = isOpenCodeVersionAtLeast(OPENCODE_NATIVE_AGENTS_INJECTION_VERSION)
+      const result = isOpenCodeVersionAtLeast(
+        OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
+      )
 
       // then returns true (native support available)
       expect(result).toBe(true)
@@ -218,7 +219,9 @@ describe("opencode-version", () => {
       setVersionCache("1.1.36")
 
       // when checking against native agents version
-      const result = isOpenCodeVersionAtLeast(OPENCODE_NATIVE_AGENTS_INJECTION_VERSION)
+      const result = isOpenCodeVersionAtLeast(
+        OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
+      )
 
       // then returns false (no native support)
       expect(result).toBe(false)
@@ -229,7 +232,9 @@ describe("opencode-version", () => {
       setVersionCache(null)
 
       // when checking against native agents version
-      const result = isOpenCodeVersionAtLeast(OPENCODE_NATIVE_AGENTS_INJECTION_VERSION)
+      const result = isOpenCodeVersionAtLeast(
+        OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
+      )
 
       // then returns true (assume latest, enable native support)
       expect(result).toBe(true)

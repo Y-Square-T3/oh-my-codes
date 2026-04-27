@@ -2,10 +2,20 @@ import { createOpencode, createOpencodeClient } from "@opencode-ai/sdk"
 import pc from "picocolors"
 import type { ServerConnection } from "./types"
 import { injectServerAuthIntoClient } from "../../shared/opencode-server-auth"
-import { getAvailableServerPort, isPortAvailable, DEFAULT_SERVER_PORT } from "../../shared/port-utils"
+import {
+  getAvailableServerPort,
+  isPortAvailable,
+  DEFAULT_SERVER_PORT,
+} from "../../shared/port-utils"
 import { withWorkingOpencodePath } from "./opencode-binary-resolver"
 
-const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]", "0.0.0.0"])
+const LOOPBACK_HOSTS = new Set([
+  "127.0.0.1",
+  "localhost",
+  "::1",
+  "[::1]",
+  "0.0.0.0",
+])
 
 function isLoopbackAttachUrl(url: string): boolean {
   try {
@@ -32,7 +42,10 @@ function isPortRangeExhausted(error: unknown): boolean {
   return error.message.includes("No available port found in range")
 }
 
-async function startServer(options: { signal: AbortSignal, port: number }): Promise<ServerConnection> {
+async function startServer(options: {
+  signal: AbortSignal
+  port: number
+}): Promise<ServerConnection> {
   const { signal, port } = options
   const { client, server } = await withWorkingOpencodePath(() =>
     createOpencode({ signal, port, hostname: "127.0.0.1" }),
@@ -79,14 +92,24 @@ export async function createServerConnection(options: {
           throw error
         }
 
-        console.log(pc.dim("Port"), pc.cyan(port.toString()), pc.dim("became occupied, attaching to existing server"))
-        const client = createOpencodeClient({ baseUrl: `http://127.0.0.1:${port}` })
+        console.log(
+          pc.dim("Port"),
+          pc.cyan(port.toString()),
+          pc.dim("became occupied, attaching to existing server"),
+        )
+        const client = createOpencodeClient({
+          baseUrl: `http://127.0.0.1:${port}`,
+        })
         injectServerAuthIntoClient(client)
         return { client, cleanup: () => {} }
       }
     }
 
-    console.log(pc.dim("Port"), pc.cyan(port.toString()), pc.dim("is occupied, attaching to existing server"))
+    console.log(
+      pc.dim("Port"),
+      pc.cyan(port.toString()),
+      pc.dim("is occupied, attaching to existing server"),
+    )
     const client = createOpencodeClient({ baseUrl: `http://127.0.0.1:${port}` })
     injectServerAuthIntoClient(client)
     return { client, cleanup: () => {} }
@@ -95,7 +118,10 @@ export async function createServerConnection(options: {
   let selectedPort: number
   let wasAutoSelected: boolean
   try {
-    const selected = await getAvailableServerPort(DEFAULT_SERVER_PORT, "127.0.0.1")
+    const selected = await getAvailableServerPort(
+      DEFAULT_SERVER_PORT,
+      "127.0.0.1",
+    )
     selectedPort = selected.port
     wasAutoSelected = selected.wasAutoSelected
   } catch (error) {
@@ -103,13 +129,21 @@ export async function createServerConnection(options: {
       throw error
     }
 
-    const defaultPortIsAvailable = await isPortAvailable(DEFAULT_SERVER_PORT, "127.0.0.1")
+    const defaultPortIsAvailable = await isPortAvailable(
+      DEFAULT_SERVER_PORT,
+      "127.0.0.1",
+    )
     if (defaultPortIsAvailable) {
       throw error
     }
 
-    console.log(pc.dim("Port range exhausted, attaching to existing server on"), pc.cyan(DEFAULT_SERVER_PORT.toString()))
-    const client = createOpencodeClient({ baseUrl: `http://127.0.0.1:${DEFAULT_SERVER_PORT}` })
+    console.log(
+      pc.dim("Port range exhausted, attaching to existing server on"),
+      pc.cyan(DEFAULT_SERVER_PORT.toString()),
+    )
+    const client = createOpencodeClient({
+      baseUrl: `http://127.0.0.1:${DEFAULT_SERVER_PORT}`,
+    })
     injectServerAuthIntoClient(client)
     return { client, cleanup: () => {} }
   }
@@ -117,7 +151,10 @@ export async function createServerConnection(options: {
   if (wasAutoSelected) {
     console.log(pc.dim("Auto-selected port"), pc.cyan(selectedPort.toString()))
   } else {
-    console.log(pc.dim("Starting server on port"), pc.cyan(selectedPort.toString()))
+    console.log(
+      pc.dim("Starting server on port"),
+      pc.cyan(selectedPort.toString()),
+    )
   }
 
   try {
@@ -127,8 +164,14 @@ export async function createServerConnection(options: {
       throw error
     }
 
-    const { port: retryPort } = await getAvailableServerPort(selectedPort + 1, "127.0.0.1")
-    console.log(pc.dim("Retrying server start on port"), pc.cyan(retryPort.toString()))
+    const { port: retryPort } = await getAvailableServerPort(
+      selectedPort + 1,
+      "127.0.0.1",
+    )
+    console.log(
+      pc.dim("Retrying server start on port"),
+      pc.cyan(retryPort.toString()),
+    )
     return await startServer({ signal, port: retryPort })
   }
 }

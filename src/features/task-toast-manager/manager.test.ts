@@ -1,5 +1,12 @@
 declare const require: (name: string) => any
-const { describe, test, expect, beforeEach, afterEach, mock } = require("bun:test")
+const {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+} = require("bun:test")
 import type { ConcurrencyManager } from "../background-agent/concurrency"
 
 type TaskToastManagerClass = typeof import("./manager").TaskToastManager
@@ -28,7 +35,10 @@ describe("TaskToastManager", () => {
     TaskToastManager = mod.TaskToastManager
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toastManager = new TaskToastManager(mockClient as any, mockConcurrencyManager)
+    toastManager = new TaskToastManager(
+      mockClient as any,
+      mockConcurrencyManager,
+    )
   })
 
   afterEach(() => {
@@ -115,7 +125,10 @@ describe("TaskToastManager", () => {
       } as unknown as ConcurrencyManager
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const managerWithConcurrency = new TaskToastManager(mockClient as any, mockConcurrencyWithCounts)
+      const managerWithConcurrency = new TaskToastManager(
+        mockClient as any,
+        mockConcurrencyWithCounts,
+      )
 
       // when - a task is added
       managerWithConcurrency.addTask({
@@ -162,7 +175,10 @@ describe("TaskToastManager", () => {
         description: "Task with category default model",
         agent: "sisyphus-junior",
         isBackground: false,
-        modelInfo: { model: "google/gemini-3.1-pro", type: "category-default" as const },
+        modelInfo: {
+          model: "google/gemini-3.1-pro",
+          type: "category-default" as const,
+        },
       }
 
       // when - addTask is called
@@ -182,7 +198,10 @@ describe("TaskToastManager", () => {
         description: "Task with system default model",
         agent: "sisyphus-junior",
         isBackground: false,
-        modelInfo: { model: "anthropic/claude-sonnet-4-6", type: "system-default" as const },
+        modelInfo: {
+          model: "anthropic/claude-sonnet-4-6",
+          type: "system-default" as const,
+        },
       }
 
       // when - addTask is called
@@ -203,7 +222,10 @@ describe("TaskToastManager", () => {
         description: "Task with inherited model",
         agent: "sisyphus-junior",
         isBackground: false,
-        modelInfo: { model: "cliproxy/claude-opus-4-7", type: "inherited" as const },
+        modelInfo: {
+          model: "cliproxy/claude-opus-4-7",
+          type: "inherited" as const,
+        },
       }
 
       // when - addTask is called
@@ -224,7 +246,10 @@ describe("TaskToastManager", () => {
         description: "Task with runtime fallback model",
         agent: "explore",
         isBackground: false,
-        modelInfo: { model: "anthropic/oswe-vscode-prime", type: "runtime-fallback" as const },
+        modelInfo: {
+          model: "anthropic/oswe-vscode-prime",
+          type: "runtime-fallback" as const,
+        },
       }
 
       // when - addTask is called
@@ -245,7 +270,10 @@ describe("TaskToastManager", () => {
         description: "Task with user model",
         agent: "sisyphus-junior",
         isBackground: false,
-        modelInfo: { model: "my-provider/my-model", type: "user-defined" as const },
+        modelInfo: {
+          model: "my-provider/my-model",
+          type: "user-defined" as const,
+        },
       }
 
       // when - addTask is called
@@ -288,7 +316,10 @@ describe("TaskToastManager", () => {
         agent: "sisyphus-junior",
         isBackground: true,
         category: "deep",
-        modelInfo: { model: "openai/gpt-5.4", type: "category-default" as const },
+        modelInfo: {
+          model: "openai/gpt-5.4",
+          type: "category-default" as const,
+        },
       }
 
       // when - addTask is called
@@ -308,7 +339,10 @@ describe("TaskToastManager", () => {
         agent: "sisyphus-junior",
         isBackground: false,
         category: "visual-engineering",
-        modelInfo: { model: "google/gemini-3.1-pro", type: "category-default" as const },
+        modelInfo: {
+          model: "google/gemini-3.1-pro",
+          type: "category-default" as const,
+        },
       }
 
       // when - addTask is called
@@ -344,7 +378,10 @@ describe("TaskToastManager", () => {
         description: "Explore codebase",
         agent: "explore",
         isBackground: true,
-        modelInfo: { model: "anthropic/claude-sonnet-4-6", type: "category-default" as const },
+        modelInfo: {
+          model: "anthropic/claude-sonnet-4-6",
+          type: "category-default" as const,
+        },
       }
 
       // when - addTask is called
@@ -361,7 +398,10 @@ describe("TaskToastManager", () => {
         getConcurrencyLimit: mock(() => 1),
       } as unknown as ConcurrencyManager
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const limitedManager = new TaskToastManager(mockClient as any, limitedConcurrency)
+      const limitedManager = new TaskToastManager(
+        mockClient as any,
+        limitedConcurrency,
+      )
 
       limitedManager.addTask({
         id: "task_running",
@@ -369,7 +409,10 @@ describe("TaskToastManager", () => {
         agent: "sisyphus-junior",
         isBackground: true,
         category: "deep",
-        modelInfo: { model: "openai/gpt-5.3-codex", type: "category-default" as const },
+        modelInfo: {
+          model: "openai/gpt-5.3-codex",
+          type: "category-default" as const,
+        },
       })
       limitedManager.addTask({
         id: "task_queued",
@@ -378,7 +421,10 @@ describe("TaskToastManager", () => {
         isBackground: true,
         category: "quick",
         status: "queued",
-        modelInfo: { model: "anthropic/claude-haiku-4-5", type: "category-default" as const },
+        modelInfo: {
+          model: "anthropic/claude-haiku-4-5",
+          type: "category-default" as const,
+        },
       })
 
       // when - the queued task toast fires

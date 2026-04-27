@@ -11,13 +11,16 @@ When `boulder.json` is malformed or manually edited to omit fields, `readBoulder
 ## Changes
 
 ### `src/features/boulder-state/storage.ts`
+
 - `readBoulderState()`: Validate `active_plan` and `plan_name` are strings (return `null` if not)
 - `readBoulderState()`: Strip `worktree_path` if present but not a string type
 - `getPlanProgress()`: Add `typeof planPath !== "string"` guard before `existsSync`
 
 ### `src/hooks/atlas/idle-event.ts`
+
 - Wrap `scheduleRetry` setTimeout async callback body in try/catch
 
 ### Tests
+
 - `src/features/boulder-state/storage.test.ts`: 5 new tests for missing/malformed fields
 - `src/hooks/atlas/index.test.ts`: 2 new tests for worktree_path presence/absence in continuation prompt

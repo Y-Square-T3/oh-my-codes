@@ -1,16 +1,32 @@
-import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync } from "node:fs"
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  mkdirSync,
+} from "node:fs"
 import { dirname, join } from "node:path"
 import { parseFrontmatter } from "../../shared/frontmatter"
 import type { RalphLoopState } from "./types"
-import { DEFAULT_STATE_FILE, DEFAULT_COMPLETION_PROMISE, DEFAULT_MAX_ITERATIONS } from "./constants"
+import {
+  DEFAULT_STATE_FILE,
+  DEFAULT_COMPLETION_PROMISE,
+  DEFAULT_MAX_ITERATIONS,
+} from "./constants"
 
-export function getStateFilePath(directory: string, customPath?: string): string {
+export function getStateFilePath(
+  directory: string,
+  customPath?: string,
+): string {
   return customPath
     ? join(directory, customPath)
     : join(directory, DEFAULT_STATE_FILE)
 }
 
-export function readState(directory: string, customPath?: string): RalphLoopState | null {
+export function readState(
+  directory: string,
+  customPath?: string,
+): RalphLoopState | null {
   const filePath = getStateFilePath(directory, customPath)
 
   if (!existsSync(filePath)) {
@@ -23,14 +39,15 @@ export function readState(directory: string, customPath?: string): RalphLoopStat
 
     const active = data.active
     const iteration = data.iteration
-    
+
     if (active === undefined || iteration === undefined) {
       return null
     }
 
     const isActive = active === true || active === "true"
-    const iterationNum = typeof iteration === "number" ? iteration : Number(iteration)
-    
+    const iterationNum =
+      typeof iteration === "number" ? iteration : Number(iteration)
+
     if (isNaN(iterationNum)) {
       return null
     }
@@ -40,7 +57,8 @@ export function readState(directory: string, customPath?: string): RalphLoopStat
       return str.replace(/^["']|["']$/g, "")
     }
 
-    const ultrawork = data.ultrawork === true || data.ultrawork === "true" ? true : undefined
+    const ultrawork =
+      data.ultrawork === true || data.ultrawork === "true" ? true : undefined
     const maxIterations =
       data.max_iterations === undefined || data.max_iterations === ""
         ? ultrawork
@@ -55,10 +73,12 @@ export function readState(directory: string, customPath?: string): RalphLoopStat
       message_count_at_start:
         typeof data.message_count_at_start === "number"
           ? data.message_count_at_start
-          : typeof data.message_count_at_start === "string" && data.message_count_at_start.trim() !== ""
+          : typeof data.message_count_at_start === "string" &&
+              data.message_count_at_start.trim() !== ""
             ? Number(data.message_count_at_start)
             : undefined,
-      completion_promise: stripQuotes(data.completion_promise) || DEFAULT_COMPLETION_PROMISE,
+      completion_promise:
+        stripQuotes(data.completion_promise) || DEFAULT_COMPLETION_PROMISE,
       initial_completion_promise: data.initial_completion_promise
         ? stripQuotes(data.initial_completion_promise)
         : undefined,
@@ -73,10 +93,14 @@ export function readState(directory: string, customPath?: string): RalphLoopStat
       session_id: data.session_id ? stripQuotes(data.session_id) : undefined,
       ultrawork,
       verification_pending:
-        data.verification_pending === true || data.verification_pending === "true"
+        data.verification_pending === true ||
+        data.verification_pending === "true"
           ? true
           : undefined,
-      strategy: data.strategy === "reset" || data.strategy === "continue" ? data.strategy : undefined,
+      strategy:
+        data.strategy === "reset" || data.strategy === "continue"
+          ? data.strategy
+          : undefined,
     }
   } catch {
     return null
@@ -86,7 +110,7 @@ export function readState(directory: string, customPath?: string): RalphLoopStat
 export function writeState(
   directory: string,
   state: RalphLoopState,
-  customPath?: string
+  customPath?: string,
 ): boolean {
   const filePath = getStateFilePath(directory, customPath)
 
@@ -96,8 +120,11 @@ export function writeState(
       mkdirSync(dir, { recursive: true })
     }
 
-    const sessionIdLine = state.session_id ? `session_id: "${state.session_id}"\n` : ""
-    const ultraworkLine = state.ultrawork !== undefined ? `ultrawork: ${state.ultrawork}\n` : ""
+    const sessionIdLine = state.session_id
+      ? `session_id: "${state.session_id}"\n`
+      : ""
+    const ultraworkLine =
+      state.ultrawork !== undefined ? `ultrawork: ${state.ultrawork}\n` : ""
     const verificationPendingLine =
       state.verification_pending !== undefined
         ? `verification_pending: ${state.verification_pending}\n`
@@ -151,7 +178,7 @@ export function clearState(directory: string, customPath?: string): boolean {
 
 export function incrementIteration(
   directory: string,
-  customPath?: string
+  customPath?: string,
 ): RalphLoopState | null {
   const state = readState(directory, customPath)
   if (!state) return null

@@ -5,13 +5,19 @@ import { log } from "../../shared/logger"
 import { DEFAULT_SKIP_AGENTS, HOOK_NAME } from "./constants"
 import { createTodoContinuationHandler } from "./handler"
 import { createSessionStateStore } from "./session-state"
-import type { TodoContinuationEnforcer, TodoContinuationEnforcerOptions } from "./types"
+import type {
+  TodoContinuationEnforcer,
+  TodoContinuationEnforcerOptions,
+} from "./types"
 
-export type { TodoContinuationEnforcer, TodoContinuationEnforcerOptions } from "./types"
+export type {
+  TodoContinuationEnforcer,
+  TodoContinuationEnforcerOptions,
+} from "./types"
 
 export function createTodoContinuationEnforcer(
   ctx: PluginInput,
-  options: TodoContinuationEnforcerOptions = {}
+  options: TodoContinuationEnforcerOptions = {},
 ): TodoContinuationEnforcer {
   const {
     backgroundManager,

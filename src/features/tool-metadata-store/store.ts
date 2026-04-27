@@ -21,7 +21,10 @@ export interface PendingToolMetadata {
   metadata?: Record<string, unknown>
 }
 
-const pendingStore = new Map<string, PendingToolMetadata & { storedAt: number }>()
+const pendingStore = new Map<
+  string,
+  PendingToolMetadata & { storedAt: number }
+>()
 
 const STALE_TIMEOUT_MS = 15 * 60 * 1000
 
@@ -45,10 +48,13 @@ function cleanupStaleEntries(): void {
 export function storeToolMetadata(
   sessionID: string,
   callID: string,
-  data: PendingToolMetadata
+  data: PendingToolMetadata,
 ): void {
   cleanupStaleEntries()
-  pendingStore.set(makeKey(sessionID, callID), { ...data, storedAt: Date.now() })
+  pendingStore.set(makeKey(sessionID, callID), {
+    ...data,
+    storedAt: Date.now(),
+  })
 }
 
 /**
@@ -57,7 +63,7 @@ export function storeToolMetadata(
  */
 export function consumeToolMetadata(
   sessionID: string,
-  callID: string
+  callID: string,
 ): PendingToolMetadata | undefined {
   const key = makeKey(sessionID, callID)
   const stored = pendingStore.get(key)

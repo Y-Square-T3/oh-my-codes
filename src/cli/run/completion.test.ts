@@ -1,11 +1,13 @@
 import { describe, it, expect, mock, spyOn } from "bun:test"
 import type { RunContext, Todo, ChildSession, SessionStatus } from "./types"
 
-const createMockContext = (overrides: {
-  todo?: Todo[]
-  childrenBySession?: Record<string, ChildSession[]>
-  statuses?: Record<string, SessionStatus>
-} = {}): RunContext => {
+const createMockContext = (
+  overrides: {
+    todo?: Todo[]
+    childrenBySession?: Record<string, ChildSession[]>
+    statuses?: Record<string, SessionStatus>
+  } = {},
+): RunContext => {
   const {
     todo = [],
     childrenBySession = { "test-session": [] },
@@ -17,7 +19,7 @@ const createMockContext = (overrides: {
       session: {
         todo: mock(() => Promise.resolve({ data: todo })),
         children: mock((opts: { path: { id: string } }) =>
-          Promise.resolve({ data: childrenBySession[opts.path.id] ?? [] })
+          Promise.resolve({ data: childrenBySession[opts.path.id] ?? [] }),
         ),
         status: mock(() => Promise.resolve({ data: statuses })),
       },

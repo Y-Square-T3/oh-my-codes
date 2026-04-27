@@ -31,7 +31,10 @@ function createMockContext(
     client: {
       session: {
         messages: mock(async () => {
-          const response = messageResponses[Math.min(callIndex, messageResponses.length - 1)] ?? []
+          const response =
+            messageResponses[
+              Math.min(callIndex, messageResponses.length - 1)
+            ] ?? []
           callIndex += 1
           return { data: response }
         }),
@@ -113,8 +116,17 @@ describe("createCompactionContextInjector", () => {
     it("injects actual task history when backgroundManager and sessionID provided", async () => {
       //#given
       const mockManager = { taskHistory: new TaskHistory() } as any
-      mockManager.taskHistory.record("ses_parent", { id: "t1", sessionID: "ses_child", agent: "explore", description: "Find patterns", status: "completed", category: "quick" })
-      const injector = createCompactionContextInjector({ backgroundManager: mockManager })
+      mockManager.taskHistory.record("ses_parent", {
+        id: "t1",
+        sessionID: "ses_child",
+        agent: "explore",
+        description: "Find patterns",
+        status: "completed",
+        category: "quick",
+      })
+      const injector = createCompactionContextInjector({
+        backgroundManager: mockManager,
+      })
 
       //#when
       const prompt = injector.inject("ses_parent")
@@ -129,7 +141,9 @@ describe("createCompactionContextInjector", () => {
     it("does not inject task history section when no entries exist", async () => {
       //#given
       const mockManager = { taskHistory: new TaskHistory() } as any
-      const injector = createCompactionContextInjector({ backgroundManager: mockManager })
+      const injector = createCompactionContextInjector({
+        backgroundManager: mockManager,
+      })
 
       //#when
       const prompt = injector.inject("ses_empty")
@@ -181,7 +195,10 @@ describe("createCompactionContextInjector", () => {
       //#when
       await injector.capture("ses_checkpoint")
       await injector.event({
-        event: { type: "session.compacted", properties: { sessionID: "ses_checkpoint" } },
+        event: {
+          type: "session.compacted",
+          properties: { sessionID: "ses_checkpoint" },
+        },
       })
 
       //#then
@@ -195,7 +212,9 @@ describe("createCompactionContextInjector", () => {
           parts: [
             {
               type: "text",
-              text: expect.stringContaining("restore checkpointed session agent configuration"),
+              text: expect.stringContaining(
+                "restore checkpointed session agent configuration",
+              ),
             },
           ],
         },
@@ -242,7 +261,10 @@ describe("createCompactionContextInjector", () => {
 
       await injector.capture("ses_no_text_tail")
       await injector.event({
-        event: { type: "session.compacted", properties: { sessionID: "ses_no_text_tail" } },
+        event: {
+          type: "session.compacted",
+          properties: { sessionID: "ses_no_text_tail" },
+        },
       })
 
       //#when
@@ -261,7 +283,10 @@ describe("createCompactionContextInjector", () => {
         })
       }
       await injector.event({
-        event: { type: "session.idle", properties: { sessionID: "ses_no_text_tail" } },
+        event: {
+          type: "session.idle",
+          properties: { sessionID: "ses_no_text_tail" },
+        },
       })
 
       //#then

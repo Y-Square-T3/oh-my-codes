@@ -9,10 +9,12 @@ describe("MOMUS_SYSTEM_PROMPT policy requirements", () => {
   test("should treat SYSTEM DIRECTIVE as ignorable/stripped", () => {
     // given
     const prompt = MOMUS_SYSTEM_PROMPT
-    
+
     // when / #then
     // Should mention that system directives are ignored
-    expect(prompt.toLowerCase()).toMatch(/system directive.*ignore|ignore.*system directive/)
+    expect(prompt.toLowerCase()).toMatch(
+      /system directive.*ignore|ignore.*system directive/,
+    )
     // Should give examples of system directive patterns
     expect(prompt).toMatch(/<system-reminder>|system-reminder/)
   })
@@ -39,8 +41,8 @@ describe("MOMUS_SYSTEM_PROMPT policy requirements", () => {
       `reject.*${escapeRegExp(invalidExample)}`,
       "i",
     )
-    
-    // We want the prompt to NOT reject this anymore. 
+
+    // We want the prompt to NOT reject this anymore.
     // If it's still in the "INVALID" list, this test should fail.
     expect(prompt).not.toMatch(rejectionTeaching)
   })

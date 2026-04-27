@@ -12,24 +12,40 @@ export function formatVerbose(result: DoctorResult): string {
 
   lines.push(`${color.bold("System Information")}`)
   lines.push(`${color.dim("\u2500".repeat(40))}`)
-  lines.push(`  ${formatStatusSymbol("pass")} opencode    ${systemInfo.opencodeVersion ?? "unknown"}`)
-  lines.push(`  ${formatStatusSymbol("pass")} ${PLUGIN_NAME} ${systemInfo.pluginVersion ?? "unknown"}`)
+  lines.push(
+    `  ${formatStatusSymbol("pass")} opencode    ${systemInfo.opencodeVersion ?? "unknown"}`,
+  )
+  lines.push(
+    `  ${formatStatusSymbol("pass")} ${PLUGIN_NAME} ${systemInfo.pluginVersion ?? "unknown"}`,
+  )
   if (systemInfo.loadedVersion) {
-    lines.push(`  ${formatStatusSymbol("pass")} loaded      ${systemInfo.loadedVersion}`)
+    lines.push(
+      `  ${formatStatusSymbol("pass")} loaded      ${systemInfo.loadedVersion}`,
+    )
   }
   if (systemInfo.bunVersion) {
-    lines.push(`  ${formatStatusSymbol("pass")} bun         ${systemInfo.bunVersion}`)
+    lines.push(
+      `  ${formatStatusSymbol("pass")} bun         ${systemInfo.bunVersion}`,
+    )
   }
-  lines.push(`  ${formatStatusSymbol("pass")} path        ${systemInfo.opencodePath ?? "unknown"}`)
+  lines.push(
+    `  ${formatStatusSymbol("pass")} path        ${systemInfo.opencodePath ?? "unknown"}`,
+  )
   if (systemInfo.isLocalDev) {
-    lines.push(`  ${color.yellow("*")} ${color.dim("(local development mode)")}`)
+    lines.push(
+      `  ${color.yellow("*")} ${color.dim("(local development mode)")}`,
+    )
   }
   lines.push("")
 
   lines.push(`${color.bold("Configuration")}`)
   lines.push(`${color.dim("\u2500".repeat(40))}`)
-  const configStatus = systemInfo.configValid ? color.green("valid") : color.red("invalid")
-  lines.push(`  ${formatStatusSymbol(systemInfo.configValid ? "pass" : "fail")} ${systemInfo.configPath ?? "unknown"} (${configStatus})`)
+  const configStatus = systemInfo.configValid
+    ? color.green("valid")
+    : color.red("invalid")
+  lines.push(
+    `  ${formatStatusSymbol(systemInfo.configValid ? "pass" : "fail")} ${systemInfo.configPath ?? "unknown"} (${configStatus})`,
+  )
   lines.push("")
 
   lines.push(`${color.bold("Tools")}`)
@@ -38,15 +54,27 @@ export function formatVerbose(result: DoctorResult): string {
     lines.push(`  ${formatStatusSymbol("warn")} LSP         none detected`)
   } else {
     const count = tools.lspServers.length
-    lines.push(`  ${formatStatusSymbol("pass")} LSP         ${count} server${count === 1 ? "" : "s"}`)
+    lines.push(
+      `  ${formatStatusSymbol("pass")} LSP         ${count} server${count === 1 ? "" : "s"}`,
+    )
     for (const server of tools.lspServers) {
-      lines.push(`${" ".repeat(20)}${server.id} (${server.extensions.join(", ")})`)
+      lines.push(
+        `${" ".repeat(20)}${server.id} (${server.extensions.join(", ")})`,
+      )
     }
   }
-  lines.push(`  ${formatStatusSymbol(tools.astGrepCli ? "pass" : "fail")} ast-grep CLI ${tools.astGrepCli ? "installed" : "not found"}`)
-  lines.push(`  ${formatStatusSymbol(tools.astGrepNapi ? "pass" : "fail")} ast-grep napi ${tools.astGrepNapi ? "installed" : "not found"}`)
-  lines.push(`  ${formatStatusSymbol(tools.commentChecker ? "pass" : "fail")} comment-checker ${tools.commentChecker ? "installed" : "not found"}`)
-  lines.push(`  ${formatStatusSymbol(tools.ghCli.installed && tools.ghCli.authenticated ? "pass" : "fail")} gh CLI ${tools.ghCli.installed ? "installed" : "not found"}${tools.ghCli.authenticated && tools.ghCli.username ? ` (${tools.ghCli.username})` : ""}`)
+  lines.push(
+    `  ${formatStatusSymbol(tools.astGrepCli ? "pass" : "fail")} ast-grep CLI ${tools.astGrepCli ? "installed" : "not found"}`,
+  )
+  lines.push(
+    `  ${formatStatusSymbol(tools.astGrepNapi ? "pass" : "fail")} ast-grep napi ${tools.astGrepNapi ? "installed" : "not found"}`,
+  )
+  lines.push(
+    `  ${formatStatusSymbol(tools.commentChecker ? "pass" : "fail")} comment-checker ${tools.commentChecker ? "installed" : "not found"}`,
+  )
+  lines.push(
+    `  ${formatStatusSymbol(tools.ghCli.installed && tools.ghCli.authenticated ? "pass" : "fail")} gh CLI ${tools.ghCli.installed ? "installed" : "not found"}${tools.ghCli.authenticated && tools.ghCli.username ? ` (${tools.ghCli.username})` : ""}`,
+  )
   lines.push("")
 
   lines.push(`${color.bold("MCPs")}`)
@@ -91,11 +119,22 @@ export function formatVerbose(result: DoctorResult): string {
 
   lines.push(`${color.bold("Summary")}`)
   lines.push(`${color.dim("\u2500".repeat(40))}`)
-  const passText = summary.passed > 0 ? color.green(`${summary.passed} passed`) : `${summary.passed} passed`
-  const failText = summary.failed > 0 ? color.red(`${summary.failed} failed`) : `${summary.failed} failed`
-  const warnText = summary.warnings > 0 ? color.yellow(`${summary.warnings} warnings`) : `${summary.warnings} warnings`
+  const passText =
+    summary.passed > 0
+      ? color.green(`${summary.passed} passed`)
+      : `${summary.passed} passed`
+  const failText =
+    summary.failed > 0
+      ? color.red(`${summary.failed} failed`)
+      : `${summary.failed} failed`
+  const warnText =
+    summary.warnings > 0
+      ? color.yellow(`${summary.warnings} warnings`)
+      : `${summary.warnings} warnings`
   lines.push(`  ${passText}, ${failText}, ${warnText}`)
-  lines.push(`  ${color.dim(`Total: ${summary.total} checks in ${summary.duration}ms`)}`)
+  lines.push(
+    `  ${color.dim(`Total: ${summary.total} checks in ${summary.duration}ms`)}`,
+  )
 
   return lines.join("\n")
 }

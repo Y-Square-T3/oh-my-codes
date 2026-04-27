@@ -23,7 +23,9 @@ declare module "bun:test" {
   export function afterEach(fn: () => void | Promise<void>): void
   export function beforeAll(fn: () => void | Promise<void>): void
   export function afterAll(fn: () => void | Promise<void>): void
-  export function mock<TFunction extends AnyFunction>(fn: TFunction): MockFunction<TFunction>
+  export function mock<TFunction extends AnyFunction>(
+    fn: TFunction,
+  ): MockFunction<TFunction>
 
   export function spyOn<TObject extends object>(
     object: TObject,
@@ -31,7 +33,10 @@ declare module "bun:test" {
   ): MockFunction<AnyFunction>
 
   export namespace mock {
-    function module(modulePath: string, factory: () => Record<string, unknown>): void
+    function module(
+      modulePath: string,
+      factory: () => Record<string, unknown>,
+    ): void
     function restore(): void
   }
 

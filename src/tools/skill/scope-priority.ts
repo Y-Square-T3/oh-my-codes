@@ -8,7 +8,9 @@ export const SCOPE_PRIORITY: Record<string, number> = {
   builtin: 1,
 }
 
-export function sortByScopePriority<TItem extends { scope: string }>(items: TItem[]): TItem[] {
+export function sortByScopePriority<TItem extends { scope: string }>(
+  items: TItem[],
+): TItem[] {
   return [...items].sort((left, right) => {
     const leftPriority = SCOPE_PRIORITY[left.scope] || 0
     const rightPriority = SCOPE_PRIORITY[right.scope] || 0

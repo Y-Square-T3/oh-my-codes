@@ -1,9 +1,7 @@
 import type { ToolDefinition } from "@opencode-ai/plugin"
 import type { SkillLoadOptions } from "../tools/skill/types"
 
-import type {
-  AvailableCategory,
-} from "../agents/dynamic-agent-prompt-builder"
+import type { AvailableCategory } from "../agents/dynamic-agent-prompt-builder"
 import type { OhMyCodesConfig } from "../config"
 import { isInteractiveBashEnabled } from "../create-runtime-tmux-config"
 import * as openclawRuntimeDispatch from "../openclaw/runtime-dispatch"
@@ -114,14 +112,24 @@ const LOW_PRIORITY_TOOL_ORDER = [
   "lsp_diagnostics",
 ] as const
 
-export function trimToolsToCap(filteredTools: ToolsRecord, maxTools: number): void {
+export function trimToolsToCap(
+  filteredTools: ToolsRecord,
+  maxTools: number,
+): void {
   const toolNames = Object.keys(filteredTools)
   if (toolNames.length <= maxTools) return
 
   const removableToolNames = [
-    ...LOW_PRIORITY_TOOL_ORDER.filter((toolName) => toolNames.includes(toolName)),
+    ...LOW_PRIORITY_TOOL_ORDER.filter((toolName) =>
+      toolNames.includes(toolName),
+    ),
     ...toolNames
-      .filter((toolName) => !LOW_PRIORITY_TOOL_ORDER.includes(toolName as (typeof LOW_PRIORITY_TOOL_ORDER)[number]))
+      .filter(
+        (toolName) =>
+          !LOW_PRIORITY_TOOL_ORDER.includes(
+            toolName as (typeof LOW_PRIORITY_TOOL_ORDER)[number],
+          ),
+      )
       .sort(),
   ]
 
@@ -144,7 +152,13 @@ export function trimToolsToCap(filteredTools: ToolsRecord, maxTools: number): vo
 export function createToolRegistry(args: {
   ctx: PluginContext
   pluginConfig: OhMyCodesConfig
-  managers: Pick<Managers, "backgroundManager" | "tmuxSessionManager" | "skillMcpManager" | "modelFallbackControllerAccessor">
+  managers: Pick<
+    Managers,
+    | "backgroundManager"
+    | "tmuxSessionManager"
+    | "skillMcpManager"
+    | "modelFallbackControllerAccessor"
+  >
   skillContext: SkillContext
   availableCategories: AvailableCategory[]
   interactiveBashEnabled?: boolean
@@ -163,7 +177,10 @@ export function createToolRegistry(args: {
     ...defaultToolRegistryFactories,
     ...toolFactories,
   }
-  const backgroundTools = factories.createBackgroundTools(managers.backgroundManager, ctx.client)
+  const backgroundTools = factories.createBackgroundTools(
+    managers.backgroundManager,
+    ctx.client,
+  )
   const callOmoAgent = factories.createCallOmoAgent(
     ctx,
     managers.backgroundManager,
@@ -217,7 +234,9 @@ export function createToolRegistry(args: {
           context: {
             sessionId: event.sessionID,
             projectPath: ctx.directory,
-            tmuxPaneId: managers.tmuxSessionManager.getTrackedPaneId?.(event.sessionID) ?? process.env.TMUX_PANE,
+            tmuxPaneId:
+              managers.tmuxSessionManager.getTrackedPaneId?.(event.sessionID) ??
+              process.env.TMUX_PANE,
           },
         })
       }
@@ -243,7 +262,10 @@ export function createToolRegistry(args: {
     getSessionID: getSessionIDForMcp,
     gitMasterConfig: pluginConfig.git_master,
     browserProvider: skillContext.browserProvider,
-    nativeSkills: "skills" in ctx ? (ctx as { skills: SkillLoadOptions["nativeSkills"] }).skills : undefined,
+    nativeSkills:
+      "skills" in ctx
+        ? (ctx as { skills: SkillLoadOptions["nativeSkills"] }).skills
+        : undefined,
   })
 
   const taskSystemEnabled = isTaskSystemEnabled(pluginConfig)
@@ -273,7 +295,9 @@ export function createToolRegistry(args: {
     task: delegateTask,
     skill_mcp: skillMcpTool,
     skill: skillTool,
-    ...(interactiveBashEnabled ? { interactive_bash: factories.interactive_bash } : {}),
+    ...(interactiveBashEnabled
+      ? { interactive_bash: factories.interactive_bash }
+      : {}),
     ...taskToolsRecord,
     ...hashlineToolsRecord,
   }
@@ -282,7 +306,10 @@ export function createToolRegistry(args: {
     normalizeToolArgSchemas(toolDefinition)
   }
 
-  const filteredTools: ToolsRecord = filterDisabledTools(allTools, pluginConfig.disabled_tools)
+  const filteredTools: ToolsRecord = filterDisabledTools(
+    allTools,
+    pluginConfig.disabled_tools,
+  )
 
   const maxTools = pluginConfig.experimental?.max_tools
   if (maxTools) {

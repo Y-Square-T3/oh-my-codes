@@ -10,7 +10,10 @@ import {
   extractTarGz as extractTarGzArchive,
 } from "../../shared/binary-downloader"
 
-export function findFileRecursive(dir: string, filename: string): string | null {
+export function findFileRecursive(
+  dir: string,
+  filename: string,
+): string | null {
   try {
     const entries = readdirSync(dir, { withFileTypes: true, recursive: true })
     for (const entry of entries) {
@@ -26,7 +29,10 @@ export function findFileRecursive(dir: string, filename: string): string | null 
 
 const RG_VERSION = "14.1.1"
 
-const PLATFORM_CONFIG: Record<string, { platform: string; extension: "tar.gz" | "zip" } | undefined> = {
+const PLATFORM_CONFIG: Record<
+  string,
+  { platform: string; extension: "tar.gz" | "zip" } | undefined
+> = {
   "arm64-darwin": { platform: "aarch64-apple-darwin", extension: "tar.gz" },
   "arm64-linux": { platform: "aarch64-unknown-linux-gnu", extension: "tar.gz" },
   "x64-darwin": { platform: "x86_64-apple-darwin", extension: "tar.gz" },
@@ -48,7 +54,10 @@ function getRgPath(): string {
   return join(getInstallDir(), isWindows ? "rg.exe" : "rg")
 }
 
-async function extractTarGz(archivePath: string, destDir: string): Promise<void> {
+async function extractTarGz(
+  archivePath: string,
+  destDir: string,
+): Promise<void> {
   const platformKey = getPlatformKey()
 
   const args = ["tar", "-xzf", archivePath, "--strip-components=1"]

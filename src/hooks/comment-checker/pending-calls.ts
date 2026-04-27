@@ -33,7 +33,10 @@ export function stopPendingCallCleanup(): void {
   cleanupIntervalStarted = false
 }
 
-export function registerPendingCall(callID: string, pendingCall: PendingCall): void {
+export function registerPendingCall(
+  callID: string,
+  pendingCall: PendingCall,
+): void {
   pendingCalls.set(callID, pendingCall)
 }
 

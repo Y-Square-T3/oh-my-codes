@@ -38,8 +38,16 @@ describe("createToolPairValidatorHook", () => {
   it("leaves matching tool pairs unchanged", async () => {
     //#given
     const messages = [
-      { info: { role: "assistant" }, parts: [{ type: "tool", callID: "call_1" }] },
-      { info: { role: "user" }, parts: [{ type: "tool_result", tool_use_id: "call_1", content: "done" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "tool", callID: "call_1" }],
+      },
+      {
+        info: { role: "user" },
+        parts: [
+          { type: "tool_result", tool_use_id: "call_1", content: "done" },
+        ],
+      },
     ] satisfies TestMessage[]
 
     //#when
@@ -47,15 +55,26 @@ describe("createToolPairValidatorHook", () => {
 
     //#then
     expect(messages).toEqual([
-      { info: { role: "assistant" }, parts: [{ type: "tool", callID: "call_1" }] },
-      { info: { role: "user" }, parts: [{ type: "tool_result", tool_use_id: "call_1", content: "done" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "tool", callID: "call_1" }],
+      },
+      {
+        info: { role: "user" },
+        parts: [
+          { type: "tool_result", tool_use_id: "call_1", content: "done" },
+        ],
+      },
     ])
   })
 
   it("injects a missing tool_result into the next user message", async () => {
     //#given
     const messages = [
-      { info: { role: "assistant" }, parts: [{ type: "tool_use", id: "toolu_1" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "tool_use", id: "toolu_1" }],
+      },
       { info: { role: "user" }, parts: [{ type: "text", text: "continue" }] },
     ] satisfies TestMessage[]
 
@@ -64,7 +83,11 @@ describe("createToolPairValidatorHook", () => {
 
     //#then
     expect(messages[1]?.parts).toEqual([
-      { type: "tool_result", tool_use_id: "toolu_1", content: TOOL_RESULT_PLACEHOLDER },
+      {
+        type: "tool_result",
+        tool_use_id: "toolu_1",
+        content: TOOL_RESULT_PLACEHOLDER,
+      },
       { type: "text", text: "continue" },
     ])
   })
@@ -98,8 +121,16 @@ describe("createToolPairValidatorHook", () => {
       {
         info: { role: "user" },
         parts: [
-          { type: "tool_result", tool_use_id: "toolu_1", content: TOOL_RESULT_PLACEHOLDER },
-          { type: "tool_result", tool_use_id: "toolu_2", content: TOOL_RESULT_PLACEHOLDER },
+          {
+            type: "tool_result",
+            tool_use_id: "toolu_1",
+            content: TOOL_RESULT_PLACEHOLDER,
+          },
+          {
+            type: "tool_result",
+            tool_use_id: "toolu_2",
+            content: TOOL_RESULT_PLACEHOLDER,
+          },
         ],
       },
     ])
@@ -108,8 +139,14 @@ describe("createToolPairValidatorHook", () => {
   it("injects a synthetic user message before a non-user next message", async () => {
     //#given
     const messages = [
-      { info: { role: "assistant" }, parts: [{ type: "tool_use", id: "toolu_1" }] },
-      { info: { role: "assistant" }, parts: [{ type: "text", text: "follow-up" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "tool_use", id: "toolu_1" }],
+      },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "text", text: "follow-up" }],
+      },
     ] satisfies TestMessage[]
 
     //#when
@@ -118,12 +155,24 @@ describe("createToolPairValidatorHook", () => {
     //#then
     expect(messages).toHaveLength(3)
     expect(messages).toEqual([
-      { info: { role: "assistant" }, parts: [{ type: "tool_use", id: "toolu_1" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "tool_use", id: "toolu_1" }],
+      },
       {
         info: { role: "user" },
-        parts: [{ type: "tool_result", tool_use_id: "toolu_1", content: TOOL_RESULT_PLACEHOLDER }],
+        parts: [
+          {
+            type: "tool_result",
+            tool_use_id: "toolu_1",
+            content: TOOL_RESULT_PLACEHOLDER,
+          },
+        ],
       },
-      { info: { role: "assistant" }, parts: [{ type: "text", text: "follow-up" }] },
+      {
+        info: { role: "assistant" },
+        parts: [{ type: "text", text: "follow-up" }],
+      },
     ])
   })
 
@@ -132,7 +181,10 @@ describe("createToolPairValidatorHook", () => {
     const messages = [
       {
         info: { role: "assistant" },
-        parts: [{ type: "tool_use", id: "toolu_1" }, { type: "tool", callID: "call_2" }],
+        parts: [
+          { type: "tool_use", id: "toolu_1" },
+          { type: "tool", callID: "call_2" },
+        ],
       },
       {
         info: { role: "user" },
@@ -149,7 +201,11 @@ describe("createToolPairValidatorHook", () => {
     //#then
     expect(messages[1]?.parts).toEqual([
       { type: "tool_result", tool_use_id: "toolu_1", content: "done" },
-      { type: "tool_result", tool_use_id: "call_2", content: TOOL_RESULT_PLACEHOLDER },
+      {
+        type: "tool_result",
+        tool_use_id: "call_2",
+        content: TOOL_RESULT_PLACEHOLDER,
+      },
       { type: "text", text: "continue" },
     ])
   })

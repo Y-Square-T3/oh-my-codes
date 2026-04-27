@@ -60,14 +60,16 @@ export const BUILTIN_AGENT_NAMES = new Set([
   "build",
 ])
 
-export function migrateAgentNames(
-  agents: Record<string, unknown>
-): { migrated: Record<string, unknown>; changed: boolean } {
+export function migrateAgentNames(agents: Record<string, unknown>): {
+  migrated: Record<string, unknown>
+  changed: boolean
+} {
   const migrated: Record<string, unknown> = {}
   let changed = false
 
   for (const [key, value] of Object.entries(agents)) {
-    const newKey = AGENT_NAME_MAP[key.toLowerCase()] ?? AGENT_NAME_MAP[key] ?? key
+    const newKey =
+      AGENT_NAME_MAP[key.toLowerCase()] ?? AGENT_NAME_MAP[key] ?? key
     if (newKey !== key) {
       changed = true
     }

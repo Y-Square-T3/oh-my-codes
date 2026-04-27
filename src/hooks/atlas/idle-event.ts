@@ -20,10 +20,15 @@ const FAILURE_BACKOFF_MS = 5 * 60 * 1000
 const MAX_CONSECUTIVE_PROMPT_FAILURES = 10
 const RETRY_DELAY_MS = CONTINUATION_COOLDOWN_MS + 1000
 
-function hasRunningBackgroundTasks(sessionID: string, options?: AtlasHookOptions): boolean {
+function hasRunningBackgroundTasks(
+  sessionID: string,
+  options?: AtlasHookOptions,
+): boolean {
   const backgroundManager = options?.backgroundManager
   return backgroundManager
-    ? backgroundManager.getTasksByParentSession(sessionID).some((task: { status: string }) => task.status === "running")
+    ? backgroundManager
+        .getTasksByParentSession(sessionID)
+        .some((task: { status: string }) => task.status === "running")
     : false
 }
 
@@ -71,10 +76,13 @@ async function injectContinuation(input: {
       requiredAgent: currentBoulder.agent,
     })
     if (!canContinueSession) {
-      log(`[${HOOK_NAME}] Skipped: tracked descendant agent does not match boulder agent`, {
-        sessionID: input.sessionID,
-        requiredAgent: currentBoulder.agent ?? "atlas",
-      })
+      log(
+        `[${HOOK_NAME}] Skipped: tracked descendant agent does not match boulder agent`,
+        {
+          sessionID: input.sessionID,
+          requiredAgent: currentBoulder.agent ?? "atlas",
+        },
+      )
       return
     }
 
@@ -120,7 +128,10 @@ async function injectContinuation(input: {
       })
     }
   } catch (error) {
-    log(`[${HOOK_NAME}] Failed to inject boulder continuation`, { sessionID: input.sessionID, error })
+    log(`[${HOOK_NAME}] Failed to inject boulder continuation`, {
+      sessionID: input.sessionID,
+      error,
+    })
     input.sessionState.promptFailureCount += 1
     input.sessionState.lastFailureAt = Date.now()
     scheduleRetry({
@@ -148,13 +159,14 @@ function scheduleRetry(input: {
   sessionState.pendingRetryTimer = setTimeout(async () => {
     sessionState.pendingRetryTimer = undefined
 
-    if (sessionState.promptFailureCount >= MAX_CONSECUTIVE_PROMPT_FAILURES) return
+    if (sessionState.promptFailureCount >= MAX_CONSECUTIVE_PROMPT_FAILURES)
+      return
     if (sessionState.waitingForFinalWaveApproval) return
 
     const now = Date.now()
     if (
-      sessionState.lastContinuationInjectedAt
-      && now - sessionState.lastContinuationInjectedAt < CONTINUATION_COOLDOWN_MS
+      sessionState.lastContinuationInjectedAt &&
+      now - sessionState.lastContinuationInjectedAt < CONTINUATION_COOLDOWN_MS
     ) {
       return
     }
@@ -208,13 +220,18 @@ export async function handleAtlasSessionIdle(input: {
     sessionID,
   })
   if (!activeBoulderSession) {
-    log(`[${HOOK_NAME}] Skipped: session not registered in active boulder`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped: session not registered in active boulder`, {
+      sessionID,
+    })
     return
   }
 
   const { boulderState, progress, appendedSession } = activeBoulderSession
   if (progress.isComplete) {
-    log(`[${HOOK_NAME}] Boulder complete`, { sessionID, plan: boulderState.plan_name })
+    log(`[${HOOK_NAME}] Boulder complete`, {
+      sessionID,
+      plan: boulderState.plan_name,
+    })
     return
   }
 
@@ -233,10 +250,13 @@ export async function handleAtlasSessionIdle(input: {
     requiredAgent: boulderState.agent,
   })
   if (!canContinueSession) {
-    log(`[${HOOK_NAME}] Skipped: tracked descendant agent does not match boulder agent`, {
-      sessionID,
-      requiredAgent: boulderState.agent ?? "atlas",
-    })
+    log(
+      `[${HOOK_NAME}] Skipped: tracked descendant agent does not match boulder agent`,
+      {
+        sessionID,
+        requiredAgent: boulderState.agent ?? "atlas",
+      },
+    )
     return
   }
 
@@ -244,25 +264,34 @@ export async function handleAtlasSessionIdle(input: {
   const now = Date.now()
 
   if (sessionState.waitingForFinalWaveApproval) {
-    log(`[${HOOK_NAME}] Skipped: waiting for explicit final-wave approval`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped: waiting for explicit final-wave approval`, {
+      sessionID,
+    })
     return
   }
 
   if (sessionState.lastEventWasAbortError) {
     sessionState.lastEventWasAbortError = false
-    log(`[${HOOK_NAME}] Skipped: abort error immediately before idle`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped: abort error immediately before idle`, {
+      sessionID,
+    })
     return
   }
 
   if (sessionState.promptFailureCount >= MAX_CONSECUTIVE_PROMPT_FAILURES) {
     const timeSinceLastFailure =
-      sessionState.lastFailureAt !== undefined ? now - sessionState.lastFailureAt : Number.POSITIVE_INFINITY
+      sessionState.lastFailureAt !== undefined
+        ? now - sessionState.lastFailureAt
+        : Number.POSITIVE_INFINITY
     if (timeSinceLastFailure < FAILURE_BACKOFF_MS) {
-      log(`[${HOOK_NAME}] Skipped: continuation in backoff after repeated failures`, {
-        sessionID,
-        promptFailureCount: sessionState.promptFailureCount,
-        backoffRemaining: FAILURE_BACKOFF_MS - timeSinceLastFailure,
-      })
+      log(
+        `[${HOOK_NAME}] Skipped: continuation in backoff after repeated failures`,
+        {
+          sessionID,
+          promptFailureCount: sessionState.promptFailureCount,
+          backoffRemaining: FAILURE_BACKOFF_MS - timeSinceLastFailure,
+        },
+      )
       return
     }
 
@@ -277,15 +306,22 @@ export async function handleAtlasSessionIdle(input: {
   }
 
   if (options?.isContinuationStopped?.(sessionID)) {
-    log(`[${HOOK_NAME}] Skipped: continuation stopped for session`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped: continuation stopped for session`, {
+      sessionID,
+    })
     return
   }
 
-  if (sessionState.lastContinuationInjectedAt && now - sessionState.lastContinuationInjectedAt < CONTINUATION_COOLDOWN_MS) {
+  if (
+    sessionState.lastContinuationInjectedAt &&
+    now - sessionState.lastContinuationInjectedAt < CONTINUATION_COOLDOWN_MS
+  ) {
     scheduleRetry({ ctx, sessionID, sessionState, options })
     log(`[${HOOK_NAME}] Skipped: continuation cooldown active`, {
       sessionID,
-      cooldownRemaining: CONTINUATION_COOLDOWN_MS - (now - sessionState.lastContinuationInjectedAt),
+      cooldownRemaining:
+        CONTINUATION_COOLDOWN_MS -
+        (now - sessionState.lastContinuationInjectedAt),
       pendingRetry: !!sessionState.pendingRetryTimer,
     })
     return
@@ -310,7 +346,9 @@ async function canContinueTrackedBoulderSession(input: {
   boulderSessionIDs: string[]
   requiredAgent?: string
 }): Promise<boolean> {
-  const ancestorSessionIDs = input.boulderSessionIDs.filter((trackedSessionID) => trackedSessionID !== input.sessionID)
+  const ancestorSessionIDs = input.boulderSessionIDs.filter(
+    (trackedSessionID) => trackedSessionID !== input.sessionID,
+  )
   if (ancestorSessionIDs.length === 0) {
     return true
   }
@@ -328,14 +366,18 @@ async function canContinueTrackedBoulderSession(input: {
     return false
   }
 
-  const sessionAgent = await getLastAgentFromSession(input.sessionID, input.client)
-    ?? getSessionAgent(input.sessionID)
+  const sessionAgent =
+    (await getLastAgentFromSession(input.sessionID, input.client)) ??
+    getSessionAgent(input.sessionID)
   if (!sessionAgent) {
     return false
   }
 
   const requiredAgentKey = getAgentConfigKey(input.requiredAgent ?? "atlas")
   const sessionAgentKey = getAgentConfigKey(sessionAgent)
-  return sessionAgentKey === requiredAgentKey
-    || (requiredAgentKey === getAgentConfigKey("atlas") && sessionAgentKey === getAgentConfigKey("sisyphus"))
+  return (
+    sessionAgentKey === requiredAgentKey ||
+    (requiredAgentKey === getAgentConfigKey("atlas") &&
+      sessionAgentKey === getAgentConfigKey("sisyphus"))
+  )
 }

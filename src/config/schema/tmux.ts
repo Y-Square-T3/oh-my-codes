@@ -9,9 +9,9 @@ export const TmuxLayoutSchema = z.enum([
 ])
 
 export const TmuxIsolationSchema = z.enum([
-  "inline",   // panes split in user's current window (legacy behavior)
-  "window",   // panes created in a separate tmux window (same session)
-  "session",  // panes created in a detached tmux session (full isolation)
+  "inline", // panes split in user's current window (legacy behavior)
+  "window", // panes created in a separate tmux window (same session)
+  "session", // panes created in a detached tmux session (full isolation)
 ])
 
 export const TmuxConfigSchema = z.object({

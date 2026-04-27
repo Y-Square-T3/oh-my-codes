@@ -6,7 +6,7 @@ import type {
   AvailableTool,
   AvailableSkill,
   AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+} from "../dynamic-agent-prompt-builder"
 import {
   buildKeyTriggersSection,
   buildToolSelectionTable,
@@ -18,7 +18,7 @@ import {
   buildHardBlocksSection,
   buildAntiPatternsSection,
   buildAntiDuplicationSection,
-} from "../dynamic-agent-prompt-builder";
+} from "../dynamic-agent-prompt-builder"
 
 function buildTodoDisciplineSection(useTaskSystem: boolean): string {
   if (useTaskSystem) {
@@ -39,7 +39,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 3. **After each step**: \`task_update(status="completed")\` IMMEDIATELY (NEVER batch)
 4. **Scope changes**: Update tasks BEFORE proceeding
 
-**NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
+**NO TASKS ON MULTI-STEP WORK = INCOMPLETE WORK.**`
   }
 
   return `## Todo Discipline (NON-NEGOTIABLE)
@@ -59,7 +59,7 @@ function buildTodoDisciplineSection(useTaskSystem: boolean): string {
 3. **After each step**: Mark \`completed\` IMMEDIATELY (NEVER batch)
 4. **Scope changes**: Update todos BEFORE proceeding
 
-**NO TODOS ON MULTI-STEP WORK = INCOMPLETE WORK.**`;
+**NO TODOS ON MULTI-STEP WORK = INCOMPLETE WORK.**`
 }
 
 export function buildHephaestusPrompt(
@@ -69,23 +69,23 @@ export function buildHephaestusPrompt(
   availableCategories: AvailableCategory[] = [],
   useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(
     availableAgents,
     availableTools,
     availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
+  )
+  const exploreSection = buildExploreSection(availableAgents)
+  const librarianSection = buildLibrarianSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(
     availableCategories,
     availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem);
+  )
+  const delegationTable = buildDelegationTable(availableAgents)
+  const oracleSection = buildOracleSection(availableAgents)
+  const hardBlocks = buildHardBlocksSection()
+  const antiPatterns = buildAntiPatternsSection()
+  const todoDiscipline = buildTodoDisciplineSection(useTaskSystem)
 
   return `You are Hephaestus, an autonomous deep worker for software engineering.
 
@@ -333,5 +333,5 @@ ${oracleSection}
    - DOCUMENT what you tried → CONSULT Oracle
    - If Oracle fails → ASK USER with clear explanation
 
-**Never**: Leave code broken, delete failing tests, shotgun debug`;
+**Never**: Leave code broken, delete failing tests, shotgun debug`
 }

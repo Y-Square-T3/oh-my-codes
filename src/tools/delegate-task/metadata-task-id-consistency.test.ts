@@ -13,7 +13,9 @@ function makeMockCtx(): ToolContextWithMetadata & { captured: any[] } {
     agent: "sisyphus",
     abort: new AbortController().signal,
     callID: "call_001",
-    metadata: async (input: any) => { captured.push(input) },
+    metadata: async (input: any) => {
+      captured.push(input)
+    },
     captured,
   }
 }
@@ -34,18 +36,37 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
         createSyncSession: async () => ({ ok: true, sessionID: "ses_sync" }),
         sendSyncPrompt: async () => null,
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
       const args: DelegateTaskArgs = {
-        description: "test", prompt: "do it",
-        category: "quick", load_skills: [], run_in_background: false,
+        description: "test",
+        prompt: "do it",
+        category: "quick",
+        load_skills: [],
+        run_in_background: false,
       }
 
-      await executeSyncTask(args, ctx, {
-        client: { session: { create: async () => ({ data: { id: "ses_sync" } }) } },
-        directory: "/tmp",
-        onSyncSessionCreated: null,
-      }, parentContext, "explore", MODEL, undefined, undefined, undefined, deps)
+      await executeSyncTask(
+        args,
+        ctx,
+        {
+          client: {
+            session: { create: async () => ({ data: { id: "ses_sync" } }) },
+          },
+          directory: "/tmp",
+          onSyncSessionCreated: null,
+        },
+        parentContext,
+        "explore",
+        MODEL,
+        undefined,
+        undefined,
+        undefined,
+        deps,
+      )
 
       const meta = ctx.captured.find((m: any) => m.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -60,19 +81,33 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       const { executeBackgroundTask } = require("./background-task")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "test", prompt: "do it",
-        load_skills: [], run_in_background: true, subagent_type: "explore",
+        description: "test",
+        prompt: "do it",
+        load_skills: [],
+        run_in_background: true,
+        subagent_type: "explore",
       }
 
-      await executeBackgroundTask(args, ctx, {
-        manager: {
-          launch: async () => ({
-            id: "bg_abc123", description: "test", agent: "explore",
-            status: "pending", sessionID: "ses_xyz789",
-          }),
-          getTask: () => undefined,
-        },
-      } as any, parentContext, "explore", MODEL, undefined)
+      await executeBackgroundTask(
+        args,
+        ctx,
+        {
+          manager: {
+            launch: async () => ({
+              id: "bg_abc123",
+              description: "test",
+              agent: "explore",
+              status: "pending",
+              sessionID: "ses_xyz789",
+            }),
+            getTask: () => undefined,
+          },
+        } as any,
+        parentContext,
+        "explore",
+        MODEL,
+        undefined,
+      )
 
       const meta = ctx.captured.find((m: any) => m.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -87,17 +122,24 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       const { executeUnstableAgentTask } = require("./unstable-agent-task")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "test", prompt: "do it",
-        category: "quick", load_skills: [], run_in_background: false,
+        description: "test",
+        prompt: "do it",
+        category: "quick",
+        load_skills: [],
+        run_in_background: false,
       }
 
       const launchedTask = {
-        id: "bg_unstable_abc", description: "test", agent: "explore",
-        status: "completed", sessionID: "ses_unstable_xyz",
+        id: "bg_unstable_abc",
+        description: "test",
+        agent: "explore",
+        status: "completed",
+        sessionID: "ses_unstable_xyz",
       }
 
       await executeUnstableAgentTask(
-        args, ctx,
+        args,
+        ctx,
         {
           manager: {
             launch: async () => launchedTask,
@@ -105,18 +147,26 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
           },
           client: {
             session: {
-              status: async () => ({ data: { ses_unstable_xyz: { type: "idle" } } }),
+              status: async () => ({
+                data: { ses_unstable_xyz: { type: "idle" } },
+              }),
               messages: async () => ({
-                data: [{
-                  info: { role: "assistant", time: { created: 1 } },
-                  parts: [{ type: "text", text: "done" }],
-                }],
+                data: [
+                  {
+                    info: { role: "assistant", time: { created: 1 } },
+                    parts: [{ type: "text", text: "done" }],
+                  },
+                ],
               }),
             },
           },
           syncPollTimeoutMs: 100,
         } as any,
-        parentContext, "explore", MODEL, undefined, "anthropic/claude-sonnet-4-6",
+        parentContext,
+        "explore",
+        MODEL,
+        undefined,
+        "anthropic/claude-sonnet-4-6",
       )
 
       const meta = ctx.captured.find((m: any) => m.metadata?.sessionId)
@@ -129,21 +179,35 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
 
   describe("#given background-continuation runs", () => {
     test("#when publishing metadata #then taskId is sessionID and backgroundTaskId is bg.id", async () => {
-      const { executeBackgroundContinuation } = require("./background-continuation")
+      const {
+        executeBackgroundContinuation,
+      } = require("./background-continuation")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "continue", prompt: "keep going",
-        load_skills: [], run_in_background: true, task_id: "ses_resumed_x",
+        description: "continue",
+        prompt: "keep going",
+        load_skills: [],
+        run_in_background: true,
+        task_id: "ses_resumed_x",
       }
 
-      await executeBackgroundContinuation(args, ctx, {
-        manager: {
-          resume: async () => ({
-            id: "bg_resumed_y", description: "continue", agent: "explore",
-            status: "running", sessionID: "ses_resumed_x", model: MODEL,
-          }),
-        },
-      } as any, parentContext)
+      await executeBackgroundContinuation(
+        args,
+        ctx,
+        {
+          manager: {
+            resume: async () => ({
+              id: "bg_resumed_y",
+              description: "continue",
+              agent: "explore",
+              status: "running",
+              sessionID: "ses_resumed_x",
+              model: MODEL,
+            }),
+          },
+        } as any,
+        parentContext,
+      )
 
       const meta = ctx.captured.find((m: any) => m.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -153,21 +217,36 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
     })
 
     test("#when resumed task has category #then metadata.category equals task.category", async () => {
-      const { executeBackgroundContinuation } = require("./background-continuation")
+      const {
+        executeBackgroundContinuation,
+      } = require("./background-continuation")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "continue", prompt: "keep going",
-        load_skills: [], run_in_background: true, task_id: "ses_resumed_x",
+        description: "continue",
+        prompt: "keep going",
+        load_skills: [],
+        run_in_background: true,
+        task_id: "ses_resumed_x",
       }
 
-      await executeBackgroundContinuation(args, ctx, {
-        manager: {
-          resume: async () => ({
-            id: "bg_resumed_y", description: "continue", agent: "explore",
-            status: "running", sessionID: "ses_resumed_x", model: MODEL, category: "deep",
-          }),
-        },
-      } as any, parentContext)
+      await executeBackgroundContinuation(
+        args,
+        ctx,
+        {
+          manager: {
+            resume: async () => ({
+              id: "bg_resumed_y",
+              description: "continue",
+              agent: "explore",
+              status: "running",
+              sessionID: "ses_resumed_x",
+              model: MODEL,
+              category: "deep",
+            }),
+          },
+        } as any,
+        parentContext,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -175,7 +254,9 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
     })
 
     test("#when publishing metadata with requested_subagent_type #then metadata.requested_subagent_type preserves original", async () => {
-      const { executeBackgroundContinuation } = require("./background-continuation")
+      const {
+        executeBackgroundContinuation,
+      } = require("./background-continuation")
       const ctx = makeMockCtx()
       const args = {
         description: "continue",
@@ -187,14 +268,23 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
         task_id: "ses_resumed_x",
       }
 
-      await executeBackgroundContinuation(args, ctx, {
-        manager: {
-          resume: async () => ({
-            id: "bg_resumed_y", description: "continue", agent: "explore",
-            status: "running", sessionID: "ses_resumed_x", model: MODEL,
-          }),
-        },
-      } as any, parentContext)
+      await executeBackgroundContinuation(
+        args,
+        ctx,
+        {
+          manager: {
+            resume: async () => ({
+              id: "bg_resumed_y",
+              description: "continue",
+              agent: "explore",
+              status: "running",
+              sessionID: "ses_resumed_x",
+              model: MODEL,
+            }),
+          },
+        } as any,
+        parentContext,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -207,25 +297,37 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       const { executeSyncContinuation } = require("./sync-continuation")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "continue", prompt: "keep going",
-        load_skills: [], run_in_background: false, task_id: "ses_cont_abc",
+        description: "continue",
+        prompt: "keep going",
+        load_skills: [],
+        run_in_background: false,
+        task_id: "ses_cont_abc",
       }
 
       const deps = {
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
 
-      await executeSyncContinuation(args, ctx, {
-        client: {
-          session: {
-            messages: async () => ({
-              data: [{ info: { agent: "explore", model: MODEL } }],
-            }),
-            prompt: async () => ({}),
+      await executeSyncContinuation(
+        args,
+        ctx,
+        {
+          client: {
+            session: {
+              messages: async () => ({
+                data: [{ info: { agent: "explore", model: MODEL } }],
+              }),
+              prompt: async () => ({}),
+            },
           },
-        },
-      } as any, parentContext, deps)
+        } as any,
+        parentContext,
+        deps,
+      )
 
       const meta = ctx.captured.find((m: any) => m.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -237,25 +339,37 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       const { executeSyncContinuation } = require("./sync-continuation")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "continue", prompt: "keep going",
-        load_skills: [], run_in_background: false, task_id: "ses_cont_abc",
+        description: "continue",
+        prompt: "keep going",
+        load_skills: [],
+        run_in_background: false,
+        task_id: "ses_cont_abc",
       }
 
       const deps = {
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
 
-      await executeSyncContinuation(args, ctx, {
-        client: {
-          session: {
-            messages: async () => ({
-              data: [{ info: { agent: "explore", model: MODEL } }],
-            }),
-            prompt: async () => ({}),
+      await executeSyncContinuation(
+        args,
+        ctx,
+        {
+          client: {
+            session: {
+              messages: async () => ({
+                data: [{ info: { agent: "explore", model: MODEL } }],
+              }),
+              prompt: async () => ({}),
+            },
           },
-        },
-      } as any, parentContext, deps)
+        } as any,
+        parentContext,
+        deps,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -266,25 +380,38 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       const { executeSyncContinuation } = require("./sync-continuation")
       const ctx = makeMockCtx()
       const args: DelegateTaskArgs = {
-        description: "continue", prompt: "keep going",
-        category: "quick", load_skills: [], run_in_background: false, task_id: "ses_cont",
+        description: "continue",
+        prompt: "keep going",
+        category: "quick",
+        load_skills: [],
+        run_in_background: false,
+        task_id: "ses_cont",
       }
 
       const deps = {
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
 
-      await executeSyncContinuation(args, ctx, {
-        client: {
-          session: {
-            messages: async () => ({
-              data: [{ info: { agent: "explore", model: MODEL } }],
-            }),
-            prompt: async () => ({}),
+      await executeSyncContinuation(
+        args,
+        ctx,
+        {
+          client: {
+            session: {
+              messages: async () => ({
+                data: [{ info: { agent: "explore", model: MODEL } }],
+              }),
+              prompt: async () => ({}),
+            },
           },
-        },
-      } as any, parentContext, deps)
+        } as any,
+        parentContext,
+        deps,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -306,19 +433,28 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
 
       const deps = {
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
 
-      await executeSyncContinuation(args, ctx, {
-        client: {
-          session: {
-            messages: async () => ({
-              data: [{ info: { agent: "explore", model: MODEL } }],
-            }),
-            prompt: async () => ({}),
+      await executeSyncContinuation(
+        args,
+        ctx,
+        {
+          client: {
+            session: {
+              messages: async () => ({
+                data: [{ info: { agent: "explore", model: MODEL } }],
+              }),
+              prompt: async () => ({}),
+            },
           },
-        },
-      } as any, parentContext, deps)
+        } as any,
+        parentContext,
+        deps,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -334,7 +470,10 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
         createSyncSession: async () => ({ ok: true, sessionID: "ses_sync" }),
         sendSyncPrompt: async () => null,
         pollSyncSession: async () => null,
-        fetchSyncResult: async () => ({ ok: true as const, textContent: "done" }),
+        fetchSyncResult: async () => ({
+          ok: true as const,
+          textContent: "done",
+        }),
       }
       const args = {
         description: "test",
@@ -345,11 +484,24 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
         run_in_background: false,
       }
 
-      await executeSyncTask(args, ctx, {
-        client: { session: { create: async () => ({ data: { id: "ses_sync" } }) } },
-        directory: "/tmp",
-        onSyncSessionCreated: null,
-      }, parentContext, "Sisyphus-Junior", MODEL, undefined, undefined, undefined, deps)
+      await executeSyncTask(
+        args,
+        ctx,
+        {
+          client: {
+            session: { create: async () => ({ data: { id: "ses_sync" } }) },
+          },
+          directory: "/tmp",
+          onSyncSessionCreated: null,
+        },
+        parentContext,
+        "Sisyphus-Junior",
+        MODEL,
+        undefined,
+        undefined,
+        undefined,
+        deps,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -368,15 +520,26 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
         run_in_background: true,
       }
 
-      await executeBackgroundTask(args, ctx, {
-        manager: {
-          launch: async () => ({
-            id: "bg_abc123", description: "test", agent: "Sisyphus-Junior",
-            status: "pending", sessionID: "ses_xyz789",
-          }),
-          getTask: () => undefined,
-        },
-      } as any, parentContext, "Sisyphus-Junior", MODEL, undefined)
+      await executeBackgroundTask(
+        args,
+        ctx,
+        {
+          manager: {
+            launch: async () => ({
+              id: "bg_abc123",
+              description: "test",
+              agent: "Sisyphus-Junior",
+              status: "pending",
+              sessionID: "ses_xyz789",
+            }),
+            getTask: () => undefined,
+          },
+        } as any,
+        parentContext,
+        "Sisyphus-Junior",
+        MODEL,
+        undefined,
+      )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
       expect(meta).toBeDefined()
@@ -396,12 +559,16 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
       }
 
       const launchedTask = {
-        id: "bg_unstable_abc", description: "test", agent: "Sisyphus-Junior",
-        status: "completed", sessionID: "ses_unstable_xyz",
+        id: "bg_unstable_abc",
+        description: "test",
+        agent: "Sisyphus-Junior",
+        status: "completed",
+        sessionID: "ses_unstable_xyz",
       }
 
       await executeUnstableAgentTask(
-        args, ctx,
+        args,
+        ctx,
         {
           manager: {
             launch: async () => launchedTask,
@@ -409,18 +576,26 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
           },
           client: {
             session: {
-              status: async () => ({ data: { ses_unstable_xyz: { type: "idle" } } }),
+              status: async () => ({
+                data: { ses_unstable_xyz: { type: "idle" } },
+              }),
               messages: async () => ({
-                data: [{
-                  info: { role: "assistant", time: { created: 1 } },
-                  parts: [{ type: "text", text: "done" }],
-                }],
+                data: [
+                  {
+                    info: { role: "assistant", time: { created: 1 } },
+                    parts: [{ type: "text", text: "done" }],
+                  },
+                ],
               }),
             },
           },
           syncPollTimeoutMs: 100,
         } as any,
-        parentContext, "Sisyphus-Junior", MODEL, undefined, "anthropic/claude-sonnet-4-6",
+        parentContext,
+        "Sisyphus-Junior",
+        MODEL,
+        undefined,
+        "anthropic/claude-sonnet-4-6",
       )
 
       const meta = ctx.captured.find((item: any) => item.metadata?.sessionId)
@@ -431,7 +606,9 @@ describe("taskId and backgroundTaskId metadata consistency", () => {
 
   describe("#given background_output runs", () => {
     test("#when publishing metadata #then backgroundTaskId is task.id not task_id", async () => {
-      const { createBackgroundOutput } = require("../background-task/create-background-output")
+      const {
+        createBackgroundOutput,
+      } = require("../background-task/create-background-output")
       const ctx = makeMockCtx()
       const manager = {
         getTask: (id: string) => ({

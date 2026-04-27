@@ -3,7 +3,11 @@ import { tool, type ToolDefinition } from "@opencode-ai/plugin/tool"
 import { formatApplyResult, formatPrepareRenameResult } from "./lsp-formatters"
 import { withLspClient } from "./lsp-client-wrapper"
 import { applyWorkspaceEdit } from "./workspace-edit"
-import type { PrepareRenameDefaultBehavior, PrepareRenameResult, WorkspaceEdit } from "./types"
+import type {
+  PrepareRenameDefaultBehavior,
+  PrepareRenameResult,
+  WorkspaceEdit,
+} from "./types"
 
 export const lsp_prepare_rename: ToolDefinition = tool({
   description: "Check if rename is valid. Use BEFORE lsp_rename.",
@@ -15,10 +19,11 @@ export const lsp_prepare_rename: ToolDefinition = tool({
   execute: async (args, _context) => {
     try {
       const result = await withLspClient(args.filePath, async (client) => {
-        return (await client.prepareRename(args.filePath, args.line, args.character)) as
-          | PrepareRenameResult
-          | PrepareRenameDefaultBehavior
-          | null
+        return (await client.prepareRename(
+          args.filePath,
+          args.line,
+          args.character,
+        )) as PrepareRenameResult | PrepareRenameDefaultBehavior | null
       })
       const output = formatPrepareRenameResult(result)
       return output
@@ -30,7 +35,8 @@ export const lsp_prepare_rename: ToolDefinition = tool({
 })
 
 export const lsp_rename: ToolDefinition = tool({
-  description: "Rename symbol across entire workspace. APPLIES changes to all files.",
+  description:
+    "Rename symbol across entire workspace. APPLIES changes to all files.",
   args: {
     filePath: tool.schema.string(),
     line: tool.schema.number().min(1).describe("1-based"),
@@ -40,7 +46,12 @@ export const lsp_rename: ToolDefinition = tool({
   execute: async (args, _context) => {
     try {
       const edit = await withLspClient(args.filePath, async (client) => {
-        return (await client.rename(args.filePath, args.line, args.character, args.newName)) as WorkspaceEdit | null
+        return (await client.rename(
+          args.filePath,
+          args.line,
+          args.character,
+          args.newName,
+        )) as WorkspaceEdit | null
       })
       const result = applyWorkspaceEdit(edit)
       const output = formatApplyResult(result)

@@ -19,7 +19,11 @@ function createTemporaryDirectory(prefix: string): string {
 }
 
 function writeDatabase(pluginsHome: string, database: unknown): void {
-  writeFileSync(join(pluginsHome, "installed_plugins.json"), JSON.stringify(database), "utf-8")
+  writeFileSync(
+    join(pluginsHome, "installed_plugins.json"),
+    JSON.stringify(database),
+    "utf-8",
+  )
 }
 
 function createInstallPath(prefix: string): string {
@@ -82,7 +86,9 @@ describe("discoverInstalledPlugins", () => {
     )
 
     //#when
-    const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-1`)
+    const { discoverInstalledPlugins } = await import(
+      `./discovery?t=${Date.now()}-1`
+    )
     const discovered = discoverInstalledPlugins({
       pluginsHomeOverride: pluginsHome,
       loadPluginManifestOverride: () => null,
@@ -105,22 +111,25 @@ describe("discoverInstalledPlugins", () => {
       JSON.stringify({
         version: 2,
         plugins: {
-          "file:///D:/configs/user-configs/.config/opencode/node_modules/oh-my-codes@latest": [
-            {
-              scope: "user",
-              installPath,
-              version: "3.10.0",
-              installedAt: "2026-03-20T00:00:00Z",
-              lastUpdated: "2026-03-20T00:00:00Z",
-            },
-          ],
+          "file:///D:/configs/user-configs/.config/opencode/node_modules/oh-my-codes@latest":
+            [
+              {
+                scope: "user",
+                installPath,
+                version: "3.10.0",
+                installedAt: "2026-03-20T00:00:00Z",
+                lastUpdated: "2026-03-20T00:00:00Z",
+              },
+            ],
         },
       }),
       "utf-8",
     )
 
     //#when
-    const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-2`)
+    const { discoverInstalledPlugins } = await import(
+      `./discovery?t=${Date.now()}-2`
+    )
     const discovered = discoverInstalledPlugins({
       pluginsHomeOverride: pluginsHome,
       loadPluginManifestOverride: () => null,
@@ -158,7 +167,9 @@ describe("discoverInstalledPlugins", () => {
     )
 
     //#when
-    const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-3`)
+    const { discoverInstalledPlugins } = await import(
+      `./discovery?t=${Date.now()}-3`
+    )
     const discovered = discoverInstalledPlugins({
       pluginsHomeOverride: pluginsHome,
       loadPluginManifestOverride: () => null,
@@ -192,7 +203,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v1-match`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v1-match`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -227,7 +240,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(subdirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v1-sub`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v1-sub`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -261,7 +276,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(otherDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v1-miss`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v1-miss`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -290,7 +307,9 @@ describe("discoverInstalledPlugins", () => {
       })
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v1-noproj`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v1-noproj`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -321,7 +340,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(unrelatedDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v1-user`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v1-user`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -380,7 +401,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v2-mix`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v2-mix`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -415,7 +438,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v2-local-match`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v2-local-match`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -451,7 +476,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(otherDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v2-local-miss`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v2-local-miss`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -495,7 +522,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v2-multi`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v2-multi`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -528,7 +557,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v3-match`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v3-match`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -568,7 +599,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(otherDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-v3-miss`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-v3-miss`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -605,7 +638,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-enabled-off`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-enabled-off`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,
@@ -640,7 +675,9 @@ describe("discoverInstalledPlugins", () => {
       process.chdir(projectDirectory)
 
       //#when
-      const { discoverInstalledPlugins } = await import(`./discovery?t=${Date.now()}-enabled-on`)
+      const { discoverInstalledPlugins } = await import(
+        `./discovery?t=${Date.now()}-enabled-on`
+      )
       const discovered = discoverInstalledPlugins({
         pluginsHomeOverride: pluginsHome,
         loadPluginManifestOverride: () => null,

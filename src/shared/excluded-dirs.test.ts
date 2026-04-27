@@ -30,7 +30,17 @@ describe("EXCLUDED_DIRS", () => {
 
   test("does not contain commonly-wanted project directories", () => {
     // given
-    const shouldBeAllowed = ["src", "lib", "tests", "test", "docs", ".github", ".cursor", ".claude", ".opencode"]
+    const shouldBeAllowed = [
+      "src",
+      "lib",
+      "tests",
+      "test",
+      "docs",
+      ".github",
+      ".cursor",
+      ".claude",
+      ".opencode",
+    ]
 
     // when / then
     for (const name of shouldBeAllowed) {

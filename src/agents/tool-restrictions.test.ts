@@ -121,9 +121,18 @@ describe("read-only agent tool restrictions", () => {
       const claudeAgent = createSisyphusAgent(TEST_MODEL)
 
       // when
-      const gpt54Permission = (gpt54Agent.permission ?? {}) as Record<string, string>
-      const gptGenericPermission = (gptGenericAgent.permission ?? {}) as Record<string, string>
-      const claudePermission = (claudeAgent.permission ?? {}) as Record<string, string>
+      const gpt54Permission = (gpt54Agent.permission ?? {}) as Record<
+        string,
+        string
+      >
+      const gptGenericPermission = (gptGenericAgent.permission ?? {}) as Record<
+        string,
+        string
+      >
+      const claudePermission = (claudeAgent.permission ?? {}) as Record<
+        string,
+        string
+      >
 
       // then
       expect(gpt54Permission["apply_patch"]).toBe("deny")

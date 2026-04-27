@@ -40,7 +40,9 @@ describe("createWriteExistingFileGuardHook", () => {
     writeFileSync(existingFile, "content")
 
     // when
-    const hook = createWriteExistingFileGuardHook({ directory: tempDir } as never)
+    const hook = createWriteExistingFileGuardHook({
+      directory: tempDir,
+    } as never)
 
     // then
     expect(existsSyncMock).toHaveBeenCalledTimes(0)

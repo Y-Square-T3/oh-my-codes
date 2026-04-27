@@ -46,13 +46,19 @@ const AGENT_RESTRICTIONS: Record<string, Record<string, boolean>> = {
   },
 }
 
-export function getAgentToolRestrictions(agentName: string): Record<string, boolean> {
+export function getAgentToolRestrictions(
+  agentName: string,
+): Record<string, boolean> {
   // Custom/unknown agents get no restrictions (empty object), matching Claude Code's
   // trust model where project-registered agents retain full tool access including bash.
   const stripped = stripInvisibleAgentCharacters(agentName)
-  return AGENT_RESTRICTIONS[stripped]
-    ?? Object.entries(AGENT_RESTRICTIONS).find(([key]) => key.toLowerCase() === stripped.toLowerCase())?.[1]
-    ?? {}
+  return (
+    AGENT_RESTRICTIONS[stripped] ??
+    Object.entries(AGENT_RESTRICTIONS).find(
+      ([key]) => key.toLowerCase() === stripped.toLowerCase(),
+    )?.[1] ??
+    {}
+  )
 }
 
 export function hasAgentToolRestrictions(agentName: string): boolean {

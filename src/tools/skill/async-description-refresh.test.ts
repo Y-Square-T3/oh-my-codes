@@ -11,8 +11,12 @@ function requireFresh<T>(modulePath: string): T {
   return require(modulePath) as T
 }
 
-function createSkillTool(...args: Parameters<typeof import("./tools").createSkillTool>): ReturnType<typeof import("./tools").createSkillTool> {
-  return requireFresh<typeof import("./tools")>("./tools").createSkillTool(...args)
+function createSkillTool(
+  ...args: Parameters<typeof import("./tools").createSkillTool>
+): ReturnType<typeof import("./tools").createSkillTool> {
+  return requireFresh<typeof import("./tools")>("./tools").createSkillTool(
+    ...args,
+  )
 }
 
 function createMockSkill(name: string): LoadedSkill {
@@ -52,12 +56,14 @@ describe("skill tool - async native skill description refresh", () => {
         async all() {
           allCallCount += 1
 
-          return [{
-            name: "async-native-skill",
-            description: "Async native skill from plugin input",
-            location: "/external/skills/async-native-skill/SKILL.md",
-            content: "Async native skill body",
-          }]
+          return [
+            {
+              name: "async-native-skill",
+              description: "Async native skill from plugin input",
+              location: "/external/skills/async-native-skill/SKILL.md",
+              content: "Async native skill body",
+            },
+          ]
         },
         async get() {
           return undefined

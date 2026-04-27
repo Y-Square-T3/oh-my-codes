@@ -1,4 +1,9 @@
-import type { AgentConfig, CategoryConfig, GeneratedOmoConfig, ProviderAvailability } from "./model-fallback-types"
+import type {
+  AgentConfig,
+  CategoryConfig,
+  GeneratedOmoConfig,
+  ProviderAvailability,
+} from "./model-fallback-types"
 
 const OPENAI_ONLY_AGENT_OVERRIDES: Record<string, AgentConfig> = {
   explore: { model: "openai/gpt-5.4-mini-fast" },
@@ -12,7 +17,9 @@ const OPENAI_ONLY_CATEGORY_OVERRIDES: Record<string, CategoryConfig> = {
   writing: { model: "openai/gpt-5.4", variant: "medium" },
 }
 
-export function isOpenAiOnlyAvailability(availability: ProviderAvailability): boolean {
+export function isOpenAiOnlyAvailability(
+  availability: ProviderAvailability,
+): boolean {
   return (
     availability.native.openai &&
     !availability.native.claude &&
@@ -25,7 +32,9 @@ export function isOpenAiOnlyAvailability(availability: ProviderAvailability): bo
   )
 }
 
-export function applyOpenAiOnlyModelCatalog(config: GeneratedOmoConfig): GeneratedOmoConfig {
+export function applyOpenAiOnlyModelCatalog(
+  config: GeneratedOmoConfig,
+): GeneratedOmoConfig {
   return {
     ...config,
     agents: {

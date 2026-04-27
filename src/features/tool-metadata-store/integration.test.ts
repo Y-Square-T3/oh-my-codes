@@ -14,7 +14,10 @@ describe("tool-metadata-store integration", () => {
     const payload = { title: "Task", metadata: { sessionId: "ses_child" } }
 
     // when
-    await publishToolMetadata({ sessionID: "ses_parent", callID: "call_123" }, payload)
+    await publishToolMetadata(
+      { sessionID: "ses_parent", callID: "call_123" },
+      payload,
+    )
     const recovered = recoverToolMetadata("ses_parent", { callID: "call_123" })
 
     // then
@@ -26,7 +29,10 @@ describe("tool-metadata-store integration", () => {
     const payload = { title: "Task", metadata: { sessionId: "ses_child" } }
 
     // when
-    await publishToolMetadata({ sessionID: "ses_parent", callId: "call_case" }, payload)
+    await publishToolMetadata(
+      { sessionID: "ses_parent", callId: "call_case" },
+      payload,
+    )
     const recovered = recoverToolMetadata("ses_parent", { callID: "call_case" })
 
     // then
@@ -38,8 +44,13 @@ describe("tool-metadata-store integration", () => {
     const payload = { title: "Task" }
 
     // when
-    const result = await publishToolMetadata({ sessionID: "ses_parent", callID: "   " }, payload)
-    const recovered = recoverToolMetadata("ses_parent", { callID: "call_blank" })
+    const result = await publishToolMetadata(
+      { sessionID: "ses_parent", callID: "   " },
+      payload,
+    )
+    const recovered = recoverToolMetadata("ses_parent", {
+      callID: "call_blank",
+    })
 
     // then
     expect(result).toEqual({ stored: false })
@@ -52,7 +63,10 @@ describe("tool-metadata-store integration", () => {
     const payload = { title: "Task" }
 
     // when
-    const result = await publishToolMetadata({ sessionID: "ses_parent" }, payload)
+    const result = await publishToolMetadata(
+      { sessionID: "ses_parent" },
+      payload,
+    )
 
     // then
     expect(result).toEqual({ stored: false })
@@ -61,8 +75,14 @@ describe("tool-metadata-store integration", () => {
 
   test("#given same session with different call ids #when publishing twice #then each entry stays isolated", async () => {
     // given
-    await publishToolMetadata({ sessionID: "ses_parent", callID: "call_a" }, { title: "A" })
-    await publishToolMetadata({ sessionID: "ses_parent", callID: "call_b" }, { title: "B" })
+    await publishToolMetadata(
+      { sessionID: "ses_parent", callID: "call_a" },
+      { title: "A" },
+    )
+    await publishToolMetadata(
+      { sessionID: "ses_parent", callID: "call_b" },
+      { title: "B" },
+    )
 
     // when
     const recoveredA = recoverToolMetadata("ses_parent", { callID: "call_a" })
@@ -80,15 +100,25 @@ describe("tool-metadata-store integration", () => {
     Date.now = () => now
 
     try {
-      await publishToolMetadata({ sessionID: "ses_parent", callID: "call_old" }, { title: "Old" })
+      await publishToolMetadata(
+        { sessionID: "ses_parent", callID: "call_old" },
+        { title: "Old" },
+      )
       now = 15 * 60 * 1000 + 1
 
       // when
-      await publishToolMetadata({ sessionID: "ses_parent", callID: "call_new" }, { title: "New" })
+      await publishToolMetadata(
+        { sessionID: "ses_parent", callID: "call_new" },
+        { title: "New" },
+      )
 
       // then
-      expect(recoverToolMetadata("ses_parent", { callID: "call_old" })).toBeUndefined()
-      expect(recoverToolMetadata("ses_parent", { callID: "call_new" })).toEqual({ title: "New" })
+      expect(
+        recoverToolMetadata("ses_parent", { callID: "call_old" }),
+      ).toBeUndefined()
+      expect(recoverToolMetadata("ses_parent", { callID: "call_new" })).toEqual(
+        { title: "New" },
+      )
     } finally {
       Date.now = originalDateNow
     }

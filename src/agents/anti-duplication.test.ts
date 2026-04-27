@@ -38,7 +38,9 @@ describe("buildAntiDuplicationSection", () => {
     //#then: should explicitly allow non-overlapping work
     expect(result).toContain("ALLOWED")
     expect(result).toContain("non-overlapping work")
-    expect(result).toContain("work that doesn't depend on the delegated research")
+    expect(result).toContain(
+      "work that doesn't depend on the delegated research",
+    )
   })
 
   it("#given no arguments #when building #then includes wait-for-results instructions", () => {

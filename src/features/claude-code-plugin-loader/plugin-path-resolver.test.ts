@@ -46,7 +46,10 @@ describe("resolvePluginPaths", () => {
 
     // when
     const nullResult = resolvePluginPaths(nullValue, "/tmp/plugin-root")
-    const undefinedResult = resolvePluginPaths(undefinedValue, "/tmp/plugin-root")
+    const undefinedResult = resolvePluginPaths(
+      undefinedValue,
+      "/tmp/plugin-root",
+    )
 
     // then
     expect(nullResult).toBeNull()

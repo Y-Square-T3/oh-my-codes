@@ -3,7 +3,10 @@ import { mkdtempSync, rmSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import type { PluginInput } from "@opencode-ai/plugin"
-import type { BackgroundManager, BackgroundTask } from "../../features/background-agent"
+import type {
+  BackgroundManager,
+  BackgroundTask,
+} from "../../features/background-agent"
 import { readContinuationMarker } from "../../features/run-continuation-state"
 import { createStopContinuationGuardHook } from "./index"
 
@@ -41,7 +44,10 @@ describe("stop-continuation-guard", () => {
     } as unknown as PluginInput
   }
 
-  function createBackgroundTask(status: BackgroundTask["status"], id: string): BackgroundTask {
+  function createBackgroundTask(
+    status: BackgroundTask["status"],
+    id: string,
+  ): BackgroundTask {
     return {
       id,
       status,
@@ -53,10 +59,16 @@ describe("stop-continuation-guard", () => {
     }
   }
 
-  function createMockBackgroundManager(tasks: BackgroundTask[], cancelCalls: CancelCall[]): Pick<BackgroundManager, "getAllDescendantTasks" | "cancelTask"> {
+  function createMockBackgroundManager(
+    tasks: BackgroundTask[],
+    cancelCalls: CancelCall[],
+  ): Pick<BackgroundManager, "getAllDescendantTasks" | "cancelTask"> {
     return {
       getAllDescendantTasks: () => tasks,
-      cancelTask: async (taskId: string, options?: Parameters<BackgroundManager["cancelTask"]>[1]) => {
+      cancelTask: async (
+        taskId: string,
+        options?: Parameters<BackgroundManager["cancelTask"]>[1],
+      ) => {
         cancelCalls.push({ taskId, options })
         return true
       },

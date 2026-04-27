@@ -1,8 +1,14 @@
 import type { ModelCapabilitiesSnapshot } from "./model-capabilities"
 import { afterEach, describe, expect, test, spyOn } from "bun:test"
 import * as connectedProvidersCache from "./connected-providers-cache"
-import { getModelCapabilities, getBundledModelCapabilitiesSnapshot } from "./model-capabilities"
-import { AGENT_MODEL_REQUIREMENTS, CATEGORY_MODEL_REQUIREMENTS } from "./model-requirements"
+import {
+  getModelCapabilities,
+  getBundledModelCapabilitiesSnapshot,
+} from "./model-capabilities"
+import {
+  AGENT_MODEL_REQUIREMENTS,
+  CATEGORY_MODEL_REQUIREMENTS,
+} from "./model-requirements"
 
 describe("getModelCapabilities", () => {
   let findProviderModelMetadataSpy: ReturnType<typeof spyOn> | undefined
@@ -63,7 +69,10 @@ describe("getModelCapabilities", () => {
   }
 
   test("uses runtime metadata before snapshot data", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "anthropic",
       modelID: "claude-opus-4-7",
@@ -95,7 +104,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("reads structured runtime capabilities from the SDK v2 shape", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "openai",
       modelID: "gpt-5.4",
@@ -136,7 +148,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("respects root-level thinking flags when providers do not nest them under capabilities", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "custom-proxy",
       modelID: "gpt-5.4",
@@ -156,7 +171,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("accepts runtime variant arrays without corrupting them into numeric keys", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "openai",
       modelID: "gpt-5.4",
@@ -170,7 +188,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("normalizes the legacy Claude Opus thinking alias before snapshot lookup", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "anthropic",
       modelID: "claude-opus-4-7-thinking",
@@ -195,7 +216,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("maps local gemini aliases to canonical models.dev entries", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const result = getModelCapabilities({
       providerID: "google",
       modelID: "gemini-3.1-pro-high",
@@ -270,7 +294,10 @@ describe("getModelCapabilities", () => {
   })
 
   test("prefers runtime models.dev cache over bundled snapshot", () => {
-    findProviderModelMetadataSpy = spyOn(connectedProvidersCache, "findProviderModelMetadata").mockReturnValue(undefined)
+    findProviderModelMetadataSpy = spyOn(
+      connectedProvidersCache,
+      "findProviderModelMetadata",
+    ).mockReturnValue(undefined)
     const runtimeSnapshot: ModelCapabilitiesSnapshot = {
       ...bundledSnapshot,
       models: {
@@ -351,11 +378,13 @@ describe("getModelCapabilities", () => {
     const requirementModels = new Set<string>()
 
     for (const requirement of Object.values(AGENT_MODEL_REQUIREMENTS)) {
-      for (const entry of requirement.fallbackChain) requirementModels.add(entry.model)
+      for (const entry of requirement.fallbackChain)
+        requirementModels.add(entry.model)
     }
 
     for (const requirement of Object.values(CATEGORY_MODEL_REQUIREMENTS)) {
-      for (const entry of requirement.fallbackChain) requirementModels.add(entry.model)
+      for (const entry of requirement.fallbackChain)
+        requirementModels.add(entry.model)
     }
 
     for (const modelID of requirementModels) {

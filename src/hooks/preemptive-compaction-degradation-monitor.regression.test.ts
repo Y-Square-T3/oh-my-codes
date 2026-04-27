@@ -8,9 +8,12 @@ mock.module("../shared/logger", () => ({
   log: logMock,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
-const { createPreemptiveCompactionHook } = await import("./preemptive-compaction")
+const { createPreemptiveCompactionHook } =
+  await import("./preemptive-compaction")
 
 type AssistantHistoryMessage = {
   info: {
@@ -67,7 +70,12 @@ function buildAssistantUpdate(input: {
           providerID: "opencode",
           modelID: "kimi-k2.5-free",
           finish: true,
-          tokens: { input: 1000, output: 10, reasoning: 0, cache: { read: 0, write: 0 } },
+          tokens: {
+            input: 1000,
+            output: 10,
+            reasoning: 0,
+            cache: { read: 0, write: 0 },
+          },
           parts: input.parts,
         },
       },
@@ -96,14 +104,29 @@ describe("preemptive-compaction degradation monitor regressions", () => {
     })
 
     // when
-    appendAssistantHistory(sessionHistory, { id: "msg_1", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_1", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_1",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_1", parts: stepOnlyParts }),
+    )
 
-    appendAssistantHistory(sessionHistory, { id: "msg_2", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_2", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_2",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_2", parts: stepOnlyParts }),
+    )
 
-    appendAssistantHistory(sessionHistory, { id: "msg_3", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_3", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_3",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_3", parts: stepOnlyParts }),
+    )
 
     await hook.event({
       event: {
@@ -112,14 +135,29 @@ describe("preemptive-compaction degradation monitor regressions", () => {
       },
     })
 
-    appendAssistantHistory(sessionHistory, { id: "msg_4", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_4", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_4",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_4", parts: stepOnlyParts }),
+    )
 
-    appendAssistantHistory(sessionHistory, { id: "msg_5", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_5", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_5",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_5", parts: stepOnlyParts }),
+    )
 
-    appendAssistantHistory(sessionHistory, { id: "msg_6", parts: stepOnlyParts })
-    await hook.event(buildAssistantUpdate({ sessionID, id: "msg_6", parts: stepOnlyParts }))
+    appendAssistantHistory(sessionHistory, {
+      id: "msg_6",
+      parts: stepOnlyParts,
+    })
+    await hook.event(
+      buildAssistantUpdate({ sessionID, id: "msg_6", parts: stepOnlyParts }),
+    )
 
     // then
     expect(ctx.client.session.summarize).toHaveBeenCalledTimes(1)

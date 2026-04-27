@@ -17,13 +17,25 @@ describe("runTuiInstaller", () => {
   const originalIsStdoutTty = process.stdout.isTTY
 
   beforeEach(() => {
-    Object.defineProperty(process.stdin, "isTTY", { configurable: true, value: true })
-    Object.defineProperty(process.stdout, "isTTY", { configurable: true, value: true })
+    Object.defineProperty(process.stdin, "isTTY", {
+      configurable: true,
+      value: true,
+    })
+    Object.defineProperty(process.stdout, "isTTY", {
+      configurable: true,
+      value: true,
+    })
   })
 
   afterEach(() => {
-    Object.defineProperty(process.stdin, "isTTY", { configurable: true, value: originalIsStdinTty })
-    Object.defineProperty(process.stdout, "isTTY", { configurable: true, value: originalIsStdoutTty })
+    Object.defineProperty(process.stdin, "isTTY", {
+      configurable: true,
+      value: originalIsStdinTty,
+    })
+    Object.defineProperty(process.stdout, "isTTY", {
+      configurable: true,
+      value: originalIsStdoutTty,
+    })
   })
 
   it("blocks installation when OpenCode is below the minimum version", async () => {

@@ -1,5 +1,9 @@
 import { describe, it, expect, mock } from "bun:test"
-import { parseModelSuggestion, promptWithModelSuggestionRetry, promptSyncWithModelSuggestionRetry } from "./model-suggestion-retry"
+import {
+  parseModelSuggestion,
+  promptWithModelSuggestionRetry,
+  promptSyncWithModelSuggestionRetry,
+} from "./model-suggestion-retry"
 
 describe("parseModelSuggestion", () => {
   describe("structured NamedError format", () => {
@@ -115,7 +119,7 @@ describe("parseModelSuggestion", () => {
     it("should parse suggestion from error message string", () => {
       // given an Error with model-not-found message and suggestion
       const error = new Error(
-        "Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4, claude-sonnet-4-6?"
+        "Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4, claude-sonnet-4-6?",
       )
 
       // when parsing the error
@@ -131,8 +135,7 @@ describe("parseModelSuggestion", () => {
 
     it("should parse from plain string error", () => {
       // given a plain string error message
-      const error =
-        "Model not found: openai/gtp-5. Did you mean: gpt-5?"
+      const error = "Model not found: openai/gtp-5. Did you mean: gpt-5?"
 
       // when parsing the error
       const result = parseModelSuggestion(error)
@@ -148,7 +151,8 @@ describe("parseModelSuggestion", () => {
     it("should parse from object with message property", () => {
       // given an object with message property
       const error = {
-        message: "Model not found: google/gemini-3-flsh. Did you mean: gemini-3-flash?",
+        message:
+          "Model not found: google/gemini-3-flsh. Did you mean: gemini-3-flash?",
       }
 
       // when parsing the error
@@ -251,7 +255,7 @@ describe("promptWithModelSuggestionRetry", () => {
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonet-4" },
         },
-      })
+      }),
     ).rejects.toThrow()
 
     // and should call promptAsync only once
@@ -273,7 +277,7 @@ describe("promptWithModelSuggestionRetry", () => {
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
         },
-      })
+      }),
     ).rejects.toThrow("Connection refused")
 
     expect(promptMock).toHaveBeenCalledTimes(1)
@@ -294,7 +298,7 @@ describe("promptWithModelSuggestionRetry", () => {
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
         },
-      })
+      }),
     ).rejects.toThrow("Still not found")
 
     // and should call promptAsync only once
@@ -334,7 +338,9 @@ describe("promptWithModelSuggestionRetry", () => {
   it("should throw string error message from promptAsync", async () => {
     // given a client that fails with a string error
     const promptMock = mock().mockRejectedValueOnce(
-      new Error("Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4?")
+      new Error(
+        "Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4?",
+      ),
     )
     const client = { session: { promptAsync: promptMock } }
 
@@ -347,7 +353,7 @@ describe("promptWithModelSuggestionRetry", () => {
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
         },
-      })
+      }),
     ).rejects.toThrow()
 
     // and should call promptAsync only once
@@ -357,7 +363,7 @@ describe("promptWithModelSuggestionRetry", () => {
   it("should throw error when no model in original request", async () => {
     // given a client that fails with an error
     const modelNotFoundError = new Error(
-      "Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4?"
+      "Model not found: anthropic/claude-sonet-4. Did you mean: claude-sonnet-4?",
     )
     const promptMock = mock().mockRejectedValueOnce(modelNotFoundError)
     const client = { session: { promptAsync: promptMock } }
@@ -370,7 +376,7 @@ describe("promptWithModelSuggestionRetry", () => {
         body: {
           parts: [{ type: "text", text: "hello" }],
         },
-      })
+      }),
     ).rejects.toThrow()
 
     // and should call promptAsync only once
@@ -383,7 +389,9 @@ describe("promptSyncWithModelSuggestionRetry", () => {
     // given a client with both prompt and promptAsync
     const promptMock = mock(() => Promise.resolve())
     const promptAsyncMock = mock(() => Promise.resolve())
-    const client = { session: { prompt: promptMock, promptAsync: promptAsyncMock } }
+    const client = {
+      session: { prompt: promptMock, promptAsync: promptAsyncMock },
+    }
 
     // when calling promptSyncWithModelSuggestionRetry
     await promptSyncWithModelSuggestionRetry(client as any, {
@@ -424,13 +432,17 @@ describe("promptSyncWithModelSuggestionRetry", () => {
     // when calling with short timeout
     // then should abort the request and throw timeout error
     await expect(
-      promptSyncWithModelSuggestionRetry(client as any, {
-        path: { id: "session-1" },
-        body: {
-          parts: [{ type: "text", text: "hello" }],
-          model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
+      promptSyncWithModelSuggestionRetry(
+        client as any,
+        {
+          path: { id: "session-1" },
+          body: {
+            parts: [{ type: "text", text: "hello" }],
+            model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
+          },
         },
-      }, { timeoutMs: 1 })
+        { timeoutMs: 1 },
+      ),
     ).rejects.toThrow("prompt timed out after 1ms")
 
     expect(receivedSignal?.aborted).toBe(true)
@@ -483,7 +495,7 @@ describe("promptSyncWithModelSuggestionRetry", () => {
           parts: [{ type: "text", text: "hello" }],
           model: { providerID: "anthropic", modelID: "claude-sonnet-4" },
         },
-      })
+      }),
     ).rejects.toThrow("Connection refused")
 
     expect(promptMock).toHaveBeenCalledTimes(1)
@@ -509,7 +521,7 @@ describe("promptSyncWithModelSuggestionRetry", () => {
         body: {
           parts: [{ type: "text", text: "hello" }],
         },
-      })
+      }),
     ).rejects.toThrow()
 
     expect(promptMock).toHaveBeenCalledTimes(1)

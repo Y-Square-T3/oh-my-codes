@@ -1,5 +1,19 @@
-import { describe, test, expect, beforeEach, afterEach, afterAll, mock } from "bun:test"
-import { mkdirSync, writeFileSync, rmSync, existsSync, readdirSync } from "node:fs"
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  afterAll,
+  mock,
+} from "bun:test"
+import {
+  mkdirSync,
+  writeFileSync,
+  rmSync,
+  existsSync,
+  readdirSync,
+} from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import { randomUUID } from "node:crypto"
@@ -61,10 +75,18 @@ mock.module("../../shared/opencode-message-dir", () => ({
   },
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
-const { getAllSessions, getMessageDir, sessionExists, readSessionMessages, readSessionTodos, getSessionInfo } =
-  await import("./storage")
+const {
+  getAllSessions,
+  getMessageDir,
+  sessionExists,
+  readSessionMessages,
+  readSessionTodos,
+  getSessionInfo,
+} = await import("./storage")
 
 const storage = await import("./storage")
 
@@ -104,7 +126,10 @@ describe("session-manager storage", () => {
     const sessionID = "ses_test123"
     const sessionPath = join(TEST_MESSAGE_STORAGE, sessionID)
     mkdirSync(sessionPath, { recursive: true })
-    writeFileSync(join(sessionPath, "msg_001.json"), JSON.stringify({ id: "msg_001", role: "user" }))
+    writeFileSync(
+      join(sessionPath, "msg_001.json"),
+      JSON.stringify({ id: "msg_001", role: "user" }),
+    )
 
     // when
     const result = getMessageDir(sessionID)
@@ -126,7 +151,10 @@ describe("session-manager storage", () => {
     const sessionID = "ses_exists"
     const sessionPath = join(TEST_MESSAGE_STORAGE, sessionID)
     mkdirSync(sessionPath, { recursive: true })
-    writeFileSync(join(sessionPath, "msg_001.json"), JSON.stringify({ id: "msg_001" }))
+    writeFileSync(
+      join(sessionPath, "msg_001.json"),
+      JSON.stringify({ id: "msg_001" }),
+    )
 
     // when
     const exists = await sessionExists(sessionID)
@@ -151,11 +179,15 @@ describe("session-manager storage", () => {
 
     writeFileSync(
       join(sessionPath, "msg_002.json"),
-      JSON.stringify({ id: "msg_002", role: "assistant", time: { created: 2000 } })
+      JSON.stringify({
+        id: "msg_002",
+        role: "assistant",
+        time: { created: 2000 },
+      }),
     )
     writeFileSync(
       join(sessionPath, "msg_001.json"),
-      JSON.stringify({ id: "msg_001", role: "user", time: { created: 1000 } })
+      JSON.stringify({ id: "msg_001", role: "user", time: { created: 1000 } }),
     )
 
     // when
@@ -179,11 +211,15 @@ describe("session-manager storage", () => {
     // given
     writeFileSync(
       join(TEST_TODO_DIR, "ses_1.json"),
-      JSON.stringify([{ id: "todo_exact", content: "Exact match", status: "pending" }]),
+      JSON.stringify([
+        { id: "todo_exact", content: "Exact match", status: "pending" },
+      ]),
     )
     writeFileSync(
       join(TEST_TODO_DIR, "ses_10.json"),
-      JSON.stringify([{ id: "todo_collision", content: "Wrong session", status: "completed" }]),
+      JSON.stringify([
+        { id: "todo_collision", content: "Wrong session", status: "completed" },
+      ]),
     )
 
     // when
@@ -217,7 +253,7 @@ describe("session-manager storage", () => {
         role: "user",
         agent: "build",
         time: { created: now - 10000 },
-      })
+      }),
     )
     writeFileSync(
       join(sessionPath, "msg_002.json"),
@@ -226,7 +262,7 @@ describe("session-manager storage", () => {
         role: "assistant",
         agent: "oracle",
         time: { created: now },
-      })
+      }),
     )
 
     // when
@@ -304,7 +340,7 @@ describe("session-manager storage - getMainSessions", () => {
   function createSessionMetadata(
     projectID: string,
     sessionID: string,
-    opts: { parentID?: string; directory: string; updated: number }
+    opts: { parentID?: string; directory: string; updated: number },
   ) {
     const projectDir = join(TEST_SESSION_STORAGE, projectID)
     mkdirSync(projectDir, { recursive: true })
@@ -316,16 +352,20 @@ describe("session-manager storage - getMainSessions", () => {
         directory: opts.directory,
         parentID: opts.parentID,
         time: { created: opts.updated - 1000, updated: opts.updated },
-      })
+      }),
     )
   }
 
-  function createMessageForSession(sessionID: string, msgID: string, created: number) {
+  function createMessageForSession(
+    sessionID: string,
+    msgID: string,
+    created: number,
+  ) {
     const sessionPath = join(TEST_MESSAGE_STORAGE, sessionID)
     mkdirSync(sessionPath, { recursive: true })
     writeFileSync(
       join(sessionPath, `${msgID}.json`),
-      JSON.stringify({ id: msgID, role: "user", time: { created } })
+      JSON.stringify({ id: msgID, role: "user", time: { created } }),
     )
   }
 
@@ -334,9 +374,19 @@ describe("session-manager storage - getMainSessions", () => {
     const projectID = "proj_abc123"
     const now = Date.now()
 
-    createSessionMetadata(projectID, "ses_main1", { directory: "/test/path", updated: now })
-    createSessionMetadata(projectID, "ses_main2", { directory: "/test/path", updated: now - 1000 })
-    createSessionMetadata(projectID, "ses_child1", { directory: "/test/path", updated: now, parentID: "ses_main1" })
+    createSessionMetadata(projectID, "ses_main1", {
+      directory: "/test/path",
+      updated: now,
+    })
+    createSessionMetadata(projectID, "ses_main2", {
+      directory: "/test/path",
+      updated: now - 1000,
+    })
+    createSessionMetadata(projectID, "ses_child1", {
+      directory: "/test/path",
+      updated: now,
+      parentID: "ses_main1",
+    })
 
     createMessageForSession("ses_main1", "msg_001", now)
     createMessageForSession("ses_main2", "msg_001", now - 1000)
@@ -355,9 +405,18 @@ describe("session-manager storage - getMainSessions", () => {
     const projectID = "proj_abc123"
     const now = Date.now()
 
-    createSessionMetadata(projectID, "ses_old", { directory: "/test/path", updated: now - 5000 })
-    createSessionMetadata(projectID, "ses_mid", { directory: "/test/path", updated: now - 2000 })
-    createSessionMetadata(projectID, "ses_new", { directory: "/test/path", updated: now })
+    createSessionMetadata(projectID, "ses_old", {
+      directory: "/test/path",
+      updated: now - 5000,
+    })
+    createSessionMetadata(projectID, "ses_mid", {
+      directory: "/test/path",
+      updated: now - 2000,
+    })
+    createSessionMetadata(projectID, "ses_new", {
+      directory: "/test/path",
+      updated: now,
+    })
 
     createMessageForSession("ses_old", "msg_001", now - 5000)
     createMessageForSession("ses_mid", "msg_001", now - 2000)
@@ -379,15 +438,25 @@ describe("session-manager storage - getMainSessions", () => {
     const projectB = "proj_bbb"
     const now = Date.now()
 
-    createSessionMetadata(projectA, "ses_projA", { directory: "/path/to/projectA", updated: now })
-    createSessionMetadata(projectB, "ses_projB", { directory: "/path/to/projectB", updated: now })
+    createSessionMetadata(projectA, "ses_projA", {
+      directory: "/path/to/projectA",
+      updated: now,
+    })
+    createSessionMetadata(projectB, "ses_projB", {
+      directory: "/path/to/projectB",
+      updated: now,
+    })
 
     createMessageForSession("ses_projA", "msg_001", now)
     createMessageForSession("ses_projB", "msg_001", now)
 
     // when
-    const sessionsA = await storage.getMainSessions({ directory: "/path/to/projectA" })
-    const sessionsB = await storage.getMainSessions({ directory: "/path/to/projectB" })
+    const sessionsA = await storage.getMainSessions({
+      directory: "/path/to/projectA",
+    })
+    const sessionsB = await storage.getMainSessions({
+      directory: "/path/to/projectB",
+    })
 
     // then
     expect(sessionsA.length).toBe(1)
@@ -402,8 +471,14 @@ describe("session-manager storage - getMainSessions", () => {
     const projectB = "proj_bbb"
     const now = Date.now()
 
-    createSessionMetadata(projectA, "ses_projA", { directory: "/path/to/projectA", updated: now })
-    createSessionMetadata(projectB, "ses_projB", { directory: "/path/to/projectB", updated: now - 1000 })
+    createSessionMetadata(projectA, "ses_projA", {
+      directory: "/path/to/projectA",
+      updated: now,
+    })
+    createSessionMetadata(projectB, "ses_projB", {
+      directory: "/path/to/projectB",
+      updated: now - 1000,
+    })
 
     createMessageForSession("ses_projA", "msg_001", now)
     createMessageForSession("ses_projB", "msg_001", now - 1000)
@@ -435,10 +510,22 @@ describe("session-manager storage - SDK path (beta mode)", () => {
   test("getMainSessions uses SDK when beta mode is enabled", async () => {
     // given
     const mockSessions = [
-      { id: "ses_1", directory: "/test", parentID: null, time: { created: 1000, updated: 2000 } },
-      { id: "ses_2", directory: "/test", parentID: "ses_1", time: { created: 1000, updated: 1500 } },
+      {
+        id: "ses_1",
+        directory: "/test",
+        parentID: null,
+        time: { created: 1000, updated: 2000 },
+      },
+      {
+        id: "ses_2",
+        directory: "/test",
+        parentID: "ses_1",
+        time: { created: 1000, updated: 1500 },
+      },
     ]
-    mockClient.session.list.mockImplementation(() => Promise.resolve({ data: mockSessions }))
+    mockClient.session.list.mockImplementation(() =>
+      Promise.resolve({ data: mockSessions }),
+    )
 
     // Mock isSqliteBackend to return true
     mock.module("../../shared/opencode-storage-detection", () => ({
@@ -448,7 +535,9 @@ describe("session-manager storage - SDK path (beta mode)", () => {
 
     // Re-import to get fresh module with mocked isSqliteBackend
     const { setStorageClient, getMainSessions } = await import("./storage")
-    setStorageClient(mockClient as unknown as Parameters<typeof setStorageClient>[0])
+    setStorageClient(
+      mockClient as unknown as Parameters<typeof setStorageClient>[0],
+    )
 
     // when
     const sessions = await getMainSessions({ directory: "/test" })
@@ -462,10 +551,20 @@ describe("session-manager storage - SDK path (beta mode)", () => {
   test("getAllSessions uses SDK when beta mode is enabled", async () => {
     // given
     const mockSessions = [
-      { id: "ses_1", directory: "/test", time: { created: 1000, updated: 2000 } },
-      { id: "ses_2", directory: "/test", time: { created: 1000, updated: 1500 } },
+      {
+        id: "ses_1",
+        directory: "/test",
+        time: { created: 1000, updated: 2000 },
+      },
+      {
+        id: "ses_2",
+        directory: "/test",
+        time: { created: 1000, updated: 1500 },
+      },
     ]
-    mockClient.session.list.mockImplementation(() => Promise.resolve({ data: mockSessions }))
+    mockClient.session.list.mockImplementation(() =>
+      Promise.resolve({ data: mockSessions }),
+    )
 
     mock.module("../../shared/opencode-storage-detection", () => ({
       isSqliteBackend: () => true,
@@ -473,7 +572,9 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     }))
 
     const { setStorageClient, getAllSessions } = await import("./storage")
-    setStorageClient(mockClient as unknown as Parameters<typeof setStorageClient>[0])
+    setStorageClient(
+      mockClient as unknown as Parameters<typeof setStorageClient>[0],
+    )
 
     // when
     const sessionIDs = await getAllSessions()
@@ -487,15 +588,27 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     // given
     const mockMessages = [
       {
-        info: { id: "msg_1", role: "user", agent: "test", time: { created: 1000 } },
+        info: {
+          id: "msg_1",
+          role: "user",
+          agent: "test",
+          time: { created: 1000 },
+        },
         parts: [{ id: "part_1", type: "text", text: "Hello" }],
       },
       {
-        info: { id: "msg_2", role: "assistant", agent: "oracle", time: { created: 2000 } },
+        info: {
+          id: "msg_2",
+          role: "assistant",
+          agent: "oracle",
+          time: { created: 2000 },
+        },
         parts: [{ id: "part_2", type: "text", text: "Hi there" }],
       },
     ]
-    mockClient.session.messages.mockImplementation(() => Promise.resolve({ data: mockMessages }))
+    mockClient.session.messages.mockImplementation(() =>
+      Promise.resolve({ data: mockMessages }),
+    )
 
     mock.module("../../shared/opencode-storage-detection", () => ({
       isSqliteBackend: () => true,
@@ -503,13 +616,17 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     }))
 
     const { setStorageClient, readSessionMessages } = await import("./storage")
-    setStorageClient(mockClient as unknown as Parameters<typeof setStorageClient>[0])
+    setStorageClient(
+      mockClient as unknown as Parameters<typeof setStorageClient>[0],
+    )
 
     // when
     const messages = await readSessionMessages("ses_test")
 
     // then
-    expect(mockClient.session.messages).toHaveBeenCalledWith({ path: { id: "ses_test" } })
+    expect(mockClient.session.messages).toHaveBeenCalledWith({
+      path: { id: "ses_test" },
+    })
     expect(messages.length).toBe(2)
     expect(messages[0].id).toBe("msg_1")
     expect(messages[1].id).toBe("msg_2")
@@ -521,9 +638,16 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     // given
     const mockTodos = [
       { id: "todo_1", content: "Task 1", status: "pending", priority: "high" },
-      { id: "todo_2", content: "Task 2", status: "completed", priority: "medium" },
+      {
+        id: "todo_2",
+        content: "Task 2",
+        status: "completed",
+        priority: "medium",
+      },
     ]
-    mockClient.session.todo.mockImplementation(() => Promise.resolve({ data: mockTodos }))
+    mockClient.session.todo.mockImplementation(() =>
+      Promise.resolve({ data: mockTodos }),
+    )
 
     mock.module("../../shared/opencode-storage-detection", () => ({
       isSqliteBackend: () => true,
@@ -531,13 +655,17 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     }))
 
     const { setStorageClient, readSessionTodos } = await import("./storage")
-    setStorageClient(mockClient as unknown as Parameters<typeof setStorageClient>[0])
+    setStorageClient(
+      mockClient as unknown as Parameters<typeof setStorageClient>[0],
+    )
 
     // when
     const todos = await readSessionTodos("ses_test")
 
     // then
-    expect(mockClient.session.todo).toHaveBeenCalledWith({ path: { id: "ses_test" } })
+    expect(mockClient.session.todo).toHaveBeenCalledWith({
+      path: { id: "ses_test" },
+    })
     expect(todos.length).toBe(2)
     expect(todos[0].content).toBe("Task 1")
     expect(todos[1].content).toBe("Task 2")
@@ -547,7 +675,9 @@ describe("session-manager storage - SDK path (beta mode)", () => {
 
   test("SDK path rethrows non-transport errors", async () => {
     // given
-    mockClient.session.messages.mockImplementation(() => Promise.reject(new Error("API error")))
+    mockClient.session.messages.mockImplementation(() =>
+      Promise.reject(new Error("API error")),
+    )
 
     mock.module("../../shared/opencode-storage-detection", () => ({
       isSqliteBackend: () => true,
@@ -555,7 +685,9 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     }))
 
     const { setStorageClient, readSessionMessages } = await import("./storage")
-    setStorageClient(mockClient as unknown as Parameters<typeof setStorageClient>[0])
+    setStorageClient(
+      mockClient as unknown as Parameters<typeof setStorageClient>[0],
+    )
 
     await expect(readSessionMessages("ses_test")).rejects.toThrow("API error")
   })
@@ -568,7 +700,8 @@ describe("session-manager storage - SDK path (beta mode)", () => {
     }))
 
     //#when client is explicitly cleared and messages are requested
-    const { resetStorageClient, readSessionMessages } = await import("./storage")
+    const { resetStorageClient, readSessionMessages } =
+      await import("./storage")
     resetStorageClient()
     const messages = await readSessionMessages("ses_test")
 

@@ -23,11 +23,17 @@ describe("skill_mcp builtin MCP hint", () => {
     })
 
     await expect(
-      tool.execute({ mcp_name: "context7", tool_name: "resolve-library-id" }, mockContext),
+      tool.execute(
+        { mcp_name: "context7", tool_name: "resolve-library-id" },
+        mockContext,
+      ),
     ).rejects.toThrow(/builtin MCP/)
 
     await expect(
-      tool.execute({ mcp_name: "context7", tool_name: "resolve-library-id" }, mockContext),
+      tool.execute(
+        { mcp_name: "context7", tool_name: "resolve-library-id" },
+        mockContext,
+      ),
     ).rejects.toThrow(/context7_resolve-library-id/)
   })
 

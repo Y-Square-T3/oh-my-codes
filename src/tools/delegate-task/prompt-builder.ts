@@ -38,24 +38,30 @@ ${rows}
 </available_skills>`
 }
 
-function usesFreeOrLocalModel(model: { providerID: string; modelID: string; variant?: string } | undefined): boolean {
+function usesFreeOrLocalModel(
+  model: { providerID: string; modelID: string; variant?: string } | undefined,
+): boolean {
   if (!model) {
     return false
   }
 
   const provider = model.providerID.toLowerCase()
   const modelId = model.modelID.toLowerCase()
-  return provider.includes("local")
-    || provider === "ollama"
-    || provider === "lmstudio"
-    || modelId.includes("free")
+  return (
+    provider.includes("local") ||
+    provider === "ollama" ||
+    provider === "lmstudio" ||
+    modelId.includes("free")
+  )
 }
 
 /**
  * Build the system content to inject into the agent prompt.
  * Combines skill content, category prompt append, and plan agent system prepend.
  */
-export function buildSystemContent(input: BuildSystemContentInput): string | undefined {
+export function buildSystemContent(
+  input: BuildSystemContentInput,
+): string | undefined {
   const {
     skillContent,
     skillContents,
@@ -78,12 +84,14 @@ export function buildSystemContent(input: BuildSystemContentInput): string | und
     : ""
 
   const baseAgentsContext = agentsContext ?? planAgentPrepend
-  const effectiveAgentsContext = !isPlan && skillsSection
-    ? [baseAgentsContext, skillsSection].filter(Boolean).join("\n\n")
-    : baseAgentsContext
+  const effectiveAgentsContext =
+    !isPlan && skillsSection
+      ? [baseAgentsContext, skillsSection].filter(Boolean).join("\n\n")
+      : baseAgentsContext
 
-  const effectiveMaxPromptTokens = maxPromptTokens
-    ?? (usesFreeOrLocalModel(model) ? FREE_OR_LOCAL_PROMPT_TOKEN_LIMIT : undefined)
+  const effectiveMaxPromptTokens =
+    maxPromptTokens ??
+    (usesFreeOrLocalModel(model) ? FREE_OR_LOCAL_PROMPT_TOKEN_LIMIT : undefined)
 
   return buildSystemContentWithTokenLimit(
     {
@@ -93,11 +101,15 @@ export function buildSystemContent(input: BuildSystemContentInput): string | und
       agentsContext: effectiveAgentsContext,
       planAgentPrepend,
     },
-    effectiveMaxPromptTokens
+    effectiveMaxPromptTokens,
   )
 }
 
-export function buildTaskPrompt(prompt: string, agentName: string | undefined, tddEnabled?: boolean): string {
+export function buildTaskPrompt(
+  prompt: string,
+  agentName: string | undefined,
+  tddEnabled?: boolean,
+): string {
   if (!isPlanAgent(agentName)) {
     return prompt
   }

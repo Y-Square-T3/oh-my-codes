@@ -32,7 +32,8 @@ describe("parsePaneStateOutput", () => {
 
   it("handles CRLF line endings without dropping panes", () => {
     // given
-    const stdout = "%0\t120\t40\t0\t0\t1\t120\t40\r\n%1\t60\t40\t60\t0\t0\t120\t40\tagent\r\n"
+    const stdout =
+      "%0\t120\t40\t0\t0\t1\t120\t40\r\n%1\t60\t40\t60\t0\t0\t120\t40\tagent\r\n"
 
     // when
     const result = parsePaneStateOutput(stdout)

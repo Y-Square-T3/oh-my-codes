@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, spyOn, mock } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  spyOn,
+  mock,
+} from "bun:test"
 
 describe("model-resolution check", () => {
   describe("getModelResolutionInfo", () => {
@@ -14,8 +22,12 @@ describe("model-resolution check", () => {
       // then: Should have agent entries
       const sisyphus = info.agents.find((a) => a.name === "sisyphus")
       expect(sisyphus).toBeDefined()
-      expect(sisyphus!.requirement.fallbackChain[0]?.model).toBe("claude-opus-4-7")
-      expect(sisyphus!.requirement.fallbackChain[0]?.providers).toContain("anthropic")
+      expect(sisyphus!.requirement.fallbackChain[0]?.model).toBe(
+        "claude-opus-4-7",
+      )
+      expect(sisyphus!.requirement.fallbackChain[0]?.providers).toContain(
+        "anthropic",
+      )
     })
 
     it("returns category requirements with provider chains", async () => {
@@ -24,10 +36,14 @@ describe("model-resolution check", () => {
       const info = getModelResolutionInfo()
 
       // then: Should have category entries
-      const visual = info.categories.find((c) => c.name === "visual-engineering")
+      const visual = info.categories.find(
+        (c) => c.name === "visual-engineering",
+      )
       expect(visual).toBeDefined()
       expect(visual!.requirement.fallbackChain[0]?.model).toBe("gemini-3.1-pro")
-      expect(visual!.requirement.fallbackChain[0]?.providers).toContain("google")
+      expect(visual!.requirement.fallbackChain[0]?.providers).toContain(
+        "google",
+      )
     })
   })
 
@@ -37,7 +53,8 @@ describe("model-resolution check", () => {
     // then: Shows user override in Step 1 position
 
     it("shows user override for agent when configured", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       // given: User has override for oracle agent
       const mockConfig = {
@@ -52,11 +69,14 @@ describe("model-resolution check", () => {
       const oracle = info.agents.find((a) => a.name === "oracle")
       expect(oracle).toBeDefined()
       expect(oracle!.userOverride).toBe("anthropic/claude-opus-4-7")
-      expect(oracle!.effectiveResolution).toBe("User override: anthropic/claude-opus-4-7")
+      expect(oracle!.effectiveResolution).toBe(
+        "User override: anthropic/claude-opus-4-7",
+      )
     })
 
     it("shows user override for category when configured", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       // given: User has override for visual-engineering category
       const mockConfig = {
@@ -68,14 +88,17 @@ describe("model-resolution check", () => {
       const info = getModelResolutionInfoWithOverrides(mockConfig)
 
       // then: visual-engineering should show the override
-      const visual = info.categories.find((c) => c.name === "visual-engineering")
+      const visual = info.categories.find(
+        (c) => c.name === "visual-engineering",
+      )
       expect(visual).toBeDefined()
       expect(visual!.userOverride).toBe("openai/gpt-5.4")
       expect(visual!.effectiveResolution).toBe("User override: openai/gpt-5.4")
     })
 
     it("shows provider fallback when no override exists", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       // given: No overrides configured
       const mockConfig = {}
@@ -91,7 +114,8 @@ describe("model-resolution check", () => {
     })
 
     it("captures user variant for agent when configured", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       //#given User has model with variant override for oracle agent
       const mockConfig = {
@@ -111,12 +135,16 @@ describe("model-resolution check", () => {
     })
 
     it("captures user variant for category when configured", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       //#given User has model with variant override for visual-engineering category
       const mockConfig = {
         categories: {
-          "visual-engineering": { model: "google/gemini-3-flash-preview", variant: "high" },
+          "visual-engineering": {
+            model: "google/gemini-3-flash-preview",
+            variant: "high",
+          },
         },
       }
 
@@ -124,14 +152,17 @@ describe("model-resolution check", () => {
       const info = getModelResolutionInfoWithOverrides(mockConfig)
 
       //#then visual-engineering should have userVariant set
-      const visual = info.categories.find((c) => c.name === "visual-engineering")
+      const visual = info.categories.find(
+        (c) => c.name === "visual-engineering",
+      )
       expect(visual).toBeDefined()
       expect(visual!.userOverride).toBe("google/gemini-3-flash-preview")
       expect(visual!.userVariant).toBe("high")
     })
 
     it("attaches snapshot-backed capability diagnostics for built-in models", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       const info = getModelResolutionInfoWithOverrides({})
       const sisyphus = info.agents.find((a) => a.name === "sisyphus")
@@ -144,7 +175,8 @@ describe("model-resolution check", () => {
     })
 
     it("keeps provider-prefixed overrides for transport while capability diagnostics use pattern aliases", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       const info = getModelResolutionInfoWithOverrides({
         categories: {
@@ -152,7 +184,9 @@ describe("model-resolution check", () => {
         },
       })
 
-      const visual = info.categories.find((category) => category.name === "visual-engineering")
+      const visual = info.categories.find(
+        (category) => category.name === "visual-engineering",
+      )
       expect(visual).toBeDefined()
       expect(visual!.effectiveModel).toBe("google/gemini-3.1-pro-high")
       expect(visual!.capabilityDiagnostics).toMatchObject({
@@ -165,7 +199,8 @@ describe("model-resolution check", () => {
     })
 
     it("keeps provider-prefixed Claude overrides for transport while capability diagnostics canonicalize to bare IDs", async () => {
-      const { getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const { getModelResolutionInfoWithOverrides } =
+        await import("./model-resolution")
 
       const info = getModelResolutionInfoWithOverrides({
         agents: {
@@ -211,17 +246,30 @@ describe("model-resolution check", () => {
       expect(result.details).toBeDefined()
       expect(result.details!.length).toBeGreaterThan(0)
       // Should have Available Models and Configured Models headers
-      expect(result.details!.some((d) => d.includes("Available Models"))).toBe(true)
-      expect(result.details!.some((d) => d.includes("Configured Models"))).toBe(true)
+      expect(result.details!.some((d) => d.includes("Available Models"))).toBe(
+        true,
+      )
+      expect(result.details!.some((d) => d.includes("Configured Models"))).toBe(
+        true,
+      )
       expect(result.details!.some((d) => d.includes("Agents:"))).toBe(true)
       expect(result.details!.some((d) => d.includes("Categories:"))).toBe(true)
       // Should have legend
-      expect(result.details!.some((d) => d.includes("user override"))).toBe(true)
-      expect(result.details!.some((d) => d.includes("capabilities: snapshot-backed"))).toBe(true)
+      expect(result.details!.some((d) => d.includes("user override"))).toBe(
+        true,
+      )
+      expect(
+        result.details!.some((d) =>
+          d.includes("capabilities: snapshot-backed"),
+        ),
+      ).toBe(true)
     })
 
     it("collects warnings when configured models rely on compatibility fallback", async () => {
-      const { collectCapabilityResolutionIssues, getModelResolutionInfoWithOverrides } = await import("./model-resolution")
+      const {
+        collectCapabilityResolutionIssues,
+        getModelResolutionInfoWithOverrides,
+      } = await import("./model-resolution")
 
       const info = getModelResolutionInfoWithOverrides({
         agents: {
@@ -236,5 +284,4 @@ describe("model-resolution check", () => {
       expect(issues[0]?.description).toContain("oracle=custom/unknown-llm")
     })
   })
-
 })

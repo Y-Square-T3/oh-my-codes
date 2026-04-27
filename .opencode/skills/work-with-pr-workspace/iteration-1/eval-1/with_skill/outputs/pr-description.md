@@ -24,20 +24,20 @@ The existing concurrency system in `ConcurrencyManager` limits agents **per mode
 // .opencode/oh-my-codes.jsonc
 {
   "background_task": {
-    "maxBackgroundAgents": 10  // default: 5, min: 1
-  }
+    "maxBackgroundAgents": 10, // default: 5, min: 1
+  },
 }
 ```
 
 ## Changes
 
-| File | What |
-|------|------|
-| `src/config/schema/background-task.ts` | Add `maxBackgroundAgents` schema field |
-| `src/config/schema/background-task.test.ts` | Validation tests (valid, boundary, invalid) |
-| `src/features/background-agent/concurrency.ts` | Global counter + `canSpawnGlobally()` / `acquireGlobal()` / `releaseGlobal()` |
-| `src/features/background-agent/concurrency.test.ts` | Global limit unit tests |
-| `src/features/background-agent/manager.ts` | Enforce global limit in `launch()`, `trackTask()`; release in completion/cancel/error paths |
+| File                                                | What                                                                                        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `src/config/schema/background-task.ts`              | Add `maxBackgroundAgents` schema field                                                      |
+| `src/config/schema/background-task.test.ts`         | Validation tests (valid, boundary, invalid)                                                 |
+| `src/features/background-agent/concurrency.ts`      | Global counter + `canSpawnGlobally()` / `acquireGlobal()` / `releaseGlobal()`               |
+| `src/features/background-agent/concurrency.test.ts` | Global limit unit tests                                                                     |
+| `src/features/background-agent/manager.ts`          | Enforce global limit in `launch()`, `trackTask()`; release in completion/cancel/error paths |
 
 ## Testing
 

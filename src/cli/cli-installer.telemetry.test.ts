@@ -48,7 +48,9 @@ describe("runCliInstaller telemetry isolation", () => {
       getPostHogDistinctId: mock(() => "install-distinct-id"),
     }))
 
-    const { runCliInstaller } = await import(`./cli-installer?telemetry=${Date.now()}-${Math.random()}`)
+    const { runCliInstaller } = await import(
+      `./cli-installer?telemetry=${Date.now()}-${Math.random()}`
+    )
     const args: InstallArgs = {
       tui: false,
       claude: "no",

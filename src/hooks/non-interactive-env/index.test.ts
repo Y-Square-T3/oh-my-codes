@@ -44,7 +44,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -63,7 +63,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -79,7 +79,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       expect(output.args.command).toBe("ls -la")
@@ -93,7 +93,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "Read", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       expect(output.args.command).toBe("git status")
@@ -107,7 +107,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       expect(output.args.command).toBeUndefined()
@@ -115,28 +115,28 @@ describe("non-interactive-env hook", () => {
 
     test("#given git command already has prefix #when hook executes again #then does not duplicate prefix", async () => {
       const hook = createNonInteractiveEnvHook(mockCtx)
-      
+
       // First call: transforms the command
       const output1: { args: Record<string, unknown>; message?: string } = {
         args: { command: "git commit -m 'test'" },
       }
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output1
+        output1,
       )
-      
+
       const firstResult = output1.args.command as string
       expect(firstResult).toStartWith("export ")
-      
+
       // Second call: takes the already-prefixed command
       const output2: { args: Record<string, unknown>; message?: string } = {
         args: { command: firstResult },
       }
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "2" },
-        output2
+        output2,
       )
-      
+
       // Should be exactly the same (no double prefix)
       expect(output2.args.command).toBe(firstResult)
     })
@@ -151,7 +151,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -166,7 +166,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -185,7 +185,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       expect(output.message).toContain("vim")
@@ -200,7 +200,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       expect(output.message).toBeUndefined()
@@ -208,7 +208,6 @@ describe("non-interactive-env hook", () => {
   })
 
   describe("platform-aware shell syntax", () => {
-
     test("#given macOS platform #when git command executes #then uses unix export syntax", async () => {
       delete process.env.PSModulePath
       process.env.SHELL = "/bin/zsh"
@@ -221,7 +220,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -243,7 +242,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -264,7 +263,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -288,7 +287,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -311,7 +310,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -333,7 +332,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -355,7 +354,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -379,7 +378,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -402,7 +401,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -425,7 +424,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string
@@ -449,7 +448,7 @@ describe("non-interactive-env hook", () => {
 
       await hook["tool.execute.before"](
         { tool: "bash", sessionID: "test", callID: "1" },
-        output
+        output,
       )
 
       const cmd = output.args.command as string

@@ -1,7 +1,10 @@
 const DEFAULT_SERVER_PORT = 4096
 const MAX_PORT_ATTEMPTS = 20
 
-export async function isPortAvailable(port: number, hostname: string = "127.0.0.1"): Promise<boolean> {
+export async function isPortAvailable(
+  port: number,
+  hostname: string = "127.0.0.1",
+): Promise<boolean> {
   try {
     const server = Bun.serve({
       port,
@@ -17,7 +20,7 @@ export async function isPortAvailable(port: number, hostname: string = "127.0.0.
 
 export async function findAvailablePort(
   startPort: number = DEFAULT_SERVER_PORT,
-  hostname: string = "127.0.0.1"
+  hostname: string = "127.0.0.1",
 ): Promise<number> {
   for (let attempt = 0; attempt < MAX_PORT_ATTEMPTS; attempt++) {
     const port = startPort + attempt
@@ -25,7 +28,9 @@ export async function findAvailablePort(
       return port
     }
   }
-  throw new Error(`No available port found in range ${startPort}-${startPort + MAX_PORT_ATTEMPTS - 1}`)
+  throw new Error(
+    `No available port found in range ${startPort}-${startPort + MAX_PORT_ATTEMPTS - 1}`,
+  )
 }
 
 export interface AutoPortResult {
@@ -35,7 +40,7 @@ export interface AutoPortResult {
 
 export async function getAvailableServerPort(
   preferredPort: number = DEFAULT_SERVER_PORT,
-  hostname: string = "127.0.0.1"
+  hostname: string = "127.0.0.1",
 ): Promise<AutoPortResult> {
   if (await isPortAvailable(preferredPort, hostname)) {
     return { port: preferredPort, wasAutoSelected: false }

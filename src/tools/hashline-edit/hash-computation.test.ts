@@ -152,7 +152,10 @@ describe("streamHashLinesFrom*", () => {
     return chunks.join("\n")
   }
 
-  async function* utf8Chunks(text: string, chunkSize: number): AsyncGenerator<Uint8Array> {
+  async function* utf8Chunks(
+    text: string,
+    chunkSize: number,
+  ): AsyncGenerator<Uint8Array> {
     const encoded = new TextEncoder().encode(text)
     for (let i = 0; i < encoded.length; i += chunkSize) {
       yield encoded.slice(i, i + chunkSize)
@@ -164,7 +167,9 @@ describe("streamHashLinesFrom*", () => {
     const content = "a\nb\nc"
 
     //#when
-    const result = await collectStream(streamHashLinesFromUtf8(utf8Chunks(content, 1), { maxChunkLines: 1 }))
+    const result = await collectStream(
+      streamHashLinesFromUtf8(utf8Chunks(content, 1), { maxChunkLines: 1 }),
+    )
 
     //#then
     expect(result).toBe(formatHashLines(content))
@@ -176,7 +181,9 @@ describe("streamHashLinesFrom*", () => {
     const lines = ["x", "y", ""]
 
     //#when
-    const result = await collectStream(streamHashLinesFromLines(lines, { maxChunkLines: 2 }))
+    const result = await collectStream(
+      streamHashLinesFromLines(lines, { maxChunkLines: 2 }),
+    )
 
     //#then
     expect(result).toBe(formatHashLines(content))
@@ -187,7 +194,9 @@ describe("streamHashLinesFrom*", () => {
     const content = ""
 
     //#when
-    const result = await collectStream(streamHashLinesFromUtf8(utf8Chunks(content, 1), { maxChunkLines: 1 }))
+    const result = await collectStream(
+      streamHashLinesFromUtf8(utf8Chunks(content, 1), { maxChunkLines: 1 }),
+    )
 
     //#then
     expect(result).toBe(formatHashLines(content))
@@ -198,7 +207,9 @@ describe("streamHashLinesFrom*", () => {
     const content = ""
 
     //#when
-    const result = await collectStream(streamHashLinesFromLines([], { maxChunkLines: 1 }))
+    const result = await collectStream(
+      streamHashLinesFromLines([], { maxChunkLines: 1 }),
+    )
 
     //#then
     expect(result).toBe(formatHashLines(content))

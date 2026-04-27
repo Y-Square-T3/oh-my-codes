@@ -11,7 +11,10 @@ import { ALLOWED_EXTENSIONS } from "./constants"
  * - Workspace confinement (blocks paths outside root or via traversal)
  * - Nested project paths (e.g., parent/.sisyphus/... when ctx.directory is parent)
  */
-export function isAllowedFile(filePath: string, workspaceRoot: string): boolean {
+export function isAllowedFile(
+  filePath: string,
+  workspaceRoot: string,
+): boolean {
   // 1. Resolve to absolute path
   const resolved = resolve(workspaceRoot, filePath)
 
@@ -30,8 +33,8 @@ export function isAllowedFile(filePath: string, workspaceRoot: string): boolean 
   }
 
   // 5. Check extension matches one of ALLOWED_EXTENSIONS (case-insensitive)
-  const hasAllowedExtension = ALLOWED_EXTENSIONS.some(
-    ext => resolved.toLowerCase().endsWith(ext.toLowerCase())
+  const hasAllowedExtension = ALLOWED_EXTENSIONS.some((ext) =>
+    resolved.toLowerCase().endsWith(ext.toLowerCase()),
   )
   if (!hasAllowedExtension) {
     return false

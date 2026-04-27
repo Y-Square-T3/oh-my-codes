@@ -1,11 +1,24 @@
 import { existsSync } from "node:fs"
 import { readdir, readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { MESSAGE_STORAGE, PART_STORAGE, SESSION_STORAGE, TODO_DIR, TRANSCRIPT_DIR } from "./constants"
+import {
+  MESSAGE_STORAGE,
+  PART_STORAGE,
+  SESSION_STORAGE,
+  TODO_DIR,
+  TRANSCRIPT_DIR,
+} from "./constants"
 import { getMessageDir } from "../../shared/opencode-message-dir"
-import type { SessionInfo, SessionMessage, SessionMetadata, TodoItem } from "./types"
+import type {
+  SessionInfo,
+  SessionMessage,
+  SessionMetadata,
+  TodoItem,
+} from "./types"
 
-export async function getFileMainSessions(directory?: string): Promise<SessionMetadata[]> {
+export async function getFileMainSessions(
+  directory?: string,
+): Promise<SessionMetadata[]> {
   if (!existsSync(SESSION_STORAGE)) return []
 
   const sessions: SessionMetadata[] = []
@@ -69,7 +82,9 @@ export async function fileSessionExists(sessionID: string): Promise<boolean> {
   return getMessageDir(sessionID) !== null
 }
 
-export async function getFileSessionMessages(sessionID: string): Promise<SessionMessage[]> {
+export async function getFileSessionMessages(
+  sessionID: string,
+): Promise<SessionMessage[]> {
   const messageDir = getMessageDir(sessionID)
   if (!messageDir || !existsSync(messageDir)) return []
 
@@ -105,7 +120,9 @@ export async function getFileSessionMessages(sessionID: string): Promise<Session
   })
 }
 
-async function readParts(messageID: string): Promise<Array<{ id: string; type: string; [key: string]: unknown }>> {
+async function readParts(
+  messageID: string,
+): Promise<Array<{ id: string; type: string; [key: string]: unknown }>> {
   const partDir = join(PART_STORAGE, messageID)
   if (!existsSync(partDir)) return []
 
@@ -128,7 +145,9 @@ async function readParts(messageID: string): Promise<Array<{ id: string; type: s
   return parts.sort((a, b) => a.id.localeCompare(b.id))
 }
 
-export async function getFileSessionTodos(sessionID: string): Promise<TodoItem[]> {
+export async function getFileSessionTodos(
+  sessionID: string,
+): Promise<TodoItem[]> {
   if (!existsSync(TODO_DIR)) return []
 
   try {
@@ -157,7 +176,9 @@ export async function getFileSessionTodos(sessionID: string): Promise<TodoItem[]
   return []
 }
 
-export async function getFileSessionTranscript(sessionID: string): Promise<number> {
+export async function getFileSessionTranscript(
+  sessionID: string,
+): Promise<number> {
   if (!existsSync(TRANSCRIPT_DIR)) return 0
   const transcriptFile = join(TRANSCRIPT_DIR, `${sessionID}.jsonl`)
   if (!existsSync(transcriptFile)) return 0
@@ -170,7 +191,9 @@ export async function getFileSessionTranscript(sessionID: string): Promise<numbe
   }
 }
 
-export async function getFileSessionInfo(sessionID: string): Promise<SessionInfo | null> {
+export async function getFileSessionInfo(
+  sessionID: string,
+): Promise<SessionInfo | null> {
   const messages = await getFileSessionMessages(sessionID)
   if (messages.length === 0) return null
 

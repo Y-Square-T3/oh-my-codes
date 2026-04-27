@@ -14,15 +14,15 @@ npx oh-my-codes
 
 ## Commands
 
-| Command                       | Description                                            |
-| ----------------------------- | ------------------------------------------------------ |
-| `install`                     | Interactive setup wizard                               |
-| `doctor`                      | Environment diagnostics and health checks              |
-| `run`                         | OpenCode session runner with task completion enforcement |
-| `get-local-version`           | Display local version information and update check     |
-| `refresh-model-capabilities`  | Refresh the cached models.dev-based model capabilities |
-| `version`                     | Show version information                               |
-| `mcp oauth`                   | MCP OAuth authentication management                    |
+| Command                      | Description                                              |
+| ---------------------------- | -------------------------------------------------------- |
+| `install`                    | Interactive setup wizard                                 |
+| `doctor`                     | Environment diagnostics and health checks                |
+| `run`                        | OpenCode session runner with task completion enforcement |
+| `get-local-version`          | Display local version information and update check       |
+| `refresh-model-capabilities` | Refresh the cached models.dev-based model capabilities   |
+| `version`                    | Show version information                                 |
+| `mcp oauth`                  | MCP OAuth authentication management                      |
 
 ---
 
@@ -46,19 +46,19 @@ bunx oh-my-codes install
 
 ### Options
 
-| Option | Description |
-| ------ | ----------- |
-| `--no-tui` | Run in non-interactive mode without TUI |
-| `--claude <no\|yes\|max20>` | Claude subscription mode |
-| `--openai <no\|yes>` | OpenAI / ChatGPT subscription |
-| `--gemini <no\|yes>` | Gemini integration |
-| `--copilot <no\|yes>` | GitHub Copilot subscription |
-| `--opencode-zen <no\|yes>` | OpenCode Zen access |
-| `--zai-coding-plan <no\|yes>` | Z.ai Coding Plan subscription |
-| `--kimi-for-coding <no\|yes>` | Kimi for Coding subscription |
-| `--opencode-go <no\|yes>` | OpenCode Go subscription |
+| Option                          | Description                              |
+| ------------------------------- | ---------------------------------------- |
+| `--no-tui`                      | Run in non-interactive mode without TUI  |
+| `--claude <no\|yes\|max20>`     | Claude subscription mode                 |
+| `--openai <no\|yes>`            | OpenAI / ChatGPT subscription            |
+| `--gemini <no\|yes>`            | Gemini integration                       |
+| `--copilot <no\|yes>`           | GitHub Copilot subscription              |
+| `--opencode-zen <no\|yes>`      | OpenCode Zen access                      |
+| `--zai-coding-plan <no\|yes>`   | Z.ai Coding Plan subscription            |
+| `--kimi-for-coding <no\|yes>`   | Kimi for Coding subscription             |
+| `--opencode-go <no\|yes>`       | OpenCode Go subscription                 |
 | `--vercel-ai-gateway <no\|yes>` | Vercel AI Gateway: no, yes (default: no) |
-| `--skip-auth` | Skip authentication setup hints |
+| `--skip-auth`                   | Skip authentication setup hints          |
 
 Anonymous telemetry uses PostHog with a hashed installation identifier. Disable it with `OMO_SEND_ANONYMOUS_TELEMETRY=0` or `OMO_DISABLE_POSTHOG=1`. See [Privacy Policy](../legal/privacy-policy.md).
 
@@ -69,10 +69,12 @@ Anonymous telemetry uses PostHog with a hashed installation identifier. Disable 
 Diagnoses your environment to ensure Oh My OpenCode is functioning correctly. The current checks are grouped into system, config, tools, and models.
 
 The doctor command detects common issues including:
+
 - Legacy plugin entry references in `opencode.json` (warns when `oh-my-codes` is still used instead of `oh-my-openagent`)
 - Configuration file validity and JSONC parsing errors
 - Model resolution and fallback chain verification
 - Missing or misconfigured MCP servers
+
 ### Usage
 
 ```bash
@@ -81,20 +83,20 @@ bunx oh-my-codes doctor
 
 ### Diagnostic Categories
 
-| Category          | Check Items                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| **System**        | OpenCode binary, version (>= 1.0.150), plugin registration, legacy package name warning |
-| **Config**        | Configuration file validity, JSONC parsing, Zod schema validation                    |
-| **Tools**         | AST-Grep, LSP servers, GitHub CLI, MCP servers                                       |
-| **Models**        | Model capabilities cache, model resolution, agent/category overrides, availability   |
+| Category   | Check Items                                                                             |
+| ---------- | --------------------------------------------------------------------------------------- |
+| **System** | OpenCode binary, version (>= 1.0.150), plugin registration, legacy package name warning |
+| **Config** | Configuration file validity, JSONC parsing, Zod schema validation                       |
+| **Tools**  | AST-Grep, LSP servers, GitHub CLI, MCP servers                                          |
+| **Models** | Model capabilities cache, model resolution, agent/category overrides, availability      |
 
 ### Options
 
-| Option       | Description                               |
-| ------------ | ----------------------------------------- |
-| `--status`   | Show compact system dashboard             |
-| `--verbose`  | Show detailed diagnostic information      |
-| `--json`     | Output results in JSON format             |
+| Option      | Description                          |
+| ----------- | ------------------------------------ |
+| `--status`  | Show compact system dashboard        |
+| `--verbose` | Show detailed diagnostic information |
+| `--json`    | Output results in JSON format        |
 
 ### Example Output
 
@@ -124,6 +126,7 @@ Models
 
 Summary: 10 passed, 1 warning, 0 failed
 ```
+
 ---
 
 ## run
@@ -138,18 +141,18 @@ bunx oh-my-codes run <message>
 
 ### Options
 
-| Option                | Description                                                         |
-| --------------------- | ------------------------------------------------------------------- |
-| `-a, --agent <name>`  | Agent to use (default: from CLI/env/config, fallback: Sisyphus)     |
-| `-m, --model <provider/model>` | Model override (e.g., anthropic/claude-sonnet-4)             |
-| `-d, --directory <path>` | Working directory                                                |
-| `-p, --port <port>`  | Server port (attaches if port already in use)                       |
-| `--attach <url>`      | Attach to existing opencode server URL                              |
-| `--on-complete <command>` | Shell command to run after completion                          |
-| `--json`              | Output structured JSON result to stdout                             |
-| `--no-timestamp`      | Disable timestamp prefix in run output                              |
-| `--verbose`           | Show full event stream (default: messages/tools only)               |
-| `--session-id <id>`   | Resume existing session instead of creating new one                 |
+| Option                         | Description                                                     |
+| ------------------------------ | --------------------------------------------------------------- |
+| `-a, --agent <name>`           | Agent to use (default: from CLI/env/config, fallback: Sisyphus) |
+| `-m, --model <provider/model>` | Model override (e.g., anthropic/claude-sonnet-4)                |
+| `-d, --directory <path>`       | Working directory                                               |
+| `-p, --port <port>`            | Server port (attaches if port already in use)                   |
+| `--attach <url>`               | Attach to existing opencode server URL                          |
+| `--on-complete <command>`      | Shell command to run after completion                           |
+| `--json`                       | Output structured JSON result to stdout                         |
+| `--no-timestamp`               | Disable timestamp prefix in run output                          |
+| `--verbose`                    | Show full event stream (default: messages/tools only)           |
+| `--session-id <id>`            | Resume existing session instead of creating new one             |
 
 ---
 
@@ -165,14 +168,15 @@ bunx oh-my-codes get-local-version
 
 ### Options
 
-| Option            | Description                                    |
-| ----------------- | ---------------------------------------------- |
-| `-d, --directory` | Working directory to check config from         |
-| `--json`          | Output in JSON format for scripting            |
+| Option            | Description                            |
+| ----------------- | -------------------------------------- |
+| `-d, --directory` | Working directory to check config from |
+| `--json`          | Output in JSON format for scripting    |
 
 ### Output
 
 Shows:
+
 - Current installed version
 - Latest available version on npm
 - Whether you're up to date
@@ -216,10 +220,10 @@ bunx oh-my-codes mcp oauth status [server-name]
 
 ### Options
 
-| Option               | Description                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `--server-url <url>` | MCP server URL (required for login)                                       |
-| `--client-id <id>`   | OAuth client ID (optional if server supports Dynamic Client Registration) |
+| Option               | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `--server-url <url>` | MCP server URL (required for login)                                              |
+| `--client-id <id>`   | OAuth client ID (optional if server supports Dynamic Client Registration)        |
 | `--scopes <scopes>`  | OAuth scopes as separate variadic arguments (for example: `--scopes read write`) |
 
 ### Token Storage
@@ -240,6 +244,7 @@ The runtime loads user config as the base config, then merges project config on 
 ### Filename Compatibility
 
 Both `.jsonc` and `.json` extensions are supported. JSONC (JSON with Comments) is preferred as it allows:
+
 - Comments (both `//` and `/* */` styles)
 - Trailing commas in arrays and objects
 
@@ -308,6 +313,7 @@ The doctor warns if it finds the legacy plugin entry `oh-my-codes` in `opencode.
 jq '.plugin = (.plugin // [] | map(if . == "oh-my-codes" then "oh-my-openagent" else . end))' \
   ~/.config/opencode/opencode.json > /tmp/opencode.json && mv /tmp/opencode.json ~/.config/opencode/opencode.json
 ```
+
 ---
 
 ## refresh-model-capabilities
@@ -322,11 +328,11 @@ bunx oh-my-codes refresh-model-capabilities
 
 ### Options
 
-| Option            | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `-d, --directory` | Working directory to read oh-my-codes config from |
-| `--source-url <url>` | Override the models.dev source URL               |
-| `--json`          | Output refresh summary as JSON                      |
+| Option               | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `-d, --directory`    | Working directory to read oh-my-codes config from |
+| `--source-url <url>` | Override the models.dev source URL                |
+| `--json`             | Output refresh summary as JSON                    |
 
 ### Configuration
 
@@ -338,8 +344,8 @@ Configure automatic refresh behavior in your plugin config:
     "enabled": true,
     "auto_refresh_on_start": true,
     "refresh_timeout_ms": 5000,
-    "source_url": "https://models.dev/api.json"
-  }
+    "source_url": "https://models.dev/api.json",
+  },
 }
 ```
 
@@ -383,25 +389,25 @@ src/cli/
 Create `src/cli/doctor/checks/my-check.ts`:
 
 ```typescript
-import type { DoctorCheck } from "../types";
+import type { DoctorCheck } from "../types"
 
 export const myCheck: DoctorCheck = {
   name: "my-check",
   category: "environment",
   check: async () => {
     // Check logic
-    const isOk = await someValidation();
+    const isOk = await someValidation()
 
     return {
       status: isOk ? "pass" : "fail",
       message: isOk ? "Everything looks good" : "Something is wrong",
-    };
+    }
   },
-};
+}
 ```
 
 Register in `src/cli/doctor/checks/index.ts`:
 
 ```typescript
-export { myCheck } from "./my-check";
+export { myCheck } from "./my-check"
 ```

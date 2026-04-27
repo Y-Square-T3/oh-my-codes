@@ -23,7 +23,9 @@ function createManager(responses: TaskSnapshot[]) {
 describe("waitForTaskSessionID", () => {
   test("#given task already has a session id #when waiting #then it returns immediately", async () => {
     // given
-    const manager = createManager([{ sessionID: "ses_ready_123", status: "running" }])
+    const manager = createManager([
+      { sessionID: "ses_ready_123", status: "running" },
+    ])
 
     // when
     const sessionID = await waitForTaskSessionID(manager, "bg_ready")
@@ -67,7 +69,11 @@ describe("waitForTaskSessionID", () => {
 
   test("#given task never resolves #when waiting past timeout #then it returns undefined", async () => {
     // given
-    const manager = createManager([{ status: "running" }, { status: "running" }, { status: "running" }])
+    const manager = createManager([
+      { status: "running" },
+      { status: "running" },
+      { status: "running" },
+    ])
 
     // when
     const sessionID = await waitForTaskSessionID(manager, "bg_timeout", {
@@ -79,7 +85,11 @@ describe("waitForTaskSessionID", () => {
     expect(sessionID).toBeUndefined()
   })
 
-  test.each(["error", "cancelled", "interrupt"] satisfies BackgroundTaskStatus[])(
+  test.each([
+    "error",
+    "cancelled",
+    "interrupt",
+  ] satisfies BackgroundTaskStatus[])(
     "#given %s task state #when waiting #then it returns undefined",
     async (status: BackgroundTaskStatus) => {
       // given
@@ -90,6 +100,6 @@ describe("waitForTaskSessionID", () => {
 
       // then
       expect(sessionID).toBeUndefined()
-    }
+    },
   )
 })

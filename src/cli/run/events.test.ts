@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, it, expect, spyOn } from "bun:test"
-import { createEventState, processEvents, serializeError, type EventState } from "./events"
+import {
+  createEventState,
+  processEvents,
+  serializeError,
+  type EventState,
+} from "./events"
 import type { RunContext, EventPayload } from "./types"
 
 const createMockContext = (sessionID: string = "test-session"): RunContext => ({

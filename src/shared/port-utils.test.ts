@@ -35,14 +35,22 @@ describe("port-utils", () => {
       })
     }
 
-    async function findContiguousAvailableStart(length: number): Promise<number> {
+    async function findContiguousAvailableStart(
+      length: number,
+    ): Promise<number> {
       const probe = startRealBlocker()
       const seedPort = probe.port
       probe.stop(true)
 
-      for (let candidate = seedPort; candidate < seedPort + REAL_PORT_SEARCH_WINDOW; candidate++) {
+      for (
+        let candidate = seedPort;
+        candidate < seedPort + REAL_PORT_SEARCH_WINDOW;
+        candidate++
+      ) {
         const checks = await Promise.all(
-          Array.from({ length }, async (_, offset) => isPortAvailable(candidate + offset, HOSTNAME))
+          Array.from({ length }, async (_, offset) =>
+            isPortAvailable(candidate + offset, HOSTNAME),
+          ),
         )
         if (checks.every(Boolean)) {
           return candidate
@@ -144,36 +152,41 @@ describe("port-utils", () => {
 
     beforeEach(() => {
       blockedSockets.clear()
-      serveSpy = spyOn(Bun, "serve").mockImplementation(({ port, hostname }) => {
-        if (typeof port !== "number") {
-          throw new Error("Test expected numeric port")
-        }
-        const resolvedHostname = typeof hostname === "string" ? hostname : HOSTNAME
-        const socketKey = getSocketKey(port, resolvedHostname)
-
-        if (blockedSockets.has(socketKey)) {
-          const error = new Error(`Failed to start server. Is port ${port} in use?`) as Error & {
-            code?: string
-            syscall?: string
-            errno?: number
-            address?: string
-            port?: number
+      serveSpy = spyOn(Bun, "serve").mockImplementation(
+        ({ port, hostname }) => {
+          if (typeof port !== "number") {
+            throw new Error("Test expected numeric port")
           }
-          error.code = "EADDRINUSE"
-          error.syscall = "listen"
-          error.errno = 0
-          error.address = resolvedHostname
-          error.port = port
-          throw error
-        }
+          const resolvedHostname =
+            typeof hostname === "string" ? hostname : HOSTNAME
+          const socketKey = getSocketKey(port, resolvedHostname)
 
-        blockedSockets.add(socketKey)
-        return {
-          stop: (_force?: boolean) => {
-            blockedSockets.delete(socketKey)
-          },
-        } as { stop: (force?: boolean) => void }
-      })
+          if (blockedSockets.has(socketKey)) {
+            const error = new Error(
+              `Failed to start server. Is port ${port} in use?`,
+            ) as Error & {
+              code?: string
+              syscall?: string
+              errno?: number
+              address?: string
+              port?: number
+            }
+            error.code = "EADDRINUSE"
+            error.syscall = "listen"
+            error.errno = 0
+            error.address = resolvedHostname
+            error.port = port
+            throw error
+          }
+
+          blockedSockets.add(socketKey)
+          return {
+            stop: (_force?: boolean) => {
+              blockedSockets.delete(socketKey)
+            },
+          } as { stop: (force?: boolean) => void }
+        },
+      )
     })
 
     afterEach(() => {
@@ -242,9 +255,21 @@ describe("port-utils", () => {
         it("#given multiple ports blocked #when finding port #then skips all blocked", async () => {
           const startPort = 59993
           const blockers = [
-            Bun.serve({ port: startPort, hostname: HOSTNAME, fetch: () => new Response() }),
-            Bun.serve({ port: startPort + 1, hostname: HOSTNAME, fetch: () => new Response() }),
-            Bun.serve({ port: startPort + 2, hostname: HOSTNAME, fetch: () => new Response() }),
+            Bun.serve({
+              port: startPort,
+              hostname: HOSTNAME,
+              fetch: () => new Response(),
+            }),
+            Bun.serve({
+              port: startPort + 1,
+              hostname: HOSTNAME,
+              fetch: () => new Response(),
+            }),
+            Bun.serve({
+              port: startPort + 2,
+              hostname: HOSTNAME,
+              fetch: () => new Response(),
+            }),
           ]
 
           try {

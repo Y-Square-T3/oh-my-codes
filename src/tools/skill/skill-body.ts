@@ -1,7 +1,8 @@
 import type { LoadedSkill } from "../../features/opencode-skill-loader"
 import { extractSkillTemplate } from "../../features/opencode-skill-loader/skill-content"
 
-const SKILL_INSTRUCTION_PATTERN = /<skill-instruction>([\s\S]*?)<\/skill-instruction>/
+const SKILL_INSTRUCTION_PATTERN =
+  /<skill-instruction>([\s\S]*?)<\/skill-instruction>/
 
 function trimSkillInstruction(template: string): string {
   const templateMatch = template.match(SKILL_INSTRUCTION_PATTERN)

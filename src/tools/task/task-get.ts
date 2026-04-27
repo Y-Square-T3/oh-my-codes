@@ -11,7 +11,9 @@ function parseTaskId(id: string): string | null {
   return id
 }
 
-export function createTaskGetTool(config: Partial<OhMyCodesConfig>): ToolDefinition {
+export function createTaskGetTool(
+  config: Partial<OhMyCodesConfig>,
+): ToolDefinition {
   return tool({
     description: `Retrieve a task by ID.
 
@@ -19,7 +21,9 @@ Returns the full task object including all fields: id, subject, description, sta
 
 Returns null if the task does not exist or the file is invalid.`,
     args: {
-      id: tool.schema.string().describe("Task ID to retrieve (format: T-{uuid})"),
+      id: tool.schema
+        .string()
+        .describe("Task ID to retrieve (format: T-{uuid})"),
     },
     execute: async (args: Record<string, unknown>): Promise<string> => {
       try {
@@ -33,7 +37,7 @@ Returns null if the task does not exist or the file is invalid.`,
         const taskDir = getTaskDir(config)
         const taskPath = join(taskDir, `${taskId}.json`)
 
-         const task = readJsonSafe(taskPath, TaskObjectSchema)
+        const task = readJsonSafe(taskPath, TaskObjectSchema)
 
         return JSON.stringify({ task: task ?? null })
       } catch (error) {

@@ -10,7 +10,9 @@ interface PngChunk {
   crc: Buffer
 }
 
-const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+const PNG_SIGNATURE = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+])
 
 function readPngChunks(buffer: Buffer): PngChunk[] {
   const chunks: PngChunk[] = []
@@ -39,7 +41,12 @@ function readPngChunks(buffer: Buffer): PngChunk[] {
   return chunks
 }
 
-function parseIhdr(data: Buffer): { width: number; height: number; bitDepth: number; colorType: number } | null {
+function parseIhdr(data: Buffer): {
+  width: number
+  height: number
+  bitDepth: number
+  colorType: number
+} | null {
   if (data.length < 13) {
     return null
   }
@@ -97,7 +104,8 @@ function unfilterRow(
     const raw = currentRow[i]
     const a = i >= bytesPerPixel ? result[i - bytesPerPixel] : 0
     const b = previousRow ? previousRow[i] : 0
-    const c = i >= bytesPerPixel && previousRow ? previousRow[i - bytesPerPixel] : 0
+    const c =
+      i >= bytesPerPixel && previousRow ? previousRow[i - bytesPerPixel] : 0
 
     switch (filterType) {
       case 0:
@@ -144,8 +152,16 @@ function decodePngPixels(
     for (let y = 0; y < height; y++) {
       const rowStart = y * (rowBytes + 1)
       const filterType = decompressed[rowStart]
-      const filteredRow = decompressed.subarray(rowStart + 1, rowStart + 1 + rowBytes)
-      const unfilteredRow = unfilterRow(filterType, filteredRow, previousRow, bytesPerPixel)
+      const filteredRow = decompressed.subarray(
+        rowStart + 1,
+        rowStart + 1 + rowBytes,
+      )
+      const unfilteredRow = unfilterRow(
+        filterType,
+        filteredRow,
+        previousRow,
+        bytesPerPixel,
+      )
 
       unfilteredRow.copy(pixels, y * rowBytes)
       previousRow = unfilteredRow
@@ -168,10 +184,16 @@ function nearestNeighborResize(
   const destPixels = Buffer.alloc(dstWidth * dstHeight * bytesPerPixel)
 
   for (let dstY = 0; dstY < dstHeight; dstY++) {
-    const srcY = Math.min(Math.floor((dstY * srcHeight) / dstHeight), srcHeight - 1)
+    const srcY = Math.min(
+      Math.floor((dstY * srcHeight) / dstHeight),
+      srcHeight - 1,
+    )
 
     for (let dstX = 0; dstX < dstWidth; dstX++) {
-      const srcX = Math.min(Math.floor((dstX * srcWidth) / dstWidth), srcWidth - 1)
+      const srcX = Math.min(
+        Math.floor((dstX * srcWidth) / dstWidth),
+        srcWidth - 1,
+      )
       const srcOffset = (srcY * srcWidth + srcX) * bytesPerPixel
       const dstOffset = (dstY * dstWidth + dstX) * bytesPerPixel
 
@@ -322,7 +344,12 @@ export function resizeImageFallback(
     }
 
     const idatData = Buffer.concat(idatChunks.map((c) => c.data))
-    const sourcePixels = decodePngPixels(idatData, ihdr.width, ihdr.height, bytesPerPixel)
+    const sourcePixels = decodePngPixels(
+      idatData,
+      ihdr.width,
+      ihdr.height,
+      bytesPerPixel,
+    )
     if (!sourcePixels) {
       return null
     }

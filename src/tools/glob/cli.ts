@@ -44,7 +44,10 @@ function buildFindArgs(options: GlobOptions): string[] {
 
   args.push(".")
 
-  const maxDepth = Math.min(options.maxDepth ?? DEFAULT_MAX_DEPTH, DEFAULT_MAX_DEPTH)
+  const maxDepth = Math.min(
+    options.maxDepth ?? DEFAULT_MAX_DEPTH,
+    DEFAULT_MAX_DEPTH,
+  )
   args.push("-maxdepth", String(maxDepth))
 
   args.push("-type", "f")
@@ -58,7 +61,10 @@ function buildFindArgs(options: GlobOptions): string[] {
 }
 
 function buildPowerShellCommand(options: GlobOptions): string[] {
-  const maxDepth = Math.min(options.maxDepth ?? DEFAULT_MAX_DEPTH, DEFAULT_MAX_DEPTH)
+  const maxDepth = Math.min(
+    options.maxDepth ?? DEFAULT_MAX_DEPTH,
+    DEFAULT_MAX_DEPTH,
+  )
   const paths = options.paths?.length ? options.paths : ["."]
   const searchPath = paths[0] || "."
 
@@ -76,7 +82,8 @@ function buildPowerShellCommand(options: GlobOptions): string[] {
   // Windows PowerShell 5.1 (default on Windows). OpenCode auto-downloads ripgrep
   // which handles symlinks via --follow. This fallback rarely triggers in practice.
 
-  psCommand += " -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName"
+  psCommand +=
+    " -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName"
 
   return ["powershell", "-NoProfile", "-Command", psCommand]
 }
@@ -94,7 +101,7 @@ export { buildRgArgs, buildFindArgs, buildPowerShellCommand }
 
 export async function runRgFiles(
   options: GlobOptions,
-  resolvedCli?: ResolvedCli
+  resolvedCli?: ResolvedCli,
 ): Promise<GlobResult> {
   await rgSemaphore.acquire()
   try {
@@ -106,10 +113,13 @@ export async function runRgFiles(
 
 async function runRgFilesInternal(
   options: GlobOptions,
-  resolvedCli?: ResolvedCli
+  resolvedCli?: ResolvedCli,
 ): Promise<GlobResult> {
   const cli = resolvedCli ?? resolveGrepCli()
-  const timeout = Math.min(options.timeout ?? DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS)
+  const timeout = Math.min(
+    options.timeout ?? DEFAULT_TIMEOUT_MS,
+    DEFAULT_TIMEOUT_MS,
+  )
   const limit = Math.min(options.limit ?? DEFAULT_LIMIT, DEFAULT_LIMIT)
 
   const isRg = cli.backend === "rg"
@@ -148,7 +158,10 @@ async function runRgFilesInternal(
   })
 
   try {
-    const stdout = await Promise.race([new Response(proc.stdout).text(), timeoutPromise])
+    const stdout = await Promise.race([
+      new Response(proc.stdout).text(),
+      timeoutPromise,
+    ])
     const stderr = await new Response(proc.stderr).text()
     const exitCode = await proc.exited
 
@@ -162,7 +175,9 @@ async function runRgFilesInternal(
     }
 
     const truncatedOutput = stdout.length >= DEFAULT_MAX_OUTPUT_BYTES
-    const outputToProcess = truncatedOutput ? stdout.substring(0, DEFAULT_MAX_OUTPUT_BYTES) : stdout
+    const outputToProcess = truncatedOutput
+      ? stdout.substring(0, DEFAULT_MAX_OUTPUT_BYTES)
+      : stdout
 
     const lines = outputToProcess.trim().split("\n").filter(Boolean)
 

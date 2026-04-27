@@ -47,7 +47,9 @@ const getParentID = (properties: unknown): string | undefined => {
   if (!isRecord(info)) return undefined
 
   const { parentID } = info
-  return typeof parentID === "string" && parentID.length > 0 ? parentID : undefined
+  return typeof parentID === "string" && parentID.length > 0
+    ? parentID
+    : undefined
 }
 
 export function createAutoUpdateCheckerHook(
@@ -63,7 +65,10 @@ export function createAutoUpdateCheckerHook(
   } = options
   const isCliRunMode = process.env.OPENCODE_CLI_RUN_MODE === "true"
 
-  const getToastMessage = (isUpdate: boolean, latestVersion?: string): string => {
+  const getToastMessage = (
+    isUpdate: boolean,
+    latestVersion?: string,
+  ): string => {
     if (isSisyphusEnabled) {
       return isUpdate
         ? `Sisyphus on steroids is steering OpenCode.\nv${latestVersion} available. Restart to apply.`
@@ -100,19 +105,28 @@ export function createAutoUpdateCheckerHook(
 
           if (localDevVersion) {
             if (showStartupToast) {
-              deps.showLocalDevToast(ctx, displayVersion, isSisyphusEnabled).catch(() => {})
+              deps
+                .showLocalDevToast(ctx, displayVersion, isSisyphusEnabled)
+                .catch(() => {})
             }
             deps.log("[auto-update-checker] Local development mode")
             return
           }
 
           if (showStartupToast) {
-            deps.showVersionToast(ctx, displayVersion, getToastMessage(false)).catch(() => {})
+            deps
+              .showVersionToast(ctx, displayVersion, getToastMessage(false))
+              .catch(() => {})
           }
 
-          deps.runBackgroundUpdateCheck(ctx, autoUpdate, getToastMessage).catch((err) => {
-            deps.log("[auto-update-checker] Background update check failed:", err)
-          })
+          deps
+            .runBackgroundUpdateCheck(ctx, autoUpdate, getToastMessage)
+            .catch((err) => {
+              deps.log(
+                "[auto-update-checker] Background update check failed:",
+                err,
+              )
+            })
         })()
       })
     },

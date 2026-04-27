@@ -9,11 +9,13 @@ You are the release manager for oh-my-codes. Execute the FULL publish workflow f
 ## CRITICAL: ARGUMENT REQUIREMENT
 
 **You MUST receive a version bump type from the user.** Valid options:
+
 - `patch`: Bug fixes, backward-compatible (1.1.7 → 1.1.8)
 - `minor`: New features, backward-compatible (1.1.7 → 1.2.0)
 - `major`: Breaking changes (1.1.7 → 2.0.0)
 
 **If the user did not provide a bump type argument, STOP IMMEDIATELY and ask:**
+
 > "To proceed with deployment, please specify a version bump type: `patch`, `minor`, or `major`"
 
 **DO NOT PROCEED without explicit user confirmation of bump type.**
@@ -48,6 +50,7 @@ You are the release manager for oh-my-codes. Execute the FULL publish workflow f
 ## STEP 1: CONFIRM BUMP TYPE
 
 If bump type provided as argument, confirm with user:
+
 > "Version bump type: `{bump}`. Proceed? (y/n)"
 
 Wait for user confirmation before proceeding.
@@ -66,11 +69,13 @@ Run: `git status --porcelain`
 ## STEP 2.5: SYNC WITH REMOTE (MANDATORY)
 
 Check if there are unpushed commits:
+
 ```bash
 git log origin/master..HEAD --oneline
 ```
 
 **If there are unpushed commits, you MUST sync before triggering workflow:**
+
 ```bash
 git pull --rebase && git push
 ```
@@ -82,11 +87,13 @@ This ensures the GitHub Actions workflow runs on the latest code including all l
 ## STEP 3: TRIGGER GITHUB ACTIONS WORKFLOW
 
 Run the publish workflow:
+
 ```bash
 gh workflow run publish -f bump={bump_type}
 ```
 
 Wait 3 seconds, then get the run ID:
+
 ```bash
 gh run list --workflow=publish --limit=1 --json databaseId,status --jq '.[0]'
 ```
@@ -96,6 +103,7 @@ gh run list --workflow=publish --limit=1 --json databaseId,status --jq '.[0]'
 ## STEP 4: WAIT FOR WORKFLOW COMPLETION
 
 Poll workflow status every 30 seconds until completion:
+
 ```bash
 gh run view {run_id} --json status,conclusion --jq '{status: .status, conclusion: .conclusion}'
 ```
@@ -105,6 +113,7 @@ Status flow: `queued` → `in_progress` → `completed`
 **IMPORTANT: Use polling loop, NOT sleep commands.**
 
 If conclusion is `failure`, show error and stop:
+
 ```bash
 gh run view {run_id} --log-failed
 ```
@@ -134,6 +143,7 @@ bun run script/generate-changelog.ts
 After running the preview, present the output to the user and say:
 
 > **The following content is ALREADY included in the release automatically:**
+>
 > - Commit changelog (grouped by feat/fix/refactor)
 > - Contributor thank-you messages (for non-team contributors)
 >
@@ -151,11 +161,11 @@ Wait for the user to acknowledge before proceeding.
 
 <decision-gate>
 
-| Release Type | Action |
-|-------------|--------|
-| **patch** | ASK the user: "Would you like me to draft an enhanced summary highlighting the key bug fixes / changes? Or is the auto-generated changelog sufficient?" If user declines → skip to Step 8. If user accepts → draft a concise bug-fix / change summary below. |
-| **minor** | MANDATORY. Draft a concise feature summary. Do NOT proceed without one. |
-| **major** | MANDATORY. Draft a full release narrative with migration notes if applicable. Do NOT proceed without one. |
+| Release Type | Action                                                                                                                                                                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **patch**    | ASK the user: "Would you like me to draft an enhanced summary highlighting the key bug fixes / changes? Or is the auto-generated changelog sufficient?" If user declines → skip to Step 8. If user accepts → draft a concise bug-fix / change summary below. |
+| **minor**    | MANDATORY. Draft a concise feature summary. Do NOT proceed without one.                                                                                                                                                                                      |
+| **major**    | MANDATORY. Draft a full release narrative with migration notes if applicable. Do NOT proceed without one.                                                                                                                                                    |
 
 </decision-gate>
 
@@ -241,6 +251,7 @@ The final release note structure:
 │  - Contributor thank-you messages   │
 └─────────────────────────────────────┘
 ```
+
 </architecture>
 
 <zero-content-loss-policy>
@@ -276,6 +287,7 @@ gh release view "v${NEW_VERSION}" --json url --jq '.url'
 ## STEP 8: VERIFY NPM PUBLICATION
 
 Poll npm registry until the new version appears:
+
 ```bash
 npm view oh-my-codes version
 ```
@@ -289,11 +301,13 @@ Compare with expected version. If not matching after 2 minutes, warn user about 
 The main publish workflow triggers a separate `publish-platform` workflow for platform-specific binaries.
 
 1. Find the publish-platform workflow run triggered by the main workflow:
+
 ```bash
 gh run list --workflow=publish-platform --limit=1 --json databaseId,status,conclusion --jq '.[0]'
 ```
 
 2. Poll workflow status every 30 seconds until completion:
+
 ```bash
 gh run view {platform_run_id} --json status,conclusion --jq '{status: .status, conclusion: .conclusion}'
 ```
@@ -301,6 +315,7 @@ gh run view {platform_run_id} --json status,conclusion --jq '{status: .status, c
 **IMPORTANT: Use polling loop, NOT sleep commands.**
 
 If conclusion is `failure`, show error logs:
+
 ```bash
 gh run view {platform_run_id} --log-failed
 ```
@@ -338,6 +353,7 @@ If any platform package version doesn't match, warn the user and suggest checkin
 ## STEP 9: FINAL CONFIRMATION
 
 Report success to user with:
+
 - New version number
 - GitHub release URL: https://github.com/code-yeongyu/oh-my-codes/releases/tag/v{version}
 - npm package URL: https://www.npmjs.com/package/oh-my-codes

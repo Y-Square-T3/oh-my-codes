@@ -6,13 +6,21 @@ import { status } from "./status"
 export function createMcpOAuthCommand(): Command {
   const mcp = new Command("mcp").description("MCP server management")
 
-  const oauth = new Command("oauth").description("OAuth token management for MCP servers")
+  const oauth = new Command("oauth").description(
+    "OAuth token management for MCP servers",
+  )
 
   oauth
     .command("login <server-name>")
     .description("Authenticate with an MCP server using OAuth")
-    .option("--server-url <url>", "OAuth server URL (required if not in config)")
-    .option("--client-id <id>", "OAuth client ID (optional, uses DCR if not provided)")
+    .option(
+      "--server-url <url>",
+      "OAuth server URL (required if not in config)",
+    )
+    .option(
+      "--client-id <id>",
+      "OAuth client ID (optional, uses DCR if not provided)",
+    )
     .option("--scopes <scopes...>", "OAuth scopes to request")
     .action(async (serverName: string, options) => {
       const exitCode = await login(serverName, options)
@@ -22,7 +30,10 @@ export function createMcpOAuthCommand(): Command {
   oauth
     .command("logout <server-name>")
     .description("Remove stored OAuth tokens for an MCP server")
-    .option("--server-url <url>", "OAuth server URL (use if server name differs from URL)")
+    .option(
+      "--server-url <url>",
+      "OAuth server URL (use if server name differs from URL)",
+    )
     .action(async (serverName: string, options) => {
       const exitCode = await logout(serverName, options)
       process.exit(exitCode)

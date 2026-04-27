@@ -1,4 +1,7 @@
-export function touchSession(sessionLastAccess: Map<string, number>, sessionID: string): void {
+export function touchSession(
+  sessionLastAccess: Map<string, number>,
+  sessionID: string,
+): void {
   sessionLastAccess.set(sessionID, Date.now())
 }
 
@@ -24,7 +27,10 @@ export function evictLeastRecentlyUsedSession(
   sessionLastAccess.delete(oldestSessionID)
 }
 
-export function trimSessionReadSet(readSet: Set<string>, maxTrackedPathsPerSession: number): void {
+export function trimSessionReadSet(
+  readSet: Set<string>,
+  maxTrackedPathsPerSession: number,
+): void {
   while (readSet.size > maxTrackedPathsPerSession) {
     const oldestPath = readSet.values().next().value
     if (!oldestPath) {

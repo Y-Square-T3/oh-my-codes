@@ -20,7 +20,10 @@ type ModuleSnapshot = {
 type ModuleMockLifecycleOptions = {
   getCallerUrl?: () => string
   resolveSpecifier?: (specifier: string, callerUrl: string) => string
-  loadOriginalModule?: (specifier: string, callerUrl: string) => ModuleLoadResult
+  loadOriginalModule?: (
+    specifier: string,
+    callerUrl: string,
+  ) => ModuleLoadResult
 }
 
 function toError(error: unknown): Error {
@@ -87,7 +90,10 @@ function defaultResolveSpecifier(specifier: string, callerUrl: string): string {
   }
 }
 
-function defaultLoadOriginalModule(specifier: string, callerUrl: string): ModuleLoadResult {
+function defaultLoadOriginalModule(
+  specifier: string,
+  callerUrl: string,
+): ModuleLoadResult {
   try {
     const require = createRequire(callerUrl)
     return { ok: true, value: require(specifier) }
@@ -105,7 +111,8 @@ export function installModuleMockLifecycle(
   const delegateRestore = mockApi.restore.bind(mockApi)
   const getCallerUrl = options.getCallerUrl ?? defaultGetCallerUrl
   const resolveSpecifier = options.resolveSpecifier ?? defaultResolveSpecifier
-  const loadOriginalModule = options.loadOriginalModule ?? defaultLoadOriginalModule
+  const loadOriginalModule =
+    options.loadOriginalModule ?? defaultLoadOriginalModule
 
   function restoreModuleMocks(): void {
     for (const snapshot of snapshots.values()) {

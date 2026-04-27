@@ -12,15 +12,18 @@ export function formatSearchResult(result: SgResult): string {
   const lines: string[] = []
 
   if (result.truncated) {
-    const reason = result.truncatedReason === "max_matches"
-      ? `showing first ${result.matches.length} of ${result.totalMatches}`
-      : result.truncatedReason === "max_output_bytes"
-      ? "output exceeded 1MB limit"
-      : "search timed out"
+    const reason =
+      result.truncatedReason === "max_matches"
+        ? `showing first ${result.matches.length} of ${result.totalMatches}`
+        : result.truncatedReason === "max_output_bytes"
+          ? "output exceeded 1MB limit"
+          : "search timed out"
     lines.push(`[TRUNCATED] Results truncated (${reason})\n`)
   }
 
-  lines.push(`Found ${result.matches.length} match(es)${result.truncated ? ` (truncated from ${result.totalMatches})` : ""}:\n`)
+  lines.push(
+    `Found ${result.matches.length} match(es)${result.truncated ? ` (truncated from ${result.totalMatches})` : ""}:\n`,
+  )
 
   for (const match of result.matches) {
     const loc = `${match.file}:${match.range.start.line + 1}:${match.range.start.column + 1}`
@@ -32,7 +35,10 @@ export function formatSearchResult(result: SgResult): string {
   return lines.join("\n")
 }
 
-export function formatReplaceResult(result: SgResult, isDryRun: boolean): string {
+export function formatReplaceResult(
+  result: SgResult,
+  isDryRun: boolean,
+): string {
   if (result.error) {
     return `Error: ${result.error}`
   }
@@ -45,11 +51,12 @@ export function formatReplaceResult(result: SgResult, isDryRun: boolean): string
   const lines: string[] = []
 
   if (result.truncated) {
-    const reason = result.truncatedReason === "max_matches"
-      ? `showing first ${result.matches.length} of ${result.totalMatches}`
-      : result.truncatedReason === "max_output_bytes"
-      ? "output exceeded 1MB limit"
-      : "search timed out"
+    const reason =
+      result.truncatedReason === "max_matches"
+        ? `showing first ${result.matches.length} of ${result.totalMatches}`
+        : result.truncatedReason === "max_output_bytes"
+          ? "output exceeded 1MB limit"
+          : "search timed out"
     lines.push(`[TRUNCATED] Results truncated (${reason})\n`)
   }
 
@@ -69,7 +76,10 @@ export function formatReplaceResult(result: SgResult, isDryRun: boolean): string
   return lines.join("\n")
 }
 
-export function formatAnalyzeResult(results: AnalyzeResult[], extractedMetaVars: boolean): string {
+export function formatAnalyzeResult(
+  results: AnalyzeResult[],
+  extractedMetaVars: boolean,
+): string {
   if (results.length === 0) {
     return "No matches found"
   }
@@ -93,7 +103,11 @@ export function formatAnalyzeResult(results: AnalyzeResult[], extractedMetaVars:
   return lines.join("\n")
 }
 
-export function formatTransformResult(_original: string, transformed: string, editCount: number): string {
+export function formatTransformResult(
+  _original: string,
+  transformed: string,
+  editCount: number,
+): string {
   if (editCount === 0) {
     return "No matches found to transform"
   }

@@ -39,9 +39,13 @@ describe("start-work hook", () => {
 You are starting a Sisyphus work session.
 </command-instruction>
 
-<session-context>${sessionContext}</session-context>${userRequest ? `
+<session-context>${sessionContext}</session-context>${
+      userRequest
+        ? `
 
-<user-request>${userRequest}</user-request>` : ""}`
+<user-request>${userRequest}</user-request>`
+        : ""
+    }`
   }
 
   beforeEach(() => {
@@ -97,10 +101,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - output should be unchanged
       expect(output.parts[0].text).toBe("Just a regular message")
@@ -110,17 +111,21 @@ You are starting a Sisyphus work session.
       // given
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
-        parts: [{ type: "text", text: "<session-context>Some context here</session-context>" }],
+        parts: [
+          {
+            type: "text",
+            text: "<session-context>Some context here</session-context>",
+          },
+        ],
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then
-      expect(output.parts[0].text).toBe("<session-context>Some context here</session-context>")
+      expect(output.parts[0].text).toBe(
+        "<session-context>Some context here</session-context>",
+      )
       expect(readBoulderState(testDir)).toBeNull()
     })
 
@@ -131,16 +136,15 @@ You are starting a Sisyphus work session.
         parts: [
           {
             type: "text",
-            text: createStartWorkPrompt({ sessionContext: "Some context here" }),
+            text: createStartWorkPrompt({
+              sessionContext: "Some context here",
+            }),
           },
         ],
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - output should be modified with context info
       expect(output.parts[0].text).toContain("---")
@@ -165,10 +169,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should show resuming status
       expect(output.parts[0].text).toContain("RESUMING")
@@ -182,16 +183,15 @@ You are starting a Sisyphus work session.
         parts: [
           {
             type: "text",
-            text: createStartWorkPrompt({ sessionContext: "Session: $SESSION_ID" }),
+            text: createStartWorkPrompt({
+              sessionContext: "Session: $SESSION_ID",
+            }),
           },
         ],
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "ses-abc123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "ses-abc123" }, output)
 
       // then - placeholder should be replaced
       expect(output.parts[0].text).toContain("ses-abc123")
@@ -211,10 +211,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - placeholder should be replaced with ISO timestamp
       expect(output.parts[0].text).not.toContain("$TIMESTAMP")
@@ -240,10 +237,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should auto-select the incomplete plan, not ask user
       expect(output.parts[0].text).toContain("Auto-Selected Plan")
@@ -268,10 +262,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should use system-reminder tag format
       expect(output.parts[0].text).toContain("<system-reminder>")
@@ -296,14 +287,13 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should prompt agent to ask user, not ask directly
       expect(output.parts[0].text).toContain("Ask the user")
-      expect(output.parts[0].text).not.toContain("Which plan would you like to work on?")
+      expect(output.parts[0].text).not.toContain(
+        "Which plan would you like to work on?",
+      )
     })
 
     test("should select explicitly specified plan name from user-request, ignoring existing boulder state", async () => {
@@ -339,10 +329,7 @@ You are starting a Sisyphus work session.
       }
 
       // when - user explicitly specifies new-plan
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should select new-plan, NOT resume old-plan
       expect(output.parts[0].text).toContain("new-plan")
@@ -363,16 +350,15 @@ You are starting a Sisyphus work session.
         parts: [
           {
             type: "text",
-            text: createStartWorkPrompt({ userRequest: "my-feature-plan ultrawork" }),
+            text: createStartWorkPrompt({
+              userRequest: "my-feature-plan ultrawork",
+            }),
           },
         ],
       }
 
       // when - user specifies plan with ultrawork keyword
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should find plan without ultrawork suffix
       expect(output.parts[0].text).toContain("my-feature-plan")
@@ -398,10 +384,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should find plan without ulw suffix
       expect(output.parts[0].text).toContain("api-refactor")
@@ -421,19 +404,20 @@ You are starting a Sisyphus work session.
         parts: [
           {
             type: "text",
-            text: createStartWorkPrompt({ userRequest: "feature-implementation" }),
+            text: createStartWorkPrompt({
+              userRequest: "feature-implementation",
+            }),
           },
         ],
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then - should find plan by partial match
-      expect(output.parts[0].text).toContain("2026-01-15-feature-implementation")
+      expect(output.parts[0].text).toContain(
+        "2026-01-15-feature-implementation",
+      )
       expect(output.parts[0].text).toContain("Auto-Selected Plan")
     })
 
@@ -450,16 +434,13 @@ You are starting a Sisyphus work session.
         parts: [
           {
             type: "text",
-            text: createStartWorkPrompt({ userRequest: "\"my feature plan\"" }),
+            text: createStartWorkPrompt({ userRequest: '"my feature plan"' }),
           },
         ],
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-123" },
-        output,
-      )
+      await hook["chat.message"]({ sessionID: "session-123" }, output)
 
       // then
       expect(output.parts[0].text).toContain("my-feature-plan")
@@ -485,10 +466,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-korean-plan" },
-        output,
-      )
+      await hook["chat.message"]({ sessionID: "session-korean-plan" }, output)
 
       // then
       expect(output.parts[0].text).toContain("결제-플로우")
@@ -514,10 +492,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-japanese-plan" },
-        output,
-      )
+      await hook["chat.message"]({ sessionID: "session-japanese-plan" }, output)
 
       // then
       expect(output.parts[0].text).toContain("支払い-フロー")
@@ -543,10 +518,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-ascii-plan" },
-        output,
-      )
+      await hook["chat.message"]({ sessionID: "session-ascii-plan" }, output)
 
       // then
       expect(output.parts[0].text).toContain("checkout-flow")
@@ -572,10 +544,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "session-mixed-plan" },
-        output,
-      )
+      await hook["chat.message"]({ sessionID: "session-mixed-plan" }, output)
 
       // then
       expect(output.parts[0].text).toContain("v2-결제-flow")
@@ -587,7 +556,7 @@ You are starting a Sisyphus work session.
     test("should update session agent to Atlas when start-work command is triggered", async () => {
       // given
       const updateSpy = spyOn(sessionState, "updateSessionAgent")
-      
+
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
         parts: [{ type: "text", text: createStartWorkPrompt() }],
@@ -596,11 +565,14 @@ You are starting a Sisyphus work session.
       // when
       await hook["chat.message"](
         { sessionID: "ses-prometheus-to-sisyphus" },
-        output
+        output,
       )
 
       // then
-      expect(updateSpy).toHaveBeenCalledWith("ses-prometheus-to-sisyphus", "atlas")
+      expect(updateSpy).toHaveBeenCalledWith(
+        "ses-prometheus-to-sisyphus",
+        "atlas",
+      )
       updateSpy.mockRestore()
     })
 
@@ -615,7 +587,7 @@ You are starting a Sisyphus work session.
       // when
       await hook["chat.message"](
         { sessionID: "ses-prometheus-to-atlas" },
-        output
+        output,
       )
 
       // then - config key, not display name (matches no-sisyphus-gpt / boulder-continuation-injector convention)
@@ -633,14 +605,13 @@ You are starting a Sisyphus work session.
         parts: [{ type: "text", text: createStartWorkPrompt() }],
       }
 
-      await hook["chat.message"](
-        { sessionID: "ses-sisyphus-to-atlas" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "ses-sisyphus-to-atlas" }, output)
 
       // atlas is registered in beforeEach, so it must be selected
       expect(output.message.agent).toBe("atlas")
-      expect(sessionState.getSessionAgent("ses-sisyphus-to-atlas")).toBe("atlas")
+      expect(sessionState.getSessionAgent("ses-sisyphus-to-atlas")).toBe(
+        "atlas",
+      )
     })
 
     test("should keep the current agent when Atlas is unavailable", async () => {
@@ -658,12 +629,14 @@ You are starting a Sisyphus work session.
       // when
       await hook["chat.message"](
         { sessionID: "ses-prometheus-to-sisyphus" },
-        output
+        output,
       )
 
       // then
       expect(output.message.agent).toBe("sisyphus")
-      expect(sessionState.getSessionAgent("ses-prometheus-to-sisyphus")).toBe("sisyphus")
+      expect(sessionState.getSessionAgent("ses-prometheus-to-sisyphus")).toBe(
+        "sisyphus",
+      )
     })
 
     test("should fall back to Sisyphus instead of keeping Prometheus when Atlas is unavailable", async () => {
@@ -686,12 +659,14 @@ You are starting a Sisyphus work session.
       // when
       await hook["chat.message"](
         { sessionID: "ses-prometheus-to-worker" },
-        output
+        output,
       )
 
       // then
       expect(output.message.agent).toBe("sisyphus")
-      expect(sessionState.getSessionAgent("ses-prometheus-to-worker")).toBe("sisyphus")
+      expect(sessionState.getSessionAgent("ses-prometheus-to-worker")).toBe(
+        "sisyphus",
+      )
       expect(readBoulderState(testDir)?.agent).toBe("sisyphus")
     })
 
@@ -719,10 +694,7 @@ You are starting a Sisyphus work session.
       }
 
       // when
-      await hook["chat.message"](
-        { sessionID: "ses-prometheus-resume" },
-        output
-      )
+      await hook["chat.message"]({ sessionID: "ses-prometheus-resume" }, output)
 
       // then
       expect(output.message.agent).toBe("sisyphus")
@@ -733,11 +705,17 @@ You are starting a Sisyphus work session.
       // given
       const plansDir = join(testDir, ".sisyphus", "plans")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "atlas-plan.md"), "# Plan\n- [ ] Task 1\n- [ ] Task 2")
+      writeFileSync(
+        join(plansDir, "atlas-plan.md"),
+        "# Plan\n- [ ] Task 1\n- [ ] Task 2",
+      )
 
-      const promptAsyncMock = spyOn({
-        promptAsync: async (_request: unknown) => undefined,
-      }, "promptAsync")
+      const promptAsyncMock = spyOn(
+        {
+          promptAsync: async (_request: unknown) => undefined,
+        },
+        "promptAsync",
+      )
       const ctx = {
         directory: testDir,
         client: {
@@ -752,12 +730,22 @@ You are starting a Sisyphus work session.
       const atlasHook = createAtlasHook(ctx)
       const output = {
         message: {} as Record<string, unknown>,
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "atlas-plan" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({ userRequest: "atlas-plan" }),
+          },
+        ],
       }
 
       // when
       await startWorkHook["chat.message"]({ sessionID: "session-123" }, output)
-      await atlasHook.handler({ event: { type: "session.idle", properties: { sessionID: "session-123" } } })
+      await atlasHook.handler({
+        event: {
+          type: "session.idle",
+          properties: { sessionID: "session-123" },
+        },
+      })
 
       // then
       expect(output.message.agent).toBe("atlas")
@@ -771,31 +759,52 @@ You are starting a Sisyphus work session.
       // given
       const plansDir = join(testDir, ".sisyphus", "plans")
       mkdirSync(plansDir, { recursive: true })
-      writeFileSync(join(plansDir, "atlas-plan.md"), "# Plan\n- [ ] Task 1\n- [ ] Task 2")
+      writeFileSync(
+        join(plansDir, "atlas-plan.md"),
+        "# Plan\n- [ ] Task 1\n- [ ] Task 2",
+      )
 
-      const capturedTimers = new Map<number, { callback: Function; cleared: boolean }>()
+      const capturedTimers = new Map<
+        number,
+        { callback: Function; cleared: boolean }
+      >()
       let nextTimerId = 4000
       let backgroundRunning = true
       const originalSetTimeout = globalThis.setTimeout
       const originalClearTimeout = globalThis.clearTimeout
       const originalDateNow = Date.now
       let fakeNow = 10000
-      const promptAsyncMock = spyOn({
-        promptAsync: async (_request: unknown) => undefined,
-      }, "promptAsync")
+      const promptAsyncMock = spyOn(
+        {
+          promptAsync: async (_request: unknown) => undefined,
+        },
+        "promptAsync",
+      )
 
-      globalThis.setTimeout = ((callback: Function, delay?: number, ...args: unknown[]) => {
+      globalThis.setTimeout = ((
+        callback: Function,
+        delay?: number,
+        ...args: unknown[]
+      ) => {
         const normalized = typeof delay === "number" ? delay : 0
         if (normalized >= 5000) {
           const id = nextTimerId++
-          capturedTimers.set(id, { callback: () => callback(...args), cleared: false })
+          capturedTimers.set(id, {
+            callback: () => callback(...args),
+            cleared: false,
+          })
           return id as unknown as ReturnType<typeof setTimeout>
         }
 
-        return originalSetTimeout(callback as Parameters<typeof originalSetTimeout>[0], delay)
+        return originalSetTimeout(
+          callback as Parameters<typeof originalSetTimeout>[0],
+          delay,
+        )
       }) as unknown as typeof setTimeout
 
-      globalThis.clearTimeout = ((id?: number | ReturnType<typeof setTimeout>) => {
+      globalThis.clearTimeout = ((
+        id?: number | ReturnType<typeof setTimeout>,
+      ) => {
         if (typeof id === "number" && capturedTimers.has(id)) {
           capturedTimers.get(id)!.cleared = true
           capturedTimers.delete(id)
@@ -821,12 +830,20 @@ You are starting a Sisyphus work session.
       const atlasHook = createAtlasHook(ctx, {
         directory: testDir,
         backgroundManager: {
-          getTasksByParentSession: () => backgroundRunning ? [{ status: "running" }] : [],
-        } as unknown as NonNullable<Parameters<typeof createAtlasHook>[1]>["backgroundManager"],
+          getTasksByParentSession: () =>
+            backgroundRunning ? [{ status: "running" }] : [],
+        } as unknown as NonNullable<
+          Parameters<typeof createAtlasHook>[1]
+        >["backgroundManager"],
       })
       const output = {
         message: {} as Record<string, unknown>,
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "atlas-plan" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({ userRequest: "atlas-plan" }),
+          },
+        ],
       }
 
       async function firePendingTimers(): Promise<void> {
@@ -841,8 +858,16 @@ You are starting a Sisyphus work session.
 
       try {
         // when
-        await startWorkHook["chat.message"]({ sessionID: "session-123" }, output)
-        await atlasHook.handler({ event: { type: "session.idle", properties: { sessionID: "session-123" } } })
+        await startWorkHook["chat.message"](
+          { sessionID: "session-123" },
+          output,
+        )
+        await atlasHook.handler({
+          event: {
+            type: "session.idle",
+            properties: { sessionID: "session-123" },
+          },
+        })
         expect(promptAsyncMock).toHaveBeenCalledTimes(0)
         expect(capturedTimers.size).toBe(1)
 
@@ -867,7 +892,9 @@ You are starting a Sisyphus work session.
     let detectSpy: ReturnType<typeof spyOn>
 
     beforeEach(() => {
-      detectSpy = spyOn(worktreeDetector, "detectWorktreePath").mockReturnValue(null)
+      detectSpy = spyOn(worktreeDetector, "detectWorktreePath").mockReturnValue(
+        null,
+      )
     })
 
     afterEach(() => {
@@ -891,7 +918,9 @@ You are starting a Sisyphus work session.
       // then - no worktree instructions should appear
       expect(output.parts[0].text).not.toContain("Worktree Setup Required")
       expect(output.parts[0].text).not.toContain("Worktree Active")
-      expect(output.parts[0].text).not.toContain("git worktree list --porcelain")
+      expect(output.parts[0].text).not.toContain(
+        "git worktree list --porcelain",
+      )
     })
 
     test("should inject worktree path when --worktree flag is valid", async () => {
@@ -903,7 +932,14 @@ You are starting a Sisyphus work session.
 
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "--worktree /validated/worktree" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({
+              userRequest: "--worktree /validated/worktree",
+            }),
+          },
+        ],
       }
 
       // when
@@ -925,7 +961,14 @@ You are starting a Sisyphus work session.
 
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "--worktree /valid/wt" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({
+              userRequest: "--worktree /valid/wt",
+            }),
+          },
+        ],
       }
 
       // when
@@ -945,7 +988,14 @@ You are starting a Sisyphus work session.
 
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "--worktree /nonexistent/wt" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({
+              userRequest: "--worktree /nonexistent/wt",
+            }),
+          },
+        ],
       }
 
       // when
@@ -974,7 +1024,12 @@ You are starting a Sisyphus work session.
 
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
-        parts: [{ type: "text", text: createStartWorkPrompt({ userRequest: "--worktree /new/wt" }) }],
+        parts: [
+          {
+            type: "text",
+            text: createStartWorkPrompt({ userRequest: "--worktree /new/wt" }),
+          },
+        ],
       }
 
       // when

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test"
 import { createKeywordDetectorHook } from "./index"
-import { _resetForTesting, setMainSession } from "../../features/claude-code-session-state"
+import {
+  _resetForTesting,
+  setMainSession,
+} from "../../features/claude-code-session-state"
 
 function createMockPluginInput(toastMessages: string[]) {
   return {
@@ -27,11 +30,16 @@ describe("keyword-detector ultrawork runtime variant gating", () => {
     }
 
     // when
-    await hook["chat.message"]({ sessionID: "main-session", variant: "max" }, output)
+    await hook["chat.message"](
+      { sessionID: "main-session", variant: "max" },
+      output,
+    )
 
     // then
     expect(output.message.variant).toBe("max")
-    expect(toastMessages).toEqual(["Maximum precision engaged. All agents at your disposal."])
+    expect(toastMessages).toEqual([
+      "Maximum precision engaged. All agents at your disposal.",
+    ])
     _resetForTesting()
   })
 
@@ -47,11 +55,16 @@ describe("keyword-detector ultrawork runtime variant gating", () => {
     }
 
     // when
-    await hook["chat.message"]({ sessionID: "main-session", variant: "medium" }, output)
+    await hook["chat.message"](
+      { sessionID: "main-session", variant: "medium" },
+      output,
+    )
 
     // then
     expect(output.message.variant).toBe("medium")
-    expect(toastMessages).toEqual(["Runtime variant preserved. All agents at your disposal."])
+    expect(toastMessages).toEqual([
+      "Runtime variant preserved. All agents at your disposal.",
+    ])
     _resetForTesting()
   })
 })

@@ -32,59 +32,63 @@ export type BackgroundTaskConfig = z.infer<typeof BackgroundTaskConfigSchema>
 Append after the existing `syncPollTimeoutMs` describe block (before the closing `})`):
 
 ```typescript
-  describe("maxBackgroundAgents", () => {
-    describe("#given valid maxBackgroundAgents (10)", () => {
-      test("#when parsed #then returns correct value", () => {
-        const result = BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 10 })
-
-        expect(result.maxBackgroundAgents).toBe(10)
+describe("maxBackgroundAgents", () => {
+  describe("#given valid maxBackgroundAgents (10)", () => {
+    test("#when parsed #then returns correct value", () => {
+      const result = BackgroundTaskConfigSchema.parse({
+        maxBackgroundAgents: 10,
       })
-    })
 
-    describe("#given maxBackgroundAgents of 1 (minimum)", () => {
-      test("#when parsed #then returns correct value", () => {
-        const result = BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 1 })
-
-        expect(result.maxBackgroundAgents).toBe(1)
-      })
-    })
-
-    describe("#given maxBackgroundAgents below minimum (0)", () => {
-      test("#when parsed #then throws ZodError", () => {
-        let thrownError: unknown
-
-        try {
-          BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 0 })
-        } catch (error) {
-          thrownError = error
-        }
-
-        expect(thrownError).toBeInstanceOf(ZodError)
-      })
-    })
-
-    describe("#given maxBackgroundAgents not provided", () => {
-      test("#when parsed #then field is undefined", () => {
-        const result = BackgroundTaskConfigSchema.parse({})
-
-        expect(result.maxBackgroundAgents).toBeUndefined()
-      })
-    })
-
-    describe('#given maxBackgroundAgents is non-integer (2.5)', () => {
-      test("#when parsed #then throws ZodError", () => {
-        let thrownError: unknown
-
-        try {
-          BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 2.5 })
-        } catch (error) {
-          thrownError = error
-        }
-
-        expect(thrownError).toBeInstanceOf(ZodError)
-      })
+      expect(result.maxBackgroundAgents).toBe(10)
     })
   })
+
+  describe("#given maxBackgroundAgents of 1 (minimum)", () => {
+    test("#when parsed #then returns correct value", () => {
+      const result = BackgroundTaskConfigSchema.parse({
+        maxBackgroundAgents: 1,
+      })
+
+      expect(result.maxBackgroundAgents).toBe(1)
+    })
+  })
+
+  describe("#given maxBackgroundAgents below minimum (0)", () => {
+    test("#when parsed #then throws ZodError", () => {
+      let thrownError: unknown
+
+      try {
+        BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 0 })
+      } catch (error) {
+        thrownError = error
+      }
+
+      expect(thrownError).toBeInstanceOf(ZodError)
+    })
+  })
+
+  describe("#given maxBackgroundAgents not provided", () => {
+    test("#when parsed #then field is undefined", () => {
+      const result = BackgroundTaskConfigSchema.parse({})
+
+      expect(result.maxBackgroundAgents).toBeUndefined()
+    })
+  })
+
+  describe("#given maxBackgroundAgents is non-integer (2.5)", () => {
+    test("#when parsed #then throws ZodError", () => {
+      let thrownError: unknown
+
+      try {
+        BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 2.5 })
+      } catch (error) {
+        thrownError = error
+      }
+
+      expect(thrownError).toBeInstanceOf(ZodError)
+    })
+  })
+})
 ```
 
 **Rationale:** Follows exact test pattern from `maxDepth`, `maxDescendants`, and `syncPollTimeoutMs` tests. Uses `#given`/`#when`/`#then` nested describe style. Tests valid, minimum boundary, below minimum, not provided, and non-integer cases.
@@ -178,6 +182,7 @@ export class ConcurrencyManager {
 ```
 
 **Key changes:**
+
 - Add `DEFAULT_MAX_BACKGROUND_AGENTS = 5` constant
 - Add `globalRunningCount` private field
 - Add `getMaxBackgroundAgents()`, `getGlobalRunningCount()`, `canSpawnGlobally()`, `acquireGlobal()`, `releaseGlobal()` methods
@@ -400,22 +405,22 @@ describe("ConcurrencyManager global background agent limit", () => {
 ### In `handleEvent()` session.error handler — release global slot:
 
 ```typescript
-    if (event.type === "session.error") {
-      // ... existing error handling ...
+if (event.type === "session.error") {
+  // ... existing error handling ...
 
-      task.status = "error"
-      // ...
+  task.status = "error"
+  // ...
 
-      if (task.concurrencyKey) {
-        this.concurrencyManager.release(task.concurrencyKey)
-        task.concurrencyKey = undefined
-      }
+  if (task.concurrencyKey) {
+    this.concurrencyManager.release(task.concurrencyKey)
+    task.concurrencyKey = undefined
+  }
 
-      // Release global slot
-      this.concurrencyManager.releaseGlobal()
+  // Release global slot
+  this.concurrencyManager.releaseGlobal()
 
-      // ... rest unchanged ...
-    }
+  // ... rest unchanged ...
+}
 ```
 
 ### In prompt error handler inside `startTask()` — release global slot:
@@ -443,12 +448,12 @@ describe("ConcurrencyManager global background agent limit", () => {
 
 ## Summary of Changes
 
-| File | Lines Added | Lines Modified |
-|------|-------------|----------------|
-| `src/config/schema/background-task.ts` | 2 | 0 |
-| `src/config/schema/background-task.test.ts` | ~50 | 0 |
-| `src/features/background-agent/concurrency.ts` | ~25 | 1 (`clear()`) |
-| `src/features/background-agent/concurrency.test.ts` | ~70 | 0 |
-| `src/features/background-agent/manager.ts` | ~20 | 0 |
+| File                                                | Lines Added | Lines Modified |
+| --------------------------------------------------- | ----------- | -------------- |
+| `src/config/schema/background-task.ts`              | 2           | 0              |
+| `src/config/schema/background-task.test.ts`         | ~50         | 0              |
+| `src/features/background-agent/concurrency.ts`      | ~25         | 1 (`clear()`)  |
+| `src/features/background-agent/concurrency.test.ts` | ~70         | 0              |
+| `src/features/background-agent/manager.ts`          | ~20         | 0              |
 
 Total: ~167 lines added, 1 line modified across 5 files.

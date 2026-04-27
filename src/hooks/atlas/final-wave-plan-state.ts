@@ -14,7 +14,9 @@ export type FinalWavePlanState = {
   pendingFinalWaveTaskCount: number
 }
 
-export function readFinalWavePlanState(planPath: string): FinalWavePlanState | null {
+export function readFinalWavePlanState(
+  planPath: string,
+): FinalWavePlanState | null {
   if (!existsSync(planPath)) {
     return null
   }

@@ -27,10 +27,12 @@ type SessionMessage = {
 }
 
 function hasFullAgentAndModel(message: StoredMessage): boolean {
-  return !!message.agent &&
+  return (
+    !!message.agent &&
     !isCompactionAgent(message.agent) &&
     !!message.model?.providerID &&
     !!message.model?.modelID
+  )
 }
 
 function hasPartialAgentOrModel(message: StoredMessage): boolean {
@@ -39,7 +41,9 @@ function hasPartialAgentOrModel(message: StoredMessage): boolean {
   return hasAgent || hasModel || !!message.tools
 }
 
-function convertSessionMessageToStoredMessage(message: SessionMessage): StoredMessage | null {
+function convertSessionMessageToStoredMessage(
+  message: SessionMessage,
+): StoredMessage | null {
   if (isCompactionMessage(message)) {
     return null
   }
@@ -82,7 +86,11 @@ function mergeStoredMessages(
       merged.agent = message.agent
     }
 
-    if (!merged.model?.providerID && message.model?.providerID && message.model.modelID) {
+    if (
+      !merged.model?.providerID &&
+      message.model?.providerID &&
+      message.model.modelID
+    ) {
       merged.model = {
         providerID: message.model.providerID,
         modelID: message.model.modelID,
@@ -148,7 +156,10 @@ export function findNearestMessageExcludingCompaction(
       try {
         const content = readFileSync(join(messageDir, file), "utf-8")
         const parsed = JSON.parse(content) as StoredMessage & { id?: string }
-        if (hasCompactionPartInStorage(parsed.id) || isCompactionAgent(parsed.agent)) {
+        if (
+          hasCompactionPartInStorage(parsed.id) ||
+          isCompactionAgent(parsed.agent)
+        ) {
           continue
         }
         messages.push(parsed)

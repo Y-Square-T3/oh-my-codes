@@ -1,9 +1,18 @@
-const { beforeEach, describe, expect, mock, test, afterAll } = require("bun:test")
+const {
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} = require("bun:test")
 
-const executeStopHooks = mock(async (context: { parentSessionId?: string }) => ({
-  block: false,
-  observedParentSessionId: context.parentSessionId,
-}))
+const executeStopHooks = mock(
+  async (context: { parentSessionId?: string }) => ({
+    block: false,
+    observedParentSessionId: context.parentSessionId,
+  }),
+)
 
 mock.module("../config", () => ({
   clearClaudeHooksConfigCache: () => {},
@@ -19,7 +28,9 @@ mock.module("../stop", () => ({
   executeStopHooks,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createSessionEventHandler } = await import("./session-event-handler")
 
@@ -51,8 +62,12 @@ describe("createSessionEventHandler retry behavior", () => {
     )
 
     //#when
-    await handler({ event: { type: "session.idle", properties: { sessionID: "ses_retry" } } })
-    await handler({ event: { type: "session.idle", properties: { sessionID: "ses_retry" } } })
+    await handler({
+      event: { type: "session.idle", properties: { sessionID: "ses_retry" } },
+    })
+    await handler({
+      event: { type: "session.idle", properties: { sessionID: "ses_retry" } },
+    })
 
     //#then
     expect(getCallCount).toBe(2)

@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from "bun:test"
-import { createEditErrorRecoveryHook, EDIT_ERROR_REMINDER, EDIT_ERROR_PATTERNS } from "./index"
+import {
+  createEditErrorRecoveryHook,
+  EDIT_ERROR_REMINDER,
+  EDIT_ERROR_PATTERNS,
+} from "./index"
 
 describe("createEditErrorRecoveryHook", () => {
   let hook: ReturnType<typeof createEditErrorRecoveryHook>
@@ -25,19 +29,25 @@ describe("createEditErrorRecoveryHook", () => {
       describe("#when the error message is detected", () => {
         it("#then should append the recovery reminder", async () => {
           const input = createInput("Edit")
-          const output = createOutput("Error: oldString and newString must be different")
+          const output = createOutput(
+            "Error: oldString and newString must be different",
+          )
 
           await hook["tool.execute.after"](input, output)
 
           expect(output.output).toContain(EDIT_ERROR_REMINDER)
-          expect(output.output).toContain("oldString and newString must be different")
+          expect(output.output).toContain(
+            "oldString and newString must be different",
+          )
         })
       })
 
       describe("#when the error appears without Error prefix", () => {
         it("#then should still detect and append reminder", async () => {
           const input = createInput("Edit")
-          const output = createOutput("oldString and newString must be different")
+          const output = createOutput(
+            "oldString and newString must be different",
+          )
 
           await hook["tool.execute.after"](input, output)
 
@@ -64,7 +74,7 @@ describe("createEditErrorRecoveryHook", () => {
         it("#then should append the recovery reminder", async () => {
           const input = createInput("Edit")
           const output = createOutput(
-            "Error: oldString found multiple times and requires more code context to uniquely identify the intended match"
+            "Error: oldString found multiple times and requires more code context to uniquely identify the intended match",
           )
 
           await hook["tool.execute.after"](input, output)
@@ -123,7 +133,9 @@ describe("createEditErrorRecoveryHook", () => {
       describe("#when tool is 'edit' lowercase", () => {
         it("#then should still detect and append reminder", async () => {
           const input = createInput("edit")
-          const output = createOutput("oldString and newString must be different")
+          const output = createOutput(
+            "oldString and newString must be different",
+          )
 
           await hook["tool.execute.after"](input, output)
 
@@ -135,7 +147,9 @@ describe("createEditErrorRecoveryHook", () => {
 
   describe("EDIT_ERROR_PATTERNS", () => {
     it("#then should contain all known Edit error patterns", () => {
-      expect(EDIT_ERROR_PATTERNS).toContain("oldString and newString must be different")
+      expect(EDIT_ERROR_PATTERNS).toContain(
+        "oldString and newString must be different",
+      )
       expect(EDIT_ERROR_PATTERNS).toContain("oldString not found")
       expect(EDIT_ERROR_PATTERNS).toContain("oldString found multiple times")
     })

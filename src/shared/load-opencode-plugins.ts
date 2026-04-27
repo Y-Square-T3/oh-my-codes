@@ -52,7 +52,12 @@ export function loadOpencodePlugins(directory: string): string[] {
       const plugins = result.data?.plugin ?? []
 
       for (const rawPlugin of plugins) {
-        const plugin = typeof rawPlugin === "string" ? rawPlugin : Array.isArray(rawPlugin) ? rawPlugin[0] : null
+        const plugin =
+          typeof rawPlugin === "string"
+            ? rawPlugin
+            : Array.isArray(rawPlugin)
+              ? rawPlugin[0]
+              : null
         if (typeof plugin !== "string") continue
         if (seenPluginEntries.has(plugin)) continue
         seenPluginEntries.add(plugin)

@@ -4,13 +4,16 @@ const processApplyPatchEditsWithCli = mock(async () => {})
 
 mock.module("./cli-runner", () => ({
   initializeCommentCheckerCli: () => {},
-  getCommentCheckerCliPathPromise: () => Promise.resolve("/tmp/fake-comment-checker"),
+  getCommentCheckerCliPathPromise: () =>
+    Promise.resolve("/tmp/fake-comment-checker"),
   isCliPathUsable: () => true,
   processWithCli: async () => {},
   processApplyPatchEditsWithCli,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createCommentCheckerHooks } = await import("./hook")
 
@@ -23,7 +26,11 @@ describe("comment-checker apply_patch integration", () => {
     // given
     const hooks = createCommentCheckerHooks()
 
-    const input = { tool: "apply_patch", sessionID: "ses_test", callID: "call_test" }
+    const input = {
+      tool: "apply_patch",
+      sessionID: "ses_test",
+      callID: "call_test",
+    }
     const output = {
       title: "ok",
       output: "Success. Updated the following files:\nM src/a.ts",
@@ -60,8 +67,16 @@ describe("comment-checker apply_patch integration", () => {
     expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
       "ses_test",
       [
-        { filePath: "/repo/src/a.ts", before: "const a = 1\n", after: "// comment\nconst a = 1\n" },
-        { filePath: "/repo/src/new.ts", before: "const b = 1\n", after: "// moved comment\nconst b = 1\n" },
+        {
+          filePath: "/repo/src/a.ts",
+          before: "const a = 1\n",
+          after: "// comment\nconst a = 1\n",
+        },
+        {
+          filePath: "/repo/src/new.ts",
+          before: "const b = 1\n",
+          after: "// moved comment\nconst b = 1\n",
+        },
       ],
       expect.any(Object),
       "/tmp/fake-comment-checker",
@@ -73,7 +88,11 @@ describe("comment-checker apply_patch integration", () => {
   it("skips when apply_patch metadata.files is missing", async () => {
     // given
     const hooks = createCommentCheckerHooks()
-    const input = { tool: "apply_patch", sessionID: "ses_test", callID: "call_test" }
+    const input = {
+      tool: "apply_patch",
+      sessionID: "ses_test",
+      callID: "call_test",
+    }
     const output = { title: "ok", output: "ok", metadata: {} }
 
     // when

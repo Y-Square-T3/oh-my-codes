@@ -17,7 +17,9 @@ describe("PROMETHEUS_SYSTEM_PROMPT Momus invocation policy", () => {
     const prompt = PROMETHEUS_SYSTEM_PROMPT
 
     //#when / #then
-    expect(prompt.toLowerCase()).toMatch(/not.*wrap|no.*explanation|no.*markdown/)
+    expect(prompt.toLowerCase()).toMatch(
+      /not.*wrap|no.*explanation|no.*markdown/,
+    )
   })
 })
 

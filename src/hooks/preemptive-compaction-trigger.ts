@@ -57,10 +57,12 @@ export async function runPreemptiveCompactionIfNeeded(args: {
     lastCompactionTime,
   } = args
 
-  if (compactedSessions.has(sessionID) || compactionInProgress.has(sessionID)) return
+  if (compactedSessions.has(sessionID) || compactionInProgress.has(sessionID))
+    return
 
   const lastTime = lastCompactionTime.get(sessionID)
-  if (lastTime && Date.now() - lastTime < PREEMPTIVE_COMPACTION_COOLDOWN_MS) return
+  if (lastTime && Date.now() - lastTime < PREEMPTIVE_COMPACTION_COOLDOWN_MS)
+    return
 
   const cached = tokenCache.get(sessionID)
   if (!cached) return
@@ -72,14 +74,18 @@ export async function runPreemptiveCompactionIfNeeded(args: {
   )
 
   if (actualLimit === null) {
-    log("[preemptive-compaction] Skipping preemptive compaction: unknown context limit for model", {
-      providerID: cached.providerID,
-      modelID: cached.modelID,
-    })
+    log(
+      "[preemptive-compaction] Skipping preemptive compaction: unknown context limit for model",
+      {
+        providerID: cached.providerID,
+        modelID: cached.modelID,
+      },
+    )
     return
   }
 
-  const totalInputTokens = (cached.tokens.input ?? 0) + (cached.tokens.cache?.read ?? 0)
+  const totalInputTokens =
+    (cached.tokens.input ?? 0) + (cached.tokens.cache?.read ?? 0)
   const usageRatio = totalInputTokens / actualLimit
   if (usageRatio < PREEMPTIVE_COMPACTION_THRESHOLD || !cached.modelID) return
 
@@ -87,17 +93,22 @@ export async function runPreemptiveCompactionIfNeeded(args: {
   lastCompactionTime.set(sessionID, Date.now())
 
   try {
-    const { providerID: targetProviderID, modelID: targetModelID } = resolveCompactionModel(
-      pluginConfig,
-      sessionID,
-      cached.providerID,
-      cached.modelID,
-    )
+    const { providerID: targetProviderID, modelID: targetModelID } =
+      resolveCompactionModel(
+        pluginConfig,
+        sessionID,
+        cached.providerID,
+        cached.modelID,
+      )
 
     await withTimeout(
       ctx.client.session.summarize({
         path: { id: sessionID },
-        body: { providerID: targetProviderID, modelID: targetModelID, auto: true },
+        body: {
+          providerID: targetProviderID,
+          modelID: targetModelID,
+          auto: true,
+        },
         query: { directory: ctx.directory },
       }),
       PREEMPTIVE_COMPACTION_TIMEOUT_MS,
@@ -112,19 +123,21 @@ export async function runPreemptiveCompactionIfNeeded(args: {
       modelID: cached.modelID,
       error: String(error),
     })
-    ctx.client.tui.showToast({
-      body: {
-        title: "Preemptive compaction failed",
-        message: `Context window is above ${Math.round(PREEMPTIVE_COMPACTION_THRESHOLD * 100)}% and auto-compaction could not run. The session may grow large. Error: ${String(error)}`,
-        variant: "warning",
-        duration: 10000,
-      },
-    }).catch((toastError: unknown) => {
-      log("[preemptive-compaction] Failed to show toast", {
-        sessionID,
-        toastError: String(toastError),
+    ctx.client.tui
+      .showToast({
+        body: {
+          title: "Preemptive compaction failed",
+          message: `Context window is above ${Math.round(PREEMPTIVE_COMPACTION_THRESHOLD * 100)}% and auto-compaction could not run. The session may grow large. Error: ${String(error)}`,
+          variant: "warning",
+          duration: 10000,
+        },
       })
-    })
+      .catch((toastError: unknown) => {
+        log("[preemptive-compaction] Failed to show toast", {
+          sessionID,
+          toastError: String(toastError),
+        })
+      })
   } finally {
     compactionInProgress.delete(sessionID)
   }

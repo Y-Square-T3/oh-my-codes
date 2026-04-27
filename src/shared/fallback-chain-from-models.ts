@@ -3,7 +3,10 @@ import type { FallbackModelObject } from "../config/schema/fallback-models"
 import { normalizeFallbackModels } from "./model-resolver"
 import { KNOWN_VARIANTS } from "./known-variants"
 
-function parseVariantFromModel(rawModel: string): { modelID: string; variant?: string } {
+function parseVariantFromModel(rawModel: string): {
+  modelID: string
+  variant?: string
+} {
   const trimmedModel = rawModel.trim()
   if (!trimmedModel) {
     return { modelID: "" }
@@ -38,8 +41,11 @@ export function parseFallbackModelEntry(
 
   const parts = trimmed.split("/")
   const providerID =
-    parts.length >= 2 ? parts[0].trim() : (contextProviderID?.trim() || defaultProviderID)
-  const rawModelID = parts.length >= 2 ? parts.slice(1).join("/").trim() : trimmed
+    parts.length >= 2
+      ? parts[0].trim()
+      : contextProviderID?.trim() || defaultProviderID
+  const rawModelID =
+    parts.length >= 2 ? parts.slice(1).join("/").trim() : trimmed
   if (!providerID || !rawModelID) return undefined
 
   const parsed = parseVariantFromModel(rawModelID)
@@ -57,7 +63,11 @@ export function parseFallbackModelObjectEntry(
   contextProviderID: string | undefined,
   defaultProviderID = "opencode",
 ): FallbackEntry | undefined {
-  const base = parseFallbackModelEntry(obj.model, contextProviderID, defaultProviderID)
+  const base = parseFallbackModelEntry(
+    obj.model,
+    contextProviderID,
+    defaultProviderID,
+  )
   if (!base) return undefined
 
   return {
@@ -113,9 +123,17 @@ export function buildFallbackChainFromModels(
   const parsed = normalized
     .map((entry) => {
       if (typeof entry === "string") {
-        return parseFallbackModelEntry(entry, contextProviderID, defaultProviderID)
+        return parseFallbackModelEntry(
+          entry,
+          contextProviderID,
+          defaultProviderID,
+        )
       }
-      return parseFallbackModelObjectEntry(entry, contextProviderID, defaultProviderID)
+      return parseFallbackModelObjectEntry(
+        entry,
+        contextProviderID,
+        defaultProviderID,
+      )
     })
     .filter((entry): entry is FallbackEntry => entry !== undefined)
 

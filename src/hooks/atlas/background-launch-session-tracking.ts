@@ -1,10 +1,21 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import { appendSessionId, type BoulderState, upsertTaskSessionState } from "../../features/boulder-state"
+import {
+  appendSessionId,
+  type BoulderState,
+  upsertTaskSessionState,
+} from "../../features/boulder-state"
 import { log } from "../../shared/logger"
 import { HOOK_NAME } from "./hook-name"
-import { extractSessionIdFromOutput, validateSubagentSessionId } from "./subagent-session-id"
+import {
+  extractSessionIdFromOutput,
+  validateSubagentSessionId,
+} from "./subagent-session-id"
 import { resolveTaskContext } from "./task-context"
-import type { PendingTaskRef, ToolExecuteAfterInput, ToolExecuteAfterOutput } from "./types"
+import type {
+  PendingTaskRef,
+  ToolExecuteAfterInput,
+  ToolExecuteAfterOutput,
+} from "./types"
 
 export async function syncBackgroundLaunchSessionTracking(input: {
   ctx: PluginInput
@@ -14,12 +25,20 @@ export async function syncBackgroundLaunchSessionTracking(input: {
   pendingTaskRef: PendingTaskRef | undefined
   metadataSessionId?: string
 }): Promise<void> {
-  const { ctx, boulderState, toolInput, toolOutput, pendingTaskRef, metadataSessionId } = input
+  const {
+    ctx,
+    boulderState,
+    toolInput,
+    toolOutput,
+    pendingTaskRef,
+    metadataSessionId,
+  } = input
   if (!boulderState) {
     return
   }
 
-  const extractedSessionId = metadataSessionId ?? extractSessionIdFromOutput(toolOutput.output)
+  const extractedSessionId =
+    metadataSessionId ?? extractSessionIdFromOutput(toolOutput.output)
   const lineageSessionIDs = boulderState.session_ids
   const subagentSessionId = await validateSubagentSessionId({
     client: ctx.client,
@@ -27,11 +46,13 @@ export async function syncBackgroundLaunchSessionTracking(input: {
     lineageSessionIDs,
   })
 
-  const trackedSessionId = subagentSessionId ?? await resolveFallbackTrackedSessionId({
-    ctx,
-    extractedSessionId,
-    lineageSessionIDs,
-  })
+  const trackedSessionId =
+    subagentSessionId ??
+    (await resolveFallbackTrackedSessionId({
+      ctx,
+      extractedSessionId,
+      lineageSessionIDs,
+    }))
   if (!trackedSessionId) {
     return
   }
@@ -49,8 +70,14 @@ export async function syncBackgroundLaunchSessionTracking(input: {
       taskLabel: currentTask.label,
       taskTitle: currentTask.title,
       sessionId: trackedSessionId,
-      agent: typeof toolOutput.metadata?.agent === "string" ? toolOutput.metadata.agent : undefined,
-      category: typeof toolOutput.metadata?.category === "string" ? toolOutput.metadata.category : undefined,
+      agent:
+        typeof toolOutput.metadata?.agent === "string"
+          ? toolOutput.metadata.agent
+          : undefined,
+      category:
+        typeof toolOutput.metadata?.category === "string"
+          ? toolOutput.metadata.category
+          : undefined,
     })
   }
 
@@ -71,9 +98,14 @@ async function resolveFallbackTrackedSessionId(input: {
   }
 
   try {
-    const session = await input.ctx.client.session.get({ path: { id: input.extractedSessionId } })
+    const session = await input.ctx.client.session.get({
+      path: { id: input.extractedSessionId },
+    })
     const parentSessionId = session.data?.parentID
-    if (typeof parentSessionId === "string" && input.lineageSessionIDs.includes(parentSessionId)) {
+    if (
+      typeof parentSessionId === "string" &&
+      input.lineageSessionIDs.includes(parentSessionId)
+    ) {
       return input.extractedSessionId
     }
     return undefined
@@ -88,7 +120,8 @@ async function resolveSessionOrigin(
 ): Promise<"direct" | "appended"> {
   try {
     const session = await ctx.client.session.get({ path: { id: sessionID } })
-    return typeof session.data?.parentID === "string" && session.data.parentID.length > 0
+    return typeof session.data?.parentID === "string" &&
+      session.data.parentID.length > 0
       ? "appended"
       : "direct"
   } catch {

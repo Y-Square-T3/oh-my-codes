@@ -1,4 +1,8 @@
-import { tool, type PluginInput, type ToolDefinition } from "@opencode-ai/plugin"
+import {
+  tool,
+  type PluginInput,
+  type ToolDefinition,
+} from "@opencode-ai/plugin"
 import type { BackgroundManager } from "../../features/background-agent"
 import type { BackgroundTaskArgs } from "./types"
 import { BACKGROUND_TASK_DESCRIPTION } from "./constants"
@@ -14,20 +18,29 @@ type ToolContextWithMetadata = {
   messageID: string
   agent: string
   abort: AbortSignal
-  metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void
+  metadata?: (input: {
+    title?: string
+    metadata?: Record<string, unknown>
+  }) => void
   callID?: string
 }
 
 export function createBackgroundTask(
   manager: BackgroundManager,
-  client: PluginInput["client"]
+  client: PluginInput["client"],
 ): ToolDefinition {
   return tool({
     description: BACKGROUND_TASK_DESCRIPTION,
     args: {
-      description: tool.schema.string().describe("Short task description (shown in status)"),
-      prompt: tool.schema.string().describe("Full detailed prompt for the agent"),
-      agent: tool.schema.string().describe("Agent type to use (any registered agent)"),
+      description: tool.schema
+        .string()
+        .describe("Short task description (shown in status)"),
+      prompt: tool.schema
+        .string()
+        .describe("Full detailed prompt for the agent"),
+      agent: tool.schema
+        .string()
+        .describe("Agent type to use (any registered agent)"),
     },
     async execute(args: BackgroundTaskArgs, toolContext) {
       const ctx = toolContext as ToolContextWithMetadata
@@ -41,11 +54,12 @@ export function createBackgroundTask(
         const { prevMessage, firstMessageAgent } = await resolveMessageContext(
           ctx.sessionID,
           client,
-          messageDir
+          messageDir,
         )
 
         const sessionAgent = getSessionAgent(ctx.sessionID)
-        const parentAgent = ctx.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent
+        const parentAgent =
+          ctx.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent
 
         log("[background_task] parentAgent resolution", {
           sessionID: ctx.sessionID,
@@ -61,7 +75,9 @@ export function createBackgroundTask(
             ? {
                 providerID: prevMessage.model.providerID,
                 modelID: prevMessage.model.modelID,
-                ...(prevMessage.model.variant ? { variant: prevMessage.model.variant } : {}),
+                ...(prevMessage.model.variant
+                  ? { variant: prevMessage.model.variant }
+                  : {}),
               }
             : undefined
 
@@ -79,9 +95,16 @@ export function createBackgroundTask(
         const WAIT_FOR_SESSION_TIMEOUT_MS = 30000
         const waitStart = Date.now()
         let sessionId = task.sessionID
-        while (!sessionId && Date.now() - waitStart < WAIT_FOR_SESSION_TIMEOUT_MS) {
+        while (
+          !sessionId &&
+          Date.now() - waitStart < WAIT_FOR_SESSION_TIMEOUT_MS
+        ) {
           const updated = manager.getTask(task.id)
-          if (updated?.status === "error" || updated?.status === "cancelled" || updated?.status === "interrupt") {
+          if (
+            updated?.status === "error" ||
+            updated?.status === "cancelled" ||
+            updated?.status === "interrupt"
+          ) {
             return `Task ${`entered error state`}\.\n\nTask ID: ${task.id}`
           }
           sessionId = updated?.sessionID

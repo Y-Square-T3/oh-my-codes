@@ -25,14 +25,27 @@ describe("hasVisibleAssistantResponse", () => {
     const checkVisibleResponse = hasVisibleAssistantResponse(() => undefined)
     const ctx = createContext({
       data: [
-        { info: { role: "user" }, parts: [{ type: "text", text: "older question" }] },
-        { info: { role: "assistant" }, parts: [{ type: "text", text: "older answer" }] },
-        { info: { role: "user" }, parts: [{ type: "text", text: "latest question" }] },
+        {
+          info: { role: "user" },
+          parts: [{ type: "text", text: "older question" }],
+        },
+        {
+          info: { role: "assistant" },
+          parts: [{ type: "text", text: "older answer" }],
+        },
+        {
+          info: { role: "user" },
+          parts: [{ type: "text", text: "latest question" }],
+        },
       ],
     })
 
     // when
-    const result = await checkVisibleResponse(ctx, "session-old-assistant", undefined)
+    const result = await checkVisibleResponse(
+      ctx,
+      "session-old-assistant",
+      undefined,
+    )
 
     // then
     expect(result).toBe(false)
@@ -43,13 +56,23 @@ describe("hasVisibleAssistantResponse", () => {
     const checkVisibleResponse = hasVisibleAssistantResponse(() => undefined)
     const ctx = createContext({
       data: [
-        { info: { role: "user" }, parts: [{ type: "text", text: "latest question" }] },
-        { info: { role: "assistant" }, parts: [{ type: "text", text: "visible answer" }] },
+        {
+          info: { role: "user" },
+          parts: [{ type: "text", text: "latest question" }],
+        },
+        {
+          info: { role: "assistant" },
+          parts: [{ type: "text", text: "visible answer" }],
+        },
       ],
     })
 
     // when
-    const result = await checkVisibleResponse(ctx, "session-visible-assistant", undefined)
+    const result = await checkVisibleResponse(
+      ctx,
+      "session-visible-assistant",
+      undefined,
+    )
 
     // then
     expect(result).toBe(true)
@@ -57,10 +80,15 @@ describe("hasVisibleAssistantResponse", () => {
 
   it("#given a too-many-requests assistant reply #when visibility is checked #then it is treated as an auto-retry signal", async () => {
     // given
-    const checkVisibleResponse = hasVisibleAssistantResponse(extractAutoRetrySignal)
+    const checkVisibleResponse = hasVisibleAssistantResponse(
+      extractAutoRetrySignal,
+    )
     const ctx = createContext({
       data: [
-        { info: { role: "user" }, parts: [{ type: "text", text: "latest question" }] },
+        {
+          info: { role: "user" },
+          parts: [{ type: "text", text: "latest question" }],
+        },
         {
           info: { role: "assistant" },
           parts: [
@@ -74,7 +102,11 @@ describe("hasVisibleAssistantResponse", () => {
     })
 
     // when
-    const result = await checkVisibleResponse(ctx, "session-rate-limit", undefined)
+    const result = await checkVisibleResponse(
+      ctx,
+      "session-rate-limit",
+      undefined,
+    )
 
     // then
     expect(result).toBe(false)

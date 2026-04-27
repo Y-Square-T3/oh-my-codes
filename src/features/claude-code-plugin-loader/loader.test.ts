@@ -8,12 +8,34 @@ import {
 
 function createPluginComponentsResult(): PluginComponentsResult {
   return {
-    commands: { "demo:command": { name: "demo:command", description: "demo", template: "demo" } },
-    skills: { "demo:skill": { name: "demo:skill", description: "skill", template: "skill" } },
-    agents: { "demo:agent": { description: "agent", mode: "subagent", prompt: "demo" } },
+    commands: {
+      "demo:command": {
+        name: "demo:command",
+        description: "demo",
+        template: "demo",
+      },
+    },
+    skills: {
+      "demo:skill": {
+        name: "demo:skill",
+        description: "skill",
+        template: "skill",
+      },
+    },
+    agents: {
+      "demo:agent": { description: "agent", mode: "subagent", prompt: "demo" },
+    },
     mcpServers: { "demo:mcp": { type: "local", command: ["demo"] } },
     hooksConfigs: [{ hooks: {} }],
-    plugins: [{ name: "demo", version: "1.0.0", scope: "user", installPath: "/tmp/demo", pluginKey: "demo@test" }],
+    plugins: [
+      {
+        name: "demo",
+        version: "1.0.0",
+        scope: "user",
+        installPath: "/tmp/demo",
+        pluginKey: "demo@test",
+      },
+    ],
     errors: [],
   }
 }
@@ -132,7 +154,10 @@ describe("loadAllPluginComponents", () => {
     it("returns the cached result without reloading plugin dependencies", async () => {
       // given
       const result = createPluginComponentsResult()
-      const discoverInstalledPlugins = mock(() => ({ plugins: result.plugins, errors: result.errors }))
+      const discoverInstalledPlugins = mock(() => ({
+        plugins: result.plugins,
+        errors: result.errors,
+      }))
       const loadPluginCommands = mock(() => result.commands)
       const loadPluginSkillsAsCommands = mock(() => result.skills)
       const loadPluginAgents = mock(() => result.agents)
@@ -151,8 +176,14 @@ describe("loadAllPluginComponents", () => {
         loadPluginMcpServers,
         loadPluginHooksConfigs,
       }
-      const firstResult = await loadAllPluginComponentsWithDeps({ enabledPluginsOverride }, deps)
-      const secondResult = await loadAllPluginComponentsWithDeps({ enabledPluginsOverride }, deps)
+      const firstResult = await loadAllPluginComponentsWithDeps(
+        { enabledPluginsOverride },
+        deps,
+      )
+      const secondResult = await loadAllPluginComponentsWithDeps(
+        { enabledPluginsOverride },
+        deps,
+      )
 
       // then
       expect(firstResult).toEqual(result)
@@ -170,7 +201,10 @@ describe("loadAllPluginComponents", () => {
     it("reloads plugin components for the new cache key", async () => {
       // given
       const result = createPluginComponentsResult()
-      const discoverInstalledPlugins = mock(() => ({ plugins: result.plugins, errors: result.errors }))
+      const discoverInstalledPlugins = mock(() => ({
+        plugins: result.plugins,
+        errors: result.errors,
+      }))
       const loadPluginCommands = mock(() => result.commands)
       const loadPluginSkillsAsCommands = mock(() => result.skills)
       const loadPluginAgents = mock(() => result.agents)
@@ -188,8 +222,14 @@ describe("loadAllPluginComponents", () => {
         loadPluginMcpServers,
         loadPluginHooksConfigs,
       }
-      await loadAllPluginComponentsWithDeps({ enabledPluginsOverride: { "demo@test": true } }, deps)
-      await loadAllPluginComponentsWithDeps({ enabledPluginsOverride: { "demo@test": false } }, deps)
+      await loadAllPluginComponentsWithDeps(
+        { enabledPluginsOverride: { "demo@test": true } },
+        deps,
+      )
+      await loadAllPluginComponentsWithDeps(
+        { enabledPluginsOverride: { "demo@test": false } },
+        deps,
+      )
 
       // then
       expect(discoverInstalledPlugins).toHaveBeenCalledTimes(2)
@@ -205,7 +245,10 @@ describe("loadAllPluginComponents", () => {
     it("reloads plugin components on the next call", async () => {
       // given
       const result = createPluginComponentsResult()
-      const discoverInstalledPlugins = mock(() => ({ plugins: result.plugins, errors: result.errors }))
+      const discoverInstalledPlugins = mock(() => ({
+        plugins: result.plugins,
+        errors: result.errors,
+      }))
       const loadPluginCommands = mock(() => result.commands)
       const loadPluginSkillsAsCommands = mock(() => result.skills)
       const loadPluginAgents = mock(() => result.agents)
@@ -241,7 +284,10 @@ describe("loadAllPluginComponents", () => {
     it("returns a fresh clone on the next cache hit", async () => {
       // given
       const result = createPluginComponentsResult()
-      const discoverInstalledPlugins = mock(() => ({ plugins: result.plugins, errors: result.errors }))
+      const discoverInstalledPlugins = mock(() => ({
+        plugins: result.plugins,
+        errors: result.errors,
+      }))
       const loadPluginCommands = mock(() => result.commands)
       const loadPluginSkillsAsCommands = mock(() => result.skills)
       const loadPluginAgents = mock(() => result.agents)
@@ -261,7 +307,10 @@ describe("loadAllPluginComponents", () => {
       }
       const firstResult = await loadAllPluginComponentsWithDeps(undefined, deps)
       firstResult.commands["demo:command"]!.description = "mutated"
-      const secondResult = await loadAllPluginComponentsWithDeps(undefined, deps)
+      const secondResult = await loadAllPluginComponentsWithDeps(
+        undefined,
+        deps,
+      )
 
       // then
       expect(secondResult.commands["demo:command"]!.description).toBe("demo")

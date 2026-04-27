@@ -5,7 +5,10 @@ import {
   getPatternModelIDAliasRules,
   resolveModelIDAlias,
 } from "./model-capability-aliases"
-import { AGENT_MODEL_REQUIREMENTS, CATEGORY_MODEL_REQUIREMENTS } from "./model-requirements"
+import {
+  AGENT_MODEL_REQUIREMENTS,
+  CATEGORY_MODEL_REQUIREMENTS,
+} from "./model-requirements"
 
 export type ModelCapabilityGuardrailIssue =
   | {
@@ -75,9 +78,12 @@ export function collectModelCapabilityGuardrailIssues(
 ): ModelCapabilityGuardrailIssue[] {
   const snapshot = input.snapshot ?? getBundledModelCapabilitiesSnapshot()
   const snapshotModelIDs = new Set(
-    Object.keys(snapshot.models).map((modelID) => normalizeLookupModelID(modelID)),
+    Object.keys(snapshot.models).map((modelID) =>
+      normalizeLookupModelID(modelID),
+    ),
   )
-  const requirementModelIDs = input.requirementModelIDs ?? getBuiltInRequirementModelIDs()
+  const requirementModelIDs =
+    input.requirementModelIDs ?? getBuiltInRequirementModelIDs()
   const issues: ModelCapabilityGuardrailIssue[] = []
 
   for (const rule of getExactModelIDAliasRules()) {

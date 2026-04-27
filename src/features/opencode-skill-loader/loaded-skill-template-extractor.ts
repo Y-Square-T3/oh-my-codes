@@ -10,7 +10,7 @@ export function extractSkillTemplate(skill: LoadedSkill): string {
   if (skill.path) {
     const content = readFileSync(skill.path, "utf-8")
     const { body } = parseFrontmatter(content)
-		return body.trim()
-	}
-	return skill.definition.template || ""
+    return body.trim()
+  }
+  return skill.definition.template || ""
 }

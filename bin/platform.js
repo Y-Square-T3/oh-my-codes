@@ -7,67 +7,95 @@
  * @returns {string} Package name like "oh-my-codes-darwin-arm64"
  * @throws {Error} If libc cannot be detected on Linux
  */
-export function getPlatformPackage({ platform, arch, libcFamily, packageBaseName = "oh-my-codes" }) {
-  let suffix = "";
+export function getPlatformPackage({
+  platform,
+  arch,
+  libcFamily,
+  packageBaseName = "oh-my-codes",
+}) {
+  let suffix = ""
   if (platform === "linux") {
     if (libcFamily === null || libcFamily === undefined) {
       throw new Error(
         "Could not detect libc on Linux. " +
-        "Please ensure detect-libc is installed or report this issue."
-      );
+          "Please ensure detect-libc is installed or report this issue.",
+      )
     }
     if (libcFamily === "musl") {
-      suffix = "-musl";
+      suffix = "-musl"
     }
   }
-  
+
   // Map platform names: win32 -> windows (for package name)
-  const os = platform === "win32" ? "windows" : platform;
-  return `${packageBaseName}-${os}-${arch}${suffix}`;
+  const os = platform === "win32" ? "windows" : platform
+  return `${packageBaseName}-${os}-${arch}${suffix}`
 }
 
 /** @param {{ platform: string, arch: string, libcFamily?: string | null, preferBaseline?: boolean, packageBaseName?: string }} options */
-export function getPlatformPackageCandidates({ platform, arch, libcFamily, preferBaseline = false, packageBaseName = "oh-my-codes" }) {
-  const primaryPackage = getPlatformPackage({ platform, arch, libcFamily, packageBaseName });
-  const baselinePackage = getBaselinePlatformPackage({ platform, arch, libcFamily, packageBaseName });
+export function getPlatformPackageCandidates({
+  platform,
+  arch,
+  libcFamily,
+  preferBaseline = false,
+  packageBaseName = "oh-my-codes",
+}) {
+  const primaryPackage = getPlatformPackage({
+    platform,
+    arch,
+    libcFamily,
+    packageBaseName,
+  })
+  const baselinePackage = getBaselinePlatformPackage({
+    platform,
+    arch,
+    libcFamily,
+    packageBaseName,
+  })
 
   if (!baselinePackage) {
-    return [primaryPackage];
+    return [primaryPackage]
   }
 
-  return preferBaseline ? [baselinePackage, primaryPackage] : [primaryPackage, baselinePackage];
+  return preferBaseline
+    ? [baselinePackage, primaryPackage]
+    : [primaryPackage, baselinePackage]
 }
 
 /** @param {{ platform: string, arch: string, libcFamily?: string | null, packageBaseName?: string }} options */
-function getBaselinePlatformPackage({ platform, arch, libcFamily, packageBaseName = "oh-my-codes" }) {
+function getBaselinePlatformPackage({
+  platform,
+  arch,
+  libcFamily,
+  packageBaseName = "oh-my-codes",
+}) {
   if (arch !== "x64") {
-    return null;
+    return null
   }
 
   if (platform === "darwin") {
-    return `${packageBaseName}-darwin-x64-baseline`;
+    return `${packageBaseName}-darwin-x64-baseline`
   }
 
   if (platform === "win32") {
-    return `${packageBaseName}-windows-x64-baseline`;
+    return `${packageBaseName}-windows-x64-baseline`
   }
 
   if (platform === "linux") {
     if (libcFamily === null || libcFamily === undefined) {
       throw new Error(
         "Could not detect libc on Linux. " +
-        "Please ensure detect-libc is installed or report this issue."
-      );
+          "Please ensure detect-libc is installed or report this issue.",
+      )
     }
 
     if (libcFamily === "musl") {
-      return `${packageBaseName}-linux-x64-musl-baseline`;
+      return `${packageBaseName}-linux-x64-musl-baseline`
     }
 
-    return `${packageBaseName}-linux-x64-baseline`;
+    return `${packageBaseName}-linux-x64-baseline`
   }
 
-  return null;
+  return null
 }
 
 /**
@@ -77,6 +105,6 @@ function getBaselinePlatformPackage({ platform, arch, libcFamily, packageBaseNam
  * @returns {string} Relative path like "oh-my-codes-darwin-arm64/bin/oh-my-codes"
  */
 export function getBinaryPath(pkg, platform) {
-  const ext = platform === "win32" ? ".exe" : "";
-  return `${pkg}/bin/oh-my-codes${ext}`;
+  const ext = platform === "win32" ? ".exe" : ""
+  return `${pkg}/bin/oh-my-codes${ext}`
 }

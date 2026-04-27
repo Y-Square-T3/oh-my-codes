@@ -16,25 +16,38 @@ const SQLITE_VERSION = "1.1.53"
 // making dynamic import unreliable. By inlining, we test the actual logic with controlled deps.
 const NOT_CACHED = Symbol("NOT_CACHED")
 const FALSE_PENDING_RETRY = Symbol("FALSE_PENDING_RETRY")
-let cachedResult: true | false | typeof NOT_CACHED | typeof FALSE_PENDING_RETRY = NOT_CACHED
+let cachedResult:
+  | true
+  | false
+  | typeof NOT_CACHED
+  | typeof FALSE_PENDING_RETRY = NOT_CACHED
 
 function isSqliteBackend(): boolean {
   if (cachedResult === true) return true
   if (cachedResult === false) return false
   if (cachedResult === FALSE_PENDING_RETRY) {
-    const versionOk = (() => { versionCheckCalls.push(SQLITE_VERSION); return versionReturnValue })()
+    const versionOk = (() => {
+      versionCheckCalls.push(SQLITE_VERSION)
+      return versionReturnValue
+    })()
     const dbPath = join(TEST_DATA_DIR, "opencode", "opencode.db")
     const dbExists = existsSync(dbPath)
     const result = versionOk && dbExists
     cachedResult = result
     return result
   }
-  const versionOk = (() => { versionCheckCalls.push(SQLITE_VERSION); return versionReturnValue })()
+  const versionOk = (() => {
+    versionCheckCalls.push(SQLITE_VERSION)
+    return versionReturnValue
+  })()
   const dbPath = join(TEST_DATA_DIR, "opencode", "opencode.db")
   const dbExists = existsSync(dbPath)
   const result = versionOk && dbExists
-  if (result) { cachedResult = true }
-  else { cachedResult = FALSE_PENDING_RETRY }
+  if (result) {
+    cachedResult = true
+  } else {
+    cachedResult = FALSE_PENDING_RETRY
+  }
   return result
 }
 
@@ -47,7 +60,9 @@ describe("isSqliteBackend", () => {
     resetSqliteBackendCache()
     versionCheckCalls = []
     versionReturnValue = true
-    try { rmSync(TEST_DATA_DIR, { recursive: true, force: true }) } catch {}
+    try {
+      rmSync(TEST_DATA_DIR, { recursive: true, force: true })
+    } catch {}
   })
 
   it("returns false when version is below threshold", () => {

@@ -8,12 +8,12 @@
 
 ## DISTINCTION FROM delegate-task
 
-| Aspect | `call_omo_agent` | `delegate-task` (`task`) |
-|--------|-----------------|--------------------------|
-| Agent selection | Named agent (explore/librarian) | Category or subagent_type |
-| Skill loading | None | `load_skills[]` supported |
-| Model selection | From agent's fallback chain | From category config |
-| Use case | Quick contextual grep | Full delegation with skills |
+| Aspect          | `call_omo_agent`                | `delegate-task` (`task`)    |
+| --------------- | ------------------------------- | --------------------------- |
+| Agent selection | Named agent (explore/librarian) | Category or subagent_type   |
+| Skill loading   | None                            | `load_skills[]` supported   |
+| Model selection | From agent's fallback chain     | From category config        |
+| Use case        | Quick contextual grep           | Full delegation with skills |
 
 ## ALLOWED AGENTS
 
@@ -23,28 +23,28 @@ Only `explore` and `librarian` — enforced via `ALLOWED_AGENTS` constant in `co
 
 Same two modes as delegate-task:
 
-| Mode | File | Description |
-|------|------|-------------|
-| **Background** | `background-agent-executor.ts` | Async via `BackgroundManager` |
-| **Sync** | `sync-executor.ts` | Create session → wait for idle → return result |
+| Mode           | File                           | Description                                    |
+| -------------- | ------------------------------ | ---------------------------------------------- |
+| **Background** | `background-agent-executor.ts` | Async via `BackgroundManager`                  |
+| **Sync**       | `sync-executor.ts`             | Create session → wait for idle → return result |
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `tools.ts` | `createCallOmoAgent()` factory — validates agent, routes to executor |
-| `background-executor.ts` | Routes to background or sync based on `run_in_background` |
-| `background-agent-executor.ts` | Launch via `BackgroundManager.launch()` |
-| `sync-executor.ts` | Synchronous session: create → send prompt → poll → fetch result |
-| `session-creator.ts` | Create OpenCode session for sync execution |
-| `subagent-session-creator.ts` | Create session with agent-specific config |
-| `subagent-session-prompter.ts` | Inject prompt into session |
-| `completion-poller.ts` | Poll until session idle |
-| `session-completion-poller.ts` | Session-specific completion check |
-| `session-message-output-extractor.ts` | Extract last assistant message as result |
-| `message-processor.ts` | Process raw message content |
-| `message-dir.ts` + `message-storage-directory.ts` | Temp storage for message exchange |
-| `types.ts` | `CallOmoAgentArgs`, `AllowedAgentType`, `ToolContextWithMetadata` |
+| File                                              | Purpose                                                              |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| `tools.ts`                                        | `createCallOmoAgent()` factory — validates agent, routes to executor |
+| `background-executor.ts`                          | Routes to background or sync based on `run_in_background`            |
+| `background-agent-executor.ts`                    | Launch via `BackgroundManager.launch()`                              |
+| `sync-executor.ts`                                | Synchronous session: create → send prompt → poll → fetch result      |
+| `session-creator.ts`                              | Create OpenCode session for sync execution                           |
+| `subagent-session-creator.ts`                     | Create session with agent-specific config                            |
+| `subagent-session-prompter.ts`                    | Inject prompt into session                                           |
+| `completion-poller.ts`                            | Poll until session idle                                              |
+| `session-completion-poller.ts`                    | Session-specific completion check                                    |
+| `session-message-output-extractor.ts`             | Extract last assistant message as result                             |
+| `message-processor.ts`                            | Process raw message content                                          |
+| `message-dir.ts` + `message-storage-directory.ts` | Temp storage for message exchange                                    |
+| `types.ts`                                        | `CallOmoAgentArgs`, `AllowedAgentType`, `ToolContextWithMetadata`    |
 
 ## SESSION CONTINUATION
 

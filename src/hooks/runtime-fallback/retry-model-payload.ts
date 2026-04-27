@@ -3,7 +3,13 @@ import { parseModelString } from "../../shared/model-string-parser"
 export function buildRetryModelPayload(
   model: string,
   agentSettings?: { variant?: string; reasoningEffort?: string },
-): { model: { providerID: string; modelID: string }; variant?: string; reasoningEffort?: string } | undefined {
+):
+  | {
+      model: { providerID: string; modelID: string }
+      variant?: string
+      reasoningEffort?: string
+    }
+  | undefined {
   const parsedModel = parseModelString(model)
   if (!parsedModel) {
     return undefined
@@ -12,7 +18,11 @@ export function buildRetryModelPayload(
   const variant = parsedModel.variant ?? agentSettings?.variant
   const reasoningEffort = agentSettings?.reasoningEffort
 
-  const payload: { model: { providerID: string; modelID: string }; variant?: string; reasoningEffort?: string } = {
+  const payload: {
+    model: { providerID: string; modelID: string }
+    variant?: string
+    reasoningEffort?: string
+  } = {
     model: {
       providerID: parsedModel.providerID,
       modelID: parsedModel.modelID,

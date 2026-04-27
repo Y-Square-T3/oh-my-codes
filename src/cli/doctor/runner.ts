@@ -1,5 +1,15 @@
-import type { DoctorOptions, DoctorResult, CheckDefinition, CheckResult, DoctorSummary } from "./types"
-import { getAllCheckDefinitions, gatherSystemInfo, gatherToolsSummary } from "./checks"
+import type {
+  DoctorOptions,
+  DoctorResult,
+  CheckDefinition,
+  CheckResult,
+  DoctorSummary,
+} from "./types"
+import {
+  getAllCheckDefinitions,
+  gatherSystemInfo,
+  gatherToolsSummary,
+} from "./checks"
 import { EXIT_CODES } from "./constants"
 import { formatDoctorOutput, formatJsonOutput } from "./formatter"
 
@@ -23,13 +33,18 @@ export async function runCheck(check: CheckDefinition): Promise<CheckResult> {
       name: check.name,
       status: "fail",
       message: err instanceof Error ? err.message : "Unknown error",
-      issues: [{ title: check.name, description: String(err), severity: "error" }],
+      issues: [
+        { title: check.name, description: String(err), severity: "error" },
+      ],
       duration: Math.round(performance.now() - start),
     }
   }
 }
 
-export function calculateSummary(results: CheckResult[], duration: number): DoctorSummary {
+export function calculateSummary(
+  results: CheckResult[],
+  duration: number,
+): DoctorSummary {
   return {
     total: results.length,
     passed: results.filter((r) => r.status === "pass").length,
@@ -41,15 +56,58 @@ export function calculateSummary(results: CheckResult[], duration: number): Doct
 }
 
 export function determineExitCode(results: CheckResult[]): number {
-  return results.some((r) => r.status === "fail") ? EXIT_CODES.FAILURE : EXIT_CODES.SUCCESS
+  return results.some((r) => r.status === "fail")
+    ? EXIT_CODES.FAILURE
+    : EXIT_CODES.SUCCESS
 }
 
-function buildTimeoutResult(start: number, options: DoctorOptions): DoctorResult {
+function buildTimeoutResult(
+  start: number,
+  options: DoctorOptions,
+): DoctorResult {
   const timeoutResult: DoctorResult = {
-    results: [{ name: "Timeout", status: "fail", message: "Doctor timed out after 30s", issues: [{ title: "Doctor timeout", description: "Checks did not complete within 30s. A subprocess may be hanging.", severity: "error" }] }],
-    systemInfo: { opencodeVersion: null, opencodePath: null, pluginVersion: null, loadedVersion: null, bunVersion: null, configPath: null, configValid: false, isLocalDev: false },
-    tools: { lspServers: [], astGrepCli: false, astGrepNapi: false, commentChecker: false, ghCli: { installed: false, authenticated: false, username: null }, mcpBuiltin: [], mcpUser: [] },
-    summary: { total: 1, passed: 0, failed: 1, warnings: 0, skipped: 0, duration: Math.round(performance.now() - start) },
+    results: [
+      {
+        name: "Timeout",
+        status: "fail",
+        message: "Doctor timed out after 30s",
+        issues: [
+          {
+            title: "Doctor timeout",
+            description:
+              "Checks did not complete within 30s. A subprocess may be hanging.",
+            severity: "error",
+          },
+        ],
+      },
+    ],
+    systemInfo: {
+      opencodeVersion: null,
+      opencodePath: null,
+      pluginVersion: null,
+      loadedVersion: null,
+      bunVersion: null,
+      configPath: null,
+      configValid: false,
+      isLocalDev: false,
+    },
+    tools: {
+      lspServers: [],
+      astGrepCli: false,
+      astGrepNapi: false,
+      commentChecker: false,
+      ghCli: { installed: false, authenticated: false, username: null },
+      mcpBuiltin: [],
+      mcpUser: [],
+    },
+    summary: {
+      total: 1,
+      passed: 0,
+      failed: 1,
+      warnings: 0,
+      skipped: 0,
+      duration: Math.round(performance.now() - start),
+    },
     exitCode: EXIT_CODES.FAILURE,
   }
 
@@ -76,7 +134,10 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
 
   let timer: ReturnType<typeof setTimeout> | undefined
   const timeoutPromise = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new DoctorTimeoutError()), DOCTOR_TIMEOUT_MS)
+    timer = setTimeout(
+      () => reject(new DoctorTimeoutError()),
+      DOCTOR_TIMEOUT_MS,
+    )
   })
 
   let results: CheckResult[]
@@ -84,7 +145,10 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
   let tools: Awaited<ReturnType<typeof gatherToolsSummary>>
 
   try {
-    ;[results, systemInfo, tools] = await Promise.race([checksPromise, timeoutPromise])
+    ;[results, systemInfo, tools] = await Promise.race([
+      checksPromise,
+      timeoutPromise,
+    ])
   } catch (error) {
     clearTimeout(timer)
     if (error instanceof DoctorTimeoutError) {

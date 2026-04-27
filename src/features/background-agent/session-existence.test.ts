@@ -14,7 +14,11 @@ describe("verifySessionExists", () => {
     } as unknown as OpencodeClient
 
     // when
-    const result = await verifySessionExists(client, "session-123", "/project/root")
+    const result = await verifySessionExists(
+      client,
+      "session-123",
+      "/project/root",
+    )
 
     // then
     expect(result).toBe(true)

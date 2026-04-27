@@ -9,7 +9,8 @@ export function getOrCreateAuthProvider(
   authProviders: Map<string, OAuthProviderLike>,
   serverUrl: string,
   oauth: NonNullable<ClaudeCodeMcpServer["oauth"]>,
-  createOAuthProvider: OAuthProviderFactory = (options) => new McpOAuthProvider(options),
+  createOAuthProvider: OAuthProviderFactory = (options) =>
+    new McpOAuthProvider(options),
 ): OAuthProviderLike {
   const existing = authProviders.get(serverUrl)
   if (existing) return existing
@@ -42,7 +43,12 @@ export async function buildHttpRequestInit(
   }
 
   if (config.oauth && config.url) {
-    const provider = getOrCreateAuthProvider(authProviders, config.url, config.oauth, createOAuthProvider)
+    const provider = getOrCreateAuthProvider(
+      authProviders,
+      config.url,
+      config.oauth,
+      createOAuthProvider,
+    )
     let tokenData = provider.tokens()
 
     if (!tokenData) {
@@ -53,15 +59,17 @@ export async function buildHttpRequestInit(
       }
     }
 
-      if (tokenData && isTokenExpired(tokenData)) {
+    if (tokenData && isTokenExpired(tokenData)) {
+      try {
+        const refreshToken = tokenData.refreshToken
+        tokenData = refreshToken
+          ? await withRefreshMutex(config.url, () =>
+              provider.refresh(refreshToken),
+            )
+          : await provider.login()
+      } catch {
         try {
-          const refreshToken = tokenData.refreshToken
-          tokenData = refreshToken
-            ? await withRefreshMutex(config.url, () => provider.refresh(refreshToken))
-            : await provider.login()
-        } catch {
-          try {
-            tokenData = await provider.login()
+          tokenData = await provider.login()
         } catch {
           tokenData = null
         }
@@ -109,7 +117,12 @@ export async function handleStepUpIfNeeded(params: {
   config.oauth.scopes = mergedScopes
 
   authProviders.delete(config.url)
-  const provider = getOrCreateAuthProvider(authProviders, config.url, config.oauth, createOAuthProvider)
+  const provider = getOrCreateAuthProvider(
+    authProviders,
+    config.url,
+    config.oauth,
+    createOAuthProvider,
+  )
 
   try {
     await provider.login()
@@ -126,7 +139,13 @@ export async function handlePostRequestAuthError(params: {
   createOAuthProvider?: OAuthProviderFactory
   refreshAttempted?: Set<string>
 }): Promise<boolean> {
-  const { error, config, authProviders, createOAuthProvider, refreshAttempted = new Set() } = params
+  const {
+    error,
+    config,
+    authProviders,
+    createOAuthProvider,
+    refreshAttempted = new Set(),
+  } = params
 
   if (!config.oauth || !config.url) {
     return false
@@ -137,7 +156,12 @@ export async function handlePostRequestAuthError(params: {
     return false
   }
 
-  const provider = getOrCreateAuthProvider(authProviders, config.url, config.oauth, createOAuthProvider)
+  const provider = getOrCreateAuthProvider(
+    authProviders,
+    config.url,
+    config.oauth,
+    createOAuthProvider,
+  )
   const tokenData = provider.tokens()
 
   if (!tokenData?.refreshToken) {

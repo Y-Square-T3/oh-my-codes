@@ -7,7 +7,10 @@
  * - gpt-5-4.ts: Native GPT-5.4 prompt with block-structured guidance
  */
 
-export { buildDefaultSisyphusPrompt, buildTaskManagementSection } from "./default";
+export {
+  buildDefaultSisyphusPrompt,
+  buildTaskManagementSection,
+} from "./default"
 export {
   buildGeminiToolMandate,
   buildGeminiDelegationOverride,
@@ -15,5 +18,5 @@ export {
   buildGeminiIntentGateEnforcement,
   buildGeminiToolGuide,
   buildGeminiToolCallExamples,
-} from "./gemini";
-export { buildGpt54SisyphusPrompt } from "./gpt-5-4";
+} from "./gemini"
+export { buildGpt54SisyphusPrompt } from "./gpt-5-4"

@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 import { tmpdir } from "node:os"
 
-import { _resetForTesting, subagentSessions } from "../claude-code-session-state"
+import {
+  _resetForTesting,
+  subagentSessions,
+} from "../claude-code-session-state"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
 import { BackgroundManager } from "./manager"
 import type { BackgroundTask } from "./types"
@@ -20,7 +23,9 @@ function createDeferredPromise(): {
   }
 }
 
-function createTask(overrides: Partial<BackgroundTask> & { id: string; sessionID: string }): BackgroundTask {
+function createTask(
+  overrides: Partial<BackgroundTask> & { id: string; sessionID: string },
+): BackgroundTask {
   return {
     parentSessionID: "parent-session",
     parentMessageID: "parent-message",

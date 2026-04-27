@@ -7,7 +7,7 @@ function extractAvailableList(output: string): string | null {
 
 export function buildRetryGuidance(errorInfo: DetectedError): string {
   const pattern = DELEGATE_TASK_ERROR_PATTERNS.find(
-    (p) => p.errorType === errorInfo.errorType
+    (p) => p.errorType === errorInfo.errorType,
   )
 
   if (!pattern) {

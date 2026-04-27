@@ -18,17 +18,37 @@ describe("buildCategorySkillsDelegationGuide", () => {
   ]
 
   const builtinSkills: AvailableSkill[] = [
-    { name: "playwright", description: "Browser automation via Playwright", location: "plugin" },
-    { name: "frontend-ui-ux", description: "Designer-turned-developer", location: "plugin" },
+    {
+      name: "playwright",
+      description: "Browser automation via Playwright",
+      location: "plugin",
+    },
+    {
+      name: "frontend-ui-ux",
+      description: "Designer-turned-developer",
+      location: "plugin",
+    },
   ]
 
   const customUserSkills: AvailableSkill[] = [
-    { name: "react-19", description: "React 19 patterns and best practices", location: "user" },
-    { name: "tailwind-4", description: "Tailwind CSS v4 utilities", location: "user" },
+    {
+      name: "react-19",
+      description: "React 19 patterns and best practices",
+      location: "user",
+    },
+    {
+      name: "tailwind-4",
+      description: "Tailwind CSS v4 utilities",
+      location: "user",
+    },
   ]
 
   const customProjectSkills: AvailableSkill[] = [
-    { name: "our-design-system", description: "Internal design system components", location: "project" },
+    {
+      name: "our-design-system",
+      description: "Internal design system components",
+      location: "project",
+    },
   ]
 
   it("should list builtin and custom skills in compact format", () => {
@@ -58,7 +78,11 @@ describe("buildCategorySkillsDelegationGuide", () => {
 
   it("should show source tags for custom skills (user vs project)", () => {
     //#given: both user and project custom skills
-    const allSkills = [...builtinSkills, ...customUserSkills, ...customProjectSkills]
+    const allSkills = [
+      ...builtinSkills,
+      ...customUserSkills,
+      ...customProjectSkills,
+    ]
 
     //#when: building the delegation guide
     const result = buildCategorySkillsDelegationGuide(categories, allSkills)
@@ -146,7 +170,11 @@ describe("buildUltraworkSection", () => {
   it("should separate builtin and custom skills", () => {
     //#given: mix of builtin and custom skills
     const skills: AvailableSkill[] = [
-      { name: "playwright", description: "Browser automation", location: "plugin" },
+      {
+        name: "playwright",
+        description: "Browser automation",
+        location: "plugin",
+      },
       { name: "react-19", description: "React 19 patterns", location: "user" },
     ]
 
@@ -162,7 +190,11 @@ describe("buildUltraworkSection", () => {
   it("should not separate when only builtin skills", () => {
     //#given: only builtin skills
     const skills: AvailableSkill[] = [
-      { name: "playwright", description: "Browser automation", location: "plugin" },
+      {
+        name: "playwright",
+        description: "Browser automation",
+        location: "plugin",
+      },
     ]
 
     //#when: building ultrawork section
@@ -175,9 +207,18 @@ describe("buildUltraworkSection", () => {
 })
 
 describe("buildParallelDelegationSection", () => {
-  const deepCategory: AvailableCategory = { name: "deep", description: "Autonomous problem-solving" }
-  const unspecifiedHighCategory: AvailableCategory = { name: "unspecified-high", description: "High effort tasks" }
-  const otherCategory: AvailableCategory = { name: "quick", description: "Trivial tasks" }
+  const deepCategory: AvailableCategory = {
+    name: "deep",
+    description: "Autonomous problem-solving",
+  }
+  const unspecifiedHighCategory: AvailableCategory = {
+    name: "unspecified-high",
+    description: "High effort tasks",
+  }
+  const otherCategory: AvailableCategory = {
+    name: "quick",
+    description: "Trivial tasks",
+  }
 
   it("#given non-Claude model with deep category #when building #then returns aggressive delegation section", () => {
     //#given
@@ -271,4 +312,3 @@ describe("buildNonClaudePlannerSection", () => {
     expect(result).not.toBe("")
   })
 })
-

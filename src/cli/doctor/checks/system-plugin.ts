@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "node:fs"
 
-import { LEGACY_PLUGIN_NAME, PLUGIN_NAME, getOpenCodeConfigPaths, parseJsonc } from "../../../shared"
+import {
+  LEGACY_PLUGIN_NAME,
+  PLUGIN_NAME,
+  getOpenCodeConfigPaths,
+  parseJsonc,
+} from "../../../shared"
 
 export interface PluginInfo {
   registered: boolean
@@ -36,15 +41,23 @@ function parsePluginVersion(entry: string): string | null {
   return null
 }
 
-function findPluginEntry(entries: string[]): { entry: string; isLocalDev: boolean } | null {
+function findPluginEntry(
+  entries: string[],
+): { entry: string; isLocalDev: boolean } | null {
   for (const entry of entries) {
     if (entry === PLUGIN_NAME || entry.startsWith(`${PLUGIN_NAME}@`)) {
       return { entry, isLocalDev: false }
     }
-    if (entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)) {
+    if (
+      entry === LEGACY_PLUGIN_NAME ||
+      entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+    ) {
       return { entry, isLocalDev: false }
     }
-    if (entry.startsWith("file://") && (entry.includes(PLUGIN_NAME) || entry.includes(LEGACY_PLUGIN_NAME))) {
+    if (
+      entry.startsWith("file://") &&
+      (entry.includes(PLUGIN_NAME) || entry.includes(LEGACY_PLUGIN_NAME))
+    ) {
       return { entry, isLocalDev: true }
     }
   }
@@ -85,7 +98,8 @@ export function getPluginInfo(): PluginInfo {
       registered: true,
       configPath,
       entry: pluginEntry.entry,
-      isPinned: pinnedVersion !== null && /^\d+\.\d+\.\d+/.test(pinnedVersion ?? ""),
+      isPinned:
+        pinnedVersion !== null && /^\d+\.\d+\.\d+/.test(pinnedVersion ?? ""),
       pinnedVersion,
       isLocalDev: pluginEntry.isLocalDev,
     }

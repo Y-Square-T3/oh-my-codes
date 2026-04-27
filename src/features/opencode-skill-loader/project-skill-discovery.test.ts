@@ -9,7 +9,11 @@ import {
   discoverProjectClaudeSkills,
 } from "./loader"
 
-function writeSkill(directory: string, name: string, description: string): void {
+function writeSkill(
+  directory: string,
+  name: string,
+  description: string,
+): void {
   mkdirSync(directory, { recursive: true })
   writeFileSync(
     join(directory, "SKILL.md"),
@@ -79,8 +83,8 @@ describe("project skill discovery", () => {
     ])
 
     // then
-    expect(claudeSkills.map(skill => skill.name)).toEqual(["repo-claude"])
-    expect(agentSkills.map(skill => skill.name)).toEqual(["repo-agents"])
-    expect(opencodeSkills.map(skill => skill.name)).toEqual(["repo-opencode"])
+    expect(claudeSkills.map((skill) => skill.name)).toEqual(["repo-claude"])
+    expect(agentSkills.map((skill) => skill.name)).toEqual(["repo-agents"])
+    expect(opencodeSkills.map((skill) => skill.name)).toEqual(["repo-opencode"])
   })
 })

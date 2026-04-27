@@ -13,23 +13,30 @@ import { resolvePromptAppend } from "./resolve-file-uri"
 export function applyCategoryOverride(
   config: AgentConfig,
   categoryName: string,
-  mergedCategories: Record<string, CategoryConfig>
+  mergedCategories: Record<string, CategoryConfig>,
 ): AgentConfig {
   const categoryConfig = mergedCategories[categoryName]
   if (!categoryConfig) return config
 
   const result = { ...config } as AgentConfig & Record<string, unknown>
   if (categoryConfig.model) result.model = categoryConfig.model
-  if (categoryConfig.variant !== undefined) result.variant = categoryConfig.variant
-  if (categoryConfig.temperature !== undefined) result.temperature = categoryConfig.temperature
-  if (categoryConfig.reasoningEffort !== undefined) result.reasoningEffort = categoryConfig.reasoningEffort
-  if (categoryConfig.textVerbosity !== undefined) result.textVerbosity = categoryConfig.textVerbosity
-  if (categoryConfig.thinking !== undefined) result.thinking = categoryConfig.thinking
+  if (categoryConfig.variant !== undefined)
+    result.variant = categoryConfig.variant
+  if (categoryConfig.temperature !== undefined)
+    result.temperature = categoryConfig.temperature
+  if (categoryConfig.reasoningEffort !== undefined)
+    result.reasoningEffort = categoryConfig.reasoningEffort
+  if (categoryConfig.textVerbosity !== undefined)
+    result.textVerbosity = categoryConfig.textVerbosity
+  if (categoryConfig.thinking !== undefined)
+    result.thinking = categoryConfig.thinking
   if (categoryConfig.top_p !== undefined) result.top_p = categoryConfig.top_p
-  if (categoryConfig.maxTokens !== undefined) result.maxTokens = categoryConfig.maxTokens
+  if (categoryConfig.maxTokens !== undefined)
+    result.maxTokens = categoryConfig.maxTokens
 
   if (categoryConfig.prompt_append && typeof result.prompt === "string") {
-    result.prompt = result.prompt + "\n" + resolvePromptAppend(categoryConfig.prompt_append)
+    result.prompt =
+      result.prompt + "\n" + resolvePromptAppend(categoryConfig.prompt_append)
   }
 
   return result as AgentConfig
@@ -38,18 +45,25 @@ export function applyCategoryOverride(
 export function mergeAgentConfig(
   base: AgentConfig,
   override: AgentOverrideConfig,
-  directory?: string
+  directory?: string,
 ): AgentConfig {
-  const migratedOverride = migrateAgentConfig(override as Record<string, unknown>) as AgentOverrideConfig
+  const migratedOverride = migrateAgentConfig(
+    override as Record<string, unknown>,
+  ) as AgentOverrideConfig
   const { prompt_append, ...rest } = migratedOverride
   const merged = deepMerge(base, rest as Partial<AgentConfig>)
 
-  if (merged.prompt && typeof merged.prompt === 'string' && merged.prompt.startsWith('file://')) {
+  if (
+    merged.prompt &&
+    typeof merged.prompt === "string" &&
+    merged.prompt.startsWith("file://")
+  ) {
     merged.prompt = resolvePromptAppend(merged.prompt, directory)
   }
 
   if (prompt_append && merged.prompt) {
-    merged.prompt = merged.prompt + "\n" + resolvePromptAppend(prompt_append, directory)
+    merged.prompt =
+      merged.prompt + "\n" + resolvePromptAppend(prompt_append, directory)
   }
 
   return merged
@@ -59,10 +73,11 @@ export function applyOverrides(
   config: AgentConfig,
   override: AgentOverrideConfig | undefined,
   mergedCategories: Record<string, CategoryConfig>,
-  directory?: string
+  directory?: string,
 ): AgentConfig {
   let result = config
-  const overrideCategory = (override as Record<string, unknown> | undefined)?.category as string | undefined
+  const overrideCategory = (override as Record<string, unknown> | undefined)
+    ?.category as string | undefined
   if (overrideCategory) {
     result = applyCategoryOverride(result, overrideCategory, mergedCategories)
   }

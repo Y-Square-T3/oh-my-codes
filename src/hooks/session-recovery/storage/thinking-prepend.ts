@@ -49,12 +49,16 @@ function readTargetPartIDs(messageID: string): string[] {
 async function readTargetPartIDsFromSDK(
   client: OpencodeClient,
   sessionID: string,
-  messageID: string
+  messageID: string,
 ): Promise<string[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
-    const targetMessage = messages.find((message) => message.info?.id === messageID)
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
+    const targetMessage = messages.find(
+      (message) => message.info?.id === messageID,
+    )
     if (!targetMessage?.parts) {
       return []
     }
@@ -67,12 +71,19 @@ async function readTargetPartIDsFromSDK(
   }
 }
 
-function canPrependBeforeTargetParts(partID: string, targetPartIDs: string[]): boolean {
-  const firstTargetPartID = [...targetPartIDs].sort((left, right) => left.localeCompare(right))[0]
+function canPrependBeforeTargetParts(
+  partID: string,
+  targetPartIDs: string[],
+): boolean {
+  const firstTargetPartID = [...targetPartIDs].sort((left, right) =>
+    left.localeCompare(right),
+  )[0]
   return !firstTargetPartID || partID.localeCompare(firstTargetPartID) < 0
 }
 
-function isStoredSignedThinkingPart(part: StoredPart): part is StoredSignedThinkingPart {
+function isStoredSignedThinkingPart(
+  part: StoredPart,
+): part is StoredSignedThinkingPart {
   if (!THINKING_TYPES.has(part.type)) {
     return false
   }
@@ -85,7 +96,9 @@ function isStoredSignedThinkingPart(part: StoredPart): part is StoredSignedThink
   return typeof signature === "string" && signature.length > 0
 }
 
-function isSDKSignedThinkingPart(part: SDKMessagePart): part is SDKSignedThinkingPart {
+function isSDKSignedThinkingPart(
+  part: SDKMessagePart,
+): part is SDKSignedThinkingPart {
   if (!part.type || !THINKING_TYPES.has(part.type)) {
     return false
   }
@@ -94,9 +107,11 @@ function isSDKSignedThinkingPart(part: SDKMessagePart): part is SDKSignedThinkin
     return false
   }
 
-  return typeof part.id === "string"
-    && typeof (part as { signature?: unknown }).signature === "string"
-    && ((part as { signature?: string }).signature?.length ?? 0) > 0
+  return (
+    typeof part.id === "string" &&
+    typeof (part as { signature?: unknown }).signature === "string" &&
+    ((part as { signature?: string }).signature?.length ?? 0) > 0
+  )
 }
 
 function toPatchBody(part: SDKSignedThinkingPart): Record<string, unknown> {
@@ -105,11 +120,13 @@ function toPatchBody(part: SDKSignedThinkingPart): Record<string, unknown> {
 
 function findLastThinkingPart(
   sessionID: string,
-  beforeMessageID: string
+  beforeMessageID: string,
 ): StoredSignedThinkingPart | null {
   const messages = readMessages(sessionID)
 
-  const currentIndex = messages.findIndex((message) => message.id === beforeMessageID)
+  const currentIndex = messages.findIndex(
+    (message) => message.id === beforeMessageID,
+  )
   if (currentIndex === -1) return null
 
   for (let i = currentIndex - 1; i >= 0; i--) {
@@ -130,10 +147,12 @@ function findLastThinkingPart(
 export function prependThinkingPart(
   sessionID: string,
   messageID: string,
-  deps: ThinkingPrependDeps = thinkingPrependDeps
+  deps: ThinkingPrependDeps = thinkingPrependDeps,
 ): boolean {
   if (deps.isSqliteBackend()) {
-    log("[session-recovery] Disabled on SQLite backend: prependThinkingPart (use async variant)")
+    log(
+      "[session-recovery] Disabled on SQLite backend: prependThinkingPart (use async variant)",
+    )
     return false
   }
 
@@ -142,7 +161,12 @@ export function prependThinkingPart(
     return false
   }
 
-  if (!canPrependBeforeTargetParts(previousThinkingPart.id, deps.readTargetPartIDs(messageID))) {
+  if (
+    !canPrependBeforeTargetParts(
+      previousThinkingPart.id,
+      deps.readTargetPartIDs(messageID),
+    )
+  ) {
     return false
   }
 
@@ -155,7 +179,7 @@ export function prependThinkingPart(
   try {
     writeFileSync(
       join(partDir, `${previousThinkingPart.id}.json`),
-      JSON.stringify(previousThinkingPart, null, 2)
+      JSON.stringify(previousThinkingPart, null, 2),
     )
     return true
   } catch {
@@ -166,13 +190,17 @@ export function prependThinkingPart(
 async function findLastThinkingPartFromSDK(
   client: OpencodeClient,
   sessionID: string,
-  beforeMessageID: string
+  beforeMessageID: string,
 ): Promise<SDKSignedThinkingPart | null> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
 
-    const currentIndex = messages.findIndex((m) => m.info?.id === beforeMessageID)
+    const currentIndex = messages.findIndex(
+      (m) => m.info?.id === beforeMessageID,
+    )
     if (currentIndex === -1) return null
 
     for (let i = currentIndex - 1; i >= 0; i--) {
@@ -196,14 +224,22 @@ export async function prependThinkingPartAsync(
   client: OpencodeClient,
   sessionID: string,
   messageID: string,
-  deps: ThinkingPrependDeps = thinkingPrependDeps
+  deps: ThinkingPrependDeps = thinkingPrependDeps,
 ): Promise<boolean> {
-  const previousThinkingPart = await deps.findLastThinkingPartFromSDK(client, sessionID, messageID)
+  const previousThinkingPart = await deps.findLastThinkingPartFromSDK(
+    client,
+    sessionID,
+    messageID,
+  )
   if (!previousThinkingPart) {
     return false
   }
 
-  const targetPartIDs = await deps.readTargetPartIDsFromSDK(client, sessionID, messageID)
+  const targetPartIDs = await deps.readTargetPartIDsFromSDK(
+    client,
+    sessionID,
+    messageID,
+  )
   if (!canPrependBeforeTargetParts(previousThinkingPart.id, targetPartIDs)) {
     return false
   }
@@ -214,10 +250,12 @@ export async function prependThinkingPartAsync(
       sessionID,
       messageID,
       previousThinkingPart.id,
-      toPatchBody(previousThinkingPart)
+      toPatchBody(previousThinkingPart),
     )
   } catch (error) {
-    deps.log("[session-recovery] prependThinkingPartAsync failed", { error: String(error) })
+    deps.log("[session-recovery] prependThinkingPartAsync failed", {
+      error: String(error),
+    })
     return false
   }
 }

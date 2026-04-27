@@ -36,14 +36,19 @@ export async function getSdkMainSessions(
   return mainSessions.sort((a, b) => b.time.updated - a.time.updated)
 }
 
-export async function getSdkAllSessions(client: PluginInput["client"]): Promise<string[]> {
+export async function getSdkAllSessions(
+  client: PluginInput["client"],
+): Promise<string[]> {
   const response = await client.session.list()
   throwOnNonFallbackableSdkError(response)
   const sessions = normalizeSDKResponse(response, [] as SessionMetadata[])
   return sessions.map((session) => session.id)
 }
 
-export async function sdkSessionExists(client: PluginInput["client"], sessionID: string): Promise<boolean> {
+export async function sdkSessionExists(
+  client: PluginInput["client"],
+  sessionID: string,
+): Promise<boolean> {
   const response = await client.session.list()
   throwOnNonFallbackableSdkError(response)
   const sessions = normalizeSDKResponse(response, [] as Array<{ id?: string }>)
@@ -57,25 +62,28 @@ export async function getSdkSessionMessages(
   const response = await client.session.messages({ path: { id: sessionID } })
   throwOnNonFallbackableSdkError(response)
 
-  const rawMessages = normalizeSDKResponse(response, [] as Array<{
-    info?: {
-      id?: string
-      role?: string
-      agent?: string
-      time?: { created?: number; updated?: number }
-    }
-    parts?: Array<{
-      id?: string
-      type?: string
-      text?: string
-      thinking?: string
-      tool?: string
-      callID?: string
-      input?: Record<string, unknown>
-      output?: string
-      error?: string
-    }>
-  }>)
+  const rawMessages = normalizeSDKResponse(
+    response,
+    [] as Array<{
+      info?: {
+        id?: string
+        role?: string
+        agent?: string
+        time?: { created?: number; updated?: number }
+      }
+      parts?: Array<{
+        id?: string
+        type?: string
+        text?: string
+        thinking?: string
+        tool?: string
+        callID?: string
+        input?: Record<string, unknown>
+        output?: string
+        error?: string
+      }>
+    }>,
+  )
 
   const messages: SessionMessage[] = rawMessages
     .filter((message) => message.info?.id)
@@ -111,16 +119,22 @@ export async function getSdkSessionMessages(
   })
 }
 
-export async function getSdkSessionTodos(client: PluginInput["client"], sessionID: string): Promise<TodoItem[]> {
+export async function getSdkSessionTodos(
+  client: PluginInput["client"],
+  sessionID: string,
+): Promise<TodoItem[]> {
   const response = await client.session.todo({ path: { id: sessionID } })
   throwOnNonFallbackableSdkError(response)
 
-  const data = normalizeSDKResponse(response, [] as Array<{
-    id?: string
-    content?: string
-    status?: string
-    priority?: string
-  }>)
+  const data = normalizeSDKResponse(
+    response,
+    [] as Array<{
+      id?: string
+      content?: string
+      status?: string
+      priority?: string
+    }>,
+  )
 
   return data.map((item) => ({
     id: item.id || "",

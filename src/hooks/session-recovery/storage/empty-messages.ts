@@ -14,7 +14,10 @@ export function findEmptyMessages(sessionID: string): string[] {
   return emptyIds
 }
 
-export function findEmptyMessageByIndex(sessionID: string, targetIndex: number): string | null {
+export function findEmptyMessageByIndex(
+  sessionID: string,
+  targetIndex: number,
+): string | null {
   const messages = readMessages(sessionID)
 
   const indicesToTry = [

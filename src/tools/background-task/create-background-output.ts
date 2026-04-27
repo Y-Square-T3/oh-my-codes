@@ -17,14 +17,20 @@ const SISYPHUS_JUNIOR_AGENT = getAgentDisplayName("sisyphus-junior")
 type ToolContextWithMetadata = {
   sessionID: string
   messageID?: string
-  metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void
+  metadata?: (input: {
+    title?: string
+    metadata?: Record<string, unknown>
+  }) => void
   callID?: string
   callId?: string
   call_id?: string
 }
 
 function formatResolvedTitle(task: BackgroundTask): string {
-  const label = task.agent === SISYPHUS_JUNIOR_AGENT && task.category ? task.category : task.agent
+  const label =
+    task.agent === SISYPHUS_JUNIOR_AGENT && task.category
+      ? task.category
+      : task.agent
   return `${label} - ${task.description}`
 }
 
@@ -36,7 +42,10 @@ function appendTimeoutNote(output: string, timeoutMs: number): string {
   return `${output}\n\n> **Timed out waiting** after ${timeoutMs}ms. Task is still running; showing latest available output.`
 }
 
-export function createBackgroundOutput(manager: BackgroundOutputManager, client: BackgroundOutputClient): ToolDefinition {
+export function createBackgroundOutput(
+  manager: BackgroundOutputManager,
+  client: BackgroundOutputClient,
+): ToolDefinition {
   return tool({
     description: BACKGROUND_OUTPUT_DESCRIPTION,
     args: {
@@ -45,15 +54,40 @@ export function createBackgroundOutput(manager: BackgroundOutputManager, client:
         .boolean()
         .optional()
         .describe(
-          "Wait for completion (default: false). System notifies when done, so blocking is rarely needed."
+          "Wait for completion (default: false). System notifies when done, so blocking is rarely needed.",
         ),
-      timeout: tool.schema.number().optional().describe("Max wait time in ms (default: 60000, max: 600000)"),
-      full_session: tool.schema.boolean().optional().describe("Return full session messages with filters (default: false)"),
-      include_thinking: tool.schema.boolean().optional().describe("Include thinking/reasoning parts in full_session output (default: false)"),
-      message_limit: tool.schema.number().optional().describe("Max messages to return (capped at 100)"),
-      since_message_id: tool.schema.string().optional().describe("Return messages after this message ID (exclusive)"),
-      include_tool_results: tool.schema.boolean().optional().describe("Include tool results in full_session output (default: false)"),
-      thinking_max_chars: tool.schema.number().optional().describe("Max characters for thinking content (default: 2000)"),
+      timeout: tool.schema
+        .number()
+        .optional()
+        .describe("Max wait time in ms (default: 60000, max: 600000)"),
+      full_session: tool.schema
+        .boolean()
+        .optional()
+        .describe("Return full session messages with filters (default: false)"),
+      include_thinking: tool.schema
+        .boolean()
+        .optional()
+        .describe(
+          "Include thinking/reasoning parts in full_session output (default: false)",
+        ),
+      message_limit: tool.schema
+        .number()
+        .optional()
+        .describe("Max messages to return (capped at 100)"),
+      since_message_id: tool.schema
+        .string()
+        .optional()
+        .describe("Return messages after this message ID (exclusive)"),
+      include_tool_results: tool.schema
+        .boolean()
+        .optional()
+        .describe(
+          "Include tool results in full_session output (default: false)",
+        ),
+      thinking_max_chars: tool.schema
+        .number()
+        .optional()
+        .describe("Max characters for thinking content (default: 2000)"),
     },
     async execute(args: BackgroundOutputArgs, toolContext) {
       try {
@@ -70,7 +104,9 @@ export function createBackgroundOutput(manager: BackgroundOutputManager, client:
             agent: task.agent,
             category: task.category,
             description: task.description,
-            ...(task.sessionID ? { sessionId: task.sessionID, taskId: task.sessionID } : {}),
+            ...(task.sessionID
+              ? { sessionId: task.sessionID, taskId: task.sessionID }
+              : {}),
           } as Record<string, unknown>,
         }
         await publishToolMetadata(ctx, meta)
@@ -114,7 +150,8 @@ export function createBackgroundOutput(manager: BackgroundOutputManager, client:
         const isActive = isTaskActiveStatus(resolvedTask.status)
         const fullSession = args.full_session ?? false
         const includeThinking = isActive || (args.include_thinking ?? false)
-        const includeToolResults = isActive || (args.include_tool_results ?? false)
+        const includeToolResults =
+          isActive || (args.include_tool_results ?? false)
 
         if (fullSession) {
           const output = await formatFullSession(resolvedTask, client, {
@@ -125,20 +162,32 @@ export function createBackgroundOutput(manager: BackgroundOutputManager, client:
             thinkingMaxChars: args.thinking_max_chars,
           })
 
-          return didTimeoutWhileActive ? appendTimeoutNote(output, timeoutMs) : output
+          return didTimeoutWhileActive
+            ? appendTimeoutNote(output, timeoutMs)
+            : output
         }
 
         if (resolvedTask.status === "completed") {
-          recordBackgroundOutputConsumption(ctx.sessionID, ctx.messageID, resolvedTask.sessionID)
+          recordBackgroundOutputConsumption(
+            ctx.sessionID,
+            ctx.messageID,
+            resolvedTask.sessionID,
+          )
           return await formatTaskResult(resolvedTask, client)
         }
 
-        if (resolvedTask.status === "error" || resolvedTask.status === "cancelled" || resolvedTask.status === "interrupt") {
+        if (
+          resolvedTask.status === "error" ||
+          resolvedTask.status === "cancelled" ||
+          resolvedTask.status === "interrupt"
+        ) {
           return formatTaskStatus(resolvedTask)
         }
 
         const statusOutput = formatTaskStatus(resolvedTask)
-        return didTimeoutWhileActive ? appendTimeoutNote(statusOutput, timeoutMs) : statusOutput
+        return didTimeoutWhileActive
+          ? appendTimeoutNote(statusOutput, timeoutMs)
+          : statusOutput
       } catch (error) {
         return `Error getting output: ${error instanceof Error ? error.message : String(error)}`
       }

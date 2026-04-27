@@ -45,8 +45,17 @@ function createDoctorResult(): DoctorResult {
 function createDoctorResultWithIssues(): DoctorResult {
   const base = createDoctorResult()
   base.results[1].issues = [
-    { title: "Config issue", description: "Bad config", severity: "error" as const, fix: "Fix it" },
-    { title: "Tool warning", description: "Missing tool", severity: "warning" as const },
+    {
+      title: "Config issue",
+      description: "Bad config",
+      severity: "error" as const,
+      fix: "Fix it",
+    },
+    {
+      title: "Tool warning",
+      description: "Missing tool",
+      severity: "warning" as const,
+    },
   ]
   base.summary.failed = 1
   base.summary.warnings = 1
@@ -61,7 +70,10 @@ function createDoctorResultWithDetails(): DoctorResult {
       name: "Models",
       status: "pass",
       message: "2 agents, 1 category, 0 overrides",
-      details: ["Available models: openai/gpt-5.4", "Agent sisyphus -> openai/gpt-5.4"],
+      details: [
+        "Available models: openai/gpt-5.4",
+        "Agent sisyphus -> openai/gpt-5.4",
+      ],
       issues: [],
     },
   ]
@@ -75,19 +87,25 @@ describe("formatDoctorOutput", () => {
     it("shows System OK when no issues", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatDoctorOutput } = await import(`./formatter?default-ok-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?default-ok-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "default"))
 
       //#then
-      expect(output).toContain("System OK (opencode 1.0.200 · oh-my-openagent 3.4.0)")
+      expect(output).toContain(
+        "System OK (opencode 1.0.200 · oh-my-openagent 3.4.0)",
+      )
     })
 
     it("shows issue count and details when issues exist", async () => {
       //#given
       const result = createDoctorResultWithIssues()
-      const { formatDoctorOutput } = await import(`./formatter?default-issues-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?default-issues-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "default"))
@@ -103,7 +121,9 @@ describe("formatDoctorOutput", () => {
     it("renders system version line", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatDoctorOutput } = await import(`./formatter?status-ver-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?status-ver-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "status"))
@@ -115,7 +135,9 @@ describe("formatDoctorOutput", () => {
     it("renders tool and MCP info", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatDoctorOutput } = await import(`./formatter?status-tools-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?status-tools-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "status"))
@@ -130,7 +152,9 @@ describe("formatDoctorOutput", () => {
     it("includes all section headers", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatDoctorOutput } = await import(`./formatter?verbose-headers-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?verbose-headers-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "verbose"))
@@ -146,7 +170,9 @@ describe("formatDoctorOutput", () => {
     it("shows check summary counts", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatDoctorOutput } = await import(`./formatter?verbose-summary-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?verbose-summary-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "verbose"))
@@ -160,7 +186,9 @@ describe("formatDoctorOutput", () => {
     it("renders check details sections such as Models", async () => {
       //#given
       const result = createDoctorResultWithDetails()
-      const { formatDoctorOutput } = await import(`./formatter?verbose-details-${Date.now()}`)
+      const { formatDoctorOutput } = await import(
+        `./formatter?verbose-details-${Date.now()}`
+      )
 
       //#when
       const output = stripAnsi(formatDoctorOutput(result, "verbose"))
@@ -176,7 +204,9 @@ describe("formatDoctorOutput", () => {
     it("returns valid JSON", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatJsonOutput } = await import(`./formatter?json-valid-${Date.now()}`)
+      const { formatJsonOutput } = await import(
+        `./formatter?json-valid-${Date.now()}`
+      )
 
       //#when
       const output = formatJsonOutput(result)
@@ -188,7 +218,9 @@ describe("formatDoctorOutput", () => {
     it("preserves all result fields", async () => {
       //#given
       const result = createDoctorResult()
-      const { formatJsonOutput } = await import(`./formatter?json-fields-${Date.now()}`)
+      const { formatJsonOutput } = await import(
+        `./formatter?json-fields-${Date.now()}`
+      )
 
       //#when
       const output = formatJsonOutput(result)

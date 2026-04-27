@@ -4,7 +4,10 @@ import { accessSync, constants, mkdirSync } from "node:fs"
 
 import { CACHE_DIR_NAME } from "./plugin-identity"
 
-function resolveWritableDirectory(preferredDir: string, fallbackSuffix: string): string {
+function resolveWritableDirectory(
+  preferredDir: string,
+  fallbackSuffix: string,
+): string {
   try {
     mkdirSync(preferredDir, { recursive: true })
     accessSync(preferredDir, constants.W_OK)
@@ -25,7 +28,8 @@ function resolveWritableDirectory(preferredDir: string, fallbackSuffix: string):
  * including Windows, so we match that behavior exactly.
  */
 export function getDataDir(): string {
-  const preferredDir = process.env.XDG_DATA_HOME ?? path.join(os.homedir(), ".local", "share")
+  const preferredDir =
+    process.env.XDG_DATA_HOME ?? path.join(os.homedir(), ".local", "share")
   return resolveWritableDirectory(preferredDir, "opencode-data")
 }
 
@@ -43,7 +47,8 @@ export function getOpenCodeStorageDir(): string {
  * - All platforms: XDG_CACHE_HOME or ~/.cache
  */
 export function getCacheDir(): string {
-  const preferredDir = process.env.XDG_CACHE_HOME ?? path.join(os.homedir(), ".cache")
+  const preferredDir =
+    process.env.XDG_CACHE_HOME ?? path.join(os.homedir(), ".cache")
   return resolveWritableDirectory(preferredDir, "opencode-cache")
 }
 

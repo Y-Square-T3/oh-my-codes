@@ -19,7 +19,7 @@ export function createThinkModeHook() {
       output: {
         message: Record<string, unknown>
         parts: Array<{ type: string; text?: string; [key: string]: unknown }>
-      }
+      },
     ): Promise<void> => {
       const promptText = extractPromptText(output.parts)
       const sessionID = input.sessionID
@@ -64,7 +64,11 @@ export function createThinkModeHook() {
       thinkModeState.set(sessionID, state)
     },
 
-    event: async ({ event }: { event: { type: string; properties?: unknown } }) => {
+    event: async ({
+      event,
+    }: {
+      event: { type: string; properties?: unknown }
+    }) => {
       if (event.type === "session.deleted") {
         const props = event.properties as { info?: { id?: string } } | undefined
         if (props?.info?.id) {

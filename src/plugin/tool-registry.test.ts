@@ -22,7 +22,12 @@ const delegateTaskTool = tool({
 })
 
 const syncSessionCreatedCallbacks: Array<
-  ((event: { sessionID: string; parentID: string; title: string }) => Promise<void>) | undefined
+  | ((event: {
+      sessionID: string
+      parentID: string
+      title: string
+    }) => Promise<void>)
+  | undefined
 > = []
 
 const trackedPaneBySession = new Map<string, string>()
@@ -30,7 +35,9 @@ let dispatchOpenClawEvent: ReturnType<typeof spyOn>
 
 const { createToolRegistry, trimToolsToCap } = await import("./tool-registry")
 
-const toolFactories: NonNullable<Parameters<typeof createToolRegistry>[0]["toolFactories"]> = {
+const toolFactories: NonNullable<
+  Parameters<typeof createToolRegistry>[0]["toolFactories"]
+> = {
   builtinTools: { bash: fakeTool, read: fakeTool },
   createBackgroundTools: mock(() => ({})),
   createCallOmoAgent: mock(() => fakeTool),
@@ -41,10 +48,14 @@ const toolFactories: NonNullable<Parameters<typeof createToolRegistry>[0]["toolF
   createGlobTools: mock(() => ({})),
   createAstGrepTools: mock(() => ({})),
   createSessionManagerTools: mock(() => ({})),
-  createDelegateTask: mock((options: { onSyncSessionCreated?: typeof syncSessionCreatedCallbacks[number] }) => {
-    syncSessionCreatedCallbacks.push(options.onSyncSessionCreated)
-    return delegateTaskTool
-  }),
+  createDelegateTask: mock(
+    (options: {
+      onSyncSessionCreated?: (typeof syncSessionCreatedCallbacks)[number]
+    }) => {
+      syncSessionCreatedCallbacks.push(options.onSyncSessionCreated)
+      return delegateTaskTool
+    },
+  ),
   discoverCommandsSync: mock(() => []),
   interactive_bash: fakeTool,
   createTaskCreateTool: mock(() => fakeTool),
@@ -54,7 +65,9 @@ const toolFactories: NonNullable<Parameters<typeof createToolRegistry>[0]["toolF
   createHashlineEditTool: mock(() => fakeTool),
 }
 
-function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig {
+function createPluginConfig(
+  overrides: Partial<OhMyCodesConfig> = {},
+): OhMyCodesConfig {
   return {
     git_master: {
       commit_footer: false,
@@ -66,7 +79,10 @@ function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodes
 }
 
 beforeEach(() => {
-  dispatchOpenClawEvent = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent")
+  dispatchOpenClawEvent = spyOn(
+    openclawRuntimeDispatch,
+    "dispatchOpenClawEvent",
+  )
   syncSessionCreatedCallbacks.length = 0
 })
 
@@ -91,7 +107,9 @@ describe("#given task_system configuration", () => {
     syncSessionCreatedCallbacks.length = 0
 
     const result = createToolRegistry({
-      ctx: { directory: "/tmp" } as Parameters<typeof createToolRegistry>[0]["ctx"],
+      ctx: { directory: "/tmp" } as Parameters<
+        typeof createToolRegistry
+      >[0]["ctx"],
       pluginConfig: createPluginConfig(),
       managers: {
         backgroundManager: {},
@@ -119,7 +137,9 @@ describe("#given task_system configuration", () => {
     syncSessionCreatedCallbacks.length = 0
 
     const result = createToolRegistry({
-      ctx: { directory: "/tmp" } as Parameters<typeof createToolRegistry>[0]["ctx"],
+      ctx: { directory: "/tmp" } as Parameters<
+        typeof createToolRegistry
+      >[0]["ctx"],
       pluginConfig: createPluginConfig({
         experimental: { task_system: true },
       }),
@@ -151,7 +171,9 @@ describe("#given tmux integration is disabled", () => {
     syncSessionCreatedCallbacks.length = 0
 
     const result = createToolRegistry({
-      ctx: { directory: "/tmp" } as Parameters<typeof createToolRegistry>[0]["ctx"],
+      ctx: { directory: "/tmp" } as Parameters<
+        typeof createToolRegistry
+      >[0]["ctx"],
       pluginConfig: createPluginConfig({
         tmux: {
           enabled: false,
@@ -185,7 +207,9 @@ describe("#given tmux integration is disabled", () => {
     syncSessionCreatedCallbacks.length = 0
 
     const result = createToolRegistry({
-      ctx: { directory: "/tmp" } as Parameters<typeof createToolRegistry>[0]["ctx"],
+      ctx: { directory: "/tmp" } as Parameters<
+        typeof createToolRegistry
+      >[0]["ctx"],
       pluginConfig: createPluginConfig({
         tmux: {
           enabled: false,
@@ -223,7 +247,9 @@ describe("#given openclaw is enabled for sync task sessions", () => {
     trackedPaneBySession.clear()
 
     const tmuxSessionManager = {
-      async onSessionCreated(event: { properties?: { info?: { id?: string } } }): Promise<void> {
+      async onSessionCreated(event: {
+        properties?: { info?: { id?: string } }
+      }): Promise<void> {
         const sessionID = event.properties?.info?.id
         if (sessionID) {
           trackedPaneBySession.set(sessionID, `%pane-${sessionID}`)
@@ -241,7 +267,9 @@ describe("#given openclaw is enabled for sync task sessions", () => {
     }
 
     createToolRegistry({
-      ctx: { directory: "/tmp/project" } as Parameters<typeof createToolRegistry>[0]["ctx"],
+      ctx: { directory: "/tmp/project" } as Parameters<
+        typeof createToolRegistry
+      >[0]["ctx"],
       pluginConfig: createPluginConfig({ openclaw: openclawConfig }),
       managers: {
         backgroundManager: {},
@@ -258,7 +286,8 @@ describe("#given openclaw is enabled for sync task sessions", () => {
       toolFactories,
     })
 
-    const onSyncSessionCreated = syncSessionCreatedCallbacks[syncSessionCreatedCallbacks.length - 1]
+    const onSyncSessionCreated =
+      syncSessionCreatedCallbacks[syncSessionCreatedCallbacks.length - 1]
     await onSyncSessionCreated?.({
       sessionID: "ses-sync-1",
       parentID: "ses-parent",

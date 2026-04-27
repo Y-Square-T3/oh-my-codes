@@ -21,7 +21,10 @@ describe("BackgroundManager session permission", () => {
       },
     }
     const directory = tmpdir()
-    const manager = new BackgroundManager({ client, directory } as unknown as PluginInput)
+    const manager = new BackgroundManager({
+      client,
+      directory,
+    } as unknown as PluginInput)
 
     // when
     await manager.launch({
@@ -62,7 +65,10 @@ describe("BackgroundManager session permission", () => {
         abort: async () => ({}),
       },
     }
-    const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput)
+    const manager = new BackgroundManager({
+      client,
+      directory: tmpdir(),
+    } as unknown as PluginInput)
 
     // when
     await manager.launch({
@@ -75,7 +81,7 @@ describe("BackgroundManager session permission", () => {
         { permission: "question", action: "deny", pattern: "*" },
       ],
     })
-    await new Promise(resolve => setTimeout(resolve, 50))
+    await new Promise((resolve) => setTimeout(resolve, 50))
     manager.shutdown()
 
     // then
@@ -83,9 +89,7 @@ describe("BackgroundManager session permission", () => {
     expect(createCalls[0]?.body).toEqual({
       parentID: "ses_parent",
       title: "Test task (@explore subagent)",
-      permission: [
-        { permission: "question", action: "deny", pattern: "*" },
-      ],
+      permission: [{ permission: "question", action: "deny", pattern: "*" }],
     })
   })
 })

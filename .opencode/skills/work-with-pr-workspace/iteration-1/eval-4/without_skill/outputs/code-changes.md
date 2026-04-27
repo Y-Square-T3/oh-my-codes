@@ -241,12 +241,12 @@ Changes needed in existing tests (count 3 → 4) plus one new test:
 
 ## Summary of Touched Files
 
-| File | Lines Changed | Type |
-|------|--------------|------|
-| `src/mcp/arxiv.ts` | +6 (new) | Create |
-| `src/mcp/types.ts` | 1 line modified | Modify |
-| `src/mcp/index.ts` | +5 (import + block) | Modify |
+| File                    | Lines Changed                      | Type   |
+| ----------------------- | ---------------------------------- | ------ |
+| `src/mcp/arxiv.ts`      | +6 (new)                           | Create |
+| `src/mcp/types.ts`      | 1 line modified                    | Modify |
+| `src/mcp/index.ts`      | +5 (import + block)                | Modify |
 | `src/mcp/index.test.ts` | ~20 lines (count fixes + new test) | Modify |
-| `src/mcp/AGENTS.md` | ~6 lines | Modify |
+| `src/mcp/AGENTS.md`     | ~6 lines                           | Modify |
 
 Total: ~37 lines added/modified across 5 files. Minimal, surgical change.

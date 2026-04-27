@@ -22,7 +22,9 @@ export function formatTaskStatus(task: BackgroundTask): string {
   let lastMessageSection = ""
   if (task.progress?.lastMessage) {
     const truncated = truncateText(task.progress.lastMessage, 500)
-    const messageTime = task.progress.lastMessageAt ? task.progress.lastMessageAt.toISOString() : "N/A"
+    const messageTime = task.progress.lastMessageAt
+      ? task.progress.lastMessageAt.toISOString()
+      : "N/A"
     lastMessageSection = `
 
 ## Last Message (${messageTime})
@@ -32,24 +34,24 @@ ${truncated}
 \`\`\``
   }
 
-   let statusNote = ""
-   if (task.status === "pending") {
-     statusNote = `
+  let statusNote = ""
+  if (task.status === "pending") {
+    statusNote = `
 
 > **Queued**: Task is waiting for a concurrency slot to become available.`
-   } else if (task.status === "running") {
-     statusNote = `
+  } else if (task.status === "running") {
+    statusNote = `
 
 > **Note**: No need to wait explicitly - the system will notify you when this task completes.`
-   } else if (task.status === "error") {
-     statusNote = `
+  } else if (task.status === "error") {
+    statusNote = `
 
 > **Failed**: The task encountered an error. Check the last message for details.`
-   } else if (task.status === "interrupt") {
-     statusNote = `
+  } else if (task.status === "interrupt") {
+    statusNote = `
 
 > **Interrupted**: The task was interrupted by a prompt error. The session may contain partial results.`
-   }
+  }
 
   const durationLabel = task.status === "pending" ? "Queued for" : "Duration"
 

@@ -8,7 +8,11 @@ import * as loader from "./loader"
 
 const TEST_DIR = join(tmpdir(), `claude-code-command-loader-${Date.now()}`)
 
-function writeCommand(directory: string, name: string, description: string): void {
+function writeCommand(
+  directory: string,
+  name: string,
+  description: string,
+): void {
   mkdirSync(directory, { recursive: true })
   writeFileSync(
     join(directory, `${name}.md`),
@@ -30,7 +34,10 @@ describe("claude-code command loader", () => {
     process.env.CLAUDE_CONFIG_DIR = claudeConfigDir
     process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir
 
-    if ("clearCommandLoaderCache" in loader && typeof loader.clearCommandLoaderCache === "function") {
+    if (
+      "clearCommandLoaderCache" in loader &&
+      typeof loader.clearCommandLoaderCache === "function"
+    ) {
       loader.clearCommandLoaderCache()
     }
   })
@@ -48,7 +55,10 @@ describe("claude-code command loader", () => {
       process.env.OPENCODE_CONFIG_DIR = originalOpencodeConfigDir
     }
 
-    if ("clearCommandLoaderCache" in loader && typeof loader.clearCommandLoaderCache === "function") {
+    if (
+      "clearCommandLoaderCache" in loader &&
+      typeof loader.clearCommandLoaderCache === "function"
+    ) {
       loader.clearCommandLoaderCache()
     }
 
@@ -59,24 +69,36 @@ describe("claude-code command loader", () => {
     // given
     const projectDir = join(TEST_DIR, "project")
     const childDir = join(projectDir, "apps", "desktop")
-    writeCommand(join(projectDir, ".opencode", "commands"), "ancestor", "Ancestor command")
+    writeCommand(
+      join(projectDir, ".opencode", "commands"),
+      "ancestor",
+      "Ancestor command",
+    )
 
     // when
     const commands = await loader.loadOpencodeProjectCommands(childDir)
 
     // then
-    expect(commands.ancestor?.description).toBe("(opencode-project) Ancestor command")
+    expect(commands.ancestor?.description).toBe(
+      "(opencode-project) Ancestor command",
+    )
   })
 
   it("#given a .opencode/command directory #when loadOpencodeProjectCommands is called #then it loads the singular alias directory", async () => {
     // given
-    writeCommand(join(TEST_DIR, ".opencode", "command"), "singular", "Singular command")
+    writeCommand(
+      join(TEST_DIR, ".opencode", "command"),
+      "singular",
+      "Singular command",
+    )
 
     // when
     const commands = await loader.loadOpencodeProjectCommands(TEST_DIR)
 
     // then
-    expect(commands.singular?.description).toBe("(opencode-project) Singular command")
+    expect(commands.singular?.description).toBe(
+      "(opencode-project) Singular command",
+    )
   })
 
   it("#given duplicate project command names across ancestors #when loadOpencodeProjectCommands is called #then the nearest directory wins", async () => {
@@ -92,20 +114,28 @@ describe("claude-code command loader", () => {
     const commands = await loader.loadOpencodeProjectCommands(childDir)
 
     // then
-    expect(commands.duplicate?.description).toBe("(opencode-project) Nearest command")
+    expect(commands.duplicate?.description).toBe(
+      "(opencode-project) Nearest command",
+    )
   })
 
   it("#given a global .opencode/commands directory #when loadOpencodeGlobalCommands is called #then it loads the plural alias directory", async () => {
     // given
     const opencodeConfigDir = join(TEST_DIR, "opencode-config")
     process.env.OPENCODE_CONFIG_DIR = opencodeConfigDir
-    writeCommand(join(opencodeConfigDir, "commands"), "global-plural", "Global plural command")
+    writeCommand(
+      join(opencodeConfigDir, "commands"),
+      "global-plural",
+      "Global plural command",
+    )
 
     // when
     const commands = await loader.loadOpencodeGlobalCommands()
 
     // then
-    expect(commands["global-plural"]?.description).toBe("(opencode) Global plural command")
+    expect(commands["global-plural"]?.description).toBe(
+      "(opencode) Global plural command",
+    )
   })
 
   it("#given duplicate global command names across profile and parent dirs #when loadOpencodeGlobalCommands is called #then the profile dir wins", async () => {
@@ -113,14 +143,24 @@ describe("claude-code command loader", () => {
     const opencodeRootDir = join(TEST_DIR, "opencode-root")
     const profileConfigDir = join(opencodeRootDir, "profiles", "codex")
     process.env.OPENCODE_CONFIG_DIR = profileConfigDir
-    writeCommand(join(opencodeRootDir, "commands"), "duplicate-global", "Parent global command")
-    writeCommand(join(profileConfigDir, "commands"), "duplicate-global", "Profile global command")
+    writeCommand(
+      join(opencodeRootDir, "commands"),
+      "duplicate-global",
+      "Parent global command",
+    )
+    writeCommand(
+      join(profileConfigDir, "commands"),
+      "duplicate-global",
+      "Profile global command",
+    )
 
     // when
     const commands = await loader.loadOpencodeGlobalCommands()
 
     // then
-    expect(commands["duplicate-global"]?.description).toBe("(opencode) Profile global command")
+    expect(commands["duplicate-global"]?.description).toBe(
+      "(opencode) Profile global command",
+    )
   })
 
   it("#given nested project opencode commands in a worktree #when loadOpencodeProjectCommands is called #then it preserves slash names and stops at the worktree root", async () => {
@@ -132,16 +172,32 @@ describe("claude-code command loader", () => {
       cwd: repositoryDir,
       stdio: ["ignore", "ignore", "ignore"],
     })
-    writeCommand(join(repositoryDir, ".opencode", "commands", "deploy"), "staging", "Deploy staging")
-    writeCommand(join(repositoryDir, ".opencode", "command"), "release", "Release command")
-    writeCommand(join(TEST_DIR, ".opencode", "commands"), "outside", "Outside command")
+    writeCommand(
+      join(repositoryDir, ".opencode", "commands", "deploy"),
+      "staging",
+      "Deploy staging",
+    )
+    writeCommand(
+      join(repositoryDir, ".opencode", "command"),
+      "release",
+      "Release command",
+    )
+    writeCommand(
+      join(TEST_DIR, ".opencode", "commands"),
+      "outside",
+      "Outside command",
+    )
 
     // when
     const commands = await loader.loadOpencodeProjectCommands(nestedDirectory)
 
     // then
-    expect(commands["deploy/staging"]?.description).toBe("(opencode-project) Deploy staging")
-    expect(commands.release?.description).toBe("(opencode-project) Release command")
+    expect(commands["deploy/staging"]?.description).toBe(
+      "(opencode-project) Deploy staging",
+    )
+    expect(commands.release?.description).toBe(
+      "(opencode-project) Release command",
+    )
     expect(commands.outside).toBeUndefined()
     expect(commands["deploy:staging"]).toBeUndefined()
   })
@@ -165,7 +221,11 @@ describe("claude-code command loader", () => {
 
   it("#given a previously loaded directory #when loadAllCommands is called twice #then the second call reuses the cached result without readdir calls", async () => {
     // given
-    writeCommand(join(TEST_DIR, ".claude", "commands"), "cached", "Cached command")
+    writeCommand(
+      join(TEST_DIR, ".claude", "commands"),
+      "cached",
+      "Cached command",
+    )
     const readdirSpy = spyOn(fs, "readdir")
 
     // when

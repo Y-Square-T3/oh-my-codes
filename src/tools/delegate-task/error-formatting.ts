@@ -19,14 +19,20 @@ export function formatDetailedError(error: unknown, ctx: ErrorContext): string {
   const message = error instanceof Error ? error.message : String(error)
   const stack = error instanceof Error ? error.stack : undefined
 
-  const lines: string[] = [`${ctx.operation} failed`, "", `**Error**: ${message}`]
+  const lines: string[] = [
+    `${ctx.operation} failed`,
+    "",
+    `**Error**: ${message}`,
+  ]
 
   if (ctx.sessionID) {
     lines.push(`**Session ID**: ${ctx.sessionID}`)
   }
 
   if (ctx.agent) {
-    lines.push(`**Agent**: ${ctx.agent}${ctx.category ? ` (category: ${ctx.category})` : ""}`)
+    lines.push(
+      `**Agent**: ${ctx.agent}${ctx.category ? ` (category: ${ctx.category})` : ""}`,
+    )
   }
 
   if (ctx.args) {

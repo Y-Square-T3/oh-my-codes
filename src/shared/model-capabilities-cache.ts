@@ -1,6 +1,9 @@
 import * as dataPath from "./data-path"
 import { createJsonFileCacheStore } from "./json-file-cache-store"
-import type { ModelCapabilitiesSnapshot, ModelCapabilitiesSnapshotEntry } from "./model-capabilities"
+import type {
+  ModelCapabilitiesSnapshot,
+  ModelCapabilitiesSnapshotEntry,
+} from "./model-capabilities"
 
 export const MODELS_DEV_SOURCE_URL = "https://models.dev/api.json"
 const MODEL_CAPABILITIES_CACHE_FILE = "model-capabilities.json"
@@ -26,11 +29,16 @@ function readStringArray(value: unknown): string[] | undefined {
     return undefined
   }
 
-  const result = value.filter((item): item is string => typeof item === "string")
+  const result = value.filter(
+    (item): item is string => typeof item === "string",
+  )
   return result.length > 0 ? result : undefined
 }
 
-function normalizeSnapshotEntry(rawModelID: string, rawModel: unknown): ModelCapabilitiesSnapshotEntry | undefined {
+function normalizeSnapshotEntry(
+  rawModelID: string,
+  rawModel: unknown,
+): ModelCapabilitiesSnapshotEntry | undefined {
   if (!isRecord(rawModel)) {
     return undefined
   }
@@ -41,27 +49,33 @@ function normalizeSnapshotEntry(rawModelID: string, rawModel: unknown): ModelCap
   const temperature = readBoolean(rawModel.temperature)
   const toolCall = readBoolean(rawModel.tool_call)
 
-  const rawModalities = isRecord(rawModel.modalities) ? rawModel.modalities : undefined
+  const rawModalities = isRecord(rawModel.modalities)
+    ? rawModel.modalities
+    : undefined
   const modalitiesInput = readStringArray(rawModalities?.input)
   const modalitiesOutput = readStringArray(rawModalities?.output)
-  const modalities = modalitiesInput || modalitiesOutput
-    ? {
-        ...(modalitiesInput ? { input: modalitiesInput } : {}),
-        ...(modalitiesOutput ? { output: modalitiesOutput } : {}),
-      }
-    : undefined
+  const modalities =
+    modalitiesInput || modalitiesOutput
+      ? {
+          ...(modalitiesInput ? { input: modalitiesInput } : {}),
+          ...(modalitiesOutput ? { output: modalitiesOutput } : {}),
+        }
+      : undefined
 
   const rawLimit = isRecord(rawModel.limit) ? rawModel.limit : undefined
   const limitContext = readNumber(rawLimit?.context)
   const limitInput = readNumber(rawLimit?.input)
   const limitOutput = readNumber(rawLimit?.output)
-  const limit = limitContext !== undefined || limitInput !== undefined || limitOutput !== undefined
-    ? {
-        ...(limitContext !== undefined ? { context: limitContext } : {}),
-        ...(limitInput !== undefined ? { input: limitInput } : {}),
-        ...(limitOutput !== undefined ? { output: limitOutput } : {}),
-      }
-    : undefined
+  const limit =
+    limitContext !== undefined ||
+    limitInput !== undefined ||
+    limitOutput !== undefined
+      ? {
+          ...(limitContext !== undefined ? { context: limitContext } : {}),
+          ...(limitInput !== undefined ? { input: limitInput } : {}),
+          ...(limitOutput !== undefined ? { output: limitOutput } : {}),
+        }
+      : undefined
 
   return {
     id,
@@ -82,18 +96,20 @@ function mergeSnapshotEntries(
     return incoming
   }
 
-  const mergedModalities = existing.modalities || incoming.modalities
-    ? {
-        ...existing.modalities,
-        ...incoming.modalities,
-      }
-    : undefined
-  const mergedLimit = existing.limit || incoming.limit
-    ? {
-        ...existing.limit,
-        ...incoming.limit,
-      }
-    : undefined
+  const mergedModalities =
+    existing.modalities || incoming.modalities
+      ? {
+          ...existing.modalities,
+          ...incoming.modalities,
+        }
+      : undefined
+  const mergedLimit =
+    existing.limit || incoming.limit
+      ? {
+          ...existing.limit,
+          ...incoming.limit,
+        }
+      : undefined
 
   return {
     ...existing,
@@ -103,7 +119,9 @@ function mergeSnapshotEntries(
   }
 }
 
-export function buildModelCapabilitiesSnapshotFromModelsDev(raw: unknown): ModelCapabilitiesSnapshot {
+export function buildModelCapabilitiesSnapshotFromModelsDev(
+  raw: unknown,
+): ModelCapabilitiesSnapshot {
   const models: Record<string, ModelCapabilitiesSnapshotEntry> = {}
   const providers = isRecord(raw) ? raw : {}
 
@@ -137,10 +155,12 @@ export function buildModelCapabilitiesSnapshotFromModelsDev(raw: unknown): Model
   }
 }
 
-export async function fetchModelCapabilitiesSnapshot(args: {
-  sourceUrl?: string
-  fetchImpl?: typeof fetch
-} = {}): Promise<ModelCapabilitiesSnapshot> {
+export async function fetchModelCapabilitiesSnapshot(
+  args: {
+    sourceUrl?: string
+    fetchImpl?: typeof fetch
+  } = {},
+): Promise<ModelCapabilitiesSnapshot> {
   const sourceUrl = args.sourceUrl ?? MODELS_DEV_SOURCE_URL
   const fetchImpl = args.fetchImpl ?? fetch
   const response = await fetchImpl(sourceUrl)
@@ -160,17 +180,18 @@ export async function fetchModelCapabilitiesSnapshot(args: {
 export function createModelCapabilitiesCacheStore(
   getCacheDir: () => string = dataPath.getOmoOpenCodeCacheDir,
 ) {
-  const snapshotCacheStore = createJsonFileCacheStore<ModelCapabilitiesSnapshot>({
-    getCacheDir,
-    filename: MODEL_CAPABILITIES_CACHE_FILE,
-    logPrefix: "model-capabilities-cache",
-    cacheLabel: "Cache",
-    describe: (snapshot) => ({
-      modelCount: Object.keys(snapshot.models).length,
-      generatedAt: snapshot.generatedAt,
-    }),
-    serialize: (snapshot) => `${JSON.stringify(snapshot, null, 2)}\n`,
-  })
+  const snapshotCacheStore =
+    createJsonFileCacheStore<ModelCapabilitiesSnapshot>({
+      getCacheDir,
+      filename: MODEL_CAPABILITIES_CACHE_FILE,
+      logPrefix: "model-capabilities-cache",
+      cacheLabel: "Cache",
+      describe: (snapshot) => ({
+        modelCount: Object.keys(snapshot.models).length,
+        generatedAt: snapshot.generatedAt,
+      }),
+      serialize: (snapshot) => `${JSON.stringify(snapshot, null, 2)}\n`,
+    })
 
   function readModelCapabilitiesCache(): ModelCapabilitiesSnapshot | null {
     return snapshotCacheStore.read()
@@ -180,14 +201,18 @@ export function createModelCapabilitiesCacheStore(
     return snapshotCacheStore.has()
   }
 
-  function writeModelCapabilitiesCache(snapshot: ModelCapabilitiesSnapshot): void {
+  function writeModelCapabilitiesCache(
+    snapshot: ModelCapabilitiesSnapshot,
+  ): void {
     snapshotCacheStore.write(snapshot)
   }
 
-  async function refreshModelCapabilitiesCache(args: {
-    sourceUrl?: string
-    fetchImpl?: typeof fetch
-  } = {}): Promise<ModelCapabilitiesSnapshot> {
+  async function refreshModelCapabilitiesCache(
+    args: {
+      sourceUrl?: string
+      fetchImpl?: typeof fetch
+    } = {},
+  ): Promise<ModelCapabilitiesSnapshot> {
     const snapshot = await fetchModelCapabilitiesSnapshot(args)
     writeModelCapabilitiesCache(snapshot)
     return snapshot

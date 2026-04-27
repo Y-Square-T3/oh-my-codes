@@ -7,7 +7,8 @@ import {
   getReplyListenerStateFilePath,
 } from "./reply-listener-paths"
 
-export const REPLY_LISTENER_STARTUP_TOKEN_ENV = "OMO_OPENCLAW_REPLY_LISTENER_STARTUP_TOKEN"
+export const REPLY_LISTENER_STARTUP_TOKEN_ENV =
+  "OMO_OPENCLAW_REPLY_LISTENER_STARTUP_TOKEN"
 
 export interface ReplyListenerDaemonState {
   isRunning: boolean
@@ -57,21 +58,34 @@ function normalizeReplyListenerState(raw: unknown): ReplyListenerDaemonState {
   return {
     isRunning: state.isRunning === true,
     pid: isNumber(state.pid) ? state.pid : null,
-    startedAt: typeof state.startedAt === "string" ? state.startedAt : defaults.startedAt,
-    startupToken: typeof state.startupToken === "string" ? state.startupToken : null,
-    configSignature: typeof state.configSignature === "string" ? state.configSignature : null,
+    startedAt:
+      typeof state.startedAt === "string"
+        ? state.startedAt
+        : defaults.startedAt,
+    startupToken:
+      typeof state.startupToken === "string" ? state.startupToken : null,
+    configSignature:
+      typeof state.configSignature === "string" ? state.configSignature : null,
     lastPollAt: typeof state.lastPollAt === "string" ? state.lastPollAt : null,
-    telegramLastUpdateId: isNumber(state.telegramLastUpdateId) ? state.telegramLastUpdateId : null,
+    telegramLastUpdateId: isNumber(state.telegramLastUpdateId)
+      ? state.telegramLastUpdateId
+      : null,
     discordLastMessageId: getDiscordMessageId(state),
     lastDiscordMessageId: getDiscordMessageId(state),
     messagesSeen: isNumber(state.messagesSeen) ? state.messagesSeen : 0,
-    messagesInjected: isNumber(state.messagesInjected) ? state.messagesInjected : 0,
+    messagesInjected: isNumber(state.messagesInjected)
+      ? state.messagesInjected
+      : 0,
     errors: isNumber(state.errors) ? state.errors : 0,
-    ...(typeof state.lastError === "string" ? { lastError: state.lastError } : {}),
+    ...(typeof state.lastError === "string"
+      ? { lastError: state.lastError }
+      : {}),
   }
 }
 
-function getDiscordMessageId(state: Partial<ReplyListenerDaemonState>): string | null {
+function getDiscordMessageId(
+  state: Partial<ReplyListenerDaemonState>,
+): string | null {
   if (typeof state.lastDiscordMessageId === "string") {
     return state.lastDiscordMessageId
   }
@@ -83,7 +97,9 @@ function getDiscordMessageId(state: Partial<ReplyListenerDaemonState>): string |
   return null
 }
 
-export function createPendingReplyListenerState(startupToken: string): ReplyListenerDaemonState {
+export function createPendingReplyListenerState(
+  startupToken: string,
+): ReplyListenerDaemonState {
   return {
     ...createDefaultReplyListenerState(),
     startedAt: new Date().toISOString(),
@@ -95,20 +111,26 @@ export function readReplyListenerDaemonState(): ReplyListenerDaemonState | null 
   try {
     const stateFilePath = getReplyListenerStateFilePath()
     if (!existsSync(stateFilePath)) return null
-    return normalizeReplyListenerState(JSON.parse(readFileSync(stateFilePath, "utf-8")))
+    return normalizeReplyListenerState(
+      JSON.parse(readFileSync(stateFilePath, "utf-8")),
+    )
   } catch {
     return null
   }
 }
 
-export function writeReplyListenerDaemonState(state: ReplyListenerDaemonState): void {
+export function writeReplyListenerDaemonState(
+  state: ReplyListenerDaemonState,
+): void {
   writeSecureReplyListenerFile(
     getReplyListenerStateFilePath(),
     JSON.stringify(
       {
         ...state,
-        lastDiscordMessageId: state.lastDiscordMessageId ?? state.discordLastMessageId,
-        discordLastMessageId: state.discordLastMessageId ?? state.lastDiscordMessageId,
+        lastDiscordMessageId:
+          state.lastDiscordMessageId ?? state.discordLastMessageId,
+        discordLastMessageId:
+          state.discordLastMessageId ?? state.lastDiscordMessageId,
       },
       null,
       2,
@@ -127,7 +149,10 @@ export function readReplyListenerDaemonConfig(): OpenClawConfig | null {
 }
 
 export function writeReplyListenerDaemonConfig(config: OpenClawConfig): void {
-  writeSecureReplyListenerFile(getReplyListenerConfigFilePath(), JSON.stringify(config, null, 2))
+  writeSecureReplyListenerFile(
+    getReplyListenerConfigFilePath(),
+    JSON.stringify(config, null, 2),
+  )
 }
 
 export function readReplyListenerPid(): number | null {
@@ -157,7 +182,10 @@ export function getReplyListenerStartupTokenFromEnv(): string | null {
   return token && token.length > 0 ? token : null
 }
 
-export function recordReplyListenerPoll(state: ReplyListenerDaemonState, pid: number): void {
+export function recordReplyListenerPoll(
+  state: ReplyListenerDaemonState,
+  pid: number,
+): void {
   state.isRunning = true
   state.pid = pid
   state.lastPollAt = new Date().toISOString()

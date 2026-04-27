@@ -27,7 +27,8 @@ describe("posthog client creation", () => {
       },
     }))
 
-    const { createCliPostHog, createPluginPostHog } = await importPostHogModule()
+    const { createCliPostHog, createPluginPostHog } =
+      await importPostHogModule()
 
     // when
     const cliPostHog = createCliPostHog()
@@ -40,7 +41,9 @@ describe("posthog client creation", () => {
         event: "run_started",
       }),
     ).not.toThrow()
-    expect(() => cliPostHog.captureException(new Error("cli failure"), "cli")).not.toThrow()
+    expect(() =>
+      cliPostHog.captureException(new Error("cli failure"), "cli"),
+    ).not.toThrow()
     expect(() => cliPostHog.trackActive("cli", "run_started")).not.toThrow()
     await expect(cliPostHog.shutdown()).resolves.toBeUndefined()
 
@@ -50,8 +53,12 @@ describe("posthog client creation", () => {
         event: "plugin_loaded",
       }),
     ).not.toThrow()
-    expect(() => pluginPostHog.captureException(new Error("plugin failure"), "plugin")).not.toThrow()
-    expect(() => pluginPostHog.trackActive("plugin", "plugin_loaded")).not.toThrow()
+    expect(() =>
+      pluginPostHog.captureException(new Error("plugin failure"), "plugin"),
+    ).not.toThrow()
+    expect(() =>
+      pluginPostHog.trackActive("plugin", "plugin_loaded"),
+    ).not.toThrow()
     await expect(pluginPostHog.shutdown()).resolves.toBeUndefined()
   })
 })

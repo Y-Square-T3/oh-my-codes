@@ -17,8 +17,7 @@ function flush(): void {
   buffer = []
   try {
     fs.appendFileSync(logFile, data)
-  } catch {
-  }
+  } catch {}
 }
 
 function scheduleFlush(): void {
@@ -39,8 +38,7 @@ export function log(message: string, data?: unknown): void {
     } else {
       scheduleFlush()
     }
-  } catch {
-  }
+  } catch {}
 }
 
 export function getLogFilePath(): string {

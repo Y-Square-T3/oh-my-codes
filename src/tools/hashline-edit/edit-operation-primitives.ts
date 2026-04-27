@@ -21,13 +21,16 @@ export function applySetLine(
   lines: string[],
   anchor: string,
   newText: string | string[],
-  options?: EditApplyOptions
+  options?: EditApplyOptions,
 ): string[] {
   if (shouldValidate(options)) validateLineRef(lines, anchor)
   const { line } = parseLineRef(anchor)
   const result = [...lines]
   const originalLine = lines[line - 1] ?? ""
-  const corrected = autocorrectReplacementLines([originalLine], toNewLines(newText))
+  const corrected = autocorrectReplacementLines(
+    [originalLine],
+    toNewLines(newText),
+  )
   const replacement = corrected.map((entry, idx) => {
     if (idx !== 0) return entry
     return restoreLeadingIndent(originalLine, entry)
@@ -41,7 +44,7 @@ export function applyReplaceLines(
   startAnchor: string,
   endAnchor: string,
   newText: string | string[],
-  options?: EditApplyOptions
+  options?: EditApplyOptions,
 ): string[] {
   if (shouldValidate(options)) {
     validateLineRef(lines, startAnchor)
@@ -53,13 +56,18 @@ export function applyReplaceLines(
 
   if (startLine > endLine) {
     throw new Error(
-      `Invalid range: start line ${startLine} cannot be greater than end line ${endLine}`
+      `Invalid range: start line ${startLine} cannot be greater than end line ${endLine}`,
     )
   }
 
   const result = [...lines]
   const originalRange = lines.slice(startLine - 1, endLine)
-  const stripped = stripRangeBoundaryEcho(lines, startLine, endLine, toNewLines(newText))
+  const stripped = stripRangeBoundaryEcho(
+    lines,
+    startLine,
+    endLine,
+    toNewLines(newText),
+  )
   const corrected = autocorrectReplacementLines(originalRange, stripped)
   const restored = corrected.map((entry, idx) => {
     if (idx !== 0) return entry
@@ -73,7 +81,7 @@ export function applyInsertAfter(
   lines: string[],
   anchor: string,
   text: string | string[],
-  options?: EditApplyOptions
+  options?: EditApplyOptions,
 ): string[] {
   if (shouldValidate(options)) validateLineRef(lines, anchor)
   const { line } = parseLineRef(anchor)
@@ -90,7 +98,7 @@ export function applyInsertBefore(
   lines: string[],
   anchor: string,
   text: string | string[],
-  options?: EditApplyOptions
+  options?: EditApplyOptions,
 ): string[] {
   if (shouldValidate(options)) validateLineRef(lines, anchor)
   const { line } = parseLineRef(anchor)
@@ -103,7 +111,10 @@ export function applyInsertBefore(
   return result
 }
 
-export function applyAppend(lines: string[], text: string | string[]): string[] {
+export function applyAppend(
+  lines: string[],
+  text: string | string[],
+): string[] {
   const normalized = toNewLines(text)
   if (normalized.length === 0) {
     throw new Error("append requires non-empty text")
@@ -114,7 +125,10 @@ export function applyAppend(lines: string[], text: string | string[]): string[] 
   return [...lines, ...normalized]
 }
 
-export function applyPrepend(lines: string[], text: string | string[]): string[] {
+export function applyPrepend(
+  lines: string[],
+  text: string | string[],
+): string[] {
   const normalized = toNewLines(text)
   if (normalized.length === 0) {
     throw new Error("prepend requires non-empty text")

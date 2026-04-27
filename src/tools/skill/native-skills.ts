@@ -34,7 +34,10 @@ function nativeSkillToLoadedSkill(native: NativeSkillEntry): LoadedSkill {
   }
 }
 
-export function mergeNativeSkills(skills: LoadedSkill[], nativeSkills: NativeSkillEntry[]): void {
+export function mergeNativeSkills(
+  skills: LoadedSkill[],
+  nativeSkills: NativeSkillEntry[],
+): void {
   const knownNames = new Set(skills.map((skill) => skill.name))
   for (const native of nativeSkills) {
     if (knownNames.has(native.name)) continue
@@ -43,7 +46,10 @@ export function mergeNativeSkills(skills: LoadedSkill[], nativeSkills: NativeSki
   }
 }
 
-export function mergeNativeSkillInfos(skillInfos: SkillInfo[], nativeSkills: NativeSkillEntry[]): void {
+export function mergeNativeSkillInfos(
+  skillInfos: SkillInfo[],
+  nativeSkills: NativeSkillEntry[],
+): void {
   const knownNames = new Set(skillInfos.map((skill) => skill.name))
   for (const native of nativeSkills) {
     if (knownNames.has(native.name)) continue
@@ -57,6 +63,8 @@ export function mergeNativeSkillInfos(skillInfos: SkillInfo[], nativeSkills: Nat
   }
 }
 
-export function isPromiseLike<TValue>(value: TValue | Promise<TValue>): value is Promise<TValue> {
+export function isPromiseLike<TValue>(
+  value: TValue | Promise<TValue>,
+): value is Promise<TValue> {
   return typeof value === "object" && value !== null && "then" in value
 }

@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { join } from "node:path"
 import { CONTINUATION_MARKER_DIR } from "./constants"
 import type {
@@ -21,7 +27,8 @@ export function readContinuationMarker(
   try {
     const raw = readFileSync(markerPath, "utf-8")
     const parsed = JSON.parse(raw)
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+      return null
     return parsed as ContinuationMarker
   } catch {
     return null
@@ -56,24 +63,34 @@ export function setContinuationMarkerSource(
   return next
 }
 
-export function clearContinuationMarker(directory: string, sessionID: string): void {
+export function clearContinuationMarker(
+  directory: string,
+  sessionID: string,
+): void {
   const markerPath = getMarkerPath(directory, sessionID)
   if (!existsSync(markerPath)) return
 
   try {
     rmSync(markerPath)
-  } catch {
-  }
+  } catch {}
 }
 
-export function isContinuationMarkerActive(marker: ContinuationMarker | null): boolean {
+export function isContinuationMarkerActive(
+  marker: ContinuationMarker | null,
+): boolean {
   if (!marker) return false
-  return Object.values(marker.sources).some((entry) => entry?.state === "active")
+  return Object.values(marker.sources).some(
+    (entry) => entry?.state === "active",
+  )
 }
 
-export function getActiveContinuationMarkerReason(marker: ContinuationMarker | null): string | null {
+export function getActiveContinuationMarkerReason(
+  marker: ContinuationMarker | null,
+): string | null {
   if (!marker) return null
-  const active = Object.entries(marker.sources).find(([, entry]) => entry?.state === "active")
+  const active = Object.entries(marker.sources).find(
+    ([, entry]) => entry?.state === "active",
+  )
   if (!active || !active[1]) return null
   const [source, entry] = active
   return entry.reason ?? `${source} continuation is active`

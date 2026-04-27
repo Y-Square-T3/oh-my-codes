@@ -22,8 +22,16 @@ describe("executeUnstableAgentTask timeout handling", () => {
     const { executeUnstableAgentTask } = require("./unstable-agent-task")
 
     const mockManager = {
-      launch: async () => ({ id: "task_001", sessionID: "ses_timeout", status: "running" }),
-      getTask: () => ({ id: "task_001", sessionID: "ses_timeout", status: "running" }),
+      launch: async () => ({
+        id: "task_001",
+        sessionID: "ses_timeout",
+        status: "running",
+      }),
+      getTask: () => ({
+        id: "task_001",
+        sessionID: "ses_timeout",
+        status: "running",
+      }),
     }
 
     const mockClient = {
@@ -32,8 +40,14 @@ describe("executeUnstableAgentTask timeout handling", () => {
         messages: async () => ({
           data: [
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 } },
-              parts: [{ type: "text", text: "This should not be treated as success" }],
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+              },
+              parts: [
+                { type: "text", text: "This should not be treated as success" },
+              ],
             },
           ],
         }),
@@ -71,7 +85,7 @@ describe("executeUnstableAgentTask timeout handling", () => {
       "test-agent",
       undefined,
       undefined,
-      "gpt-test"
+      "gpt-test",
     )
 
     // #then

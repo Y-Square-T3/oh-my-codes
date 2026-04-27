@@ -41,7 +41,7 @@ function mapClaudeModelString(model: string | undefined): string | undefined {
 }
 
 export function mapClaudeModelToOpenCode(
-  model: string | undefined
+  model: string | undefined,
 ): { providerID: string; modelID: string } | undefined {
   const mappedModel = mapClaudeModelString(model)
   return mappedModel ? normalizeModelFormat(mappedModel) : undefined

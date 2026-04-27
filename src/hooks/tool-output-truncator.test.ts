@@ -7,12 +7,21 @@ describe("createToolOutputTruncatorHook", () => {
   let truncateSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
-    truncateSpy = spyOn(dynamicTruncator, "createDynamicTruncator").mockReturnValue({
-      truncate: mock(async (_sessionID: string, output: string, options?: { targetMaxTokens?: number }) => ({
-        result: output,
-        truncated: false,
-        targetMaxTokens: options?.targetMaxTokens,
-      })),
+    truncateSpy = spyOn(
+      dynamicTruncator,
+      "createDynamicTruncator",
+    ).mockReturnValue({
+      truncate: mock(
+        async (
+          _sessionID: string,
+          output: string,
+          options?: { targetMaxTokens?: number },
+        ) => ({
+          result: output,
+          truncated: false,
+          targetMaxTokens: options?.targetMaxTokens,
+        }),
+      ),
       getUsage: mock(async () => null),
       truncateSync: mock(() => ({ result: "", truncated: false })),
     })
@@ -49,11 +58,17 @@ describe("createToolOutputTruncatorHook", () => {
     describe("#given webfetch tool", () => {
       describe("#when output is processed", () => {
         it("#then should use aggressive truncation limit (10k tokens)", async () => {
-          const truncateMock = mock(async (_sessionID: string, _output: string, options?: { targetMaxTokens?: number }) => ({
-            result: "truncated",
-            truncated: true,
-            targetMaxTokens: options?.targetMaxTokens,
-          }))
+          const truncateMock = mock(
+            async (
+              _sessionID: string,
+              _output: string,
+              options?: { targetMaxTokens?: number },
+            ) => ({
+              result: "truncated",
+              truncated: true,
+              targetMaxTokens: options?.targetMaxTokens,
+            }),
+          )
           truncateSpy.mockReturnValue({
             truncate: truncateMock,
             getUsage: mock(async () => null),
@@ -69,17 +84,23 @@ describe("createToolOutputTruncatorHook", () => {
           expect(truncateMock).toHaveBeenCalledWith(
             "test-session",
             "large content",
-            { targetMaxTokens: 10_000 }
+            { targetMaxTokens: 10_000 },
           )
         })
       })
 
       describe("#when using WebFetch variant", () => {
         it("#then should also use aggressive truncation limit", async () => {
-          const truncateMock = mock(async (_sessionID: string, _output: string, options?: { targetMaxTokens?: number }) => ({
-            result: "truncated",
-            truncated: true,
-          }))
+          const truncateMock = mock(
+            async (
+              _sessionID: string,
+              _output: string,
+              options?: { targetMaxTokens?: number },
+            ) => ({
+              result: "truncated",
+              truncated: true,
+            }),
+          )
           truncateSpy.mockReturnValue({
             truncate: truncateMock,
             getUsage: mock(async () => null),
@@ -95,7 +116,7 @@ describe("createToolOutputTruncatorHook", () => {
           expect(truncateMock).toHaveBeenCalledWith(
             "test-session",
             "large content",
-            { targetMaxTokens: 10_000 }
+            { targetMaxTokens: 10_000 },
           )
         })
       })
@@ -104,10 +125,16 @@ describe("createToolOutputTruncatorHook", () => {
     describe("#given grep tool", () => {
       describe("#when output is processed", () => {
         it("#then should use default truncation limit (50k tokens)", async () => {
-          const truncateMock = mock(async (_sessionID: string, _output: string, options?: { targetMaxTokens?: number }) => ({
-            result: "truncated",
-            truncated: true,
-          }))
+          const truncateMock = mock(
+            async (
+              _sessionID: string,
+              _output: string,
+              options?: { targetMaxTokens?: number },
+            ) => ({
+              result: "truncated",
+              truncated: true,
+            }),
+          )
           truncateSpy.mockReturnValue({
             truncate: truncateMock,
             getUsage: mock(async () => null),
@@ -123,7 +150,7 @@ describe("createToolOutputTruncatorHook", () => {
           expect(truncateMock).toHaveBeenCalledWith(
             "test-session",
             "grep output",
-            { targetMaxTokens: 50_000 }
+            { targetMaxTokens: 50_000 },
           )
         })
       })
@@ -156,10 +183,16 @@ describe("createToolOutputTruncatorHook", () => {
     describe("#given truncate_all_tool_outputs enabled", () => {
       describe("#when any tool output is processed", () => {
         it("#then should truncate non-listed tools too", async () => {
-          const truncateMock = mock(async (_sessionID: string, _output: string, options?: { targetMaxTokens?: number }) => ({
-            result: "truncated",
-            truncated: true,
-          }))
+          const truncateMock = mock(
+            async (
+              _sessionID: string,
+              _output: string,
+              options?: { targetMaxTokens?: number },
+            ) => ({
+              result: "truncated",
+              truncated: true,
+            }),
+          )
           truncateSpy.mockReturnValue({
             truncate: truncateMock,
             getUsage: mock(async () => null),

@@ -4,7 +4,7 @@ import { log } from "../../shared/logger"
 
 async function readOutput(
   stream: ReadableStream<Uint8Array> | undefined,
-  streamName: "stdout" | "stderr"
+  streamName: "stdout" | "stderr",
 ): Promise<string> {
   if (!stream) {
     return ""
@@ -26,7 +26,8 @@ function resolveHookShellCommand(command: string): string[] {
 
   switch (shellType) {
     case "powershell": {
-      const powershellExecutable = process.platform === "win32" ? "powershell.exe" : "pwsh"
+      const powershellExecutable =
+        process.platform === "win32" ? "powershell.exe" : "pwsh"
       return [powershellExecutable, "-NoProfile", "-Command", command]
     }
     case "cmd":
@@ -76,11 +77,17 @@ export async function executeOnCompleteHook(options: {
     ])
 
     if (stdout.trim()) {
-      log("On-complete hook stdout", { command: trimmedCommand, stdout: stdout.trim() })
+      log("On-complete hook stdout", {
+        command: trimmedCommand,
+        stdout: stdout.trim(),
+      })
     }
 
     if (stderr.trim()) {
-      log("On-complete hook stderr", { command: trimmedCommand, stderr: stderr.trim() })
+      log("On-complete hook stderr", {
+        command: trimmedCommand,
+        stderr: stderr.trim(),
+      })
     }
 
     if (hookExitCode !== 0) {

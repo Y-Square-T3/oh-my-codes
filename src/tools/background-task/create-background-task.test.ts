@@ -6,19 +6,21 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import { createBackgroundTask } from "./create-background-task"
 
 describe("createBackgroundTask", () => {
-  const launchMock = mock(async (): Promise<{
-    id: string
-    sessionID: string | null
-    description: string
-    agent: string
-    status: string
-  }> => ({
-    id: "test-task-id",
-    sessionID: null,
-    description: "Test task",
-    agent: "test-agent",
-    status: "pending",
-  }))
+  const launchMock = mock(
+    async (): Promise<{
+      id: string
+      sessionID: string | null
+      description: string
+      agent: string
+      status: string
+    }> => ({
+      id: "test-task-id",
+      sessionID: null,
+      description: "Test task",
+      agent: "test-agent",
+      status: "pending",
+    }),
+  )
   const getTaskMock = mock()
 
   const mockManager = {
@@ -106,7 +108,9 @@ describe("createBackgroundTask", () => {
     //#then - tool should still report successful launch instead of cancelling child task
     expect(result).toContain("Background task launched successfully.")
     expect(result).toContain("Task ID: test-task-id")
-    expect(result).not.toContain("Task aborted and cancelled while waiting for session to start")
+    expect(result).not.toContain(
+      "Task aborted and cancelled while waiting for session to start",
+    )
   })
 
   test("keeps sibling background task alive when two tasks start concurrently", async () => {
@@ -121,8 +125,20 @@ describe("createBackgroundTask", () => {
     launchMock.mockImplementation(async () => {
       launchCount += 1
       return launchCount === 1
-        ? { id: "task-1", sessionID: null, description: "Task 1", agent: "test-agent", status: "pending" }
-        : { id: "task-2", sessionID: null, description: "Task 2", agent: "test-agent", status: "pending" }
+        ? {
+            id: "task-1",
+            sessionID: null,
+            description: "Task 1",
+            agent: "test-agent",
+            status: "pending",
+          }
+        : {
+            id: "task-2",
+            sessionID: null,
+            description: "Task 2",
+            agent: "test-agent",
+            status: "pending",
+          }
     })
     getTaskMock.mockImplementation((taskID: string) => {
       const state = states.get(taskID)
@@ -132,8 +148,20 @@ describe("createBackgroundTask", () => {
         firstAbortController.abort()
       }
       return state.reads >= 2
-        ? { id: taskID, sessionID: state.sessionID, description: "Task", agent: "test-agent", status: "pending" }
-        : { id: taskID, sessionID: null, description: "Task", agent: "test-agent", status: "pending" }
+        ? {
+            id: taskID,
+            sessionID: state.sessionID,
+            description: "Task",
+            agent: "test-agent",
+            status: "pending",
+          }
+        : {
+            id: taskID,
+            sessionID: null,
+            description: "Task",
+            agent: "test-agent",
+            status: "pending",
+          }
     })
 
     //#when

@@ -13,7 +13,7 @@ export interface SpawnWithTimeoutResult {
 export async function spawnWithTimeout(
   command: string[],
   options: SpawnOptions,
-  timeoutMs: number = DEFAULT_SPAWN_TIMEOUT_MS
+  timeoutMs: number = DEFAULT_SPAWN_TIMEOUT_MS,
 ): Promise<SpawnWithTimeoutResult> {
   let proc: ReturnType<typeof spawnWithWindowsHide>
   try {

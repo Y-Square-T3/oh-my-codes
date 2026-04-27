@@ -45,11 +45,17 @@ export function createSessionPollingController(params: {
       paneId: tracked.paneId,
     })
 
-    const state = params.sourcePaneId ? await queryWindowState(params.sourcePaneId) : null
+    const state = params.sourcePaneId
+      ? await queryWindowState(params.sourcePaneId)
+      : null
     if (state) {
       await executeAction(
         { type: "close", paneId: tracked.paneId, sessionId },
-        { config: params.tmuxConfig, serverUrl: params.serverUrl, windowState: state },
+        {
+          config: params.tmuxConfig,
+          serverUrl: params.serverUrl,
+          windowState: state,
+        },
       )
     }
 
@@ -67,7 +73,9 @@ export function createSessionPollingController(params: {
     }
 
     try {
-      const statusResult = await params.client.session.status({ path: undefined })
+      const statusResult = await params.client.session.status({
+        path: undefined,
+      })
       const allStatuses = parseSessionStatusMap(statusResult.data)
 
       log("[tmux-session-manager] pollSessions", {
@@ -88,7 +96,8 @@ export function createSessionPollingController(params: {
 
         const missingSince = !status ? now - tracked.lastSeenAt.getTime() : 0
         const missingTooLong = missingSince >= SESSION_MISSING_GRACE_MS
-        const isTimedOut = now - tracked.createdAt.getTime() > SESSION_TIMEOUT_MS
+        const isTimedOut =
+          now - tracked.createdAt.getTime() > SESSION_TIMEOUT_MS
         const elapsedMs = now - tracked.createdAt.getTime()
 
         let shouldCloseViaStability = false
@@ -104,8 +113,12 @@ export function createSessionPollingController(params: {
               tracked.stableIdlePolls = (tracked.stableIdlePolls ?? 0) + 1
 
               if (tracked.stableIdlePolls >= STABLE_POLLS_REQUIRED) {
-                const recheckResult = await params.client.session.status({ path: undefined })
-                const recheckStatuses = parseSessionStatusMap(recheckResult.data)
+                const recheckResult = await params.client.session.status({
+                  path: undefined,
+                })
+                const recheckStatuses = parseSessionStatusMap(
+                  recheckResult.data,
+                )
                 const recheckStatus = recheckStatuses[sessionId]
 
                 if (recheckStatus?.type === "idle") {
@@ -124,10 +137,13 @@ export function createSessionPollingController(params: {
 
             tracked.lastMessageCount = currentMessageCount
           } catch (messageError) {
-            log("[tmux-session-manager] failed to fetch messages for stability check", {
-              sessionId,
-              error: String(messageError),
-            })
+            log(
+              "[tmux-session-manager] failed to fetch messages for stability check",
+              {
+                sessionId,
+                error: String(messageError),
+              },
+            )
           }
         } else if (!isIdle) {
           tracked.stableIdlePolls = 0
@@ -179,5 +195,11 @@ export function createSessionPollingController(params: {
     return waitForSessionReadyFromClient({ client: params.client, sessionId })
   }
 
-  return { startPolling, stopPolling, closeSessionById, waitForSessionReady, pollSessions }
+  return {
+    startPolling,
+    stopPolling,
+    closeSessionById,
+    waitForSessionReady,
+    pollSessions,
+  }
 }

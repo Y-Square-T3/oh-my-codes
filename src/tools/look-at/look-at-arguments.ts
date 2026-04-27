@@ -28,7 +28,7 @@ export function validateArgs(args: LookAtArgs): string | null {
     return "Error: Provide only one of 'file_path' or 'image_data', not both."
   }
   if (!args.goal) {
-    return "Error: Missing required parameter 'goal'. Usage: look_at(file_path=\"/path/to/file\", goal=\"what to extract\")"
+    return 'Error: Missing required parameter \'goal\'. Usage: look_at(file_path="/path/to/file", goal="what to extract")'
   }
   return null
 }

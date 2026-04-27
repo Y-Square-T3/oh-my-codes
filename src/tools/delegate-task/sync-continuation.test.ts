@@ -1,4 +1,12 @@
-const { describe, test, expect, beforeEach, afterEach, mock, spyOn } = require("bun:test")
+const {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+  spyOn,
+} = require("bun:test")
 
 describe("executeSyncContinuation - toast cleanup error paths", () => {
   let removeTaskCalls: string[] = []
@@ -20,7 +28,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     addTaskCalls = []
 
     //#given - initialize real task toast manager (avoid global module mocks)
-    const { initTaskToastManager, _resetTaskToastManagerForTesting } = require("../../features/task-toast-manager/manager")
+    const {
+      initTaskToastManager,
+      _resetTaskToastManagerForTesting,
+    } = require("../../features/task-toast-manager/manager")
     _resetTaskToastManagerForTesting()
     resetToastManager = _resetTaskToastManagerForTesting
 
@@ -41,10 +52,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     const { __resetTimingConfig } = require("./timing")
     __resetTimingConfig()
 
-		mock.restore()
+    mock.restore()
 
-		resetToastManager?.()
-		resetToastManager = null
+    resetToastManager?.()
+    resetToastManager = null
   })
 
   test("removes toast when fetchSyncResult throws", async () => {
@@ -54,7 +65,12 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -97,7 +113,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     let error: any = null
     let result: string | null = null
     try {
-      result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+      result = await executeSyncContinuation(
+        args,
+        mockCtx,
+        mockExecutorCtx,
+        { sessionID: "parent-session", messageID: "parent-message" },
+        deps,
+      )
     } catch (e) {
       error = e
     }
@@ -116,7 +138,12 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -134,7 +161,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
       pollSyncSession: async () => {
         throw new Error("Poll error")
       },
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -159,7 +189,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     let error: any = null
     let result: string | null = null
     try {
-      result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+      result = await executeSyncContinuation(
+        args,
+        mockCtx,
+        mockExecutorCtx,
+        { sessionID: "parent-session", messageID: "parent-message" },
+        deps,
+      )
     } catch (e) {
       error = e
     }
@@ -179,12 +215,22 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
             { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
             {
-              info: { id: "msg_004", role: "assistant", time: { created: 4000 }, finish: "end_turn" },
+              info: {
+                id: "msg_004",
+                role: "assistant",
+                time: { created: 4000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "New response" }],
             },
           ],
@@ -200,7 +246,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -222,7 +271,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when - executeSyncContinuation completes successfully
-    const result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    const result = await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then - toast should be removed exactly once
     expect(removeTaskCalls.length).toBe(1)
@@ -242,7 +297,12 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -263,7 +323,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
         }
         return "Task aborted.\n\nSession ID: ses_test_12345678"
       },
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -286,7 +349,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when - executeSyncContinuation with abort signal
-    const result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    const result = await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then - removeTask should be called at least once (poller and finally may both call it)
     expect(removeTaskCalls.length).toBeGreaterThanOrEqual(1)
@@ -295,8 +364,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
   })
 
   test("no crash when toastManager is null", async () => {
-		//#given - reset toast manager instance to null
-    const { _resetTaskToastManagerForTesting } = require("../../features/task-toast-manager/manager")
+    //#given - reset toast manager instance to null
+    const {
+      _resetTaskToastManagerForTesting,
+    } = require("../../features/task-toast-manager/manager")
     _resetTaskToastManagerForTesting()
 
     const mockClient = {
@@ -305,7 +376,12 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -321,7 +397,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -346,7 +425,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     let error: any = null
     let result: string | null = null
     try {
-      result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+      result = await executeSyncContinuation(
+        args,
+        mockCtx,
+        mockExecutorCtx,
+        { sessionID: "parent-session", messageID: "parent-message" },
+        deps,
+      )
     } catch (e) {
       error = e
     }
@@ -363,9 +448,24 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
       session: {
         messages: async () => ({
           data: [
-            { info: { id: "msg_001", role: "user", time: { created: 1000 }, agent: "oracle" } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn", agent: "oracle", providerID: "openai", modelID: "gpt-5.4" },
+              info: {
+                id: "msg_001",
+                role: "user",
+                time: { created: 1000 },
+                agent: "oracle",
+              },
+            },
+            {
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+                agent: "oracle",
+                providerID: "openai",
+                modelID: "gpt-5.4",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -381,7 +481,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -403,7 +506,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when - executeSyncContinuation completes with agent info in messages
-    const result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    const result = await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then - task_metadata should contain subagent field with the agent name
     expect(result).toContain("<task_metadata>")
@@ -419,7 +528,12 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
           data: [
             { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
             {
-              info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+              info: {
+                id: "msg_002",
+                role: "assistant",
+                time: { created: 2000 },
+                finish: "end_turn",
+              },
               parts: [{ type: "text", text: "Response" }],
             },
           ],
@@ -435,7 +549,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -457,7 +574,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when - executeSyncContinuation completes without agent info
-    const result = await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    const result = await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then - task_metadata should NOT contain subagent field
     expect(result).toContain("<task_metadata>")
@@ -467,7 +590,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
   test("preserves restricted tool permissions for resumed explore sessions", async () => {
     //#given - a resumed explore session should not regain delegation tools
-    const promptAsyncCalls: Array<{ path: { id: string }; body: Record<string, unknown> }> = []
+    const promptAsyncCalls: Array<{
+      path: { id: string }
+      body: Record<string, unknown>
+    }> = []
     const mockClient = {
       session: {
         messages: async () => ({
@@ -485,7 +611,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
             },
           ],
         }),
-        promptAsync: async (input: { path: { id: string }; body: Record<string, unknown> }) => {
+        promptAsync: async (input: {
+          path: { id: string }
+          body: Record<string, unknown>
+        }) => {
           promptAsyncCalls.push(input)
           return {}
         },
@@ -499,7 +628,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -522,7 +654,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when
-    await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then
     expect(promptAsyncCalls).toHaveLength(1)
@@ -537,7 +675,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
   test("preserves restricted tool permissions for resumed librarian sessions", async () => {
     //#given - a resumed librarian session should stay read-only for delegation tools
-    const promptAsyncCalls: Array<{ path: { id: string }; body: Record<string, unknown> }> = []
+    const promptAsyncCalls: Array<{
+      path: { id: string }
+      body: Record<string, unknown>
+    }> = []
     const mockClient = {
       session: {
         messages: async () => ({
@@ -555,7 +696,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
             },
           ],
         }),
-        promptAsync: async (input: { path: { id: string }; body: Record<string, unknown> }) => {
+        promptAsync: async (input: {
+          path: { id: string }
+          body: Record<string, unknown>
+        }) => {
           promptAsyncCalls.push(input)
           return {}
         },
@@ -569,7 +713,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -592,7 +739,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when
-    await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then
     expect(promptAsyncCalls).toHaveLength(1)
@@ -607,7 +760,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
   test("keeps task delegation enabled during prometheus sync continuation", async () => {
     //#given - a resumed prometheus session should keep plan-family task permission
-    const promptAsyncCalls: Array<{ path: { id: string }; body: Record<string, unknown> }> = []
+    const promptAsyncCalls: Array<{
+      path: { id: string }
+      body: Record<string, unknown>
+    }> = []
     const mockClient = {
       session: {
         messages: async () => ({
@@ -625,7 +781,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
             },
           ],
         }),
-        promptAsync: async (input: { path: { id: string }; body: Record<string, unknown> }) => {
+        promptAsync: async (input: {
+          path: { id: string }
+          body: Record<string, unknown>
+        }) => {
           promptAsyncCalls.push(input)
           return {}
         },
@@ -639,7 +798,10 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
 
     const deps = {
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -662,7 +824,13 @@ describe("executeSyncContinuation - toast cleanup error paths", () => {
     }
 
     //#when
-    await executeSyncContinuation(args, mockCtx, mockExecutorCtx, { sessionID: "parent-session", messageID: "parent-message" }, deps)
+    await executeSyncContinuation(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      { sessionID: "parent-session", messageID: "parent-message" },
+      deps,
+    )
 
     //#then
     expect(promptAsyncCalls).toHaveLength(1)

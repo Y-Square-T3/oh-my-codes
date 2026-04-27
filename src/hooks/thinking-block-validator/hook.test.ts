@@ -170,7 +170,10 @@ describe("createThinkingBlockValidatorHook", () => {
       },
       {
         info: { role: "assistant" },
-        parts: [leadingRedactedThinkingPart, { type: "text", text: "continue" }],
+        parts: [
+          leadingRedactedThinkingPart,
+          { type: "text", text: "continue" },
+        ],
       },
     ] satisfies TestMessage[]
 

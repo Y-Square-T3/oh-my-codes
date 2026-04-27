@@ -15,8 +15,13 @@ export function detectUltrawork(text: string): boolean {
   return ULTRAWORK_PATTERN.test(clean)
 }
 
-function extractPromptText(parts: Array<{ type: string; text?: string }>): string {
-  return parts.filter((part) => part.type === "text").map((part) => part.text || "").join("")
+function extractPromptText(
+  parts: Array<{ type: string; text?: string }>,
+): string {
+  return parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text || "")
+    .join("")
 }
 
 type ToastFn = {
@@ -26,9 +31,11 @@ type ToastFn = {
 function showToast(tui: unknown, title: string, message: string): void {
   const toastFn = tui as Partial<ToastFn>
   if (typeof toastFn.showToast !== "function") return
-  toastFn.showToast({
-    body: { title, message, variant: "warning" as const, duration: 3000 },
-  }).catch(() => {})
+  toastFn
+    .showToast({
+      body: { title, message, variant: "warning" as const, duration: 3000 },
+    })
+    .catch(() => {})
 }
 
 export type UltraworkOverrideResult = {
@@ -45,7 +52,10 @@ type ModelDescriptor = {
 function isSameModel(current: unknown, target: ModelDescriptor): boolean {
   if (typeof current !== "object" || current === null) return false
   const currentRecord = current as Record<string, unknown>
-  return currentRecord["providerID"] === target.providerID && currentRecord["modelID"] === target.modelID
+  return (
+    currentRecord["providerID"] === target.providerID &&
+    currentRecord["modelID"] === target.modelID
+  )
 }
 
 function getMessageModel(current: unknown): ModelDescriptor | undefined {
@@ -53,7 +63,8 @@ function getMessageModel(current: unknown): ModelDescriptor | undefined {
   const currentRecord = current as Record<string, unknown>
   const providerID = currentRecord["providerID"]
   const modelID = currentRecord["modelID"]
-  if (typeof providerID !== "string" || typeof modelID !== "string") return undefined
+  if (typeof providerID !== "string" || typeof modelID !== "string")
+    return undefined
   return { providerID, modelID }
 }
 
@@ -70,13 +81,16 @@ export function resolveUltraworkOverride(
   if (!detectUltrawork(promptText)) return null
 
   const messageAgentName =
-    typeof output.message["agent"] === "string" ? (output.message["agent"] as string) : undefined
+    typeof output.message["agent"] === "string"
+      ? (output.message["agent"] as string)
+      : undefined
   const sessionAgentName = sessionID ? getSessionAgent(sessionID) : undefined
   const rawAgentName = inputAgentName ?? messageAgentName ?? sessionAgentName
   if (!rawAgentName || !pluginConfig.agents) return null
 
   const agentConfigKey = getAgentConfigKey(rawAgentName)
-  const agentConfig = pluginConfig.agents[agentConfigKey as keyof AgentOverrides]
+  const agentConfig =
+    pluginConfig.agents[agentConfigKey as keyof AgentOverrides]
   const ultraworkConfig = agentConfig?.ultrawork
   if (!ultraworkConfig?.model && !ultraworkConfig?.variant) return null
 
@@ -109,34 +123,50 @@ function applyResolvedUltraworkOverride(args: {
 
   if (!override.providerID || !override.modelID) return
 
-  const targetModel = { providerID: override.providerID, modelID: override.modelID }
+  const targetModel = {
+    providerID: override.providerID,
+    modelID: override.modelID,
+  }
   const messageId = output.message["id"] as string | undefined
   if (isSameModel(output.message.model, targetModel)) {
     if (validatedVariant && messageId) {
       scheduleDeferredModelOverride(messageId, targetModel, validatedVariant)
-      log(`[ultrawork-model-override] Persist validated variant for active model: ${override.modelID}`)
+      log(
+        `[ultrawork-model-override] Persist validated variant for active model: ${override.modelID}`,
+      )
       return
     }
-    log(`[ultrawork-model-override] Skip override; target model already active: ${override.modelID}`)
+    log(
+      `[ultrawork-model-override] Skip override; target model already active: ${override.modelID}`,
+    )
     return
   }
   if (!messageId) {
-    log("[ultrawork-model-override] No message ID found, falling back to direct mutation")
+    log(
+      "[ultrawork-model-override] No message ID found, falling back to direct mutation",
+    )
     output.message.model = targetModel
     return
   }
 
-  const fromModel = (output.message.model as { modelID?: string } | undefined)?.modelID ?? "unknown"
+  const fromModel =
+    (output.message.model as { modelID?: string } | undefined)?.modelID ??
+    "unknown"
   const agentConfigKey = getAgentConfigKey(
     inputAgentName ??
-    (typeof output.message["agent"] === "string" ? (output.message["agent"] as string) : "unknown"),
+      (typeof output.message["agent"] === "string"
+        ? (output.message["agent"] as string)
+        : "unknown"),
   )
 
   scheduleDeferredModelOverride(messageId, targetModel, validatedVariant)
 
-  log(`[ultrawork-model-override] ${fromModel} -> ${override.modelID} (deferred DB)`, {
-    agent: agentConfigKey,
-  })
+  log(
+    `[ultrawork-model-override] ${fromModel} -> ${override.modelID} (deferred DB)`,
+    {
+      agent: agentConfigKey,
+    },
+  )
 
   showToast(
     tui,
@@ -156,41 +186,82 @@ export function applyUltraworkModelOverrideOnMessage(
   sessionID?: string,
   client?: unknown,
 ): void | Promise<void> {
-  const override = resolveUltraworkOverride(pluginConfig, inputAgentName, output, sessionID)
+  const override = resolveUltraworkOverride(
+    pluginConfig,
+    inputAgentName,
+    output,
+    sessionID,
+  )
   if (!override) return
 
   const currentModel = getMessageModel(output.message.model)
-  const variantTargetModel = override.providerID && override.modelID
-    ? { providerID: override.providerID, modelID: override.modelID }
-    : currentModel
+  const variantTargetModel =
+    override.providerID && override.modelID
+      ? { providerID: override.providerID, modelID: override.modelID }
+      : currentModel
 
-  if (!client || typeof (client as { provider?: { list?: unknown } }).provider?.list !== "function") {
-    log("[ultrawork-model-override] SDK validation unavailable, skipping variant override", {
-      variant: override.variant,
+  if (
+    !client ||
+    typeof (client as { provider?: { list?: unknown } }).provider?.list !==
+      "function"
+  ) {
+    log(
+      "[ultrawork-model-override] SDK validation unavailable, skipping variant override",
+      {
+        variant: override.variant,
+      },
+    )
+    applyResolvedUltraworkOverride({
+      override,
+      validatedVariant: undefined,
+      output,
+      inputAgentName,
+      tui,
     })
-    applyResolvedUltraworkOverride({ override, validatedVariant: undefined, output, inputAgentName, tui })
     return
   }
 
-  return resolveValidUltraworkVariant(client, variantTargetModel, override.variant)
+  return resolveValidUltraworkVariant(
+    client,
+    variantTargetModel,
+    override.variant,
+  )
     .then((validatedVariant) => {
       if (override.variant && !validatedVariant) {
-        log("[ultrawork-model-override] Skip invalid ultrawork variant override", {
-          variant: override.variant,
-          providerID: variantTargetModel?.providerID,
-          modelID: variantTargetModel?.modelID,
-        })
+        log(
+          "[ultrawork-model-override] Skip invalid ultrawork variant override",
+          {
+            variant: override.variant,
+            providerID: variantTargetModel?.providerID,
+            modelID: variantTargetModel?.modelID,
+          },
+        )
       }
 
-      applyResolvedUltraworkOverride({ override, validatedVariant, output, inputAgentName, tui })
+      applyResolvedUltraworkOverride({
+        override,
+        validatedVariant,
+        output,
+        inputAgentName,
+        tui,
+      })
     })
     .catch((error) => {
-      log("[ultrawork-model-override] Failed to validate ultrawork variant via SDK", {
-        variant: override.variant,
-        error: String(error),
-        providerID: variantTargetModel?.providerID,
-        modelID: variantTargetModel?.modelID,
+      log(
+        "[ultrawork-model-override] Failed to validate ultrawork variant via SDK",
+        {
+          variant: override.variant,
+          error: String(error),
+          providerID: variantTargetModel?.providerID,
+          modelID: variantTargetModel?.modelID,
+        },
+      )
+      applyResolvedUltraworkOverride({
+        override,
+        validatedVariant: undefined,
+        output,
+        inputAgentName,
+        tui,
       })
-      applyResolvedUltraworkOverride({ override, validatedVariant: undefined, output, inputAgentName, tui })
     })
 }

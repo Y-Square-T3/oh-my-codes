@@ -1,4 +1,7 @@
-import { replaceEmptyTextPartsAsync, findMessagesWithEmptyTextPartsFromSDK } from "../session-recovery/storage/empty-text"
+import {
+  replaceEmptyTextPartsAsync,
+  findMessagesWithEmptyTextPartsFromSDK,
+} from "../session-recovery/storage/empty-text"
 import { injectTextPartAsync } from "../session-recovery/storage/text-part-injector"
 import type { Client } from "./client"
 
@@ -51,7 +54,10 @@ function getSdkMessages(response: unknown): SDKMessage[] {
   return Array.isArray(record) ? (record as SDKMessage[]) : []
 }
 
-async function findEmptyMessagesFromSDK(client: Client, sessionID: string): Promise<string[]> {
+async function findEmptyMessagesFromSDK(
+  client: Client,
+  sessionID: string,
+): Promise<string[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
     const messages = getSdkMessages(response)
@@ -114,7 +120,11 @@ export async function fixEmptyMessagesWithSDK(params: {
   client: Client
   placeholderText: string
   messageIndex?: number
-}): Promise<{ fixed: boolean; fixedMessageIds: string[]; scannedEmptyCount: number }> {
+}): Promise<{
+  fixed: boolean
+  fixedMessageIds: string[]
+  scannedEmptyCount: number
+}> {
   let fixed = false
   const fixedMessageIds: string[] = []
 
@@ -156,13 +166,21 @@ export async function fixEmptyMessagesWithSDK(params: {
     return { fixed, fixedMessageIds, scannedEmptyCount: 0 }
   }
 
-  const emptyMessageIds = await findEmptyMessagesFromSDK(params.client, params.sessionID)
+  const emptyMessageIds = await findEmptyMessagesFromSDK(
+    params.client,
+    params.sessionID,
+  )
 
   // Also find messages with empty text parts alongside non-empty content (e.g., tool calls).
   // messageHasContentFromSDK returns true for these since they have tool parts,
   // but the API still rejects the empty text block.
-  const emptyTextPartIds = await findMessagesWithEmptyTextPartsFromSDK(params.client, params.sessionID)
-  const additionalIds = emptyTextPartIds.filter((id) => !emptyMessageIds.includes(id))
+  const emptyTextPartIds = await findMessagesWithEmptyTextPartsFromSDK(
+    params.client,
+    params.sessionID,
+  )
+  const additionalIds = emptyTextPartIds.filter(
+    (id) => !emptyMessageIds.includes(id),
+  )
   const allTargetIds = [...emptyMessageIds, ...additionalIds]
 
   if (allTargetIds.length === 0) {

@@ -4,7 +4,12 @@ export type TaskStatus = "running" | "queued" | "completed" | "error"
 
 export interface ModelFallbackInfo {
   model: string
-  type: "user-defined" | "inherited" | "category-default" | "system-default" | "runtime-fallback"
+  type:
+    | "user-defined"
+    | "inherited"
+    | "category-default"
+    | "system-default"
+    | "runtime-fallback"
   source?: ModelSource
 }
 

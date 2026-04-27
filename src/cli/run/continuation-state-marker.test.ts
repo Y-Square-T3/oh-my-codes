@@ -27,7 +27,13 @@ describe("getContinuationState marker integration", () => {
     // given
     const directory = createTempDir()
     const sessionID = "ses_marker_active"
-    setContinuationMarkerSource(directory, sessionID, "todo", "active", "todos remaining")
+    setContinuationMarkerSource(
+      directory,
+      sessionID,
+      "todo",
+      "active",
+      "todos remaining",
+    )
 
     // when
     const state = await getContinuationState(directory, sessionID)

@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { _resetForTesting, setMainSession } from "../../features/claude-code-session-state"
+import {
+  _resetForTesting,
+  setMainSession,
+} from "../../features/claude-code-session-state"
 import type { BackgroundTask } from "../../features/background-agent"
 import { OMO_INTERNAL_INITIATOR_MARKER } from "../../shared/internal-initiator-marker"
 import { createUnstableAgentBabysitterHook } from "./index"
@@ -70,10 +73,18 @@ describe("unstable-agent-babysitter hook", () => {
     const ctx = createMockPluginInput({
       messagesBySession: {
         "main-1": [
-          { info: { agent: "sisyphus", model: { providerID: "openai", modelID: "gpt-4" } } },
+          {
+            info: {
+              agent: "sisyphus",
+              model: { providerID: "openai", modelID: "gpt-4" },
+            },
+          },
         ],
         "bg-1": [
-          { info: { role: "assistant" }, parts: [{ type: "thinking", thinking: "deep thought" }] },
+          {
+            info: { role: "assistant" },
+            parts: [{ type: "thinking", thinking: "deep thought" }],
+          },
         ],
       },
       promptCalls,
@@ -85,11 +96,15 @@ describe("unstable-agent-babysitter hook", () => {
     })
 
     // #when
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     // #then
     expect(promptCalls.length).toBe(1)
-    const payload = promptCalls[0].input as { body?: { parts?: Array<{ text?: string }> } }
+    const payload = promptCalls[0].input as {
+      body?: { parts?: Array<{ text?: string }> }
+    }
     const text = payload.body?.parts?.[0]?.text ?? ""
     expect(text).toContain("background_output")
     expect(text).toContain("background_cancel")
@@ -104,10 +119,18 @@ describe("unstable-agent-babysitter hook", () => {
     const ctx = createMockPluginInput({
       messagesBySession: {
         "main-1": [
-          { info: { agent: "sisyphus", model: { providerID: "openai", modelID: "gpt-4" } } },
+          {
+            info: {
+              agent: "sisyphus",
+              model: { providerID: "openai", modelID: "gpt-4" },
+            },
+          },
         ],
         "bg-1": [
-          { info: { role: "assistant" }, parts: [{ type: "thinking", thinking: "minimax thought" }] },
+          {
+            info: { role: "assistant" },
+            parts: [{ type: "thinking", thinking: "minimax thought" }],
+          },
         ],
       },
       promptCalls,
@@ -121,11 +144,15 @@ describe("unstable-agent-babysitter hook", () => {
     })
 
     // #when
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     // #then
     expect(promptCalls.length).toBe(1)
-    const payload = promptCalls[0].input as { body?: { parts?: Array<{ text?: string }> } }
+    const payload = promptCalls[0].input as {
+      body?: { parts?: Array<{ text?: string }> }
+    }
     const text = payload.body?.parts?.[0]?.text ?? ""
     expect(text).toContain("background_output")
     expect(text).toContain("background_cancel")
@@ -150,7 +177,9 @@ describe("unstable-agent-babysitter hook", () => {
     })
 
     // #when
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     // #then
     expect(promptCalls.length).toBe(0)
@@ -174,8 +203,12 @@ describe("unstable-agent-babysitter hook", () => {
     Date.now = () => now
 
     // #when
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     // #then
     expect(promptCalls.length).toBe(1)
@@ -188,10 +221,18 @@ describe("unstable-agent-babysitter hook", () => {
     const ctx = createMockPluginInput({
       messagesBySession: {
         "main-1": [
-          { info: { agent: "sisyphus", model: { providerID: "openai", modelID: "gpt-4" } } },
+          {
+            info: {
+              agent: "sisyphus",
+              model: { providerID: "openai", modelID: "gpt-4" },
+            },
+          },
         ],
         "bg-1": [
-          { info: { role: "assistant" }, parts: [{ type: "thinking", thinking: "deep thought" }] },
+          {
+            info: { role: "assistant" },
+            parts: [{ type: "thinking", thinking: "deep thought" }],
+          },
         ],
       },
       promptCalls,
@@ -206,10 +247,19 @@ describe("unstable-agent-babysitter hook", () => {
     let currentNow = firstNow
     Date.now = () => currentNow
 
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
-    await hook.event({ event: { type: "session.error", properties: { sessionID: "main-1", error: { name: "AbortError" } } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
+    await hook.event({
+      event: {
+        type: "session.error",
+        properties: { sessionID: "main-1", error: { name: "AbortError" } },
+      },
+    })
     currentNow += 5 * 60 * 1000 + 1
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     expect(promptCalls.length).toBe(1)
     Date.now = originalNow
@@ -226,11 +276,12 @@ describe("unstable-agent-babysitter hook", () => {
     }
     const ctx = createMockPluginInput({
       messagesBySession: {
-        "main-1": [
-          { info: { agent: "sisyphus", model: mainModel } },
-        ],
+        "main-1": [{ info: { agent: "sisyphus", model: mainModel } }],
         "bg-1": [
-          { info: { role: "assistant" }, parts: [{ type: "thinking", thinking: "deep thought" }] },
+          {
+            info: { role: "assistant" },
+            parts: [{ type: "thinking", thinking: "deep thought" }],
+          },
         ],
       },
       promptCalls,
@@ -242,7 +293,9 @@ describe("unstable-agent-babysitter hook", () => {
     })
 
     // when
-    await hook.event({ event: { type: "session.idle", properties: { sessionID: "main-1" } } })
+    await hook.event({
+      event: { type: "session.idle", properties: { sessionID: "main-1" } },
+    })
 
     // then
     expect(promptCalls.length).toBe(1)
@@ -252,7 +305,10 @@ describe("unstable-agent-babysitter hook", () => {
         variant?: string
       }
     }
-    expect(payload.body?.model).toEqual({ providerID: "openai", modelID: "gpt-4" })
+    expect(payload.body?.model).toEqual({
+      providerID: "openai",
+      modelID: "gpt-4",
+    })
     expect(payload.body?.variant).toBe("max")
   })
 })

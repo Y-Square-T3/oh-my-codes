@@ -21,7 +21,12 @@ describe("createSkillContext", () => {
 
   it("excludes discovered playwright skill when browser provider is agent-browser", async () => {
     // given
-    const discoveredPlaywrightDir = join(testDirectory, ".claude", "skills", "playwright")
+    const discoveredPlaywrightDir = join(
+      testDirectory,
+      ".claude",
+      "skills",
+      "playwright",
+    )
     mkdirSync(discoveredPlaywrightDir, { recursive: true })
     writeFileSync(
       join(discoveredPlaywrightDir, "SKILL.md"),
@@ -73,9 +78,15 @@ describe("createSkillContext", () => {
 
       // then
       expect(result.browserProvider).toBe("agent-browser")
-      expect(result.mergedSkills.some((skill) => skill.name === "agent-browser")).toBe(true)
-      expect(result.mergedSkills.some((skill) => skill.name === "playwright")).toBe(false)
-      expect(result.availableSkills.some((skill) => skill.name === "playwright")).toBe(false)
+      expect(
+        result.mergedSkills.some((skill) => skill.name === "agent-browser"),
+      ).toBe(true)
+      expect(
+        result.mergedSkills.some((skill) => skill.name === "playwright"),
+      ).toBe(false)
+      expect(
+        result.availableSkills.some((skill) => skill.name === "playwright"),
+      ).toBe(false)
     } finally {
       discoverConfigSourceSkillsSpy.mockRestore()
       discoverUserClaudeSkillsSpy.mockRestore()

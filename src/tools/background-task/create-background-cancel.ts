@@ -4,12 +4,21 @@ import type { BackgroundCancelArgs } from "./types"
 import type { BackgroundCancelClient } from "./clients"
 import { BACKGROUND_CANCEL_DESCRIPTION } from "./constants"
 
-export function createBackgroundCancel(manager: BackgroundManager, _client: BackgroundCancelClient): ToolDefinition {
+export function createBackgroundCancel(
+  manager: BackgroundManager,
+  _client: BackgroundCancelClient,
+): ToolDefinition {
   return tool({
     description: BACKGROUND_CANCEL_DESCRIPTION,
     args: {
-      taskId: tool.schema.string().optional().describe("Task ID to cancel (required if all=false)"),
-      all: tool.schema.boolean().optional().describe("Cancel all running background tasks (default: false)"),
+      taskId: tool.schema
+        .string()
+        .optional()
+        .describe("Task ID to cancel (required if all=false)"),
+      all: tool.schema
+        .boolean()
+        .optional()
+        .describe("Cancel all running background tasks (default: false)"),
     },
     async execute(args: BackgroundCancelArgs, toolContext) {
       try {
@@ -21,13 +30,21 @@ export function createBackgroundCancel(manager: BackgroundManager, _client: Back
 
         if (cancelAll) {
           const tasks = manager.getAllDescendantTasks(toolContext.sessionID)
-          const cancellableTasks = tasks.filter((t: { status: string }) => t.status === "running" || t.status === "pending")
+          const cancellableTasks = tasks.filter(
+            (t: { status: string }) =>
+              t.status === "running" || t.status === "pending",
+          )
 
           if (cancellableTasks.length === 0) {
             return `No running or pending background tasks to cancel.`
           }
 
-          const cancelledInfo: Array<{ id: string; description: string; status: string; sessionID?: string }> = []
+          const cancelledInfo: Array<{
+            id: string
+            description: string
+            status: string
+            sessionID?: string
+          }> = []
 
           for (const task of cancellableTasks) {
             const originalStatus = task.status
@@ -48,7 +65,7 @@ export function createBackgroundCancel(manager: BackgroundManager, _client: Back
           const tableRows = cancelledInfo
             .map(
               (t) =>
-                `| \`${t.id}\` | ${t.description} | ${t.status} | ${t.sessionID ? `\`${t.sessionID}\`` : "(not started)"} |`
+                `| \`${t.id}\` | ${t.description} | ${t.status} | ${t.sessionID ? `\`${t.sessionID}\`` : "(not started)"} |`,
             )
             .join("\n")
 

@@ -1,6 +1,10 @@
 import type { BackgroundTaskStatus } from "./types"
 
-export type BackgroundTaskNotificationStatus = "COMPLETED" | "CANCELLED" | "INTERRUPTED" | "ERROR"
+export type BackgroundTaskNotificationStatus =
+  | "COMPLETED"
+  | "CANCELLED"
+  | "INTERRUPTED"
+  | "ERROR"
 
 export interface BackgroundTaskNotificationTask {
   id: string
@@ -17,21 +21,40 @@ export function buildBackgroundTaskNotificationText(input: {
   remainingCount: number
   completedTasks: BackgroundTaskNotificationTask[]
 }): string {
-  const { task, duration, statusText, allComplete, remainingCount, completedTasks } = input
+  const {
+    task,
+    duration,
+    statusText,
+    allComplete,
+    remainingCount,
+    completedTasks,
+  } = input
 
-  const safeDescription = (t: BackgroundTaskNotificationTask): string => t.description || t.id
+  const safeDescription = (t: BackgroundTaskNotificationTask): string =>
+    t.description || t.id
   const errorInfo = task.error ? `\n**Error:** ${task.error}` : ""
 
   if (allComplete) {
-    const succeededTasks = completedTasks.filter((t) => t.status === "completed")
+    const succeededTasks = completedTasks.filter(
+      (t) => t.status === "completed",
+    )
     const failedTasks = completedTasks.filter((t) => t.status !== "completed")
 
-    const succeededText = succeededTasks.length > 0
-      ? succeededTasks.map((t) => `- \`${t.id}\`: ${safeDescription(t)}`).join("\n")
-      : ""
-    const failedText = failedTasks.length > 0
-      ? failedTasks.map((t) => `- \`${t.id}\`: ${safeDescription(t)} [${t.status.toUpperCase()}]${t.error ? ` - ${t.error}` : ""}`).join("\n")
-      : ""
+    const succeededText =
+      succeededTasks.length > 0
+        ? succeededTasks
+            .map((t) => `- \`${t.id}\`: ${safeDescription(t)}`)
+            .join("\n")
+        : ""
+    const failedText =
+      failedTasks.length > 0
+        ? failedTasks
+            .map(
+              (t) =>
+                `- \`${t.id}\`: ${safeDescription(t)} [${t.status.toUpperCase()}]${t.error ? ` - ${t.error}` : ""}`,
+            )
+            .join("\n")
+        : ""
 
     const hasFailures = failedTasks.length > 0
     const header = hasFailures

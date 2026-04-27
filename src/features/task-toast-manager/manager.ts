@@ -6,7 +6,14 @@ type OpencodeClient = PluginInput["client"]
 
 type ClientWithTui = {
   tui?: {
-    showToast: (opts: { body: { title: string; message: string; variant: string; duration: number } }) => Promise<unknown>
+    showToast: (opts: {
+      body: {
+        title: string
+        message: string
+        variant: string
+        duration: number
+      }
+    }) => Promise<unknown>
   }
 }
 
@@ -65,11 +72,20 @@ export class TaskToastManager {
   /**
    * Update model info for a task by session ID
    */
-  updateTaskModelBySession(sessionID: string, modelInfo: ModelFallbackInfo): void {
+  updateTaskModelBySession(
+    sessionID: string,
+    modelInfo: ModelFallbackInfo,
+  ): void {
     if (!sessionID) return
-    const task = Array.from(this.tasks.values()).find((t) => t.sessionID === sessionID)
+    const task = Array.from(this.tasks.values()).find(
+      (t) => t.sessionID === sessionID,
+    )
     if (!task) return
-    if (task.modelInfo?.model === modelInfo.model && task.modelInfo?.type === modelInfo.type) return
+    if (
+      task.modelInfo?.model === modelInfo.model &&
+      task.modelInfo?.type === modelInfo.type
+    )
+      return
     task.modelInfo = modelInfo
     this.showTaskListToast(task)
   }
@@ -136,18 +152,27 @@ export class TaskToastManager {
     }
     const lines: string[] = []
 
-    const isFallback = newTask.modelInfo && (
-      newTask.modelInfo.type === "inherited" ||
-      newTask.modelInfo.type === "system-default" ||
-      newTask.modelInfo.type === "runtime-fallback"
-    )
+    const isFallback =
+      newTask.modelInfo &&
+      (newTask.modelInfo.type === "inherited" ||
+        newTask.modelInfo.type === "system-default" ||
+        newTask.modelInfo.type === "runtime-fallback")
     if (isFallback) {
-      const suffixMap: Record<"inherited" | "system-default" | "runtime-fallback", string> = {
+      const suffixMap: Record<
+        "inherited" | "system-default" | "runtime-fallback",
+        string
+      > = {
         inherited: " (inherited from parent)",
         "system-default": " (system default fallback)",
         "runtime-fallback": " (runtime fallback)",
       }
-      const suffix = suffixMap[newTask.modelInfo!.type as "inherited" | "system-default" | "runtime-fallback"]
+      const suffix =
+        suffixMap[
+          newTask.modelInfo!.type as
+            | "inherited"
+            | "system-default"
+            | "runtime-fallback"
+        ]
       lines.push(`[FALLBACK] Model: ${newTask.modelInfo!.model}${suffix}`)
       lines.push("")
     }
@@ -159,8 +184,12 @@ export class TaskToastManager {
         const bgIcon = task.isBackground ? "[BG]" : "[RUN]"
         const isNew = task.id === newTask.id ? " ← NEW" : ""
         const taskId = formatTaskIdentifier(task)
-        const skillsInfo = task.skills?.length ? ` [${task.skills.join(", ")}]` : ""
-        lines.push(`${bgIcon} ${task.description} (${taskId})${skillsInfo} - ${duration}${isNew}`)
+        const skillsInfo = task.skills?.length
+          ? ` [${task.skills.join(", ")}]`
+          : ""
+        lines.push(
+          `${bgIcon} ${task.description} (${taskId})${skillsInfo} - ${duration}${isNew}`,
+        )
       }
     }
 
@@ -170,9 +199,13 @@ export class TaskToastManager {
       for (const task of queued) {
         const bgIcon = task.isBackground ? "[Q]" : "[W]"
         const taskId = formatTaskIdentifier(task)
-        const skillsInfo = task.skills?.length ? ` [${task.skills.join(", ")}]` : ""
+        const skillsInfo = task.skills?.length
+          ? ` [${task.skills.join(", ")}]`
+          : ""
         const isNew = task.id === newTask.id ? " ← NEW" : ""
-        lines.push(`${bgIcon} ${task.description} (${taskId})${skillsInfo} - Queued${isNew}`)
+        lines.push(
+          `${bgIcon} ${task.description} (${taskId})${skillsInfo} - Queued${isNew}`,
+        )
       }
     }
 
@@ -194,20 +227,26 @@ export class TaskToastManager {
       ? `New Background Task`
       : `New Task Executed`
 
-    tuiClient.tui.showToast({
-      body: {
-        title,
-        message: message || `${newTask.description} (${newTask.agent})`,
-        variant: "info",
-        duration: running.length + queued.length > 2 ? 5000 : 3000,
-      },
-    }).catch(() => {})
+    tuiClient.tui
+      .showToast({
+        body: {
+          title,
+          message: message || `${newTask.description} (${newTask.agent})`,
+          variant: "info",
+          duration: running.length + queued.length > 2 ? 5000 : 3000,
+        },
+      })
+      .catch(() => {})
   }
 
   /**
    * Show task completion toast
    */
-  showCompletionToast(task: { id: string; description: string; duration: string }): void {
+  showCompletionToast(task: {
+    id: string
+    description: string
+    duration: string
+  }): void {
     const tuiClient = this.client as ClientWithTui
     if (!tuiClient.tui?.showToast) return
 
@@ -221,14 +260,16 @@ export class TaskToastManager {
       message += `\n\nStill running: ${remaining.length} | Queued: ${queued.length}`
     }
 
-    tuiClient.tui.showToast({
-      body: {
-        title: "Task Completed",
-        message,
-        variant: "success",
-        duration: 5000,
-      },
-    }).catch(() => {})
+    tuiClient.tui
+      .showToast({
+        body: {
+          title: "Task Completed",
+          message,
+          variant: "success",
+          duration: 5000,
+        },
+      })
+      .catch(() => {})
   }
 }
 
@@ -240,7 +281,7 @@ export function getTaskToastManager(): TaskToastManager | null {
 
 export function initTaskToastManager(
   client: OpencodeClient,
-  concurrencyManager?: ConcurrencyManager
+  concurrencyManager?: ConcurrencyManager,
 ): TaskToastManager {
   instance = new TaskToastManager(client, concurrencyManager)
   return instance

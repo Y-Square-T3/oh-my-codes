@@ -1,7 +1,15 @@
 import { afterEach, describe, expect, it } from "bun:test"
 
-import { _resetForTesting, getSessionAgent, updateSessionAgent } from "../features/claude-code-session-state"
-import { clearSessionModel, getSessionModel, setSessionModel } from "../shared/session-model-state"
+import {
+  _resetForTesting,
+  getSessionAgent,
+  updateSessionAgent,
+} from "../features/claude-code-session-state"
+import {
+  clearSessionModel,
+  getSessionModel,
+  setSessionModel,
+} from "../shared/session-model-state"
 import { clearSessionPromptParams } from "../shared/session-prompt-params-state"
 import { createEventHandler } from "./event"
 

@@ -16,7 +16,8 @@ function buildTaskRef(
   section: "todo" | "final-wave",
   taskLabel: string,
 ): TopLevelTaskRef | null {
-  const pattern = section === "todo" ? TODO_TASK_PATTERN : FINAL_WAVE_TASK_PATTERN
+  const pattern =
+    section === "todo" ? TODO_TASK_PATTERN : FINAL_WAVE_TASK_PATTERN
   const match = taskLabel.match(pattern)
   if (!match) {
     return null
@@ -33,7 +34,9 @@ function buildTaskRef(
   }
 }
 
-export function readCurrentTopLevelTask(planPath: string): TopLevelTaskRef | null {
+export function readCurrentTopLevelTask(
+  planPath: string,
+): TopLevelTaskRef | null {
   if (!existsSync(planPath)) {
     return null
   }

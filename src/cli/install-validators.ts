@@ -19,7 +19,11 @@ export const SYMBOLS = {
 
 const ANSI_COLOR_PATTERN = new RegExp("\u001b\\[[0-9;]*m", "g")
 
-function formatProvider(name: string, enabled: boolean, detail?: string): string {
+function formatProvider(
+  name: string,
+  enabled: boolean,
+  detail?: string,
+): string {
   const status = enabled ? SYMBOLS.check : color.dim("○")
   const label = enabled ? color.white(name) : color.dim(name)
   const suffix = detail ? color.dim(` (${detail})`) : ""
@@ -32,15 +36,41 @@ export function formatConfigSummary(config: InstallConfig): string {
   lines.push(color.bold(color.white("Configuration Summary")))
   lines.push("")
 
-  const claudeDetail = config.hasClaude ? (config.isMax20 ? "max20" : "standard") : undefined
+  const claudeDetail = config.hasClaude
+    ? config.isMax20
+      ? "max20"
+      : "standard"
+    : undefined
   lines.push(formatProvider("Claude", config.hasClaude, claudeDetail))
-  lines.push(formatProvider("OpenAI/ChatGPT", config.hasOpenAI, "GPT-5.4 for Oracle"))
+  lines.push(
+    formatProvider("OpenAI/ChatGPT", config.hasOpenAI, "GPT-5.4 for Oracle"),
+  )
   lines.push(formatProvider("Gemini", config.hasGemini))
   lines.push(formatProvider("GitHub Copilot", config.hasCopilot, "fallback"))
-  lines.push(formatProvider("OpenCode Zen", config.hasOpencodeZen, "opencode/ models"))
-  lines.push(formatProvider("Z.ai Coding Plan", config.hasZaiCodingPlan, "Librarian/Multimodal"))
-  lines.push(formatProvider("Kimi For Coding", config.hasKimiForCoding, "Sisyphus/Prometheus fallback"))
-  lines.push(formatProvider("Vercel AI Gateway", config.hasVercelAiGateway, "universal proxy"))
+  lines.push(
+    formatProvider("OpenCode Zen", config.hasOpencodeZen, "opencode/ models"),
+  )
+  lines.push(
+    formatProvider(
+      "Z.ai Coding Plan",
+      config.hasZaiCodingPlan,
+      "Librarian/Multimodal",
+    ),
+  )
+  lines.push(
+    formatProvider(
+      "Kimi For Coding",
+      config.hasKimiForCoding,
+      "Sisyphus/Prometheus fallback",
+    ),
+  )
+  lines.push(
+    formatProvider(
+      "Vercel AI Gateway",
+      config.hasVercelAiGateway,
+      "universal proxy",
+    ),
+  )
 
   lines.push("")
   lines.push(color.dim("─".repeat(40)))
@@ -48,8 +78,12 @@ export function formatConfigSummary(config: InstallConfig): string {
 
   lines.push(color.bold(color.white("Model Assignment")))
   lines.push("")
-  lines.push(`  ${SYMBOLS.info} Models auto-configured based on provider priority`)
-  lines.push(`  ${SYMBOLS.bullet} Priority: Native > Copilot > OpenCode Zen > Z.ai`)
+  lines.push(
+    `  ${SYMBOLS.info} Models auto-configured based on provider priority`,
+  )
+  lines.push(
+    `  ${SYMBOLS.bullet} Priority: Native > Copilot > OpenCode Zen > Z.ai`,
+  )
 
   return lines.join("\n")
 }
@@ -106,20 +140,27 @@ export function printBox(content: string, title?: string): void {
   for (const line of lines) {
     const stripped = line.replace(ANSI_COLOR_PATTERN, "")
     const padding = maxWidth - stripped.length
-    console.log(color.dim("│") + ` ${line}${" ".repeat(padding - 1)}` + color.dim("│"))
+    console.log(
+      color.dim("│") + ` ${line}${" ".repeat(padding - 1)}` + color.dim("│"),
+    )
   }
 
   console.log(color.dim("└") + border + color.dim("┘"))
   console.log()
 }
 
-export function validateNonTuiArgs(args: InstallArgs): { valid: boolean; errors: string[] } {
+export function validateNonTuiArgs(args: InstallArgs): {
+  valid: boolean
+  errors: string[]
+} {
   const errors: string[] = []
 
   if (args.claude === undefined) {
     errors.push("--claude is required (values: no, yes, max20)")
   } else if (!["no", "yes", "max20"].includes(args.claude)) {
-    errors.push(`Invalid --claude value: ${args.claude} (expected: no, yes, max20)`)
+    errors.push(
+      `Invalid --claude value: ${args.claude} (expected: no, yes, max20)`,
+    )
   }
 
   if (args.gemini === undefined) {
@@ -138,24 +179,49 @@ export function validateNonTuiArgs(args: InstallArgs): { valid: boolean; errors:
     errors.push(`Invalid --openai value: ${args.openai} (expected: no, yes)`)
   }
 
-  if (args.opencodeGo !== undefined && !["no", "yes"].includes(args.opencodeGo)) {
-    errors.push(`Invalid --opencode-go value: ${args.opencodeGo} (expected: no, yes)`)
+  if (
+    args.opencodeGo !== undefined &&
+    !["no", "yes"].includes(args.opencodeGo)
+  ) {
+    errors.push(
+      `Invalid --opencode-go value: ${args.opencodeGo} (expected: no, yes)`,
+    )
   }
 
-  if (args.opencodeZen !== undefined && !["no", "yes"].includes(args.opencodeZen)) {
-    errors.push(`Invalid --opencode-zen value: ${args.opencodeZen} (expected: no, yes)`)
+  if (
+    args.opencodeZen !== undefined &&
+    !["no", "yes"].includes(args.opencodeZen)
+  ) {
+    errors.push(
+      `Invalid --opencode-zen value: ${args.opencodeZen} (expected: no, yes)`,
+    )
   }
 
-  if (args.zaiCodingPlan !== undefined && !["no", "yes"].includes(args.zaiCodingPlan)) {
-    errors.push(`Invalid --zai-coding-plan value: ${args.zaiCodingPlan} (expected: no, yes)`)
+  if (
+    args.zaiCodingPlan !== undefined &&
+    !["no", "yes"].includes(args.zaiCodingPlan)
+  ) {
+    errors.push(
+      `Invalid --zai-coding-plan value: ${args.zaiCodingPlan} (expected: no, yes)`,
+    )
   }
 
-  if (args.kimiForCoding !== undefined && !["no", "yes"].includes(args.kimiForCoding)) {
-    errors.push(`Invalid --kimi-for-coding value: ${args.kimiForCoding} (expected: no, yes)`)
+  if (
+    args.kimiForCoding !== undefined &&
+    !["no", "yes"].includes(args.kimiForCoding)
+  ) {
+    errors.push(
+      `Invalid --kimi-for-coding value: ${args.kimiForCoding} (expected: no, yes)`,
+    )
   }
 
-  if (args.vercelAiGateway !== undefined && !["no", "yes"].includes(args.vercelAiGateway)) {
-    errors.push(`Invalid --vercel-ai-gateway value: ${args.vercelAiGateway} (expected: no, yes)`)
+  if (
+    args.vercelAiGateway !== undefined &&
+    !["no", "yes"].includes(args.vercelAiGateway)
+  ) {
+    errors.push(
+      `Invalid --vercel-ai-gateway value: ${args.vercelAiGateway} (expected: no, yes)`,
+    )
   }
 
   return { valid: errors.length === 0, errors }
@@ -170,7 +236,7 @@ export function argsToConfig(args: InstallArgs): InstallConfig {
     hasCopilot: args.copilot === "yes",
     hasOpencodeZen: args.opencodeZen === "yes",
     hasZaiCodingPlan: args.zaiCodingPlan === "yes",
-hasKimiForCoding: args.kimiForCoding === "yes",
+    hasKimiForCoding: args.kimiForCoding === "yes",
     hasOpencodeGo: args.opencodeGo === "yes",
     hasVercelAiGateway: args.vercelAiGateway === "yes",
   }
@@ -183,7 +249,7 @@ export function detectedToInitialValues(detected: DetectedConfig): {
   copilot: BooleanArg
   opencodeZen: BooleanArg
   zaiCodingPlan: BooleanArg
-kimiForCoding: BooleanArg
+  kimiForCoding: BooleanArg
   opencodeGo: BooleanArg
   vercelAiGateway: BooleanArg
 } {
@@ -199,7 +265,7 @@ kimiForCoding: BooleanArg
     copilot: detected.hasCopilot ? "yes" : "no",
     opencodeZen: detected.hasOpencodeZen ? "yes" : "no",
     zaiCodingPlan: detected.hasZaiCodingPlan ? "yes" : "no",
-kimiForCoding: detected.hasKimiForCoding ? "yes" : "no",
+    kimiForCoding: detected.hasKimiForCoding ? "yes" : "no",
     opencodeGo: detected.hasOpencodeGo ? "yes" : "no",
     vercelAiGateway: detected.hasVercelAiGateway ? "yes" : "no",
   }

@@ -5,7 +5,9 @@ function formatTimestamp(date: Date): string {
   return `${hh}:${mm}:${ss}`
 }
 
-export function createTimestampTransformer(now: () => Date = () => new Date()): (chunk: string) => string {
+export function createTimestampTransformer(
+  now: () => Date = () => new Date(),
+): (chunk: string) => string {
   let atLineStart = true
 
   return (chunk: string): string => {
@@ -32,7 +34,9 @@ export function createTimestampTransformer(now: () => Date = () => new Date()): 
 
 type WriteFn = NodeJS.WriteStream["write"]
 
-export function createTimestampedStdoutController(stdout: NodeJS.WriteStream = process.stdout): {
+export function createTimestampedStdoutController(
+  stdout: NodeJS.WriteStream = process.stdout,
+): {
   enable: () => void
   restore: () => void
 } {
@@ -45,9 +49,14 @@ export function createTimestampedStdoutController(stdout: NodeJS.WriteStream = p
       encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
       callback?: (error?: Error | null) => void,
     ): boolean => {
-      const text = typeof chunk === "string"
-        ? chunk
-        : Buffer.from(chunk).toString(typeof encodingOrCallback === "string" ? encodingOrCallback : undefined)
+      const text =
+        typeof chunk === "string"
+          ? chunk
+          : Buffer.from(chunk).toString(
+              typeof encodingOrCallback === "string"
+                ? encodingOrCallback
+                : undefined,
+            )
       const stamped = transform(text)
 
       if (typeof encodingOrCallback === "function") {

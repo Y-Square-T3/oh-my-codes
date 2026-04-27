@@ -8,7 +8,10 @@ interface TodoSnapshot {
   priority?: "low" | "medium" | "high"
 }
 
-type TodoWriter = (input: { sessionID: string; todos: TodoSnapshot[] }) => Promise<void>
+type TodoWriter = (input: {
+  sessionID: string
+  todos: TodoSnapshot[]
+}) => Promise<void>
 
 const HOOK_NAME = "compaction-todo-preserver"
 
@@ -46,7 +49,9 @@ function resolveSessionID(props?: Record<string, unknown>): string | undefined {
 
 export interface CompactionTodoPreserver {
   capture: (sessionID: string) => Promise<void>
-  event: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
+  event: (input: {
+    event: { type: string; properties?: unknown }
+  }) => Promise<void>
 }
 
 export function createCompactionTodoPreserverHook(
@@ -57,13 +62,21 @@ export function createCompactionTodoPreserverHook(
   const capture = async (sessionID: string): Promise<void> => {
     if (!sessionID) return
     try {
-      const response = await ctx.client.session.todo({ path: { id: sessionID } })
+      const response = await ctx.client.session.todo({
+        path: { id: sessionID },
+      })
       const todos = extractTodos(response)
       if (todos.length === 0) return
       snapshots.set(sessionID, todos)
-      log(`[${HOOK_NAME}] Captured todo snapshot`, { sessionID, count: todos.length })
+      log(`[${HOOK_NAME}] Captured todo snapshot`, {
+        sessionID,
+        count: todos.length,
+      })
     } catch (err) {
-      log(`[${HOOK_NAME}] Failed to capture todos`, { sessionID, error: String(err) })
+      log(`[${HOOK_NAME}] Failed to capture todos`, {
+        sessionID,
+        error: String(err),
+      })
     }
   }
 
@@ -74,36 +87,56 @@ export function createCompactionTodoPreserverHook(
     let hasCurrent = false
     let currentTodos: TodoSnapshot[] = []
     try {
-      const response = await ctx.client.session.todo({ path: { id: sessionID } })
+      const response = await ctx.client.session.todo({
+        path: { id: sessionID },
+      })
       currentTodos = extractTodos(response)
       hasCurrent = true
     } catch (err) {
-      log(`[${HOOK_NAME}] Failed to fetch todos post-compaction`, { sessionID, error: String(err) })
+      log(`[${HOOK_NAME}] Failed to fetch todos post-compaction`, {
+        sessionID,
+        error: String(err),
+      })
     }
 
     if (hasCurrent && currentTodos.length > 0) {
       snapshots.delete(sessionID)
-      log(`[${HOOK_NAME}] Skipped restore (todos already present)`, { sessionID, count: currentTodos.length })
+      log(`[${HOOK_NAME}] Skipped restore (todos already present)`, {
+        sessionID,
+        count: currentTodos.length,
+      })
       return
     }
 
     const writer = await resolveTodoWriter()
     if (!writer) {
-      log(`[${HOOK_NAME}] Skipped restore (Todo.update unavailable)`, { sessionID })
+      log(`[${HOOK_NAME}] Skipped restore (Todo.update unavailable)`, {
+        sessionID,
+      })
       return
     }
 
     try {
       await writer({ sessionID, todos: snapshot })
-      log(`[${HOOK_NAME}] Restored todos after compaction`, { sessionID, count: snapshot.length })
+      log(`[${HOOK_NAME}] Restored todos after compaction`, {
+        sessionID,
+        count: snapshot.length,
+      })
     } catch (err) {
-      log(`[${HOOK_NAME}] Failed to restore todos`, { sessionID, error: String(err) })
+      log(`[${HOOK_NAME}] Failed to restore todos`, {
+        sessionID,
+        error: String(err),
+      })
     } finally {
       snapshots.delete(sessionID)
     }
   }
 
-  const event = async ({ event }: { event: { type: string; properties?: unknown } }): Promise<void> => {
+  const event = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }): Promise<void> => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {

@@ -19,7 +19,10 @@ export { createSessionManagerTools } from "./session-manager"
 
 export { sessionExists } from "./session-manager/storage"
 
-export { interactive_bash, startBackgroundCheck as startTmuxCheck } from "./interactive-bash"
+export {
+  interactive_bash,
+  startBackgroundCheck as startTmuxCheck,
+} from "./interactive-bash"
 export { createSkillMcpTool } from "./skill-mcp"
 
 import {
@@ -45,7 +48,10 @@ export {
 } from "./task"
 export { createHashlineEditTool } from "./hashline-edit"
 
-export function createBackgroundTools(manager: BackgroundManager, client: OpencodeClient): Record<string, ToolDefinition> {
+export function createBackgroundTools(
+  manager: BackgroundManager,
+  client: OpencodeClient,
+): Record<string, ToolDefinition> {
   const outputManager: BackgroundOutputManager = manager
   const cancelClient: BackgroundCancelClient = client
   return {

@@ -5,7 +5,7 @@ import type { HookHttp } from "./types"
 import * as sharedModule from "../../shared"
 
 const mockFetch = mock(() =>
-  Promise.resolve(new Response(JSON.stringify({}), { status: 200 }))
+  Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
 )
 const originalFetch = globalThis.fetch
 const originalEnv = process.env
@@ -15,7 +15,9 @@ async function importFreshExecuteHttpHook() {
   return import(modulePath)
 }
 
-function installSharedLogMock(logCalls: Array<{ message: string; data?: unknown }>): void {
+function installSharedLogMock(
+  logCalls: Array<{ message: string; data?: unknown }>,
+): void {
   const sharedMockFactory = () => ({
     ...sharedModule,
     log: (message: string, data?: unknown) => {
@@ -34,7 +36,7 @@ describe("executeHttpHook TLS security", () => {
     globalThis.fetch = mockFetch as unknown as typeof fetch
     mockFetch.mockReset()
     mockFetch.mockImplementation(() =>
-      Promise.resolve(new Response(JSON.stringify({}), { status: 200 }))
+      Promise.resolve(new Response(JSON.stringify({}), { status: 200 })),
     )
     logCalls = []
   })
@@ -77,7 +79,10 @@ describe("executeHttpHook TLS security", () => {
       // given
       installSharedLogMock(logCalls)
       const { executeHttpHook } = await importFreshExecuteHttpHook()
-      const hook: HookHttp = { type: "http", url: "http://tls-security-remote.invalid/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://tls-security-remote.invalid/hooks",
+      }
 
       // when
       const result = await executeHttpHook(hook, "{}")
@@ -90,7 +95,10 @@ describe("executeHttpHook TLS security", () => {
 
     it("#when hook uses http://localhost #then allows execution", async () => {
       const { executeHttpHook } = await import("./execute-http-hook")
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
 
       const result = await executeHttpHook(hook, "{}")
 
@@ -102,15 +110,20 @@ describe("executeHttpHook TLS security", () => {
       // given
       installSharedLogMock(logCalls)
       const { executeHttpHook } = await importFreshExecuteHttpHook()
-      const hook: HookHttp = { type: "http", url: "http://localhost:49123/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:49123/hooks",
+      }
 
       // when
       const result = await executeHttpHook(hook, "{}")
 
       // then
       const matchingCalls = logCalls.filter(({ message, data }) => {
-        return message === "HTTP hook URL uses insecure protocol"
-          && JSON.stringify(data) === JSON.stringify({ url: hook.url })
+        return (
+          message === "HTTP hook URL uses insecure protocol" &&
+          JSON.stringify(data) === JSON.stringify({ url: hook.url })
+        )
       })
 
       expect(result.exitCode).toBe(0)
@@ -119,7 +132,10 @@ describe("executeHttpHook TLS security", () => {
 
     it("#when hook uses http://127.0.0.1 #then allows execution", async () => {
       const { executeHttpHook } = await import("./execute-http-hook")
-      const hook: HookHttp = { type: "http", url: "http://127.0.0.1:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://127.0.0.1:8080/hooks",
+      }
 
       const result = await executeHttpHook(hook, "{}")
 
@@ -156,7 +172,10 @@ describe("executeHttpHook TLS security", () => {
 
     it("#when hook uses http://localhost #then allows execution", async () => {
       const { executeHttpHook } = await import("./execute-http-hook")
-      const hook: HookHttp = { type: "http", url: "http://localhost:8080/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://localhost:8080/hooks",
+      }
 
       const result = await executeHttpHook(hook, "{}")
 
@@ -178,7 +197,10 @@ describe("executeHttpHook TLS security", () => {
       // given
       installSharedLogMock(logCalls)
       const { executeHttpHook } = await importFreshExecuteHttpHook()
-      const hook: HookHttp = { type: "http", url: "http://tls-security-dev.invalid/hooks" }
+      const hook: HookHttp = {
+        type: "http",
+        url: "http://tls-security-dev.invalid/hooks",
+      }
 
       // when
       const result = await executeHttpHook(hook, "{}")
@@ -225,7 +247,9 @@ describe("executeHttpHook TLS security", () => {
 
     it("#when hook uses https:// URL #then fetch rejects redirects manually", async () => {
       mockFetch.mockImplementation(() =>
-        Promise.resolve(new Response("redirect", { status: 302, statusText: "Found" }))
+        Promise.resolve(
+          new Response("redirect", { status: 302, statusText: "Found" }),
+        ),
       )
       const { executeHttpHook } = await import("./execute-http-hook")
       const hook: HookHttp = { type: "http", url: "https://example.com/hooks" }
@@ -238,7 +262,7 @@ describe("executeHttpHook TLS security", () => {
         "https://example.com/hooks",
         expect.objectContaining({
           redirect: "manual",
-        })
+        }),
       )
     })
   })
@@ -263,7 +287,9 @@ describe("executeHttpHook TLS security", () => {
       const result = await executeHttpHook(hook, "{}")
 
       expect(result.exitCode).toBe(1)
-      expect(result.stderr).toContain('HTTP hook URL scheme "file:" is not allowed')
+      expect(result.stderr).toContain(
+        'HTTP hook URL scheme "file:" is not allowed',
+      )
     })
   })
 })

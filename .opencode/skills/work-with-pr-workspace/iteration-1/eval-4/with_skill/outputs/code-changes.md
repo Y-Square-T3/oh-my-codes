@@ -18,7 +18,12 @@ Pattern: identical to `grep-app.ts` (static export, no auth, no config factory n
 ```typescript
 import { z } from "zod"
 
-export const McpNameSchema = z.enum(["websearch", "context7", "grep_app", "arxiv"])
+export const McpNameSchema = z.enum([
+  "websearch",
+  "context7",
+  "grep_app",
+  "arxiv",
+])
 
 export type McpName = z.infer<typeof McpNameSchema>
 
@@ -48,7 +53,10 @@ type RemoteMcpConfig = {
   oauth?: false
 }
 
-export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyCodesConfig) {
+export function createBuiltinMcps(
+  disabledMcps: string[] = [],
+  config?: OhMyCodesConfig,
+) {
   const mcps: Record<string, RemoteMcpConfig> = {}
 
   if (!disabledMcps.includes("websearch")) {
@@ -99,6 +107,7 @@ describe("arxiv MCP configuration", () => {
 ## 5. MODIFY: `src/mcp/index.test.ts`
 
 Changes needed:
+
 - Test "should return all MCPs when disabled_mcps is empty": add `expect(result).toHaveProperty("arxiv")`, change length to 4
 - Test "should filter out all built-in MCPs when all disabled": add `"arxiv"` to disabledMcps array, add `expect(result).not.toHaveProperty("arxiv")`
 - Test "should handle empty disabled_mcps by default": add `expect(result).toHaveProperty("arxiv")`, change length to 4
@@ -133,11 +142,11 @@ Add row to built-in MCPs table:
 
 ## Files touched summary
 
-| File | Action |
-|------|--------|
-| `src/mcp/arxiv.ts` | NEW |
-| `src/mcp/arxiv.test.ts` | NEW |
-| `src/mcp/types.ts` | MODIFY (add enum value) |
-| `src/mcp/index.ts` | MODIFY (import + conditional block) |
-| `src/mcp/index.test.ts` | MODIFY (update counts + new test) |
-| `src/mcp/AGENTS.md` | MODIFY (add table row) |
+| File                    | Action                              |
+| ----------------------- | ----------------------------------- |
+| `src/mcp/arxiv.ts`      | NEW                                 |
+| `src/mcp/arxiv.test.ts` | NEW                                 |
+| `src/mcp/types.ts`      | MODIFY (add enum value)             |
+| `src/mcp/index.ts`      | MODIFY (import + conditional block) |
+| `src/mcp/index.test.ts` | MODIFY (update counts + new test)   |
+| `src/mcp/AGENTS.md`     | MODIFY (add table row)              |

@@ -12,12 +12,18 @@ export { addPluginToOpenCodeConfig } from "./config-manager/add-plugin-to-openco
 export { generateOmoConfig } from "./config-manager/generate-omo-config"
 export { writeOmoConfig } from "./config-manager/write-omo-config"
 
-export { isOpenCodeInstalled, getOpenCodeVersion } from "./config-manager/opencode-binary"
+export {
+  isOpenCodeInstalled,
+  getOpenCodeVersion,
+} from "./config-manager/opencode-binary"
 
 export { detectCurrentConfig } from "./config-manager/detect-current-config"
 
 export type { BunInstallResult } from "./config-manager/bun-install"
-export { runBunInstall, runBunInstallWithDetails } from "./config-manager/bun-install"
+export {
+  runBunInstall,
+  runBunInstallWithDetails,
+} from "./config-manager/bun-install"
 
 export type { VersionCompatibility } from "./config-manager/version-compatibility"
 export {

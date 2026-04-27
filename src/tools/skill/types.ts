@@ -1,6 +1,12 @@
-import type { SkillScope, LoadedSkill } from "../../features/opencode-skill-loader/types"
+import type {
+  SkillScope,
+  LoadedSkill,
+} from "../../features/opencode-skill-loader/types"
 import type { SkillMcpManager } from "../../features/skill-mcp-manager"
-import type { BrowserAutomationProvider, GitMasterConfig } from "../../config/schema"
+import type {
+  BrowserAutomationProvider,
+  GitMasterConfig,
+} from "../../config/schema"
 import type { CommandInfo } from "../slashcommand/types"
 
 export interface SkillArgs {
@@ -41,8 +47,33 @@ export interface SkillLoadOptions {
   enabledPluginsOverride?: Record<string, boolean>
   /** Native skill accessor from PluginInput for discovering skills registered via config.skills.paths */
   nativeSkills?: {
-    all(): { name: string; description: string; location: string; content: string }[] | Promise<{ name: string; description: string; location: string; content: string }[]>
-    get(name: string): { name: string; description: string; location: string; content: string } | undefined | Promise<{ name: string; description: string; location: string; content: string } | undefined>
+    all():
+      | {
+          name: string
+          description: string
+          location: string
+          content: string
+        }[]
+      | Promise<
+          {
+            name: string
+            description: string
+            location: string
+            content: string
+          }[]
+        >
+    get(name: string):
+      | { name: string; description: string; location: string; content: string }
+      | undefined
+      | Promise<
+          | {
+              name: string
+              description: string
+              location: string
+              content: string
+            }
+          | undefined
+        >
     dirs(): string[] | Promise<string[]>
   }
 }

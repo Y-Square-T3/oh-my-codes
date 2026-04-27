@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test"
 
-import { buildTaskMetadataBlock, extractTaskLink, parseTaskMetadataBlock } from "./task-metadata-contract"
+import {
+  buildTaskMetadataBlock,
+  extractTaskLink,
+  parseTaskMetadataBlock,
+} from "./task-metadata-contract"
 
 describe("buildTaskMetadataBlock", () => {
   test("#given only session id #when building #then it preserves the frozen block format", () => {
@@ -29,7 +33,7 @@ describe("buildTaskMetadataBlock", () => {
 
     // then
     expect(block).toBe(
-      "<task_metadata>\nsession_id: ses_bg_123\ntask_id: ses_bg_123\nbackground_task_id: bg_123\nsubagent: explore\ncategory: quick\n</task_metadata>"
+      "<task_metadata>\nsession_id: ses_bg_123\ntask_id: ses_bg_123\nbackground_task_id: bg_123\nsubagent: explore\ncategory: quick\n</task_metadata>",
     )
   })
 })
@@ -37,7 +41,8 @@ describe("buildTaskMetadataBlock", () => {
 describe("parseTaskMetadataBlock", () => {
   test("#given a task metadata block #when parsing #then it extracts the structured link", () => {
     // given
-    const text = "<task_metadata>\nsession_id: ses_sync_123\ntask_id: task_123\nbackground_task_id: bg_123\nsubagent: oracle\ncategory: deep\n</task_metadata>"
+    const text =
+      "<task_metadata>\nsession_id: ses_sync_123\ntask_id: task_123\nbackground_task_id: bg_123\nsubagent: oracle\ncategory: deep\n</task_metadata>"
 
     // when
     const parsed = parseTaskMetadataBlock(text)
@@ -91,7 +96,8 @@ describe("extractTaskLink", () => {
 
   test("#given missing metadata #when extracting #then it falls back to task metadata text", () => {
     // given
-    const output = "Task completed.\n\n<task_metadata>\nsession_id: ses_text_456\nsubagent: oracle\n</task_metadata>"
+    const output =
+      "Task completed.\n\n<task_metadata>\nsession_id: ses_text_456\nsubagent: oracle\n</task_metadata>"
 
     // when
     const extracted = extractTaskLink(undefined, output)

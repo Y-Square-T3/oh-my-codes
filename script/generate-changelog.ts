@@ -6,7 +6,8 @@ const TEAM = ["actions-user", "github-actions[bot]", "code-yeongyu"]
 
 async function getLatestReleasedTag(): Promise<string | null> {
   try {
-    const tag = await $`gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // empty'`.text()
+    const tag =
+      await $`gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // empty'`.text()
     return tag.trim() || null
   } catch {
     return null
@@ -17,10 +18,14 @@ async function generateChangelog(previousTag: string): Promise<string[]> {
   const notes: string[] = []
 
   try {
-    const log = await $`git log ${previousTag}..HEAD --oneline --format="%h %s"`.text()
+    const log =
+      await $`git log ${previousTag}..HEAD --oneline --format="%h %s"`.text()
     const commits = log
       .split("\n")
-      .filter((line) => line && !line.match(/^\w+ (ignore:|test:|chore:|ci:|release:)/i))
+      .filter(
+        (line) =>
+          line && !line.match(/^\w+ (ignore:|test:|chore:|ci:|release:)/i),
+      )
 
     if (commits.length > 0) {
       for (const commit of commits) {
@@ -47,7 +52,11 @@ async function getChangedFiles(previousTag: string): Promise<string[]> {
 }
 
 function touchesAnyPath(files: string[], candidates: string[]): boolean {
-  return files.some((file) => candidates.some((candidate) => file === candidate || file.startsWith(`${candidate}/`)))
+  return files.some((file) =>
+    candidates.some(
+      (candidate) => file === candidate || file.startsWith(`${candidate}/`),
+    ),
+  )
 }
 
 function buildReleaseFraming(files: string[]): string[] {
@@ -62,11 +71,20 @@ function buildReleaseFraming(files: string[]): string[] {
       "docs",
     ])
   ) {
-    bullets.push("Rename transition updates across package detection, plugin/config compatibility, and install surfaces.")
+    bullets.push(
+      "Rename transition updates across package detection, plugin/config compatibility, and install surfaces.",
+    )
   }
 
-  if (touchesAnyPath(files, ["src/tools/delegate-task", "src/plugin/tool-registry.ts"])) {
-    bullets.push("Task and tool behavior updates, including delegate-task contract and runtime registration behavior.")
+  if (
+    touchesAnyPath(files, [
+      "src/tools/delegate-task",
+      "src/plugin/tool-registry.ts",
+    ])
+  ) {
+    bullets.push(
+      "Task and tool behavior updates, including delegate-task contract and runtime registration behavior.",
+    )
   }
 
   if (
@@ -77,11 +95,21 @@ function buildReleaseFraming(files: string[]): string[] {
       "src/hooks/tasks-todowrite-disabler",
     ])
   ) {
-    bullets.push("Task-system default behavior alignment so omitted configuration behaves consistently across runtime paths.")
+    bullets.push(
+      "Task-system default behavior alignment so omitted configuration behaves consistently across runtime paths.",
+    )
   }
 
-  if (touchesAnyPath(files, [".github/workflows", "docs/guide/installation.md", "postinstall.mjs"])) {
-    bullets.push("Install and publish workflow hardening, including safer release sequencing and package/install fixes.")
+  if (
+    touchesAnyPath(files, [
+      ".github/workflows",
+      "docs/guide/installation.md",
+      "postinstall.mjs",
+    ])
+  ) {
+    bullets.push(
+      "Install and publish workflow hardening, including safer release sequencing and package/install fixes.",
+    )
   }
 
   if (bullets.length === 0) {
@@ -109,7 +137,10 @@ async function getContributors(previousTag: string): Promise<string[]> {
     const contributors = new Map<string, string[]>()
 
     for (const line of compare.split("\n").filter(Boolean)) {
-      const { login, message } = JSON.parse(line) as { login: string | null; message: string }
+      const { login, message } = JSON.parse(line) as {
+        login: string | null
+        message: string
+      }
       const title = message.split("\n")[0] ?? ""
       if (title.match(/^(ignore:|test:|chore:|ci:|release:)/i)) continue
 
@@ -121,7 +152,9 @@ async function getContributors(previousTag: string): Promise<string[]> {
 
     if (contributors.size > 0) {
       notes.push("")
-      notes.push(`**Thank you to ${contributors.size} community contributor${contributors.size > 1 ? "s" : ""}:**`)
+      notes.push(
+        `**Thank you to ${contributors.size} community contributor${contributors.size > 1 ? "s" : ""}:**`,
+      )
       for (const [username, userCommits] of contributors) {
         notes.push(`- @${username}:`)
         for (const commit of userCommits) {

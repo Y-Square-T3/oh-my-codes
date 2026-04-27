@@ -3,7 +3,10 @@
 import { describe, expect, test } from "bun:test"
 import { applyProviderConfig } from "./provider-config-handler"
 import { createModelCacheState } from "../plugin-state"
-import { clearVisionCapableModelsCache, readVisionCapableModelsCache } from "../shared/vision-capable-models-cache"
+import {
+  clearVisionCapableModelsCache,
+  readVisionCapableModelsCache,
+} from "../shared/vision-capable-models-cache"
 
 describe("applyProviderConfig", () => {
   test("clears stale model context limits when provider config changes", () => {
@@ -41,9 +44,9 @@ describe("applyProviderConfig", () => {
     })
 
     // then
-    expect(Array.from(modelCacheState.modelContextLimitsCache.entries())).toEqual([
-      ["google/gemini-2.5-pro", 1048576],
-    ])
+    expect(
+      Array.from(modelCacheState.modelContextLimitsCache.entries()),
+    ).toEqual([["google/gemini-2.5-pro", 1048576]])
   })
 
   test("caches vision-capable models from modalities and capabilities", () => {

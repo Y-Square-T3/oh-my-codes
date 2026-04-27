@@ -21,13 +21,13 @@
  *   8. <style>             - Tone (prose) + output contract + progress updates
  */
 
-import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard";
+import { GPT_APPLY_PATCH_GUIDANCE } from "../gpt-apply-patch-guard"
 import type {
   AvailableAgent,
   AvailableTool,
   AvailableSkill,
   AvailableCategory,
-} from "../dynamic-agent-prompt-builder";
+} from "../dynamic-agent-prompt-builder"
 import {
   buildAgentIdentitySection,
   buildKeyTriggersSection,
@@ -42,7 +42,7 @@ import {
   buildAntiDuplicationSection,
   buildNonClaudePlannerSection,
   categorizeTools,
-} from "../dynamic-agent-prompt-builder";
+} from "../dynamic-agent-prompt-builder"
 
 function buildGpt54TasksSection(useTaskSystem: boolean): string {
   if (useTaskSystem) {
@@ -59,7 +59,7 @@ Workflow:
 
 When asking for clarification:
 - State what you understood, what's unclear, 2-3 options with effort/implications, and your recommendation.
-</tasks>`;
+</tasks>`
   }
 
   return `<tasks>
@@ -75,7 +75,7 @@ Workflow:
 
 When asking for clarification:
 - State what you understood, what's unclear, 2-3 options with effort/implications, and your recommendation.
-</tasks>`;
+</tasks>`
 }
 
 export function buildGpt54SisyphusPrompt(
@@ -86,32 +86,32 @@ export function buildGpt54SisyphusPrompt(
   availableCategories: AvailableCategory[] = [],
   useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(
     availableAgents,
     availableTools,
     availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
+  )
+  const exploreSection = buildExploreSection(availableAgents)
+  const librarianSection = buildLibrarianSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(
     availableCategories,
     availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const tasksSection = buildGpt54TasksSection(useTaskSystem);
+  )
+  const delegationTable = buildDelegationTable(availableAgents)
+  const oracleSection = buildOracleSection(availableAgents)
+  const hardBlocks = buildHardBlocksSection()
+  const antiPatterns = buildAntiPatternsSection()
+  const nonClaudePlannerSection = buildNonClaudePlannerSection(model)
+  const tasksSection = buildGpt54TasksSection(useTaskSystem)
   const todoHookNote = useTaskSystem
     ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])"
 
   const agentIdentity = buildAgentIdentitySection(
     "Sisyphus",
     "Powerful AI Agent with orchestration capabilities from OhMyCodes",
-  );
+  )
 
   const identityBlock = `<identity>
 You are Sisyphus - an AI orchestrator from OhMyCodes.
@@ -128,13 +128,13 @@ Instruction priority: user instructions override default style/tone/formatting. 
 
 Default to orchestration. Direct execution is for clearly local, trivial work only.
 ${todoHookNote}
-</identity>`;
+</identity>`
 
   const constraintsBlock = `<constraints>
 ${hardBlocks}
 
 ${antiPatterns}
-</constraints>`;
+</constraints>`
 
   const intentBlock = `<intent>
 Every message passes through this gate before any action.
@@ -208,7 +208,7 @@ Proceed unless:
 (c) critical information is missing that would materially change the outcome.
 If proceeding, briefly state what you did and what remains.
 </ask_gate>
-</intent>`;
+</intent>`
 
   const exploreBlock = `<explore>
 ## Exploration & Research
@@ -275,7 +275,7 @@ Background result collection:
 ${buildAntiDuplicationSection()}
 
 Stop searching when: you have enough context, same info repeating, 2 iterations with no new data, or direct answer found.
-</explore>`;
+</explore>`
 
   const executionLoopBlock = `<execution_loop>
 ## Execution Loop
@@ -358,7 +358,7 @@ Every implementation task follows this cycle. No exceptions.
 
 Progress: report at phase transitions - before exploration, after discovery, before large edits, on blockers.
 1-2 sentences each, outcome-based. Include one specific detail. Not upfront narration or scripted preambles.
-</execution_loop>`;
+</execution_loop>`
 
   const delegationBlock = `<delegation>
 ## Delegation System
@@ -394,10 +394,14 @@ Every \`task()\` returns a task_id. Use it for all follow-ups:
 
 This preserves full context, avoids repeated exploration, saves 70%+ tokens.
 
-${oracleSection ? `### Oracle
+${
+  oracleSection
+    ? `### Oracle
 
-${oracleSection}` : ""}
-</delegation>`;
+${oracleSection}`
+    : ""
+}
+</delegation>`
 
   const styleBlock = `<style>
 ## Tone
@@ -426,7 +430,7 @@ If the user's approach has a problem, explain the concern directly and clearly, 
 - Avoid repeating the user's request back to them.
 - Do not shorten so aggressively that required evidence, reasoning, or completion checks are omitted.
 </verbosity_controls>
-</style>`;
+</style>`
 
   return `${agentIdentity}
 ${identityBlock}
@@ -443,7 +447,7 @@ ${delegationBlock}
 
 ${tasksSection}
 
-${styleBlock}`;
+${styleBlock}`
 }
 
-export { categorizeTools };
+export { categorizeTools }

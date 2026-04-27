@@ -27,7 +27,9 @@ describe("BOULDER_CONTINUATION_PROMPT", () => {
       const rulesSection = BOULDER_CONTINUATION_PROMPT.split("RULES:")[1]!
 
       const checkboxMarkingMatch = rulesSection.match(/- \[x\]/i)
-      const proceedMatch = rulesSection.match(/Proceed without asking for permission/)
+      const proceedMatch = rulesSection.match(
+        /Proceed without asking for permission/,
+      )
 
       expect(checkboxMarkingMatch).not.toBeNull()
       expect(proceedMatch).not.toBeNull()

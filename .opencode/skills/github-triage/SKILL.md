@@ -13,13 +13,13 @@ Read-only GitHub triage orchestrator. Fetch open issues/PRs, classify, spawn 1 b
 
 **1 ISSUE/PR = 1 `task_create` = 1 `quick` SUBAGENT (background). NO EXCEPTIONS.**
 
-| Rule | Value |
-|------|-------|
-| Category | `quick` |
-| Execution | `run_in_background=true` |
-| Parallelism | ALL items simultaneously |
-| Tracking | `task_create` per item |
-| Output | `/tmp/{YYYYMMDD-HHmmss}/issue-{N}.md` or `pr-{N}.md` |
+| Rule        | Value                                                |
+| ----------- | ---------------------------------------------------- |
+| Category    | `quick`                                              |
+| Execution   | `run_in_background=true`                             |
+| Parallelism | ALL items simultaneously                             |
+| Tracking    | `task_create` per item                               |
+| Output      | `/tmp/{YYYYMMDD-HHmmss}/issue-{N}.md` or `pr-{N}.md` |
 
 ---
 
@@ -32,6 +32,7 @@ Subagents MUST NEVER run ANY command that writes or mutates GitHub state.
 `gh issue comment`, `gh issue close`, `gh issue edit`, `gh pr comment`, `gh pr merge`, `gh pr review`, `gh pr edit`, `gh api -X POST`, `gh api -X PUT`, `gh api -X PATCH`, `gh api -X DELETE`
 
 **ALLOWED**:
+
 - `gh issue view`, `gh pr view`, `gh api` (GET only) - read GitHub data
 - `Grep`, `Read`, `Glob` - read codebase
 - `Write` - write report files to `/tmp/` ONLY
@@ -62,7 +63,7 @@ A permalink is a URL pointing to a specific line/range in a specific commit, e.g
 - Claims without permalinks are explicitly marked `[UNVERIFIED]` and carry zero weight.
 - Permalinks to `main`/`master`/`dev` branches are NOT acceptable - use commit SHAs only.
 - For bug analysis: permalink to the problematic code. For fix verification: permalink to the fixing commit diff.
-</evidence>
+  </evidence>
 
 ---
 
@@ -138,19 +139,18 @@ Example: If there are 500 open issues, spawn 500 subagents. If there are 1000 op
 
 **Note:** Background task system will queue excess tasks automatically.
 
-
 ---
 
 ## Phase 2: Classify
 
-| Type | Detection |
-|------|-----------|
+| Type             | Detection                                                                   |
+| ---------------- | --------------------------------------------------------------------------- |
 | `ISSUE_QUESTION` | `[Question]`, `[Discussion]`, `?`, "how to" / "why does" / "is it possible" |
-| `ISSUE_BUG` | `[Bug]`, `Bug:`, error messages, stack traces, unexpected behavior |
-| `ISSUE_FEATURE` | `[Feature]`, `[RFE]`, `[Enhancement]`, `Feature Request`, `Proposal` |
-| `ISSUE_OTHER` | Anything else |
-| `PR_BUGFIX` | Title starts with `fix`, branch contains `fix/`/`bugfix/`, label `bug` |
-| `PR_OTHER` | Everything else |
+| `ISSUE_BUG`      | `[Bug]`, `Bug:`, error messages, stack traces, unexpected behavior          |
+| `ISSUE_FEATURE`  | `[Feature]`, `[RFE]`, `[Enhancement]`, `Feature Request`, `Proposal`        |
+| `ISSUE_OTHER`    | Anything else                                                               |
+| `PR_BUGFIX`      | Title starts with `fix`, branch contains `fix/`/`bugfix/`, label `bug`      |
+| `PR_OTHER`       | Everything else                                                             |
 
 ---
 
@@ -161,25 +161,31 @@ Example: If there are 500 open issues, spawn 500 subagents. If there are 1000 op
 For each item, execute these steps sequentially:
 
 ### Step 3.1: Create Task Record
+
 ```typescript
 task_create(
-  subject="Triage: #{number} {title}",
-  description="GitHub {issue|PR} triage analysis - {type}",
-  metadata={"type": "{ISSUE_QUESTION|ISSUE_BUG|ISSUE_FEATURE|ISSUE_OTHER|PR_BUGFIX|PR_OTHER}", "number": {number}}
+  (subject = "Triage: #{number} {title}"),
+  (description = "GitHub {issue|PR} triage analysis - {type}"),
+  (metadata = {
+    type: "{ISSUE_QUESTION|ISSUE_BUG|ISSUE_FEATURE|ISSUE_OTHER|PR_BUGFIX|PR_OTHER}",
+    number: { number },
+  }),
 )
 ```
 
 ### Step 3.2: Spawn Analysis Subagent (Background)
+
 ```typescript
 task(
-  category="quick",
-  run_in_background=true,
-  load_skills=[],
-  prompt=SUBAGENT_PROMPT
+  (category = "quick"),
+  (run_in_background = true),
+  (load_skills = []),
+  (prompt = SUBAGENT_PROMPT),
 )
 ```
 
 **ABSOLUTE RULES for Subagents:**
+
 - **ONLY ANALYZE** - Never take action on GitHub (no comments, merges, closes)
 - **READ-ONLY** - Use tools only for reading code/GitHub data
 - **WRITE REPORT ONLY** - Output goes to `{REPORT_DIR}/{issue|pr}-{number}.md` via Write tool
@@ -216,7 +222,6 @@ ABSOLUTE RULES (violating ANY = critical failure):
 - NEVER run git checkout, git fetch, git pull, git switch, git worktree
 - Your ONLY writable output: {REPORT_DIR}/{issue|pr}-{number}.md via the Write tool
 ```
-
 
 ---
 
@@ -529,6 +534,7 @@ NEVER merge. NEVER comment. NEVER review. Write to file ONLY.
 ## Phase 4: Collect & Update
 
 Poll `background_output()` per task. As each completes:
+
 1. Parse report.
 2. `task_update(id=task_id, status="completed", description=REPORT_SUMMARY)`
 3. Stream to user immediately.
@@ -547,26 +553,30 @@ Write to `{REPORT_DIR}/SUMMARY.md` AND display to user:
 **Report Directory:** {REPORT_DIR}
 
 ## Issues ({issue_count})
-| Category | Count |
-|----------|-------|
-| Bug Confirmed | {n} |
-| Bug Already Fixed | {n} |
-| Not A Bug | {n} |
-| Needs Investigation | {n} |
-| Question Analyzed | {n} |
-| Feature Assessed | {n} |
-| Other | {n} |
+
+| Category            | Count |
+| ------------------- | ----- |
+| Bug Confirmed       | {n}   |
+| Bug Already Fixed   | {n}   |
+| Not A Bug           | {n}   |
+| Needs Investigation | {n}   |
+| Question Analyzed   | {n}   |
+| Feature Assessed    | {n}   |
+| Other               | {n}   |
 
 ## PRs ({pr_count})
-| Category | Count |
-|----------|-------|
-| Bugfix Reviewed | {n} |
-| Other PR Reviewed | {n} |
+
+| Category          | Count |
+| ----------------- | ----- |
+| Bugfix Reviewed   | {n}   |
+| Other PR Reviewed | {n}   |
 
 ## Items Requiring Attention
+
 [Each item: number, title, verdict, 1-line summary, link to report file]
 
 ## Report Files
+
 [All generated files with paths]
 ```
 
@@ -574,14 +584,14 @@ Write to `{REPORT_DIR}/SUMMARY.md` AND display to user:
 
 ## Anti-Patterns
 
-| Violation | Severity |
-|-----------|----------|
+| Violation                                                   | Severity     |
+| ----------------------------------------------------------- | ------------ |
 | ANY GitHub mutation (comment/close/merge/review/label/edit) | **CRITICAL** |
-| Claim without permalink | **CRITICAL** |
-| Using category other than `quick` | CRITICAL |
-| Batching multiple items into one task | CRITICAL |
-| `run_in_background=false` | CRITICAL |
-| `git checkout` on PR branch | CRITICAL |
-| Guessing without codebase evidence | HIGH |
-| Not writing report to `{REPORT_DIR}` | HIGH |
-| Using branch name instead of commit SHA in permalink | HIGH |
+| Claim without permalink                                     | **CRITICAL** |
+| Using category other than `quick`                           | CRITICAL     |
+| Batching multiple items into one task                       | CRITICAL     |
+| `run_in_background=false`                                   | CRITICAL     |
+| `git checkout` on PR branch                                 | CRITICAL     |
+| Guessing without codebase evidence                          | HIGH         |
+| Not writing report to `{REPORT_DIR}`                        | HIGH         |
+| Using branch name instead of commit SHA in permalink        | HIGH         |

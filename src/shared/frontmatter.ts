@@ -8,13 +8,18 @@ export interface FrontmatterResult<T = Record<string, unknown>> {
 }
 
 export function parseFrontmatter<T = Record<string, unknown>>(
-  content: string
+  content: string,
 ): FrontmatterResult<T> {
   const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n?---\r?\n([\s\S]*)$/
   const match = content.match(frontmatterRegex)
 
   if (!match) {
-    return { data: {} as T, body: content, hadFrontmatter: false, parseError: false }
+    return {
+      data: {} as T,
+      body: content,
+      hadFrontmatter: false,
+      parseError: false,
+    }
   }
 
   const yamlContent = match[1]

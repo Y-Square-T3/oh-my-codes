@@ -10,7 +10,10 @@ export interface RuntimeFallbackPluginInput {
   client: {
     session: {
       abort: (input: { path: { id: string } }) => Promise<unknown>
-      messages: (input: { path: { id: string }; query: { directory: string } }) => Promise<unknown>
+      messages: (input: {
+        path: { id: string }
+        query: { directory: string }
+      }) => Promise<unknown>
       promptAsync: (input: {
         path: { id: string }
         body: {
@@ -58,8 +61,20 @@ export interface RuntimeFallbackOptions {
 }
 
 export interface RuntimeFallbackHook {
-  event: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
-  "chat.message"?: (input: { sessionID: string; agent?: string; model?: { providerID: string; modelID: string } }, output: { message: { model?: { providerID: string; modelID: string } }; parts?: Array<{ type: string; text?: string }> }) => Promise<void>
+  event: (input: {
+    event: { type: string; properties?: unknown }
+  }) => Promise<void>
+  "chat.message"?: (
+    input: {
+      sessionID: string
+      agent?: string
+      model?: { providerID: string; modelID: string }
+    },
+    output: {
+      message: { model?: { providerID: string; modelID: string } }
+      parts?: Array<{ type: string; text?: string }>
+    },
+  ) => Promise<void>
   dispose?: () => void
 }
 

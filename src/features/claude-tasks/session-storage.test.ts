@@ -180,7 +180,11 @@ describe("findTaskAcrossSessions", () => {
     const session2Dir = join(TEST_DIR_ABS, "ses_002")
     mkdirSync(join(TEST_DIR_ABS, "ses_001"), { recursive: true })
     mkdirSync(session2Dir, { recursive: true })
-    writeFileSync(join(session2Dir, "T-target.json"), '{"id":"T-target"}', "utf-8")
+    writeFileSync(
+      join(session2Dir, "T-target.json"),
+      '{"id":"T-target"}',
+      "utf-8",
+    )
 
     //#when
     const result = findTaskAcrossSessions(config, "T-target")

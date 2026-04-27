@@ -6,32 +6,42 @@
  */
 
 import type { CategoryConfig } from "../../config/schema"
-import type { AvailableAgent, AvailableSkill } from "../dynamic-agent-prompt-builder"
+import type {
+  AvailableAgent,
+  AvailableSkill,
+} from "../dynamic-agent-prompt-builder"
 import { CATEGORY_DESCRIPTIONS } from "../../tools/delegate-task/constants"
 import { mergeCategories } from "../../shared/merge-categories"
 import { truncateDescription } from "../../shared/truncate-description"
 
-export const getCategoryDescription = (name: string, userCategories?: Record<string, CategoryConfig>) =>
-  userCategories?.[name]?.description ?? CATEGORY_DESCRIPTIONS[name] ?? "General tasks"
+export const getCategoryDescription = (
+  name: string,
+  userCategories?: Record<string, CategoryConfig>,
+) =>
+  userCategories?.[name]?.description ??
+  CATEGORY_DESCRIPTIONS[name] ??
+  "General tasks"
 
 export function buildAgentSelectionSection(agents: AvailableAgent[]): string {
-   if (agents.length === 0) {
-     return `##### Option B: Use AGENT directly (for specialized experts)
+  if (agents.length === 0) {
+    return `##### Option B: Use AGENT directly (for specialized experts)
 
  No agents available.`
-   }
+  }
 
-   const rows = agents.map((a) => {
-     const shortDesc = truncateDescription(a.description)
-     return `- **\`${a.name}\`** - ${shortDesc}`
-   })
+  const rows = agents.map((a) => {
+    const shortDesc = truncateDescription(a.description)
+    return `- **\`${a.name}\`** - ${shortDesc}`
+  })
 
   return `##### Option B: Use AGENT directly (for specialized experts)
 
 ${rows.join("\n")}`
 }
 
-export function buildCategorySection(userCategories?: Record<string, CategoryConfig>): string {
+export function buildCategorySection(
+  userCategories?: Record<string, CategoryConfig>,
+): string {
   const allCategories = mergeCategories(userCategories)
   const categoryRows = Object.entries(allCategories).map(([name, config]) => {
     const temp = config.temperature ?? 0.5
@@ -82,7 +92,10 @@ task(category="[category]", load_skills=["skill-1", "skill-2"], run_in_backgroun
 - Missing a relevant skill = suboptimal output quality`
 }
 
-export function buildDecisionMatrix(agents: AvailableAgent[], userCategories?: Record<string, CategoryConfig>): string {
+export function buildDecisionMatrix(
+  agents: AvailableAgent[],
+  userCategories?: Record<string, CategoryConfig>,
+): string {
   const allCategories = mergeCategories(userCategories)
 
   const categoryRows = Object.entries(allCategories).map(([name]) => {
@@ -90,10 +103,10 @@ export function buildDecisionMatrix(agents: AvailableAgent[], userCategories?: R
     return `- **${desc}**: \`category="${name}", load_skills=[...]\``
   })
 
-   const agentRows = agents.map((a) => {
-     const shortDesc = truncateDescription(a.description)
-     return `- **${shortDesc}**: \`agent="${a.name}"\``
-   })
+  const agentRows = agents.map((a) => {
+    const shortDesc = truncateDescription(a.description)
+    return `- **${shortDesc}**: \`agent="${a.name}"\``
+  })
 
   return `##### Decision Matrix
 

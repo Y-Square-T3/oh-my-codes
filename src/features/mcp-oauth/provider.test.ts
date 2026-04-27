@@ -6,7 +6,12 @@ import { resetDiscoveryCache } from "./discovery"
 type ProviderModule = typeof import("./provider")
 
 async function importFreshProviderModule(): Promise<ProviderModule> {
-  return await import(new URL(`./provider.ts?real-provider-test=${Date.now()}-${Math.random()}`, import.meta.url).href)
+  return await import(
+    new URL(
+      `./provider.ts?real-provider-test=${Date.now()}-${Math.random()}`,
+      import.meta.url,
+    ).href
+  )
 }
 
 describe("McpOAuthProvider", () => {
@@ -79,15 +84,21 @@ describe("McpOAuthProvider", () => {
 
       // then
       const parsed = new URL(url)
-      expect(parsed.origin + parsed.pathname).toBe("https://auth.example.com/authorize")
+      expect(parsed.origin + parsed.pathname).toBe(
+        "https://auth.example.com/authorize",
+      )
       expect(parsed.searchParams.get("response_type")).toBe("code")
       expect(parsed.searchParams.get("client_id")).toBe("my-client")
-      expect(parsed.searchParams.get("redirect_uri")).toBe("http://127.0.0.1:8912/callback")
+      expect(parsed.searchParams.get("redirect_uri")).toBe(
+        "http://127.0.0.1:8912/callback",
+      )
       expect(parsed.searchParams.get("code_challenge")).toBe("challenge-value")
       expect(parsed.searchParams.get("code_challenge_method")).toBe("S256")
       expect(parsed.searchParams.get("state")).toBe("state-value")
       expect(parsed.searchParams.get("scope")).toBe("openid profile")
-      expect(parsed.searchParams.get("resource")).toBe("https://mcp.example.com")
+      expect(parsed.searchParams.get("resource")).toBe(
+        "https://mcp.example.com",
+      )
     })
 
     it("omits scope when empty", () => {
@@ -159,7 +170,9 @@ describe("McpOAuthProvider", () => {
   describe("saveCodeVerifier / codeVerifier", () => {
     it("stores and retrieves code verifier", () => {
       // given
-      const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+      const provider = new McpOAuthProvider({
+        serverUrl: "https://mcp.example.com",
+      })
 
       // when
       provider.saveCodeVerifier("my-verifier")
@@ -192,7 +205,9 @@ describe("McpOAuthProvider", () => {
 
     it("persists and loads token data via storage", () => {
       // given
-      const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+      const provider = new McpOAuthProvider({
+        serverUrl: "https://mcp.example.com",
+      })
       const tokenData: OAuthTokenData = {
         accessToken: "access-token-123",
         refreshToken: "refresh-token-456",
@@ -212,7 +227,9 @@ describe("McpOAuthProvider", () => {
   describe("redirectToAuthorization", () => {
     it("throws when no client information is set", async () => {
       // given
-      const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+      const provider = new McpOAuthProvider({
+        serverUrl: "https://mcp.example.com",
+      })
       const metadata = {
         authorizationEndpoint: "https://auth.example.com/authorize",
         tokenEndpoint: "https://auth.example.com/token",
@@ -238,7 +255,10 @@ describe("McpOAuthProvider", () => {
       const { mkdirSync } = require("node:fs")
       const { tmpdir } = require("node:os")
       const { join } = require("node:path")
-      const testDir = join(tmpdir(), `mcp-oauth-provider-refresh-test-${Date.now()}`)
+      const testDir = join(
+        tmpdir(),
+        `mcp-oauth-provider-refresh-test-${Date.now()}`,
+      )
       mkdirSync(testDir, { recursive: true })
       process.env.OPENCODE_CONFIG_DIR = testDir
     })
@@ -255,39 +275,50 @@ describe("McpOAuthProvider", () => {
 
     it("exchanges refresh token and preserves it when the response omits a new one", async () => {
       // Stub fetch to handle both discovery (well-known) and token exchange
-      const fetchStub = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = input.toString()
-        if (url.includes("oauth-protected-resource")) {
-          // PRM: return authorization_servers pointing to auth server
-          return new Response(
-            JSON.stringify({ authorization_servers: ["https://auth.example.com"] }),
-            { status: 200, headers: { "content-type": "application/json" } },
-          )
-        }
-        if (url.includes(".well-known")) {
-          // AS metadata
+      const fetchStub = mock(
+        async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = input.toString()
+          if (url.includes("oauth-protected-resource")) {
+            // PRM: return authorization_servers pointing to auth server
+            return new Response(
+              JSON.stringify({
+                authorization_servers: ["https://auth.example.com"],
+              }),
+              { status: 200, headers: { "content-type": "application/json" } },
+            )
+          }
+          if (url.includes(".well-known")) {
+            // AS metadata
+            return new Response(
+              JSON.stringify({
+                issuer: "https://auth.example.com",
+                authorization_endpoint: "https://auth.example.com/authorize",
+                token_endpoint: "https://auth.example.com/token",
+              }),
+              { status: 200, headers: { "content-type": "application/json" } },
+            )
+          }
+          // Token exchange
+          const body = init?.body?.toString() ?? ""
+          expect(body).toContain("grant_type=refresh_token")
+          expect(body).toContain("refresh_token=refresh-token-456")
+          expect(body).toContain("client_id=my-client")
           return new Response(
             JSON.stringify({
-              issuer: "https://auth.example.com",
-              authorization_endpoint: "https://auth.example.com/authorize",
-              token_endpoint: "https://auth.example.com/token",
+              access_token: "refreshed-access-token",
+              expires_in: 3600,
             }),
             { status: 200, headers: { "content-type": "application/json" } },
           )
-        }
-        // Token exchange
-        const body = init?.body?.toString() ?? ""
-        expect(body).toContain("grant_type=refresh_token")
-        expect(body).toContain("refresh_token=refresh-token-456")
-        expect(body).toContain("client_id=my-client")
-        return new Response(
-          JSON.stringify({ access_token: "refreshed-access-token", expires_in: 3600 }),
-          { status: 200, headers: { "content-type": "application/json" } },
-        )
-      })
+        },
+      )
       const fetchMock = Object.assign(
-        async (...args: Parameters<typeof fetch>): ReturnType<typeof fetch> => fetchStub(...args),
-        { preconnect: originalFetch?.preconnect?.bind(originalFetch) ?? (() => {}) },
+        async (...args: Parameters<typeof fetch>): ReturnType<typeof fetch> =>
+          fetchStub(...args),
+        {
+          preconnect:
+            originalFetch?.preconnect?.bind(originalFetch) ?? (() => {}),
+        },
       ) satisfies typeof fetch
       globalThis.fetch = fetchMock
 
@@ -316,7 +347,9 @@ describe("McpOAuthProvider", () => {
   describe("redirectUrl", () => {
     it("returns localhost callback URL with default port", () => {
       // given
-      const provider = new McpOAuthProvider({ serverUrl: "https://mcp.example.com" })
+      const provider = new McpOAuthProvider({
+        serverUrl: "https://mcp.example.com",
+      })
 
       // when
       const url = provider.redirectUrl()

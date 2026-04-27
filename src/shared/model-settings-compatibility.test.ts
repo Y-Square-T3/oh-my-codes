@@ -210,7 +210,15 @@ describe("resolveCompatibleModelSettings", () => {
 
   // Provider-agnostic detection: model ID is the source of truth, not provider ID
   test("detects Claude via any provider (provider-agnostic)", () => {
-    for (const providerID of ["anthropic", "aws-bedrock", "bedrock", "amazon-bedrock", "opencode", "my-custom-proxy", "google-vertex-anthropic"]) {
+    for (const providerID of [
+      "anthropic",
+      "aws-bedrock",
+      "bedrock",
+      "amazon-bedrock",
+      "opencode",
+      "my-custom-proxy",
+      "google-vertex-anthropic",
+    ]) {
       const result = resolveCompatibleModelSettings({
         providerID,
         modelID: "claude-sonnet-4-6",
@@ -251,18 +259,68 @@ describe("resolveCompatibleModelSettings", () => {
       expectedVariants: string[]
       hasReasoningEffort: boolean
     }> = [
-      { name: "Gemini", modelID: "gemini-3.1-pro", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Kimi (kimi)", modelID: "kimi-k2.5", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Kimi (k2)", modelID: "k2-v2", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "GLM", modelID: "glm-5", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Minimax", modelID: "minimax-m2.5", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "DeepSeek", modelID: "deepseek-r2", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Mistral", modelID: "mistral-large-next", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Codestral → Mistral", modelID: "codestral-2506", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
-      { name: "Llama", modelID: "llama-4-maverick", expectedVariants: ["low", "medium", "high"], hasReasoningEffort: false },
+      {
+        name: "Gemini",
+        modelID: "gemini-3.1-pro",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Kimi (kimi)",
+        modelID: "kimi-k2.5",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Kimi (k2)",
+        modelID: "k2-v2",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "GLM",
+        modelID: "glm-5",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Minimax",
+        modelID: "minimax-m2.5",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "DeepSeek",
+        modelID: "deepseek-r2",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Mistral",
+        modelID: "mistral-large-next",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Codestral → Mistral",
+        modelID: "codestral-2506",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
+      {
+        name: "Llama",
+        modelID: "llama-4-maverick",
+        expectedVariants: ["low", "medium", "high"],
+        hasReasoningEffort: false,
+      },
     ]
 
-    for (const { name, modelID, expectedVariants, hasReasoningEffort } of familyCases) {
+    for (const {
+      name,
+      modelID,
+      expectedVariants,
+      hasReasoningEffort,
+    } of familyCases) {
       test(`${name} (${modelID}): keeps supported variant`, () => {
         const highest = expectedVariants[expectedVariants.length - 1]
         const result = resolveCompatibleModelSettings({
@@ -460,7 +518,7 @@ describe("resolveCompatibleModelSettings", () => {
     expect(result.changes).toEqual([
       {
         field: "thinking",
-        from: "{\"type\":\"enabled\",\"budgetTokens\":4096}",
+        from: '{"type":"enabled","budgetTokens":4096}',
         to: undefined,
         reason: "unsupported-by-model-metadata",
       },

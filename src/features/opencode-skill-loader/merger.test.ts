@@ -4,7 +4,11 @@ import type { CommandDefinition } from "../claude-code-command-loader/types"
 import { mergeSkills } from "./merger"
 import type { LoadedSkill, SkillScope } from "./types"
 
-function createLoadedSkill(scope: SkillScope, name: string, description: string): LoadedSkill {
+function createLoadedSkill(
+  scope: SkillScope,
+  name: string,
+  description: string,
+): LoadedSkill {
   const definition: CommandDefinition = {
     name,
     description,

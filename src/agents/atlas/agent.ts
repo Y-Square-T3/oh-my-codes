@@ -13,8 +13,15 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentMode, AgentPromptMetadata } from "../types"
 import { isGptModel, isGeminiModel } from "../types"
-import type { AvailableAgent, AvailableSkill, AvailableCategory } from "../dynamic-agent-prompt-builder"
-import { buildAgentIdentitySection, buildCategorySkillsDelegationGuide } from "../dynamic-agent-prompt-builder"
+import type {
+  AvailableAgent,
+  AvailableSkill,
+  AvailableCategory,
+} from "../dynamic-agent-prompt-builder"
+import {
+  buildAgentIdentitySection,
+  buildCategorySkillsDelegationGuide,
+} from "../dynamic-agent-prompt-builder"
 import type { CategoryConfig } from "../../config/schema"
 import { mergeCategories } from "../../shared/merge-categories"
 
@@ -77,7 +84,9 @@ function buildDynamicOrchestratorPrompt(ctx?: OrchestratorContext): string {
   const model = ctx?.model
 
   const allCategories = mergeCategories(userCategories)
-  const availableCategories: AvailableCategory[] = Object.entries(allCategories).map(([name]) => ({
+  const availableCategories: AvailableCategory[] = Object.entries(
+    allCategories,
+  ).map(([name]) => ({
     name,
     description: getCategoryDescription(name, userCategories),
   }))
@@ -86,7 +95,10 @@ function buildDynamicOrchestratorPrompt(ctx?: OrchestratorContext): string {
   const agentSection = buildAgentSelectionSection(agents)
   const decisionMatrix = buildDecisionMatrix(agents, userCategories)
   const skillsSection = buildSkillsSection(skills)
-  const categorySkillsGuide = buildCategorySkillsDelegationGuide(availableCategories, skills)
+  const categorySkillsGuide = buildCategorySkillsDelegationGuide(
+    availableCategories,
+    skills,
+  )
 
   const agentIdentity = buildAgentIdentitySection(
     "Atlas",
@@ -94,12 +106,16 @@ function buildDynamicOrchestratorPrompt(ctx?: OrchestratorContext): string {
   )
   const basePrompt = getAtlasPrompt(model)
 
-  return agentIdentity + "\n" + basePrompt
-    .replace("{CATEGORY_SECTION}", categorySection)
-    .replace("{AGENT_SECTION}", agentSection)
-    .replace("{DECISION_MATRIX}", decisionMatrix)
-    .replace("{SKILLS_SECTION}", skillsSection)
-    .replace("{{CATEGORY_SKILLS_DELEGATION_GUIDE}}", categorySkillsGuide)
+  return (
+    agentIdentity +
+    "\n" +
+    basePrompt
+      .replace("{CATEGORY_SECTION}", categorySection)
+      .replace("{AGENT_SECTION}", agentSection)
+      .replace("{DECISION_MATRIX}", decisionMatrix)
+      .replace("{SKILLS_SECTION}", skillsSection)
+      .replace("{{CATEGORY_SKILLS_DELEGATION_GUIDE}}", categorySkillsGuide)
+  )
 }
 
 export function createAtlasAgent(ctx: OrchestratorContext): AgentConfig {

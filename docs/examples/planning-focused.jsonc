@@ -39,7 +39,10 @@
     "explore": { "model": "github-copilot/grok-code-fast-1" },
 
     // Visual planning and diagrams
-    "multimodal-looker": { "model": "google/gemini-3.1-pro", "variant": "high" },
+    "multimodal-looker": {
+      "model": "google/gemini-3.1-pro",
+      "variant": "high",
+    },
 
     // Plan review and refinement: heavily utilized
     "metis": {
@@ -77,7 +80,10 @@
     "writing": { "model": "google/gemini-3-flash" },
 
     // Visual architecture
-    "visual-engineering": { "model": "google/gemini-3.1-pro", "variant": "high" },
+    "visual-engineering": {
+      "model": "google/gemini-3.1-pro",
+      "variant": "high",
+    },
 
     // Deep research and analysis
     "deep": { "model": "openai/gpt-5.4" },

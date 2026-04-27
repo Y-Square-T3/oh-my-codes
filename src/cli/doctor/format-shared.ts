@@ -42,7 +42,9 @@ export function formatIssue(issue: DoctorIssue, index: number): string {
   }
 
   if (issue.affects && issue.affects.length > 0) {
-    lines.push(`   ${color.cyan("Affects:")} ${color.dim(issue.affects.join(", "))}`)
+    lines.push(
+      `   ${color.cyan("Affects:")} ${color.dim(issue.affects.join(", "))}`,
+    )
   }
 
   return lines.join("\n")

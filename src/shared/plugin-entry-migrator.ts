@@ -1,7 +1,9 @@
 import { LEGACY_PLUGIN_NAME, PLUGIN_NAME } from "./plugin-identity"
 
 export function isLegacyEntry(entry: string): boolean {
-  return entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  return (
+    entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  )
 }
 
 export function isCanonicalEntry(entry: string): boolean {

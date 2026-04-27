@@ -11,5 +11,7 @@ export interface ContinuationMarkerSourceEntry {
 export interface ContinuationMarker {
   sessionID: string
   updatedAt: string
-  sources: Partial<Record<ContinuationMarkerSource, ContinuationMarkerSourceEntry>>
+  sources: Partial<
+    Record<ContinuationMarkerSource, ContinuationMarkerSourceEntry>
+  >
 }

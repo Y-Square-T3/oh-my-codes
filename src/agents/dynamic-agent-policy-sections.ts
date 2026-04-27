@@ -76,16 +76,20 @@ export function buildUltraworkSection(
     if (builtinSkills.length > 0) {
       lines.push("**Built-in Skills** (combine with categories):")
       for (const skill of builtinSkills) {
-        const shortDescription = skill.description.split(".")[0] || skill.description
+        const shortDescription =
+          skill.description.split(".")[0] || skill.description
         lines.push(`- \`${skill.name}\`: ${shortDescription}`)
       }
       lines.push("")
     }
 
     if (customSkills.length > 0) {
-      lines.push("**User-Installed Skills** (HIGH PRIORITY - user installed these for their workflow):")
+      lines.push(
+        "**User-Installed Skills** (HIGH PRIORITY - user installed these for their workflow):",
+      )
       for (const skill of customSkills) {
-        const shortDescription = skill.description.split(".")[0] || skill.description
+        const shortDescription =
+          skill.description.split(".")[0] || skill.description
         lines.push(`- \`${skill.name}\`: ${shortDescription}`)
       }
       lines.push("")
@@ -116,7 +120,9 @@ export function buildUltraworkSection(
           ? `${agent.description.slice(0, 120)}...`
           : agent.description
       const suffix =
-        agent.name === "explore" || agent.name === "librarian" ? " (multiple)" : ""
+        agent.name === "explore" || agent.name === "librarian"
+          ? " (multiple)"
+          : ""
       lines.push(`- \`${agent.name}${suffix}\`: ${shortDescription}`)
     }
   }

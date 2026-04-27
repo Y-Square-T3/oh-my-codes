@@ -1,6 +1,6 @@
-import type { AgentConfig } from "@opencode-ai/sdk";
-import type { AgentMode, AgentPromptMetadata } from "./types";
-import { isGptModel, isGeminiModel, isGptNativeSisyphusModel } from "./types";
+import type { AgentConfig } from "@opencode-ai/sdk"
+import type { AgentMode, AgentPromptMetadata } from "./types"
+import { isGptModel, isGeminiModel, isGptNativeSisyphusModel } from "./types"
 import {
   buildGeminiToolMandate,
   buildGeminiDelegationOverride,
@@ -8,24 +8,24 @@ import {
   buildGeminiIntentGateEnforcement,
   buildGeminiToolGuide,
   buildGeminiToolCallExamples,
-} from "./sisyphus/gemini";
-import { buildGpt54SisyphusPrompt } from "./sisyphus/gpt-5-4";
-import { buildTaskManagementSection } from "./sisyphus/default";
-import { getGptApplyPatchPermission } from "./gpt-apply-patch-guard";
+} from "./sisyphus/gemini"
+import { buildGpt54SisyphusPrompt } from "./sisyphus/gpt-5-4"
+import { buildTaskManagementSection } from "./sisyphus/default"
+import { getGptApplyPatchPermission } from "./gpt-apply-patch-guard"
 
-const MODE: AgentMode = "primary";
+const MODE: AgentMode = "primary"
 export const SISYPHUS_PROMPT_METADATA: AgentPromptMetadata = {
   category: "utility",
   cost: "EXPENSIVE",
   promptAlias: "Sisyphus",
   triggers: [],
-};
+}
 import type {
   AvailableAgent,
   AvailableTool,
   AvailableSkill,
   AvailableCategory,
-} from "./dynamic-agent-prompt-builder";
+} from "./dynamic-agent-prompt-builder"
 import {
   buildAgentIdentitySection,
   buildKeyTriggersSection,
@@ -41,7 +41,7 @@ import {
   buildNonClaudePlannerSection,
   buildAntiDuplicationSection,
   categorizeTools,
-} from "./dynamic-agent-prompt-builder";
+} from "./dynamic-agent-prompt-builder"
 
 function buildDynamicSisyphusPrompt(
   model: string,
@@ -51,33 +51,36 @@ function buildDynamicSisyphusPrompt(
   availableCategories: AvailableCategory[] = [],
   useTaskSystem = false,
 ): string {
-  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills);
+  const keyTriggers = buildKeyTriggersSection(availableAgents, availableSkills)
   const toolSelection = buildToolSelectionTable(
     availableAgents,
     availableTools,
     availableSkills,
-  );
-  const exploreSection = buildExploreSection(availableAgents);
-  const librarianSection = buildLibrarianSection(availableAgents);
+  )
+  const exploreSection = buildExploreSection(availableAgents)
+  const librarianSection = buildLibrarianSection(availableAgents)
   const categorySkillsGuide = buildCategorySkillsDelegationGuide(
     availableCategories,
     availableSkills,
-  );
-  const delegationTable = buildDelegationTable(availableAgents);
-  const oracleSection = buildOracleSection(availableAgents);
-  const hardBlocks = buildHardBlocksSection();
-  const antiPatterns = buildAntiPatternsSection();
-  const parallelDelegationSection = buildParallelDelegationSection(model, availableCategories);
-  const nonClaudePlannerSection = buildNonClaudePlannerSection(model);
-  const taskManagementSection = buildTaskManagementSection(useTaskSystem);
+  )
+  const delegationTable = buildDelegationTable(availableAgents)
+  const oracleSection = buildOracleSection(availableAgents)
+  const hardBlocks = buildHardBlocksSection()
+  const antiPatterns = buildAntiPatternsSection()
+  const parallelDelegationSection = buildParallelDelegationSection(
+    model,
+    availableCategories,
+  )
+  const nonClaudePlannerSection = buildNonClaudePlannerSection(model)
+  const taskManagementSection = buildTaskManagementSection(useTaskSystem)
   const todoHookNote = useTaskSystem
     ? "YOUR TASK CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TASK CONTINUATION])"
-    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])";
+    : "YOUR TODO CREATION WOULD BE TRACKED BY HOOK([SYSTEM REMINDER - TODO CONTINUATION])"
 
   const agentIdentity = buildAgentIdentitySection(
     "Sisyphus",
     "Powerful AI Agent with orchestration capabilities from OhMyCodes",
-  );
+  )
 
   return `${agentIdentity}
 <Role>
@@ -464,7 +467,7 @@ ${antiPatterns}
 - Prefer small, focused changes over large refactors
 - When uncertain about scope, ask
 </Constraints>
-`;
+`
 }
 
 export function createSisyphusAgent(
@@ -475,10 +478,10 @@ export function createSisyphusAgent(
   availableCategories?: AvailableCategory[],
   useTaskSystem = false,
 ): AgentConfig {
-  const tools = availableToolNames ? categorizeTools(availableToolNames) : [];
-  const skills = availableSkills ?? [];
-  const categories = availableCategories ?? [];
-  const agents = availableAgents ?? [];
+  const tools = availableToolNames ? categorizeTools(availableToolNames) : []
+  const skills = availableSkills ?? []
+  const categories = availableCategories ?? []
+  const agents = availableAgents ?? []
 
   if (isGptNativeSisyphusModel(model)) {
     const prompt = buildGpt54SisyphusPrompt(
@@ -488,7 +491,7 @@ export function createSisyphusAgent(
       skills,
       categories,
       useTaskSystem,
-    );
+    )
     return {
       description:
         "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - OhMyCodes)",
@@ -503,7 +506,7 @@ export function createSisyphusAgent(
         ...getGptApplyPatchPermission(model),
       } as AgentConfig["permission"],
       reasoningEffort: "medium",
-    };
+    }
   }
 
   let prompt = buildDynamicSisyphusPrompt(
@@ -513,35 +516,35 @@ export function createSisyphusAgent(
     skills,
     categories,
     useTaskSystem,
-  );
+  )
 
   if (isGeminiModel(model)) {
     // 1. Intent gate + tool mandate - early in prompt (after intent verbalization)
     prompt = prompt.replace(
       "</intent_verbalization>",
-      `</intent_verbalization>\n\n${buildGeminiIntentGateEnforcement()}\n\n${buildGeminiToolMandate()}`
-    );
+      `</intent_verbalization>\n\n${buildGeminiIntentGateEnforcement()}\n\n${buildGeminiToolMandate()}`,
+    )
 
     // 2. Tool guide + examples - after tool_usage_rules (where tools are discussed)
     prompt = prompt.replace(
       "</tool_usage_rules>",
-      `</tool_usage_rules>\n\n${buildGeminiToolGuide()}\n\n${buildGeminiToolCallExamples()}`
-    );
+      `</tool_usage_rules>\n\n${buildGeminiToolGuide()}\n\n${buildGeminiToolCallExamples()}`,
+    )
 
     // 3. Delegation + verification overrides - before Constraints (NOT at prompt end)
     //    Gemini suffers from lost-in-the-middle: content at prompt end gets weaker attention.
     //    Placing these before <Constraints> ensures they're in a high-attention zone.
     prompt = prompt.replace(
       "<Constraints>",
-      `${buildGeminiDelegationOverride()}\n\n${buildGeminiVerificationOverride()}\n\n<Constraints>`
-    );
+      `${buildGeminiDelegationOverride()}\n\n${buildGeminiVerificationOverride()}\n\n<Constraints>`,
+    )
   }
 
   const permission = {
     question: "allow",
     call_omo_agent: "deny",
     ...getGptApplyPatchPermission(model),
-  } as AgentConfig["permission"];
+  } as AgentConfig["permission"]
   const base = {
     description:
       "Powerful AI orchestrator. Plans obsessively with todos, assesses search complexity before exploration, delegates strategically via category+skills combinations. Uses explore for internal code (parallel-friendly), librarian for external docs. (Sisyphus - OhMyCodes)",
@@ -551,12 +554,12 @@ export function createSisyphusAgent(
     prompt,
     color: "#00CED1",
     permission,
-  };
-
-  if (isGptModel(model)) {
-    return { ...base, reasoningEffort: "medium" };
   }
 
-  return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } };
+  if (isGptModel(model)) {
+    return { ...base, reasoningEffort: "medium" }
+  }
+
+  return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } }
 }
-createSisyphusAgent.mode = MODE;
+createSisyphusAgent.mode = MODE

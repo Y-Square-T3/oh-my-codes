@@ -1,4 +1,13 @@
-import { describe, it, expect, mock, spyOn, beforeEach, afterEach, afterAll } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  spyOn,
+  beforeEach,
+  afterEach,
+  afterAll,
+} from "bun:test"
 import type { RunResult } from "./types"
 import { createJsonOutputManager } from "./json-output"
 import { resolveSession } from "./session-resolver"
@@ -13,11 +22,13 @@ const mockCreateOpencode = mock(() =>
   Promise.resolve({
     client: { session: {} },
     server: { url: "http://127.0.0.1:9999", close: mockServerClose },
-  })
+  }),
 )
 const mockCreateOpencodeClient = mock(() => ({ session: {} }))
 const mockIsPortAvailable = mock(() => Promise.resolve(true))
-const mockGetAvailableServerPort = mock(() => Promise.resolve({ port: 9999, wasAutoSelected: false }))
+const mockGetAvailableServerPort = mock(() =>
+  Promise.resolve({ port: 9999, wasAutoSelected: false }),
+)
 
 mock.module("@opencode-ai/sdk", () => ({
   createOpencode: mockCreateOpencode,
@@ -54,16 +65,18 @@ function createMockWriteStream(): MockWriteStream {
   }
 }
 
-const createMockClient = (
-  getResult?: { error?: unknown; data?: { id: string } }
-): OpencodeClient => ({
-  session: {
-    get: mock((opts: { path: { id: string } }) =>
-      Promise.resolve(getResult ?? { data: { id: opts.path.id } })
-    ),
-    create: mock(() => Promise.resolve({ data: { id: "new-session-id" } })),
-  },
-} as unknown as OpencodeClient)
+const createMockClient = (getResult?: {
+  error?: unknown
+  data?: { id: string }
+}): OpencodeClient =>
+  ({
+    session: {
+      get: mock((opts: { path: { id: string } }) =>
+        Promise.resolve(getResult ?? { data: { id: opts.path.id } }),
+      ),
+      create: mock(() => Promise.resolve({ data: { id: "new-session-id" } })),
+    },
+  }) as unknown as OpencodeClient
 
 describe("integration: --json mode", () => {
   it("emits valid RunResult JSON to stdout", () => {
@@ -129,7 +142,11 @@ describe("integration: --session-id", () => {
     const mockClient = createMockClient({ data: { id: sessionId } })
 
     // when
-    const result = await resolveSession({ client: mockClient, sessionId, directory: "/test" })
+    const result = await resolveSession({
+      client: mockClient,
+      sessionId,
+      directory: "/test",
+    })
 
     // then
     expect(result).toBe(sessionId)
@@ -143,10 +160,16 @@ describe("integration: --session-id", () => {
   it("throws when session does not exist", async () => {
     // given
     const sessionId = "non-existent-session-id"
-    const mockClient = createMockClient({ error: { message: "Session not found" } })
+    const mockClient = createMockClient({
+      error: { message: "Session not found" },
+    })
 
     // when
-    const result = resolveSession({ client: mockClient, sessionId, directory: "/test" })
+    const result = resolveSession({
+      client: mockClient,
+      sessionId,
+      directory: "/test",
+    })
 
     // then
     expect(result).rejects.toThrow(`Session not found: ${sessionId}`)
@@ -170,13 +193,18 @@ describe("integration: --on-complete", () => {
       PSModulePath: process.env.PSModulePath,
     }
     spyOn(console, "error").mockImplementation(() => {})
-    spawnSpy = spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockReturnValue({
+    spawnSpy = spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockReturnValue({
       exited: Promise.resolve(0),
       exitCode: 0,
       stdout: undefined,
       stderr: undefined,
       kill: () => {},
-    } satisfies ReturnType<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>)
+    } satisfies ReturnType<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >)
   })
 
   afterEach(() => {
@@ -209,7 +237,9 @@ describe("integration: --on-complete", () => {
 
     // then
     expect(spawnSpy).toHaveBeenCalledTimes(1)
-    const [_, options] = spawnSpy.mock.calls[0] as Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    const [_, options] = spawnSpy.mock.calls[0] as Parameters<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >
     expect(options?.env?.SESSION_ID).toBe("session-123")
     expect(options?.env?.EXIT_CODE).toBe("0")
     expect(options?.env?.DURATION_MS).toBe("5000")
@@ -238,13 +268,18 @@ describe("integration: option combinations", () => {
     spyOn(console, "error").mockImplementation(() => {})
     mockStdout = createMockWriteStream()
     mockStderr = createMockWriteStream()
-    spawnSpy = spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockReturnValue({
+    spawnSpy = spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockReturnValue({
       exited: Promise.resolve(0),
       exitCode: 0,
       stdout: undefined,
       stderr: undefined,
       kill: () => {},
-    } satisfies ReturnType<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>)
+    } satisfies ReturnType<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >)
   })
 
   afterEach(() => {
@@ -293,9 +328,13 @@ describe("integration: option combinations", () => {
     const emitted = mockStdout.writes[0]!
     expect(() => JSON.parse(emitted)).not.toThrow()
     expect(spawnSpy).toHaveBeenCalledTimes(1)
-    const [args] = spawnSpy.mock.calls[0] as Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    const [args] = spawnSpy.mock.calls[0] as Parameters<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >
     expect(args).toEqual(["sh", "-c", "echo done"])
-    const [_, options] = spawnSpy.mock.calls[0] as Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    const [_, options] = spawnSpy.mock.calls[0] as Parameters<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >
     expect(options?.env?.SESSION_ID).toBe("session-123")
     expect(options?.env?.EXIT_CODE).toBe("0")
     expect(options?.env?.DURATION_MS).toBe("5000")
@@ -328,7 +367,9 @@ describe("integration: server connection", () => {
     // then
     expect(result.client).toBeDefined()
     expect(result.cleanup).toBeDefined()
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: attachUrl })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: attachUrl,
+    })
     result.cleanup()
     expect(mockServerClose).not.toHaveBeenCalled()
   })

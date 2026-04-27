@@ -8,7 +8,8 @@ export class TaskStateManager {
   readonly pendingByParent: Map<string, Set<string>> = new Map()
   readonly queuesByKey: Map<string, QueueItem[]> = new Map()
   readonly processingKeys: Set<string> = new Set()
-  readonly completionTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
+  readonly completionTimers: Map<string, ReturnType<typeof setTimeout>> =
+    new Map()
   getTask(id: string): BackgroundTask | undefined {
     return this.tasks.get(id)
   }
@@ -46,10 +47,10 @@ export class TaskStateManager {
   }
 
   getRunningTasks(): BackgroundTask[] {
-    return Array.from(this.tasks.values()).filter(t => t.status === "running")
+    return Array.from(this.tasks.values()).filter((t) => t.status === "running")
   }
   getNonRunningTasks(): BackgroundTask[] {
-    return Array.from(this.tasks.values()).filter(t => t.status !== "running")
+    return Array.from(this.tasks.values()).filter((t) => t.status !== "running")
   }
 
   hasRunningTasks(): boolean {
@@ -141,7 +142,7 @@ export class TaskStateManager {
     const queue = this.queuesByKey.get(key)
     if (!queue) return false
 
-    const index = queue.findIndex(item => item.task.id === taskId)
+    const index = queue.findIndex((item) => item.task.id === taskId)
     if (index === -1) return false
 
     queue.splice(index, 1)
@@ -151,7 +152,10 @@ export class TaskStateManager {
     return true
   }
 
-  setCompletionTimer(taskId: string, timer: ReturnType<typeof setTimeout>): void {
+  setCompletionTimer(
+    taskId: string,
+    timer: ReturnType<typeof setTimeout>,
+  ): void {
     this.completionTimers.set(taskId, timer)
   }
 

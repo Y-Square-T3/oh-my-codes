@@ -10,7 +10,10 @@ export const EXPLORE_PROMPT_METADATA: AgentPromptMetadata = {
   promptAlias: "Explore",
   keyTrigger: "2+ modules involved → fire `explore` background",
   triggers: [
-    { domain: "Explore", trigger: "Find existing codebase structure, patterns and styles" },
+    {
+      domain: "Explore",
+      trigger: "Find existing codebase structure, patterns and styles",
+    },
   ],
   useWhen: [
     "Multiple search angles needed",
@@ -27,7 +30,13 @@ export const EXPLORE_PROMPT_METADATA: AgentPromptMetadata = {
 export function createExploreAgent(model: string): AgentConfig {
   const restrictions = createAgentToolRestrictions(
     ["write", "edit", "apply_patch", "task", "call_omo_agent"],
-    ["lsp_symbols", "lsp_goto_definition", "lsp_find_references", "lsp_diagnostics", "ast_grep_search"],
+    [
+      "lsp_symbols",
+      "lsp_goto_definition",
+      "lsp_find_references",
+      "lsp_diagnostics",
+      "ast_grep_search",
+    ],
   )
 
   return {

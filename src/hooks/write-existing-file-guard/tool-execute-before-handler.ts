@@ -23,7 +23,12 @@ function ensureSessionReadSet(params: {
   sessionLastAccess: Map<string, number>
   maxTrackedSessions: number
 }): Set<string> {
-  const { sessionID, readPermissionsBySession, sessionLastAccess, maxTrackedSessions } = params
+  const {
+    sessionID,
+    readPermissionsBySession,
+    sessionLastAccess,
+    maxTrackedSessions,
+  } = params
   let readSet = readPermissionsBySession.get(sessionID)
   if (!readSet) {
     if (readPermissionsBySession.size >= maxTrackedSessions) {
@@ -93,7 +98,15 @@ export async function handleWriteExistingFileGuardToolExecuteBefore(params: {
   getCanonicalSessionRoot: () => string
   maxTrackedSessions: number
 }): Promise<void> {
-  const { ctx, input, output, readPermissionsBySession, sessionLastAccess, getCanonicalSessionRoot, maxTrackedSessions } = params
+  const {
+    ctx,
+    input,
+    output,
+    readPermissionsBySession,
+    sessionLastAccess,
+    getCanonicalSessionRoot,
+    maxTrackedSessions,
+  } = params
   const toolName = input.tool?.toLowerCase()
   if (toolName !== "write" && toolName !== "read") {
     return
@@ -143,7 +156,11 @@ export async function handleWriteExistingFileGuardToolExecuteBefore(params: {
       sessionID: input.sessionID,
       filePath,
     })
-    invalidateOtherSessions(readPermissionsBySession, canonicalPath, input.sessionID)
+    invalidateOtherSessions(
+      readPermissionsBySession,
+      canonicalPath,
+      input.sessionID,
+    )
     return
   }
 
@@ -153,17 +170,33 @@ export async function handleWriteExistingFileGuardToolExecuteBefore(params: {
       filePath,
       resolvedPath,
     })
-    invalidateOtherSessions(readPermissionsBySession, canonicalPath, input.sessionID)
+    invalidateOtherSessions(
+      readPermissionsBySession,
+      canonicalPath,
+      input.sessionID,
+    )
     return
   }
 
-  if (input.sessionID && consumeReadPermission({ sessionID: input.sessionID, canonicalPath, readPermissionsBySession, sessionLastAccess })) {
+  if (
+    input.sessionID &&
+    consumeReadPermission({
+      sessionID: input.sessionID,
+      canonicalPath,
+      readPermissionsBySession,
+      sessionLastAccess,
+    })
+  ) {
     log("[write-existing-file-guard] Allowing overwrite after read", {
       sessionID: input.sessionID,
       filePath,
       resolvedPath,
     })
-    invalidateOtherSessions(readPermissionsBySession, canonicalPath, input.sessionID)
+    invalidateOtherSessions(
+      readPermissionsBySession,
+      canonicalPath,
+      input.sessionID,
+    )
     return
   }
 

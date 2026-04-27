@@ -3,7 +3,10 @@ import { createHashlineChunkFormatter } from "./hashline-chunk-formatter"
 
 const RE_SIGNIFICANT = /[\p{L}\p{N}]/u
 
-function computeNormalizedLineHash(lineNumber: number, normalizedContent: string): string {
+function computeNormalizedLineHash(
+  lineNumber: number,
+  normalizedContent: string,
+): string {
   const stripped = normalizedContent
   const seed = RE_SIGNIFICANT.test(stripped) ? 0 : lineNumber
   const hash = Bun.hash.xxHash32(stripped, seed)
@@ -12,11 +15,20 @@ function computeNormalizedLineHash(lineNumber: number, normalizedContent: string
 }
 
 export function computeLineHash(lineNumber: number, content: string): string {
-  return computeNormalizedLineHash(lineNumber, content.replace(/\r/g, "").trimEnd())
+  return computeNormalizedLineHash(
+    lineNumber,
+    content.replace(/\r/g, "").trimEnd(),
+  )
 }
 
-export function computeLegacyLineHash(lineNumber: number, content: string): string {
-  return computeNormalizedLineHash(lineNumber, content.replace(/\r/g, "").replace(/\s+/g, ""))
+export function computeLegacyLineHash(
+  lineNumber: number,
+  content: string,
+): string {
+  return computeNormalizedLineHash(
+    lineNumber,
+    content.replace(/\r/g, "").replace(/\s+/g, ""),
+  )
 }
 
 export function formatHashLine(lineNumber: number, content: string): string {
@@ -45,7 +57,9 @@ function isReadableStream(value: unknown): value is ReadableStream<Uint8Array> {
   )
 }
 
-async function* bytesFromReadableStream(stream: ReadableStream<Uint8Array>): AsyncGenerator<Uint8Array> {
+async function* bytesFromReadableStream(
+  stream: ReadableStream<Uint8Array>,
+): AsyncGenerator<Uint8Array> {
   const reader = stream.getReader()
   try {
     while (true) {
@@ -60,19 +74,24 @@ async function* bytesFromReadableStream(stream: ReadableStream<Uint8Array>): Asy
 
 export async function* streamHashLinesFromUtf8(
   source: ReadableStream<Uint8Array> | AsyncIterable<Uint8Array>,
-  options: HashlineStreamOptions = {}
+  options: HashlineStreamOptions = {},
 ): AsyncGenerator<string> {
   const startLine = options.startLine ?? 1
   const maxChunkLines = options.maxChunkLines ?? 200
   const maxChunkBytes = options.maxChunkBytes ?? 64 * 1024
   const decoder = new TextDecoder("utf-8")
-  const chunks = isReadableStream(source) ? bytesFromReadableStream(source) : source
+  const chunks = isReadableStream(source)
+    ? bytesFromReadableStream(source)
+    : source
 
   let lineNumber = startLine
   let pending = ""
   let sawAnyText = false
   let endedWithNewline = false
-  const chunkFormatter = createHashlineChunkFormatter({ maxChunkLines, maxChunkBytes })
+  const chunkFormatter = createHashlineChunkFormatter({
+    maxChunkLines,
+    maxChunkBytes,
+  })
 
   const pushLine = (line: string): string[] => {
     const formatted = formatHashLine(lineNumber, line)
@@ -123,14 +142,17 @@ export async function* streamHashLinesFromUtf8(
 
 export async function* streamHashLinesFromLines(
   lines: Iterable<string> | AsyncIterable<string>,
-  options: HashlineStreamOptions = {}
+  options: HashlineStreamOptions = {},
 ): AsyncGenerator<string> {
   const startLine = options.startLine ?? 1
   const maxChunkLines = options.maxChunkLines ?? 200
   const maxChunkBytes = options.maxChunkBytes ?? 64 * 1024
 
   let lineNumber = startLine
-  const chunkFormatter = createHashlineChunkFormatter({ maxChunkLines, maxChunkBytes })
+  const chunkFormatter = createHashlineChunkFormatter({
+    maxChunkLines,
+    maxChunkBytes,
+  })
 
   const pushLine = (line: string): string[] => {
     const formatted = formatHashLine(lineNumber, line)

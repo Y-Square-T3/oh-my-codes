@@ -6,7 +6,10 @@ import {
   reorderAgentsByPriority,
   CANONICAL_CORE_AGENT_ORDER,
 } from "./agent-priority-order"
-import { getAgentDisplayName, getAgentListDisplayName } from "../shared/agent-display-names"
+import {
+  getAgentDisplayName,
+  getAgentListDisplayName,
+} from "../shared/agent-display-names"
 
 describe("agent-priority-order", () => {
   describe("CANONICAL_CORE_AGENT_ORDER", () => {
@@ -83,7 +86,12 @@ describe("agent-priority-order", () => {
 
         // then
         const keys = Object.keys(result)
-        expect(keys.slice(0, 4)).toEqual([sisyphus, hephaestus, prometheus, atlas])
+        expect(keys.slice(0, 4)).toEqual([
+          sisyphus,
+          hephaestus,
+          prometheus,
+          atlas,
+        ])
       })
     })
 
@@ -193,10 +201,26 @@ describe("agent-priority-order", () => {
         const result = reorderAgentsByPriority(agents)
 
         // then
-        expect(result[sisyphus]).toEqual({ name: "sisyphus", mode: "primary", order: 1 })
-        expect(result[hephaestus]).toEqual({ name: "hephaestus", mode: "primary", order: 2 })
-        expect(result[prometheus]).toEqual({ name: "prometheus", mode: "primary", order: 3 })
-        expect(result[atlas]).toEqual({ name: "atlas", mode: "primary", order: 4 })
+        expect(result[sisyphus]).toEqual({
+          name: "sisyphus",
+          mode: "primary",
+          order: 1,
+        })
+        expect(result[hephaestus]).toEqual({
+          name: "hephaestus",
+          mode: "primary",
+          order: 2,
+        })
+        expect(result[prometheus]).toEqual({
+          name: "prometheus",
+          mode: "primary",
+          order: 3,
+        })
+        expect(result[atlas]).toEqual({
+          name: "atlas",
+          mode: "primary",
+          order: 4,
+        })
       })
 
       test("#when core agent is non-object #then leaves value unchanged", () => {

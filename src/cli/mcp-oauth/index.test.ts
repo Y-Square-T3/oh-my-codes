@@ -3,7 +3,6 @@ import { Command } from "commander"
 import { createMcpOAuthCommand } from "./index"
 
 describe("mcp oauth command", () => {
-
   describe("command structure", () => {
     it("creates mcp command group with oauth subcommand", () => {
       // given
@@ -19,10 +18,13 @@ describe("mcp oauth command", () => {
     it("oauth subcommand has login, logout, and status subcommands", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
 
       // when
-      const subcommands = oauthCommand?.commands.map((cmd: Command) => cmd.name()) ?? []
+      const subcommands =
+        oauthCommand?.commands.map((cmd: Command) => cmd.name()) ?? []
 
       // then
       expect(subcommands).toContain("login")
@@ -35,8 +37,12 @@ describe("mcp oauth command", () => {
     it("exists and has description", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const loginCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "login")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const loginCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "login",
+      )
 
       // when
       const description = loginCommand?.description() ?? ""
@@ -49,12 +55,18 @@ describe("mcp oauth command", () => {
     it("accepts --server-url option", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const loginCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "login")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const loginCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "login",
+      )
 
       // when
       const options = loginCommand?.options ?? []
-      const serverUrlOption = options.find((opt: { long?: string }) => opt.long === "--server-url")
+      const serverUrlOption = options.find(
+        (opt: { long?: string }) => opt.long === "--server-url",
+      )
 
       // then
       expect(serverUrlOption).toBeDefined()
@@ -63,12 +75,18 @@ describe("mcp oauth command", () => {
     it("accepts --client-id option", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const loginCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "login")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const loginCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "login",
+      )
 
       // when
       const options = loginCommand?.options ?? []
-      const clientIdOption = options.find((opt: { long?: string }) => opt.long === "--client-id")
+      const clientIdOption = options.find(
+        (opt: { long?: string }) => opt.long === "--client-id",
+      )
 
       // then
       expect(clientIdOption).toBeDefined()
@@ -77,12 +95,18 @@ describe("mcp oauth command", () => {
     it("accepts --scopes option", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const loginCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "login")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const loginCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "login",
+      )
 
       // when
       const options = loginCommand?.options ?? []
-      const scopesOption = options.find((opt: { long?: string }) => opt.long === "--scopes")
+      const scopesOption = options.find(
+        (opt: { long?: string }) => opt.long === "--scopes",
+      )
 
       // then
       expect(scopesOption).toBeDefined()
@@ -93,8 +117,12 @@ describe("mcp oauth command", () => {
     it("exists and has description", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const logoutCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "logout")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const logoutCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "logout",
+      )
 
       // when
       const description = logoutCommand?.description() ?? ""
@@ -109,8 +137,12 @@ describe("mcp oauth command", () => {
     it("exists and has description", () => {
       // given
       const mcpCommand = createMcpOAuthCommand()
-      const oauthCommand = mcpCommand.commands.find((cmd: Command) => cmd.name() === "oauth")
-      const statusCommand = oauthCommand?.commands.find((cmd: Command) => cmd.name() === "status")
+      const oauthCommand = mcpCommand.commands.find(
+        (cmd: Command) => cmd.name() === "oauth",
+      )
+      const statusCommand = oauthCommand?.commands.find(
+        (cmd: Command) => cmd.name() === "status",
+      )
 
       // when
       const description = statusCommand?.description() ?? ""

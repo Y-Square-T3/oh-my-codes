@@ -1,4 +1,12 @@
-import { describe, it, expect, spyOn, beforeEach, afterEach, mock } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  spyOn,
+  beforeEach,
+  afterEach,
+  mock,
+} from "bun:test"
 import * as spawnWithWindowsHideModule from "../../shared/spawn-with-windows-hide"
 import * as loggerModule from "../../shared/logger"
 
@@ -22,14 +30,19 @@ describe("executeOnCompleteHook", () => {
     })
   }
 
-  function createProc(exitCode: number, output?: { stdout?: string; stderr?: string }) {
+  function createProc(
+    exitCode: number,
+    output?: { stdout?: string; stderr?: string },
+  ) {
     return {
       exited: Promise.resolve(exitCode),
       exitCode,
       stdout: createStream(output?.stdout ?? ""),
       stderr: createStream(output?.stderr ?? ""),
       kill: () => {},
-    } satisfies ReturnType<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    } satisfies ReturnType<
+      typeof spawnWithWindowsHideModule.spawnWithWindowsHide
+    >
   }
 
   let logCalls: Array<Parameters<typeof loggerModule.log>>
@@ -37,7 +50,9 @@ describe("executeOnCompleteHook", () => {
   async function importFreshExecuteOnCompleteHook(): Promise<
     OnCompleteHookModule["executeOnCompleteHook"]
   > {
-    const onCompleteHookModule = await import(`./on-complete-hook?test=${Date.now()}-${Math.random()}`)
+    const onCompleteHookModule = await import(
+      `./on-complete-hook?test=${Date.now()}-${Math.random()}`
+    )
     return onCompleteHookModule.executeOnCompleteHook
   }
 
@@ -50,9 +65,11 @@ describe("executeOnCompleteHook", () => {
       ComSpec: process.env.ComSpec,
     }
     logCalls = []
-    spyOn(loggerModule, "log").mockImplementation((message: string, data?: unknown) => {
-      logCalls.push([message, data])
-    })
+    spyOn(loggerModule, "log").mockImplementation(
+      (message: string, data?: unknown) => {
+        logCalls.push([message, data])
+      },
+    )
   })
 
   afterEach(() => {
@@ -72,11 +89,13 @@ describe("executeOnCompleteHook", () => {
     Object.defineProperty(process, "platform", { value: "linux" })
     process.env.SHELL = "/bin/bash"
     delete process.env.PSModulePath
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -109,11 +128,13 @@ describe("executeOnCompleteHook", () => {
     Object.defineProperty(process, "platform", { value: "win32" })
     process.env.PSModulePath = "C:\\Program Files\\PowerShell\\Modules"
     delete process.env.SHELL
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -130,7 +151,12 @@ describe("executeOnCompleteHook", () => {
 
     // then
     const [args] = spawnCalls[0]
-    expect(args).toEqual(["powershell.exe", "-NoProfile", "-Command", "Write-Host done"])
+    expect(args).toEqual([
+      "powershell.exe",
+      "-NoProfile",
+      "-Command",
+      "Write-Host done",
+    ])
   })
 
   it("uses pwsh when PowerShell is detected on non-Windows platforms", async () => {
@@ -138,11 +164,13 @@ describe("executeOnCompleteHook", () => {
     Object.defineProperty(process, "platform", { value: "linux" })
     process.env.PSModulePath = "/usr/local/share/powershell/Modules"
     delete process.env.SHELL
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -168,11 +196,13 @@ describe("executeOnCompleteHook", () => {
     delete process.env.PSModulePath
     delete process.env.SHELL
     process.env.ComSpec = "C:\\Windows\\System32\\cmd.exe"
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -189,16 +219,24 @@ describe("executeOnCompleteHook", () => {
 
     // then
     const [args] = spawnCalls[0]
-    expect(args).toEqual(["C:\\Windows\\System32\\cmd.exe", "/d", "/s", "/c", "echo done"])
+    expect(args).toEqual([
+      "C:\\Windows\\System32\\cmd.exe",
+      "/d",
+      "/s",
+      "/c",
+      "echo done",
+    ])
   })
 
   it("env var values are strings", async () => {
     // given
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -226,11 +264,13 @@ describe("executeOnCompleteHook", () => {
 
   it("empty command string is no-op", async () => {
     // given
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -251,11 +291,13 @@ describe("executeOnCompleteHook", () => {
 
   it("whitespace-only command is no-op", async () => {
     // given
-    const spawnCalls: Array<Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>> = []
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation((
-      command,
-      options,
-    ) => {
+    const spawnCalls: Array<
+      Parameters<typeof spawnWithWindowsHideModule.spawnWithWindowsHide>
+    > = []
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation((command, options) => {
       spawnCalls.push([command, options])
       return createProc(0)
     })
@@ -276,7 +318,9 @@ describe("executeOnCompleteHook", () => {
 
   it("command failure logs warning but does not throw", async () => {
     // given
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockReturnValue(createProc(1))
+    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockReturnValue(
+      createProc(1),
+    )
     const executeOnCompleteHook = await importFreshExecuteOnCompleteHook()
 
     // when
@@ -290,7 +334,7 @@ describe("executeOnCompleteHook", () => {
 
     // then
     const warningCall = logCalls.find(
-      (call) => call[0] === "On-complete hook exited with non-zero code"
+      (call) => call[0] === "On-complete hook exited with non-zero code",
     )
     expect(warningCall).toBeDefined()
   })
@@ -298,7 +342,10 @@ describe("executeOnCompleteHook", () => {
   it("spawn error logs warning but does not throw", async () => {
     // given
     const spawnError = new Error("Command not found")
-    spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockImplementation(() => {
+    spyOn(
+      spawnWithWindowsHideModule,
+      "spawnWithWindowsHide",
+    ).mockImplementation(() => {
       throw spawnError
     })
     const executeOnCompleteHook = await importFreshExecuteOnCompleteHook()
@@ -314,7 +361,7 @@ describe("executeOnCompleteHook", () => {
 
     // then
     const errorCall = logCalls.find(
-      (call) => call[0] === "Failed to execute on-complete hook"
+      (call) => call[0] === "Failed to execute on-complete hook",
     )
     expect(errorCall).toBeDefined()
   })
@@ -322,7 +369,7 @@ describe("executeOnCompleteHook", () => {
   it("hook stdout and stderr are logged to file logger", async () => {
     // given
     spyOn(spawnWithWindowsHideModule, "spawnWithWindowsHide").mockReturnValue(
-      createProc(0, { stdout: "hook output\n", stderr: "hook warning\n" })
+      createProc(0, { stdout: "hook output\n", stderr: "hook warning\n" }),
     )
     const executeOnCompleteHook = await importFreshExecuteOnCompleteHook()
 
@@ -337,13 +384,19 @@ describe("executeOnCompleteHook", () => {
 
     // then
     const stdoutCall = logCalls.find(
-      (call) => call[0] === "On-complete hook stdout"
+      (call) => call[0] === "On-complete hook stdout",
     )
     const stderrCall = logCalls.find(
-      (call) => call[0] === "On-complete hook stderr"
+      (call) => call[0] === "On-complete hook stderr",
     )
 
-    expect(stdoutCall?.[1]).toEqual({ command: "echo test", stdout: "hook output" })
-    expect(stderrCall?.[1]).toEqual({ command: "echo test", stderr: "hook warning" })
+    expect(stdoutCall?.[1]).toEqual({
+      command: "echo test",
+      stdout: "hook output",
+    })
+    expect(stderrCall?.[1]).toEqual({
+      command: "echo test",
+      stderr: "hook warning",
+    })
   })
 })

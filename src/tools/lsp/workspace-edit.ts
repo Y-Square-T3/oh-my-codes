@@ -10,7 +10,10 @@ export interface ApplyResult {
   errors: string[]
 }
 
-function applyTextEditsToFile(filePath: string, edits: TextEdit[]): { success: boolean; editCount: number; error?: string } {
+function applyTextEditsToFile(
+  filePath: string,
+  edits: TextEdit[],
+): { success: boolean; editCount: number; error?: string } {
   try {
     let content = readFileSync(filePath, "utf-8")
     const lines = content.split("\n")
@@ -30,28 +33,50 @@ function applyTextEditsToFile(filePath: string, edits: TextEdit[]): { success: b
 
       if (startLine === endLine) {
         const line = lines[startLine] || ""
-        lines[startLine] = line.substring(0, startChar) + edit.newText + line.substring(endChar)
+        lines[startLine] =
+          line.substring(0, startChar) + edit.newText + line.substring(endChar)
       } else {
         const firstLine = lines[startLine] || ""
         const lastLine = lines[endLine] || ""
-        const newContent = firstLine.substring(0, startChar) + edit.newText + lastLine.substring(endChar)
-        lines.splice(startLine, endLine - startLine + 1, ...newContent.split("\n"))
+        const newContent =
+          firstLine.substring(0, startChar) +
+          edit.newText +
+          lastLine.substring(endChar)
+        lines.splice(
+          startLine,
+          endLine - startLine + 1,
+          ...newContent.split("\n"),
+        )
       }
     }
 
     writeFileSync(filePath, lines.join("\n"), "utf-8")
     return { success: true, editCount: edits.length }
   } catch (err) {
-    return { success: false, editCount: 0, error: err instanceof Error ? err.message : String(err) }
+    return {
+      success: false,
+      editCount: 0,
+      error: err instanceof Error ? err.message : String(err),
+    }
   }
 }
 
 export function applyWorkspaceEdit(edit: WorkspaceEdit | null): ApplyResult {
   if (!edit) {
-    return { success: false, filesModified: [], totalEdits: 0, errors: ["No edit provided"] }
+    return {
+      success: false,
+      filesModified: [],
+      totalEdits: 0,
+      errors: ["No edit provided"],
+    }
   }
 
-  const result: ApplyResult = { success: true, filesModified: [], totalEdits: 0, errors: [] }
+  const result: ApplyResult = {
+    success: true,
+    filesModified: [],
+    totalEdits: 0,
+    errors: [],
+  }
 
   if (edit.changes) {
     for (const [uri, edits] of Object.entries(edit.changes)) {

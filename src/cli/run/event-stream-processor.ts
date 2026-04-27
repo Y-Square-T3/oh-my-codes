@@ -17,7 +17,7 @@ import {
 export async function processEvents(
   ctx: RunContext,
   stream: AsyncIterable<unknown>,
-  state: EventState
+  state: EventState,
 ): Promise<void> {
   for await (const event of stream) {
     if (ctx.abortController.signal.aborted) break

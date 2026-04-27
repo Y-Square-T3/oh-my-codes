@@ -8,15 +8,22 @@ import * as sharedModule from "../shared"
 
 let scheduleDeferredModelOverride: (typeof import("./ultrawork-db-model-override"))["scheduleDeferredModelOverride"]
 
-async function importFreshUltraworkDbModelOverrideModule(): Promise<typeof import("./ultrawork-db-model-override")> {
-  return import(`./ultrawork-db-model-override?test=${Date.now()}-${Math.random()}`)
+async function importFreshUltraworkDbModelOverrideModule(): Promise<
+  typeof import("./ultrawork-db-model-override")
+> {
+  return import(
+    `./ultrawork-db-model-override?test=${Date.now()}-${Math.random()}`
+  )
 }
 
 function flushMicrotasks(depth: number): Promise<void> {
   return new Promise<void>((resolve) => {
     let remaining = depth
     function step() {
-      if (remaining <= 0) { resolve(); return }
+      if (remaining <= 0) {
+        resolve()
+        return
+      }
       remaining--
       queueMicrotask(step)
     }
@@ -65,7 +72,8 @@ describe("scheduleDeferredModelOverride", () => {
     getDataDirSpy.mockReturnValue(tempDir)
     logSpy = spyOn(sharedModule, "log")
     logSpy.mockImplementation(() => {})
-    ;({ scheduleDeferredModelOverride } = await importFreshUltraworkDbModelOverrideModule())
+    ;({ scheduleDeferredModelOverride } =
+      await importFreshUltraworkDbModelOverrideModule())
   })
 
   afterEach(async () => {
@@ -75,20 +83,26 @@ describe("scheduleDeferredModelOverride", () => {
     rmSync(tempDir, { recursive: true, force: true })
   })
 
-  function insertMessage(id: string, model: { providerID: string; modelID: string }) {
+  function insertMessage(
+    id: string,
+    model: { providerID: string; modelID: string },
+  ) {
     const db = new Database(dbPath)
-    db.run(
-      `INSERT INTO message (id, session_id, data) VALUES (?, ?, ?)`,
-      [id, "ses_test", JSON.stringify({ model })],
-    )
+    db.run(`INSERT INTO message (id, session_id, data) VALUES (?, ?, ?)`, [
+      id,
+      "ses_test",
+      JSON.stringify({ model }),
+    ])
     db.close()
   }
 
-  function readMessageModel(id: string): { providerID: string; modelID: string } | null {
+  function readMessageModel(
+    id: string,
+  ): { providerID: string; modelID: string } | null {
     const db = new Database(dbPath)
-    const row = db.query(`SELECT data FROM message WHERE id = ?`).get(id) as
-      | { data: string }
-      | null
+    const row = db.query(`SELECT data FROM message WHERE id = ?`).get(id) as {
+      data: string
+    } | null
     db.close()
     if (!row) return null
     const parsed = JSON.parse(row.data)
@@ -97,9 +111,9 @@ describe("scheduleDeferredModelOverride", () => {
 
   function readMessageField(id: string, field: string): unknown {
     const db = new Database(dbPath)
-    const row = db.query(`SELECT data FROM message WHERE id = ?`).get(id) as
-      | { data: string }
-      | null
+    const row = db.query(`SELECT data FROM message WHERE id = ?`).get(id) as {
+      data: string
+    } | null
     db.close()
     if (!row) return null
     return JSON.parse(row.data)[field] ?? null
@@ -107,23 +121,32 @@ describe("scheduleDeferredModelOverride", () => {
 
   test("should update model in DB after microtask flushes", async () => {
     //#given
-    insertMessage("msg_001", { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+    insertMessage("msg_001", {
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    })
 
     //#when
-    scheduleDeferredModelOverride(
-      "msg_001",
-      { providerID: "anthropic", modelID: "claude-opus-4-7" },
-    )
+    scheduleDeferredModelOverride("msg_001", {
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     await flushMicrotasks(5)
 
     //#then
     const model = readMessageModel("msg_001")
-    expect(model).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-7" })
+    expect(model).toEqual({
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
   })
 
   test("should update variant and thinking fields when variant provided", async () => {
     //#given
-    insertMessage("msg_002", { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+    insertMessage("msg_002", {
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    })
 
     //#when
     scheduleDeferredModelOverride(
@@ -142,10 +165,10 @@ describe("scheduleDeferredModelOverride", () => {
     //#given no message inserted
 
     //#when
-    scheduleDeferredModelOverride(
-      "msg_nonexistent",
-      { providerID: "anthropic", modelID: "claude-opus-4-7" },
-    )
+    scheduleDeferredModelOverride("msg_nonexistent", {
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     await flushWithTimeout()
 
     //#then
@@ -157,18 +180,24 @@ describe("scheduleDeferredModelOverride", () => {
 
   test("should not update variant fields when variant is undefined", async () => {
     //#given
-    insertMessage("msg_003", { providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+    insertMessage("msg_003", {
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    })
 
     //#when
-    scheduleDeferredModelOverride(
-      "msg_003",
-      { providerID: "anthropic", modelID: "claude-opus-4-7" },
-    )
+    scheduleDeferredModelOverride("msg_003", {
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     await flushMicrotasks(5)
 
     //#then
     const model = readMessageModel("msg_003")
-    expect(model).toEqual({ providerID: "anthropic", modelID: "claude-opus-4-7" })
+    expect(model).toEqual({
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     expect(readMessageField("msg_003", "variant")).toBeNull()
     expect(readMessageField("msg_003", "thinking")).toBeNull()
   })
@@ -178,16 +207,14 @@ describe("scheduleDeferredModelOverride", () => {
     getDataDirSpy.mockReturnValue("/nonexistent/path/that/does/not/exist")
 
     //#when
-    scheduleDeferredModelOverride(
-      "msg_004",
-      { providerID: "anthropic", modelID: "claude-opus-4-7" },
-    )
+    scheduleDeferredModelOverride("msg_004", {
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     await flushMicrotasks(5)
 
     //#then
-    expect(logSpy).toHaveBeenCalledWith(
-      expect.stringContaining("DB not found"),
-    )
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("DB not found"))
   })
 
   test("should log a DB failure when DB file exists but is corrupted", async () => {
@@ -198,21 +225,20 @@ describe("scheduleDeferredModelOverride", () => {
     chmodSync(corruptedDbPath, 0o000)
 
     //#when
-    scheduleDeferredModelOverride(
-      "msg_corrupt",
-      { providerID: "anthropic", modelID: "claude-opus-4-7" },
-    )
+    scheduleDeferredModelOverride("msg_corrupt", {
+      providerID: "anthropic",
+      modelID: "claude-opus-4-7",
+    })
     await flushMicrotasks(5)
 
     //#then
-    const failureCall = logSpy.mock.calls.find(([message, metadata]) =>
-      typeof message === "string"
-      && (
-        message.includes("Failed to open DB")
-        || message.includes("Deferred DB update failed with error")
-      )
-      && isRecord(metadata)
-      && metadata.messageId === "msg_corrupt"
+    const failureCall = logSpy.mock.calls.find(
+      ([message, metadata]) =>
+        typeof message === "string" &&
+        (message.includes("Failed to open DB") ||
+          message.includes("Deferred DB update failed with error")) &&
+        isRecord(metadata) &&
+        metadata.messageId === "msg_corrupt",
     )
 
     expect(failureCall).toBeDefined()

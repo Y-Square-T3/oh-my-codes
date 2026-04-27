@@ -38,13 +38,21 @@ export const SISYPHUS_JUNIOR_DEFAULTS = {
   temperature: 0.1,
 } as const
 
-export type SisyphusJuniorPromptSource = "default" | "gpt" | "gpt-5-4" | "gpt-5-3-codex" | "gemini"
+export type SisyphusJuniorPromptSource =
+  | "default"
+  | "gpt"
+  | "gpt-5-4"
+  | "gpt-5-3-codex"
+  | "gemini"
 
-export function getSisyphusJuniorPromptSource(model?: string): SisyphusJuniorPromptSource {
+export function getSisyphusJuniorPromptSource(
+  model?: string,
+): SisyphusJuniorPromptSource {
   if (model && isGptModel(model)) {
     const lower = model.toLowerCase()
     if (lower.includes("gpt-5.4") || lower.includes("gpt-5-4")) return "gpt-5-4"
-    if (lower.includes("gpt-5.3-codex") || lower.includes("gpt-5-3-codex")) return "gpt-5-3-codex"
+    if (lower.includes("gpt-5.3-codex") || lower.includes("gpt-5-3-codex"))
+      return "gpt-5-3-codex"
     return "gpt"
   }
   if (model && isGeminiModel(model)) {
@@ -59,7 +67,7 @@ export function getSisyphusJuniorPromptSource(model?: string): SisyphusJuniorPro
 export function buildSisyphusJuniorPrompt(
   model: string | undefined,
   useTaskSystem: boolean,
-  promptAppend?: string
+  promptAppend?: string,
 ): string {
   const source = getSisyphusJuniorPromptSource(model)
 
@@ -81,15 +89,17 @@ export function buildSisyphusJuniorPrompt(
 export function createSisyphusJuniorAgentWithOverrides(
   override: AgentOverrideConfig | undefined,
   systemDefaultModel?: string,
-  useTaskSystem = false
+  useTaskSystem = false,
 ): AgentConfig {
   if (override?.disable) {
     override = undefined
   }
 
   const overrideModel = (override as { model?: string } | undefined)?.model
-  const model = overrideModel ?? systemDefaultModel ?? SISYPHUS_JUNIOR_DEFAULTS.model
-  const temperature = override?.temperature ?? SISYPHUS_JUNIOR_DEFAULTS.temperature
+  const model =
+    overrideModel ?? systemDefaultModel ?? SISYPHUS_JUNIOR_DEFAULTS.model
+  const temperature =
+    override?.temperature ?? SISYPHUS_JUNIOR_DEFAULTS.temperature
 
   const promptAppend = override?.prompt_append
   const prompt = buildSisyphusJuniorPrompt(model, useTaskSystem, promptAppend)
@@ -97,21 +107,30 @@ export function createSisyphusJuniorAgentWithOverrides(
 
   const baseRestrictions = createAgentToolRestrictions(blockedTools)
 
-  const userPermission = (override?.permission ?? {}) as Record<string, PermissionValue>
+  const userPermission = (override?.permission ?? {}) as Record<
+    string,
+    PermissionValue
+  >
   const basePermission = baseRestrictions.permission
   const merged: Record<string, PermissionValue> = { ...userPermission }
   for (const tool of blockedTools) {
     merged[tool] = "deny"
   }
   merged.call_omo_agent = "allow"
-  const toolsConfig = { permission: { ...merged, ...basePermission } as Record<string, PermissionValue> }
+  const toolsConfig = {
+    permission: { ...merged, ...basePermission } as Record<
+      string,
+      PermissionValue
+    >,
+  }
   const permission: Record<string, PermissionValue> = {
     ...toolsConfig.permission,
     ...getGptApplyPatchPermission(model),
   }
 
   const base: AgentConfig = {
-    description: override?.description ??
+    description:
+      override?.description ??
       "Focused task executor. Same discipline, no delegation. (Sisyphus-Junior - OhMyCodes)",
     mode: MODE,
     model,

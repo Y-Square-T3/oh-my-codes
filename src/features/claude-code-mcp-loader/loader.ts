@@ -30,7 +30,7 @@ function getMcpConfigPaths(): McpConfigPath[] {
 }
 
 async function loadMcpConfigFile(
-  filePath: string
+  filePath: string,
 ): Promise<ClaudeCodeMcpConfig | null> {
   if (!existsSync(filePath)) {
     return null
@@ -75,7 +75,7 @@ export function getSystemMcpServerNames(): Set<string> {
 }
 
 export async function loadMcpConfigs(
-  disabledMcps: string[] = []
+  disabledMcps: string[] = [],
 ): Promise<McpLoadResult> {
   const servers: McpLoadResult["servers"] = {}
   const loadedServers: LoadedMcpServer[] = []
@@ -94,11 +94,14 @@ export async function loadMcpConfigs(
       }
 
       if (!shouldLoadMcpServer(serverConfig, cwd)) {
-        log(`Skipping MCP server "${name}" because local scope does not match cwd`, {
-          path,
-          projectPath: serverConfig.projectPath,
-          cwd,
-        })
+        log(
+          `Skipping MCP server "${name}" because local scope does not match cwd`,
+          {
+            path,
+            projectPath: serverConfig.projectPath,
+            cwd,
+          },
+        )
         continue
       }
 
@@ -135,7 +138,7 @@ export async function loadMcpConfigs(
 }
 
 export function formatLoadedServersForToast(
-  loadedServers: LoadedMcpServer[]
+  loadedServers: LoadedMcpServer[],
 ): string {
   if (loadedServers.length === 0) return ""
 

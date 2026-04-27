@@ -1,4 +1,6 @@
-export function parseAllowedTools(allowedTools: string | string[] | undefined): string[] | undefined {
+export function parseAllowedTools(
+  allowedTools: string | string[] | undefined,
+): string[] | undefined {
   if (!allowedTools) return undefined
 
   if (Array.isArray(allowedTools)) {

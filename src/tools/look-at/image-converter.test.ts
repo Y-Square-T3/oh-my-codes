@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test"
 import * as childProcess from "node:child_process"
-import { existsSync, mkdtempSync, writeFileSync, unlinkSync, rmSync } from "node:fs"
+import {
+  existsSync,
+  mkdtempSync,
+  writeFileSync,
+  unlinkSync,
+  rmSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 
@@ -60,7 +66,8 @@ describe("image-converter command execution safety", () => {
     })
 
     execFileSyncSpy = spyOn(childProcess, "execFileSync").mockImplementation(
-      ((_command: string, _args: string[], _options?: unknown) => "") as typeof childProcess.execFileSync,
+      ((_command: string, _args: string[], _options?: unknown) =>
+        "") as typeof childProcess.execFileSync,
     )
   })
 
@@ -75,19 +82,20 @@ describe("image-converter command execution safety", () => {
     writeFileSync(inputPath, "fake-heic-data")
     const { convertImageToJpeg } = await loadImageConverter()
 
-    execFileSyncSpy.mockImplementation(
-      ((command: string, args: string[]) => {
-        writeConvertedOutput(command, args)
-        return ""
-      }) as typeof childProcess.execFileSync,
-    )
+    execFileSyncSpy.mockImplementation(((command: string, args: string[]) => {
+      writeConvertedOutput(command, args)
+      return ""
+    }) as typeof childProcess.execFileSync)
 
     const outputPath = convertImageToJpeg(inputPath, "image/heic")
 
     expect(execSyncSpy).not.toHaveBeenCalled()
     expect(execFileSyncSpy).toHaveBeenCalled()
 
-    const [firstCommand, firstArgs] = execFileSyncSpy.mock.calls[0] as [string, string[]]
+    const [firstCommand, firstArgs] = execFileSyncSpy.mock.calls[0] as [
+      string,
+      string[],
+    ]
     expect(typeof firstCommand).toBe("string")
     expect(Array.isArray(firstArgs)).toBe(true)
     expect(["sips", "convert", "magick"]).toContain(firstCommand)
@@ -107,14 +115,13 @@ describe("image-converter command execution safety", () => {
     const testDir = mkdtempSync(join(tmpdir(), "img-converter-cleanup-test-"))
     const inputPath = join(testDir, "photo.heic")
     writeFileSync(inputPath, "fake-heic-data")
-    const { convertImageToJpeg, cleanupConvertedImage } = await loadImageConverter()
+    const { convertImageToJpeg, cleanupConvertedImage } =
+      await loadImageConverter()
 
-    execFileSyncSpy.mockImplementation(
-      ((command: string, args: string[]) => {
-        writeConvertedOutput(command, args)
-        return ""
-      }) as typeof childProcess.execFileSync,
-    )
+    execFileSyncSpy.mockImplementation(((command: string, args: string[]) => {
+      writeConvertedOutput(command, args)
+      return ""
+    }) as typeof childProcess.execFileSync)
 
     const outputPath = convertImageToJpeg(inputPath, "image/heic")
     const conversionDirectory = dirname(outputPath)
@@ -131,23 +138,27 @@ describe("image-converter command execution safety", () => {
 
   test("uses magick command on non-darwin platforms to avoid convert.exe collision", async () => {
     await withMockPlatform("linux", async () => {
-      const testDir = mkdtempSync(join(tmpdir(), "img-converter-platform-test-"))
+      const testDir = mkdtempSync(
+        join(tmpdir(), "img-converter-platform-test-"),
+      )
       const inputPath = join(testDir, "photo.heic")
       writeFileSync(inputPath, "fake-heic-data")
-      const { convertImageToJpeg, cleanupConvertedImage } = await loadImageConverter()
+      const { convertImageToJpeg, cleanupConvertedImage } =
+        await loadImageConverter()
 
-      execFileSyncSpy.mockImplementation(
-        ((command: string, args: string[]) => {
-          if (command === "magick") {
-            writeFileSync(args[2], "jpeg")
-          }
-          return ""
-        }) as typeof childProcess.execFileSync,
-      )
+      execFileSyncSpy.mockImplementation(((command: string, args: string[]) => {
+        if (command === "magick") {
+          writeFileSync(args[2], "jpeg")
+        }
+        return ""
+      }) as typeof childProcess.execFileSync)
 
       const outputPath = convertImageToJpeg(inputPath, "image/heic")
 
-      const [command, args] = execFileSyncSpy.mock.calls[0] as [string, string[]]
+      const [command, args] = execFileSyncSpy.mock.calls[0] as [
+        string,
+        string[],
+      ]
       expect(command).toBe("magick")
       expect(args).toContain("--")
       expect(args.indexOf("--") < args.indexOf(inputPath)).toBe(true)
@@ -163,18 +174,19 @@ describe("image-converter command execution safety", () => {
     const testDir = mkdtempSync(join(tmpdir(), "img-converter-timeout-test-"))
     const inputPath = join(testDir, "photo.heic")
     writeFileSync(inputPath, "fake-heic-data")
-    const { convertImageToJpeg, cleanupConvertedImage } = await loadImageConverter()
+    const { convertImageToJpeg, cleanupConvertedImage } =
+      await loadImageConverter()
 
-    execFileSyncSpy.mockImplementation(
-      ((command: string, args: string[]) => {
-        writeConvertedOutput(command, args)
-        return ""
-      }) as typeof childProcess.execFileSync,
-    )
+    execFileSyncSpy.mockImplementation(((command: string, args: string[]) => {
+      writeConvertedOutput(command, args)
+      return ""
+    }) as typeof childProcess.execFileSync)
 
     const outputPath = convertImageToJpeg(inputPath, "image/heic")
 
-    const options = execFileSyncSpy.mock.calls[0]?.[2] as { timeout?: number } | undefined
+    const options = execFileSyncSpy.mock.calls[0]?.[2] as
+      | { timeout?: number }
+      | undefined
     expect(options).toBeDefined()
     expect(typeof options?.timeout).toBe("number")
     expect((options?.timeout ?? 0) > 0).toBe(true)
@@ -201,9 +213,13 @@ describe("image-converter command execution safety", () => {
       try {
         runConversion()
       } catch (error) {
-        const conversionError = error as Error & { temporaryOutputPath?: string }
+        const conversionError = error as Error & {
+          temporaryOutputPath?: string
+        }
         expect(conversionError.temporaryOutputPath).toBeDefined()
-        expect(conversionError.temporaryOutputPath?.endsWith("converted.jpg")).toBe(true)
+        expect(
+          conversionError.temporaryOutputPath?.endsWith("converted.jpg"),
+        ).toBe(true)
       }
 
       if (existsSync(inputPath)) unlinkSync(inputPath)

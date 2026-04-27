@@ -24,7 +24,9 @@ function writePluginFixture(baseDir: string): void {
 
   mkdirSync(join(pluginInstallPath, ".claude-plugin"), { recursive: true })
   mkdirSync(join(pluginInstallPath, "commands"), { recursive: true })
-  mkdirSync(join(pluginInstallPath, "skills", "plugin-plan"), { recursive: true })
+  mkdirSync(join(pluginInstallPath, "skills", "plugin-plan"), {
+    recursive: true,
+  })
 
   writeFileSync(
     join(pluginInstallPath, ".claude-plugin", "plugin.json"),

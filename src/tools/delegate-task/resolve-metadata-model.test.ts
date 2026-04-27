@@ -40,43 +40,75 @@ describe("resolveMetadataModel", () => {
 
   describe("#given primary has extra fields", () => {
     test("#when resolving #then preserves variant and strips unrelated fields", () => {
-      const extended = { providerID: "openai", modelID: "gpt-5.4", variant: "high", temperature: 0.7 } as const
+      const extended = {
+        providerID: "openai",
+        modelID: "gpt-5.4",
+        variant: "high",
+        temperature: 0.7,
+      } as const
 
       const result = resolveMetadataModel(extended, undefined)
 
-      expect(result).toEqual({ providerID: "openai", modelID: "gpt-5.4", variant: "high" })
+      expect(result).toEqual({
+        providerID: "openai",
+        modelID: "gpt-5.4",
+        variant: "high",
+      })
     })
   })
 
   describe("#given primary has variant", () => {
     test("#when resolving metadata model #then variant is preserved", () => {
-      const primary = { providerID: "google", modelID: "gemini-3.1-pro", variant: "high" }
+      const primary = {
+        providerID: "google",
+        modelID: "gemini-3.1-pro",
+        variant: "high",
+      }
 
       const result = resolveMetadataModel(primary, undefined)
 
-      expect(result).toEqual({ providerID: "google", modelID: "gemini-3.1-pro", variant: "high" })
+      expect(result).toEqual({
+        providerID: "google",
+        modelID: "gemini-3.1-pro",
+        variant: "high",
+      })
     })
   })
 
   describe("#given primary lacks variant but fallback has variant", () => {
     test("#when primary provided #then fallback variant is not used", () => {
       const primary = { providerID: "google", modelID: "gemini-3.1-pro" }
-      const fallback = { providerID: "anthropic", modelID: "claude", variant: "max" }
+      const fallback = {
+        providerID: "anthropic",
+        modelID: "claude",
+        variant: "max",
+      }
 
       const result = resolveMetadataModel(primary, fallback)
 
-      expect(result).toEqual({ providerID: "google", modelID: "gemini-3.1-pro" })
+      expect(result).toEqual({
+        providerID: "google",
+        modelID: "gemini-3.1-pro",
+      })
       expect(result?.variant).toBeUndefined()
     })
   })
 
   describe("#given primary is undefined and fallback has variant", () => {
     test("#when resolving metadata model #then fallback variant is preserved", () => {
-      const fallback = { providerID: "anthropic", modelID: "claude", variant: "max" }
+      const fallback = {
+        providerID: "anthropic",
+        modelID: "claude",
+        variant: "max",
+      }
 
       const result = resolveMetadataModel(undefined, fallback)
 
-      expect(result).toEqual({ providerID: "anthropic", modelID: "claude", variant: "max" })
+      expect(result).toEqual({
+        providerID: "anthropic",
+        modelID: "claude",
+        variant: "max",
+      })
     })
   })
 

@@ -37,9 +37,14 @@ export function getErrorMessage(error: unknown): string {
   }
 }
 
-const DEFAULT_RETRY_PATTERN = new RegExp(`\\b(${DEFAULT_CONFIG.retry_on_errors.join("|")})\\b`)
+const DEFAULT_RETRY_PATTERN = new RegExp(
+  `\\b(${DEFAULT_CONFIG.retry_on_errors.join("|")})\\b`,
+)
 
-export function extractStatusCode(error: unknown, retryOnErrors?: number[]): number | undefined {
+export function extractStatusCode(
+  error: unknown,
+  retryOnErrors?: number[],
+): number | undefined {
   if (!error) return undefined
 
   const errorObj = error as Record<string, unknown>
@@ -56,7 +61,7 @@ export function extractStatusCode(error: unknown, retryOnErrors?: number[]): num
     return statusCode
   }
 
-  const pattern = retryOnErrors 
+  const pattern = retryOnErrors
     ? new RegExp(`\\b(${retryOnErrors.join("|")})\\b`)
     : DEFAULT_RETRY_PATTERN
   const message = getErrorMessage(error)
@@ -88,7 +93,8 @@ export function extractErrorName(error: unknown): string | undefined {
     return nestedName
   }
 
-  const dataError = (errorObj.data as Record<string, unknown> | undefined)?.error as Record<string, unknown> | undefined
+  const dataError = (errorObj.data as Record<string, unknown> | undefined)
+    ?.error as Record<string, unknown> | undefined
   const dataErrorName = dataError?.name
   if (typeof dataErrorName === "string" && dataErrorName.length > 0) {
     return dataErrorName
@@ -104,7 +110,8 @@ export function classifyErrorType(error: unknown): string | undefined {
   if (
     errorName?.includes("ai_loadapikeyerror") ||
     errorName?.includes("loadapi") ||
-    (/api.?key.?is.?missing/i.test(message) && /environment variable/i.test(message))
+    (/api.?key.?is.?missing/i.test(message) &&
+      /environment variable/i.test(message))
   ) {
     return "missing_api_key"
   }
@@ -116,7 +123,8 @@ export function classifyErrorType(error: unknown): string | undefined {
   if (
     errorName?.includes("providermodelnotfounderror") ||
     errorName?.includes("modelnotfounderror") ||
-    (errorName?.includes("unknownerror") && /model\s+not\s+found/i.test(message))
+    (errorName?.includes("unknownerror") &&
+      /model\s+not\s+found/i.test(message))
   ) {
     return "model_not_found"
   }
@@ -141,21 +149,27 @@ export function classifyErrorType(error: unknown): string | undefined {
 }
 
 export function containsErrorContent(
-  parts: Array<{ type?: string; text?: string }> | undefined
+  parts: Array<{ type?: string; text?: string }> | undefined,
 ): { hasError: boolean; errorMessage?: string } {
   if (!parts || parts.length === 0) return { hasError: false }
 
   const errorParts = parts.filter((p) => p.type === "error")
   if (errorParts.length > 0) {
-    const errorMessages = errorParts.map((p) => p.text).filter((text): text is string => typeof text === "string")
-    const errorMessage = errorMessages.length > 0 ? errorMessages.join("\n") : undefined
+    const errorMessages = errorParts
+      .map((p) => p.text)
+      .filter((text): text is string => typeof text === "string")
+    const errorMessage =
+      errorMessages.length > 0 ? errorMessages.join("\n") : undefined
     return { hasError: true, errorMessage }
   }
 
   return { hasError: false }
 }
 
-export function isRetryableError(error: unknown, retryOnErrors: number[]): boolean {
+export function isRetryableError(
+  error: unknown,
+  retryOnErrors: number[],
+): boolean {
   const statusCode = extractStatusCode(error, retryOnErrors)
   const message = getErrorMessage(error)
   const errorType = classifyErrorType(error)

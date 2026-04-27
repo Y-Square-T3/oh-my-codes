@@ -8,27 +8,27 @@
 
 ## RECOVERY STRATEGIES
 
-| Error Type | File | Recovery Action |
-|------------|------|-----------------|
-| `tool_result_missing` | `recover-tool-result-missing.ts` | Reconstruct missing tool results from storage |
-| `thinking_block_order` | `recover-thinking-block-order.ts` | Reorder malformed thinking blocks |
-| `thinking_disabled_violation` | `recover-thinking-disabled-violation.ts` | Strip thinking blocks when disabled |
-| `empty_content_message` | `recover-empty-content-message*.ts` | Handle empty/null content blocks |
+| Error Type                    | File                                     | Recovery Action                               |
+| ----------------------------- | ---------------------------------------- | --------------------------------------------- |
+| `tool_result_missing`         | `recover-tool-result-missing.ts`         | Reconstruct missing tool results from storage |
+| `thinking_block_order`        | `recover-thinking-block-order.ts`        | Reorder malformed thinking blocks             |
+| `thinking_disabled_violation` | `recover-thinking-disabled-violation.ts` | Strip thinking blocks when disabled           |
+| `empty_content_message`       | `recover-empty-content-message*.ts`      | Handle empty/null content blocks              |
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `hook.ts` | `createSessionRecoveryHook()` — error detection, strategy dispatch, resume |
-| `detect-error-type.ts` | `detectErrorType(error)` → `RecoveryErrorType \| null` |
-| `resume.ts` | `resumeSession()` — rebuild session context, trigger retry |
-| `storage.ts` | Per-session message storage for recovery reconstruction |
-| `recover-tool-result-missing.ts` | Reconstruct tool results from stored metadata |
-| `recover-thinking-block-order.ts` | Fix malformed thinking block sequences |
-| `recover-thinking-disabled-violation.ts` | Remove thinking blocks from model context |
-| `recover-empty-content-message.ts` | Handle empty assistant messages |
-| `recover-empty-content-message-sdk.ts` | SDK variant for empty content recovery |
-| `types.ts` | `StoredMessageMeta`, `StoredPart`, `ResumeConfig`, `MessageData` |
+| File                                     | Purpose                                                                    |
+| ---------------------------------------- | -------------------------------------------------------------------------- |
+| `hook.ts`                                | `createSessionRecoveryHook()` — error detection, strategy dispatch, resume |
+| `detect-error-type.ts`                   | `detectErrorType(error)` → `RecoveryErrorType \| null`                     |
+| `resume.ts`                              | `resumeSession()` — rebuild session context, trigger retry                 |
+| `storage.ts`                             | Per-session message storage for recovery reconstruction                    |
+| `recover-tool-result-missing.ts`         | Reconstruct tool results from stored metadata                              |
+| `recover-thinking-block-order.ts`        | Fix malformed thinking block sequences                                     |
+| `recover-thinking-disabled-violation.ts` | Remove thinking blocks from model context                                  |
+| `recover-empty-content-message.ts`       | Handle empty assistant messages                                            |
+| `recover-empty-content-message-sdk.ts`   | SDK variant for empty content recovery                                     |
+| `types.ts`                               | `StoredMessageMeta`, `StoredPart`, `ResumeConfig`, `MessageData`           |
 
 ## STORAGE SUBDIRECTORY
 

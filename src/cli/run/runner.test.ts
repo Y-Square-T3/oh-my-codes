@@ -5,8 +5,9 @@ import { OhMyCodesConfigSchema, type OhMyCodesConfig } from "../../config"
 import { resolveRunAgent } from "./agent-resolver"
 import { getAgentRuntimeName } from "../../shared/agent-display-names"
 
-const createConfig = (overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig =>
-  OhMyCodesConfigSchema.parse(overrides)
+const createConfig = (
+  overrides: Partial<OhMyCodesConfig> = {},
+): OhMyCodesConfig => OhMyCodesConfigSchema.parse(overrides)
 
 describe("resolveRunAgent", () => {
   let consoleLogSpy: ReturnType<typeof spyOn>
@@ -28,7 +29,7 @@ describe("resolveRunAgent", () => {
     const agent = resolveRunAgent(
       { message: "test", agent: "Hephaestus" },
       config,
-      env
+      env,
     )
 
     // then

@@ -22,17 +22,17 @@
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
+| File                          | Purpose                                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------------------------- |
 | `oauth-authorization-flow.ts` | PKCE helpers: `generateCodeVerifier()`, `generateCodeChallenge()`, `buildAuthorizationUrl()` |
-| `callback-server.ts` | Local HTTP redirect server — listens for OAuth callback |
-| `provider.ts` | `OAuthProvider` — token exchange, refresh, revoke |
-| `discovery.ts` | Fetch + parse OAuth server metadata from well-known endpoint |
-| `dcr.ts` | Dynamic Client Registration — register this app with OAuth server |
-| `resource-indicator.ts` | RFC 8707 resource indicator handling |
-| `step-up.ts` | Handle step-up authentication challenges |
-| `storage.ts` | Persist tokens to `~/.config/opencode/mcp-oauth/{server-hash}.json` |
-| `schema.ts` | Zod schemas for OAuth server metadata, token response, DCR |
+| `callback-server.ts`          | Local HTTP redirect server — listens for OAuth callback                                      |
+| `provider.ts`                 | `OAuthProvider` — token exchange, refresh, revoke                                            |
+| `discovery.ts`                | Fetch + parse OAuth server metadata from well-known endpoint                                 |
+| `dcr.ts`                      | Dynamic Client Registration — register this app with OAuth server                            |
+| `resource-indicator.ts`       | RFC 8707 resource indicator handling                                                         |
+| `step-up.ts`                  | Handle step-up authentication challenges                                                     |
+| `storage.ts`                  | Persist tokens to `~/.config/opencode/mcp-oauth/{server-hash}.json`                          |
+| `schema.ts`                   | Zod schemas for OAuth server metadata, token response, DCR                                   |
 
 ## PKCE IMPLEMENTATION
 

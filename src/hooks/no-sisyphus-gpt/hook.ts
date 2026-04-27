@@ -15,39 +15,50 @@ const TOAST_MESSAGE = [
   "For other GPT models, always use Hephaestus.",
 ].join("\n")
 function showToast(ctx: PluginInput, sessionID: string): void {
-  ctx.client.tui.showToast({
-    body: {
-      title: TOAST_TITLE,
-      message: TOAST_MESSAGE,
-      variant: "error",
-      duration: 10000,
-    },
-  }).catch((error) => {
-    log("[no-sisyphus-gpt] Failed to show toast", {
-      sessionID,
-      error,
+  ctx.client.tui
+    .showToast({
+      body: {
+        title: TOAST_TITLE,
+        message: TOAST_MESSAGE,
+        variant: "error",
+        duration: 10000,
+      },
     })
-  })
+    .catch((error) => {
+      log("[no-sisyphus-gpt] Failed to show toast", {
+        sessionID,
+        error,
+      })
+    })
 }
 
 export function createNoSisyphusGptHook(ctx: PluginInput) {
   return {
-    "chat.message": async (input: {
-      sessionID: string
-      agent?: string
-      model?: { providerID: string; modelID: string }
-    }, output?: {
-      message?: { agent?: string; [key: string]: unknown }
-    }): Promise<void> => {
+    "chat.message": async (
+      input: {
+        sessionID: string
+        agent?: string
+        model?: { providerID: string; modelID: string }
+      },
+      output?: {
+        message?: { agent?: string; [key: string]: unknown }
+      },
+    ): Promise<void> => {
       const rawAgent = input.agent ?? getSessionAgent(input.sessionID) ?? ""
       const agentKey = getAgentConfigKey(rawAgent)
       const modelID = input.model?.modelID
 
-      if (agentKey === "sisyphus" && modelID && isGptModel(modelID) && !isGptNativeSisyphusModel(modelID)) {
+      if (
+        agentKey === "sisyphus" &&
+        modelID &&
+        isGptModel(modelID) &&
+        !isGptNativeSisyphusModel(modelID)
+      ) {
         showToast(ctx, input.sessionID)
         input.agent = resolveRegisteredAgentName("hephaestus") ?? "hephaestus"
         if (output?.message) {
-          output.message.agent = resolveRegisteredAgentName("hephaestus") ?? "hephaestus"
+          output.message.agent =
+            resolveRegisteredAgentName("hephaestus") ?? "hephaestus"
         }
         updateSessionAgent(input.sessionID, "hephaestus")
       }

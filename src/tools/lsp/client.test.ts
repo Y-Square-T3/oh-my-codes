@@ -2,7 +2,16 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 
-import { describe, it, expect, spyOn, mock, beforeEach, afterEach, afterAll } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  spyOn,
+  mock,
+  beforeEach,
+  afterEach,
+  afterAll,
+} from "bun:test"
 
 mock.module("vscode-jsonrpc/node", () => ({
   createMessageConnection: () => {
@@ -12,7 +21,9 @@ mock.module("vscode-jsonrpc/node", () => ({
   StreamMessageWriter: function StreamMessageWriter() {},
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 import { LSPClient, lspManager, validateCwd } from "./client"
 import type { ResolvedServer } from "./types"
@@ -34,7 +45,10 @@ describe("LSPClient", () => {
       writeFileSync(filePath, "const a = 1\n")
 
       const originalSetTimeout = globalThis.setTimeout
-      globalThis.setTimeout = ((fn: (...args: unknown[]) => void, _ms?: number) => {
+      globalThis.setTimeout = ((
+        fn: (...args: unknown[]) => void,
+        _ms?: number,
+      ) => {
         fn()
         return 0 as unknown as ReturnType<typeof setTimeout>
       }) as typeof setTimeout
@@ -50,8 +64,10 @@ describe("LSPClient", () => {
 
       // Stub protocol output: we only want to assert notifications.
       const sendNotificationSpy = spyOn(
-        client as unknown as { sendNotification: (m: string, p?: unknown) => void },
-        "sendNotification"
+        client as unknown as {
+          sendNotification: (m: string, p?: unknown) => void
+        },
+        "sendNotification",
       )
 
       try {
@@ -155,7 +171,9 @@ describe("LSPClient", () => {
 
         const client = await Promise.race([
           lspManager.getClient(dir, server),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error("test-timeout")), 50)),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("test-timeout")), 50),
+          ),
         ])
 
         //#then
@@ -224,7 +242,10 @@ describe("LSPClient", () => {
   describe("start", () => {
     it("throws error when working directory does not exist", async () => {
       // #given
-      const nonExistentDir = join(tmpdir(), "lsp-test-nonexistent-" + Date.now())
+      const nonExistentDir = join(
+        tmpdir(),
+        "lsp-test-nonexistent-" + Date.now(),
+      )
       const server: ResolvedServer = {
         id: "typescript",
         command: ["typescript-language-server", "--stdio"],
@@ -234,7 +255,9 @@ describe("LSPClient", () => {
       const client = new LSPClient(nonExistentDir, server)
 
       // #when / #then
-      await expect(client.start()).rejects.toThrow("Working directory does not exist")
+      await expect(client.start()).rejects.toThrow(
+        "Working directory does not exist",
+      )
     })
 
     it("throws error when path is a file instead of directory", async () => {

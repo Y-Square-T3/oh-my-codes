@@ -4,7 +4,9 @@ import { parsePaneStateOutput } from "./pane-state-parser"
 import { getTmuxPath } from "../../tools/interactive-bash/tmux-path-resolver"
 import { log } from "../../shared"
 
-export async function queryWindowState(sourcePaneId: string): Promise<WindowState | null> {
+export async function queryWindowState(
+  sourcePaneId: string,
+): Promise<WindowState | null> {
   const tmux = await getTmuxPath()
   if (!tmux) return null
 
@@ -15,9 +17,9 @@ export async function queryWindowState(sourcePaneId: string): Promise<WindowStat
       "-t",
       sourcePaneId,
       "-F",
-			"#{pane_id}\t#{pane_width}\t#{pane_height}\t#{pane_left}\t#{pane_top}\t#{pane_active}\t#{window_width}\t#{window_height}\t#{pane_title}",
+      "#{pane_id}\t#{pane_width}\t#{pane_height}\t#{pane_left}\t#{pane_top}\t#{pane_active}\t#{window_width}\t#{window_height}\t#{pane_title}",
     ],
-    { stdout: "pipe", stderr: "pipe" }
+    { stdout: "pipe", stderr: "pipe" },
   )
 
   const exitCode = await proc.exited

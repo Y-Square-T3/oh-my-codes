@@ -1,4 +1,12 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs"
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs"
 import { dirname, join } from "node:path"
 import { getOpenCodeConfigDir } from "../../shared"
 
@@ -83,7 +91,10 @@ function writeStore(store: TokenStore): boolean {
     }
 
     const tempPath = `${filePath}.tmp.${Date.now()}`
-    writeFileSync(tempPath, JSON.stringify(store, null, 2), { encoding: "utf-8", mode: 0o600 })
+    writeFileSync(tempPath, JSON.stringify(store, null, 2), {
+      encoding: "utf-8",
+      mode: 0o600,
+    })
     chmodSync(tempPath, 0o600)
     renameSync(tempPath, filePath)
     return true
@@ -92,7 +103,10 @@ function writeStore(store: TokenStore): boolean {
   }
 }
 
-export function loadToken(serverHost: string, resource: string): OAuthTokenData | null {
+export function loadToken(
+  serverHost: string,
+  resource: string,
+): OAuthTokenData | null {
   const store = readStore()
   if (!store) return null
 
@@ -100,7 +114,11 @@ export function loadToken(serverHost: string, resource: string): OAuthTokenData 
   return store[key] ?? null
 }
 
-export function saveToken(serverHost: string, resource: string, token: OAuthTokenData): boolean {
+export function saveToken(
+  serverHost: string,
+  resource: string,
+  token: OAuthTokenData,
+): boolean {
   const store = readStore() ?? {}
   const key = buildKey(serverHost, resource)
   store[key] = token

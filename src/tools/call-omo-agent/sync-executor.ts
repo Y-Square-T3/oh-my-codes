@@ -1,6 +1,9 @@
 import type { CallOmoAgentArgs } from "./types"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { subagentSessions, syncSubagentSessions } from "../../features/claude-code-session-state"
+import {
+  subagentSessions,
+  syncSubagentSessions,
+} from "../../features/claude-code-session-state"
 import { getAgentToolRestrictions, log } from "../../shared"
 import { applySessionPromptParams } from "../../shared/session-prompt-params-helpers"
 import type { DelegatedModelConfig } from "../../shared/model-resolution-types"
@@ -11,14 +14,20 @@ import { processMessages } from "./message-processor"
 import { createOrGetSession } from "./session-creator"
 
 type SessionWithPromptAsync = {
-  promptAsync: (opts: { path: { id: string }; body: Record<string, unknown> }) => Promise<unknown>
+  promptAsync: (opts: {
+    path: { id: string }
+    body: Record<string, unknown>
+  }) => Promise<unknown>
 }
 
 type ExecuteSyncDeps = {
   createOrGetSession: typeof createOrGetSession
   waitForCompletion: typeof waitForCompletion
   processMessages: typeof processMessages
-  setSessionFallbackChain: (sessionID: string, fallbackChain: FallbackEntry[] | undefined) => void
+  setSessionFallbackChain: (
+    sessionID: string,
+    fallbackChain: FallbackEntry[] | undefined,
+  ) => void
   clearSessionFallbackChain: (sessionID: string) => void
 }
 
@@ -35,21 +44,31 @@ const defaultDeps: ExecuteSyncDeps = {
   clearSessionFallbackChain: () => {},
 }
 
-function buildPromptGenerationParams(model: DelegatedModelConfig | undefined): Record<string, unknown> {
+function buildPromptGenerationParams(
+  model: DelegatedModelConfig | undefined,
+): Record<string, unknown> {
   if (!model) {
     return {}
   }
 
   const promptOptions: Record<string, unknown> = {
-    ...(model.reasoningEffort ? { reasoningEffort: model.reasoningEffort } : {}),
+    ...(model.reasoningEffort
+      ? { reasoningEffort: model.reasoningEffort }
+      : {}),
     ...(model.thinking ? { thinking: model.thinking } : {}),
   }
 
   return {
-    ...(model.temperature !== undefined ? { temperature: model.temperature } : {}),
+    ...(model.temperature !== undefined
+      ? { temperature: model.temperature }
+      : {}),
     ...(model.top_p !== undefined ? { topP: model.top_p } : {}),
-    ...(model.maxTokens !== undefined ? { maxOutputTokens: model.maxTokens } : {}),
-    ...(Object.keys(promptOptions).length > 0 ? { options: promptOptions } : {}),
+    ...(model.maxTokens !== undefined
+      ? { maxOutputTokens: model.maxTokens }
+      : {}),
+    ...(Object.keys(promptOptions).length > 0
+      ? { options: promptOptions }
+      : {}),
   }
 }
 
@@ -60,7 +79,10 @@ export async function executeSync(
     messageID: string
     agent: string
     abort: AbortSignal
-    metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void | Promise<void>
+    metadata?: (input: {
+      title?: string
+      metadata?: Record<string, unknown>
+    }) => void | Promise<void>
   },
   ctx: PluginInput,
   deps: ExecuteSyncDeps = defaultDeps,
@@ -94,7 +116,7 @@ export async function executeSync(
       toolContext.metadata?.({
         title: args.description,
         metadata: { sessionId: sessionID },
-      })
+      }),
     )
 
     log(`[call_omo_agent] Sending prompt to session ${sessionID}`)
@@ -102,7 +124,9 @@ export async function executeSync(
     const normalizedSubagentType = stripAgentListSortPrefix(args.subagent_type)
 
     try {
-      await (ctx.client.session as unknown as SessionWithPromptAsync).promptAsync({
+      await (
+        ctx.client.session as unknown as SessionWithPromptAsync
+      ).promptAsync({
         path: { id: sessionID },
         body: {
           agent: normalizedSubagentType,
@@ -112,15 +136,23 @@ export async function executeSync(
             question: false,
           },
           parts: [{ type: "text", text: args.prompt }],
-          ...(model ? { model: { providerID: model.providerID, modelID: model.modelID } } : {}),
+          ...(model
+            ? {
+                model: { providerID: model.providerID, modelID: model.modelID },
+              }
+            : {}),
           ...(model?.variant ? { variant: model.variant } : {}),
           ...buildPromptGenerationParams(model),
         },
       })
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
       log(`[call_omo_agent] Prompt error:`, errorMessage)
-      if (errorMessage.includes("agent.name") || errorMessage.includes("undefined")) {
+      if (
+        errorMessage.includes("agent.name") ||
+        errorMessage.includes("undefined")
+      ) {
         return `Error: Agent "${normalizedSubagentType}" not found. Make sure the agent is registered in your opencode.json or provided by a plugin.\n\n<task_metadata>\nsession_id: ${sessionID}\n</task_metadata>`
       }
       return `Error: Failed to send prompt: ${errorMessage}\n\n<task_metadata>\nsession_id: ${sessionID}\n</task_metadata>`
@@ -130,7 +162,13 @@ export async function executeSync(
 
     const responseText = await deps.processMessages(sessionID, ctx)
 
-    return responseText + "\n\n" + ["<task_metadata>", `session_id: ${sessionID}`, "</task_metadata>"].join("\n")
+    return (
+      responseText +
+      "\n\n" +
+      ["<task_metadata>", `session_id: ${sessionID}`, "</task_metadata>"].join(
+        "\n",
+      )
+    )
   } catch (error) {
     spawnReservation?.rollback()
     throw error

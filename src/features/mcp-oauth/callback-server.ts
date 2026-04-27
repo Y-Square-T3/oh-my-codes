@@ -34,20 +34,26 @@ const SUCCESS_HTML = `<!DOCTYPE html>
 </body>
 </html>`
 
-export async function findAvailablePort(startPort: number = DEFAULT_PORT): Promise<number> {
+export async function findAvailablePort(
+  startPort: number = DEFAULT_PORT,
+): Promise<number> {
   return findAvailablePortShared(startPort)
 }
 
-export async function startCallbackServer(startPort: number = DEFAULT_PORT): Promise<CallbackServer> {
+export async function startCallbackServer(
+  startPort: number = DEFAULT_PORT,
+): Promise<CallbackServer> {
   const requestedPort = await findAvailablePort(startPort).catch(() => 0)
 
   let resolveCallback: ((result: OAuthCallbackResult) => void) | null = null
   let rejectCallback: ((error: Error) => void) | null = null
 
-  const callbackPromise = new Promise<OAuthCallbackResult>((resolve, reject) => {
-    resolveCallback = resolve
-    rejectCallback = reject
-  })
+  const callbackPromise = new Promise<OAuthCallbackResult>(
+    (resolve, reject) => {
+      resolveCallback = resolve
+      rejectCallback = reject
+    },
+  )
 
   const timeoutId = setTimeout(() => {
     rejectCallback?.(new Error("OAuth callback timed out after 5 minutes"))
@@ -66,11 +72,16 @@ export async function startCallbackServer(startPort: number = DEFAULT_PORT): Pro
 
       const oauthError = url.searchParams.get("error")
       if (oauthError) {
-        const description = url.searchParams.get("error_description") ?? oauthError
+        const description =
+          url.searchParams.get("error_description") ?? oauthError
         clearTimeout(timeoutId)
-        rejectCallback?.(new Error(`OAuth authorization failed: ${description}`))
+        rejectCallback?.(
+          new Error(`OAuth authorization failed: ${description}`),
+        )
         setTimeout(() => server.stop(true), 100)
-        return new Response(`Authorization failed: ${description}`, { status: 400 })
+        return new Response(`Authorization failed: ${description}`, {
+          status: 400,
+        })
       }
 
       const code = url.searchParams.get("code")
@@ -78,7 +89,9 @@ export async function startCallbackServer(startPort: number = DEFAULT_PORT): Pro
 
       if (!code || !state) {
         clearTimeout(timeoutId)
-        rejectCallback?.(new Error("OAuth callback missing code or state parameter"))
+        rejectCallback?.(
+          new Error("OAuth callback missing code or state parameter"),
+        )
         setTimeout(() => server.stop(true), 100)
         return new Response("Missing code or state parameter", { status: 400 })
       }

@@ -5,7 +5,8 @@ const initializeCommentCheckerCli = mock(() => {})
 
 mock.module("./cli-runner", () => ({
   initializeCommentCheckerCli,
-  getCommentCheckerCliPathPromise: () => Promise.resolve("/tmp/fake-comment-checker"),
+  getCommentCheckerCliPathPromise: () =>
+    Promise.resolve("/tmp/fake-comment-checker"),
   isCliPathUsable: () => true,
   processWithCli: async () => {},
   processApplyPatchEditsWithCli: async () => {},

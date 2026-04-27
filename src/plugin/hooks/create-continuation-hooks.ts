@@ -14,12 +14,24 @@ import { safeCreateHook } from "../../shared/safe-create-hook"
 import { createUnstableAgentBabysitter } from "../unstable-agent-babysitter"
 
 export type ContinuationHooks = {
-  stopContinuationGuard: ReturnType<typeof createStopContinuationGuardHook> | null
-  compactionContextInjector: ReturnType<typeof createCompactionContextInjector> | null
-  compactionTodoPreserver: ReturnType<typeof createCompactionTodoPreserverHook> | null
-  todoContinuationEnforcer: ReturnType<typeof createTodoContinuationEnforcer> | null
-  unstableAgentBabysitter: ReturnType<typeof createUnstableAgentBabysitter> | null
-  backgroundNotificationHook: ReturnType<typeof createBackgroundNotificationHook> | null
+  stopContinuationGuard: ReturnType<
+    typeof createStopContinuationGuardHook
+  > | null
+  compactionContextInjector: ReturnType<
+    typeof createCompactionContextInjector
+  > | null
+  compactionTodoPreserver: ReturnType<
+    typeof createCompactionTodoPreserverHook
+  > | null
+  todoContinuationEnforcer: ReturnType<
+    typeof createTodoContinuationEnforcer
+  > | null
+  unstableAgentBabysitter: ReturnType<
+    typeof createUnstableAgentBabysitter
+  > | null
+  backgroundNotificationHook: ReturnType<
+    typeof createBackgroundNotificationHook
+  > | null
   atlasHook: ReturnType<typeof createAtlasHook> | null
 }
 
@@ -52,29 +64,35 @@ export function createContinuationHooks(args: {
     ? safeHook("stop-continuation-guard", () =>
         createStopContinuationGuardHook(ctx, {
           backgroundManager,
-        }))
+        }),
+      )
     : null
 
   const compactionContextInjector = isHookEnabled("compaction-context-injector")
     ? safeHook("compaction-context-injector", () =>
-        createCompactionContextInjector({ ctx, backgroundManager }))
+        createCompactionContextInjector({ ctx, backgroundManager }),
+      )
     : null
 
   const compactionTodoPreserver = isHookEnabled("compaction-todo-preserver")
-    ? safeHook("compaction-todo-preserver", () => createCompactionTodoPreserverHook(ctx))
+    ? safeHook("compaction-todo-preserver", () =>
+        createCompactionTodoPreserverHook(ctx),
+      )
     : null
 
   const todoContinuationEnforcer = isHookEnabled("todo-continuation-enforcer")
     ? safeHook("todo-continuation-enforcer", () =>
-      createTodoContinuationEnforcer(ctx, {
+        createTodoContinuationEnforcer(ctx, {
           backgroundManager,
           isContinuationStopped: stopContinuationGuard?.isStopped,
-        }))
+        }),
+      )
     : null
 
   const unstableAgentBabysitter = isHookEnabled("unstable-agent-babysitter")
     ? safeHook("unstable-agent-babysitter", () =>
-        createUnstableAgentBabysitter({ ctx, backgroundManager, pluginConfig }))
+        createUnstableAgentBabysitter({ ctx, backgroundManager, pluginConfig }),
+      )
     : null
 
   if (sessionRecovery) {
@@ -83,9 +101,10 @@ export function createContinuationHooks(args: {
 
     if (todoContinuationEnforcer) {
       onAbortCallbacks.push(todoContinuationEnforcer.markRecovering)
-      onRecoveryCompleteCallbacks.push(todoContinuationEnforcer.markRecoveryComplete)
+      onRecoveryCompleteCallbacks.push(
+        todoContinuationEnforcer.markRecoveryComplete,
+      )
     }
-
 
     if (onAbortCallbacks.length > 0) {
       sessionRecovery.setOnAbortCallback((sessionID: string) => {
@@ -101,7 +120,9 @@ export function createContinuationHooks(args: {
   }
 
   const backgroundNotificationHook = isHookEnabled("background-notification")
-    ? safeHook("background-notification", () => createBackgroundNotificationHook(backgroundManager))
+    ? safeHook("background-notification", () =>
+        createBackgroundNotificationHook(backgroundManager),
+      )
     : null
 
   const atlasHook = isHookEnabled("atlas")
@@ -113,7 +134,8 @@ export function createContinuationHooks(args: {
             stopContinuationGuard?.isStopped(sessionID) ?? false,
           agentOverrides: pluginConfig.agents,
           autoCommit: pluginConfig.start_work?.auto_commit,
-        }))
+        }),
+      )
     : null
 
   return {

@@ -45,13 +45,17 @@ function isThinkingBlockError(text: string): boolean {
 
 const MESSAGE_INDEX_PATTERN = /messages\.(\d+)/
 
-function extractTokensFromMessage(message: string): { current: number; max: number } | null {
+function extractTokensFromMessage(
+  message: string,
+): { current: number; max: number } | null {
   for (const pattern of TOKEN_LIMIT_PATTERNS) {
     const match = message.match(pattern)
     if (match) {
       const num1 = parseInt(match[1], 10)
       const num2 = parseInt(match[2], 10)
-      return num1 > num2 ? { current: num1, max: num2 } : { current: num2, max: num1 }
+      return num1 > num2
+        ? { current: num1, max: num2 }
+        : { current: num2, max: num1 }
     }
   }
   return null
@@ -73,7 +77,9 @@ function isTokenLimitError(text: string): boolean {
   return TOKEN_LIMIT_KEYWORDS.some((kw) => lower.includes(kw))
 }
 
-export function parseAnthropicTokenLimitError(err: unknown): ParsedTokenLimitError | null {
+export function parseAnthropicTokenLimitError(
+  err: unknown,
+): ParsedTokenLimitError | null {
   try {
     return parseAnthropicTokenLimitErrorUnsafe(err)
   } catch {
@@ -81,7 +87,9 @@ export function parseAnthropicTokenLimitError(err: unknown): ParsedTokenLimitErr
   }
 }
 
-function parseAnthropicTokenLimitErrorUnsafe(err: unknown): ParsedTokenLimitError | null {
+function parseAnthropicTokenLimitErrorUnsafe(
+  err: unknown,
+): ParsedTokenLimitError | null {
   if (typeof err === "string") {
     if (err.toLowerCase().includes("non-empty content")) {
       return {
@@ -116,14 +124,21 @@ function parseAnthropicTokenLimitErrorUnsafe(err: unknown): ParsedTokenLimitErro
 
   if (typeof responseBody === "string") textSources.push(responseBody)
   if (typeof errorMessage === "string") textSources.push(errorMessage)
-  if (typeof errorData?.message === "string") textSources.push(errorData.message as string)
+  if (typeof errorData?.message === "string")
+    textSources.push(errorData.message as string)
   if (typeof errObj.body === "string") textSources.push(errObj.body as string)
-  if (typeof errObj.details === "string") textSources.push(errObj.details as string)
-  if (typeof errObj.reason === "string") textSources.push(errObj.reason as string)
-  if (typeof errObj.description === "string") textSources.push(errObj.description as string)
-  if (typeof nestedError?.message === "string") textSources.push(nestedError.message as string)
-  if (typeof dataObj?.message === "string") textSources.push(dataObj.message as string)
-  if (typeof dataObj?.error === "string") textSources.push(dataObj.error as string)
+  if (typeof errObj.details === "string")
+    textSources.push(errObj.details as string)
+  if (typeof errObj.reason === "string")
+    textSources.push(errObj.reason as string)
+  if (typeof errObj.description === "string")
+    textSources.push(errObj.description as string)
+  if (typeof nestedError?.message === "string")
+    textSources.push(nestedError.message as string)
+  if (typeof dataObj?.message === "string")
+    textSources.push(dataObj.message as string)
+  if (typeof dataObj?.error === "string")
+    textSources.push(dataObj.error as string)
 
   if (textSources.length === 0) {
     try {
@@ -167,7 +182,10 @@ function parseAnthropicTokenLimitErrorUnsafe(err: unknown): ParsedTokenLimitErro
       }
 
       const bedrockJson = JSON.parse(responseBody)
-      if (typeof bedrockJson.message === "string" && isTokenLimitError(bedrockJson.message)) {
+      if (
+        typeof bedrockJson.message === "string" &&
+        isTokenLimitError(bedrockJson.message)
+      ) {
         return {
           currentTokens: 0,
           maxTokens: 0,

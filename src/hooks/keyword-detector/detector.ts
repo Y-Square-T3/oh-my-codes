@@ -19,21 +19,33 @@ export function removeCodeBlocks(text: string): string {
 function resolveMessage(
   message: string | ((agentName?: string, modelID?: string) => string),
   agentName?: string,
-  modelID?: string
+  modelID?: string,
 ): string {
   return typeof message === "function" ? message(agentName, modelID) : message
 }
 
-export function detectKeywords(text: string, agentName?: string, modelID?: string): string[] {
+export function detectKeywords(
+  text: string,
+  agentName?: string,
+  modelID?: string,
+): string[] {
   const textWithoutCode = removeCodeBlocks(text)
   return KEYWORD_DETECTORS.filter(({ pattern }) =>
-    pattern.test(textWithoutCode)
+    pattern.test(textWithoutCode),
   ).map(({ message }) => resolveMessage(message, agentName, modelID))
 }
 
-export function detectKeywordsWithType(text: string, agentName?: string, modelID?: string): DetectedKeyword[] {
+export function detectKeywordsWithType(
+  text: string,
+  agentName?: string,
+  modelID?: string,
+): DetectedKeyword[] {
   const textWithoutCode = removeCodeBlocks(text)
-  const types: Array<"ultrawork" | "search" | "analyze"> = ["ultrawork", "search", "analyze"]
+  const types: Array<"ultrawork" | "search" | "analyze"> = [
+    "ultrawork",
+    "search",
+    "analyze",
+  ]
   return KEYWORD_DETECTORS.map(({ pattern, message }, index) => ({
     matches: pattern.test(textWithoutCode),
     type: types[index],
@@ -44,7 +56,7 @@ export function detectKeywordsWithType(text: string, agentName?: string, modelID
 }
 
 export function extractPromptText(
-  parts: Array<{ type: string; text?: string }>
+  parts: Array<{ type: string; text?: string }>,
 ): string {
   return parts
     .filter((p) => p.type === "text")

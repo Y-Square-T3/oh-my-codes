@@ -3,7 +3,14 @@ import { extname, join } from "path"
 
 import { EXT_TO_LANG } from "./language-mappings"
 
-const SKIP_DIRECTORIES = new Set(["node_modules", ".git", "dist", "build", ".next", "out"])
+const SKIP_DIRECTORIES = new Set([
+  "node_modules",
+  ".git",
+  "dist",
+  "build",
+  ".next",
+  "out",
+])
 const MAX_SCAN_ENTRIES = 500
 
 export function inferExtensionFromDirectory(directory: string): string | null {

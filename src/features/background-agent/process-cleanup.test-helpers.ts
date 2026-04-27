@@ -11,7 +11,9 @@ export function getNewListener(
 ): () => void {
   const listener = process
     .listeners(signal)
-    .find((registeredListener) => !existingListeners.includes(registeredListener))
+    .find(
+      (registeredListener) => !existingListeners.includes(registeredListener),
+    )
 
   if (typeof listener !== "function") {
     throw new Error(`Expected a ${signal} listener to be registered`)

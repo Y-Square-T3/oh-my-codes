@@ -25,7 +25,9 @@ function findAncestorDirectories(
   const directories: string[] = []
   const seen = new Set<string>()
   let currentDirectory = normalizePath(startDirectory)
-  const resolvedStopDirectory = stopDirectory ? normalizePath(stopDirectory) : undefined
+  const resolvedStopDirectory = stopDirectory
+    ? normalizePath(stopDirectory)
+    : undefined
 
   while (true) {
     for (const targetPath of targetPaths) {
@@ -77,7 +79,10 @@ export function detectWorktreePath(directory: string): string | undefined {
   }
 }
 
-export function findProjectClaudeSkillDirs(startDirectory: string, stopDirectory?: string): string[] {
+export function findProjectClaudeSkillDirs(
+  startDirectory: string,
+  stopDirectory?: string,
+): string[] {
   return findAncestorDirectories(
     startDirectory,
     [[".claude", "skills"]],
@@ -85,7 +90,10 @@ export function findProjectClaudeSkillDirs(startDirectory: string, stopDirectory
   )
 }
 
-export function findProjectAgentsSkillDirs(startDirectory: string, stopDirectory?: string): string[] {
+export function findProjectAgentsSkillDirs(
+  startDirectory: string,
+  stopDirectory?: string,
+): string[] {
   return findAncestorDirectories(
     startDirectory,
     [[".agents", "skills"]],
@@ -93,7 +101,10 @@ export function findProjectAgentsSkillDirs(startDirectory: string, stopDirectory
   )
 }
 
-export function findProjectOpencodeSkillDirs(startDirectory: string, stopDirectory?: string): string[] {
+export function findProjectOpencodeSkillDirs(
+  startDirectory: string,
+  stopDirectory?: string,
+): string[] {
   return findAncestorDirectories(
     startDirectory,
     [
@@ -104,7 +115,10 @@ export function findProjectOpencodeSkillDirs(startDirectory: string, stopDirecto
   )
 }
 
-export function findProjectOpencodeCommandDirs(startDirectory: string, stopDirectory?: string): string[] {
+export function findProjectOpencodeCommandDirs(
+  startDirectory: string,
+  stopDirectory?: string,
+): string[] {
   return findAncestorDirectories(
     startDirectory,
     [

@@ -1,5 +1,12 @@
 import { describe, it, expect } from "bun:test"
-import { AGENT_DISPLAY_NAMES, getAgentConfigKey, getAgentDisplayName, getAgentListDisplayName, normalizeAgentForPrompt, normalizeAgentForPromptKey } from "./agent-display-names"
+import {
+  AGENT_DISPLAY_NAMES,
+  getAgentConfigKey,
+  getAgentDisplayName,
+  getAgentListDisplayName,
+  normalizeAgentForPrompt,
+  normalizeAgentForPromptKey,
+} from "./agent-display-names"
 
 describe("getAgentDisplayName", () => {
   it("returns display name for lowercase config key (new format)", () => {
@@ -42,7 +49,7 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-     // then returns "Atlas - Plan Executor"
+    // then returns "Atlas - Plan Executor"
     expect(result).toBe("Atlas - Plan Executor")
   })
 
@@ -86,7 +93,7 @@ describe("getAgentDisplayName", () => {
     // when getAgentDisplayName called
     const result = getAgentDisplayName(configKey)
 
-     // then returns "Momus - Plan Critic"
+    // then returns "Momus - Plan Critic"
     expect(result).toBe("Momus - Plan Critic")
   })
 
@@ -195,10 +202,18 @@ describe("getAgentConfigKey", () => {
 
 describe("getAgentListDisplayName", () => {
   it("applies invisible stable-sort prefixes to the core agent list", () => {
-    expect(getAgentListDisplayName("sisyphus")).toBe("\u200BSisyphus - Ultraworker")
-    expect(getAgentListDisplayName("hephaestus")).toBe("\u200B\u200BHephaestus - Deep Agent")
-    expect(getAgentListDisplayName("prometheus")).toBe("\u200B\u200B\u200BPrometheus - Plan Builder")
-    expect(getAgentListDisplayName("atlas")).toBe("\u200B\u200B\u200B\u200BAtlas - Plan Executor")
+    expect(getAgentListDisplayName("sisyphus")).toBe(
+      "\u200BSisyphus - Ultraworker",
+    )
+    expect(getAgentListDisplayName("hephaestus")).toBe(
+      "\u200B\u200BHephaestus - Deep Agent",
+    )
+    expect(getAgentListDisplayName("prometheus")).toBe(
+      "\u200B\u200B\u200BPrometheus - Plan Builder",
+    )
+    expect(getAgentListDisplayName("atlas")).toBe(
+      "\u200B\u200B\u200B\u200BAtlas - Plan Executor",
+    )
   })
 
   it("keeps non-core agents unprefixed for list display", () => {
@@ -208,28 +223,44 @@ describe("getAgentListDisplayName", () => {
 
 describe("normalizeAgentForPrompt", () => {
   it("strips core UI ordering prefixes back to canonical display names", () => {
-    expect(normalizeAgentForPrompt(getAgentListDisplayName("sisyphus"))).toBe("Sisyphus - Ultraworker")
-    expect(normalizeAgentForPrompt(getAgentListDisplayName("hephaestus"))).toBe("Hephaestus - Deep Agent")
-    expect(normalizeAgentForPrompt(getAgentListDisplayName("prometheus"))).toBe("Prometheus - Plan Builder")
-    expect(normalizeAgentForPrompt(getAgentListDisplayName("atlas"))).toBe("Atlas - Plan Executor")
+    expect(normalizeAgentForPrompt(getAgentListDisplayName("sisyphus"))).toBe(
+      "Sisyphus - Ultraworker",
+    )
+    expect(normalizeAgentForPrompt(getAgentListDisplayName("hephaestus"))).toBe(
+      "Hephaestus - Deep Agent",
+    )
+    expect(normalizeAgentForPrompt(getAgentListDisplayName("prometheus"))).toBe(
+      "Prometheus - Plan Builder",
+    )
+    expect(normalizeAgentForPrompt(getAgentListDisplayName("atlas"))).toBe(
+      "Atlas - Plan Executor",
+    )
   })
 
   it("removes zero-width characters before returning canonical names", () => {
-    expect(normalizeAgentForPrompt("Sisyphus\u200B - Ultraworker")).toBe("Sisyphus - Ultraworker")
+    expect(normalizeAgentForPrompt("Sisyphus\u200B - Ultraworker")).toBe(
+      "Sisyphus - Ultraworker",
+    )
   })
 
   it("converts legacy parenthesized names to canonical display names", () => {
-    expect(normalizeAgentForPrompt("Atlas (Plan Executor)")).toBe("Atlas - Plan Executor")
+    expect(normalizeAgentForPrompt("Atlas (Plan Executor)")).toBe(
+      "Atlas - Plan Executor",
+    )
   })
 })
 
 describe("normalizeAgentForPromptKey", () => {
   it("converts built-in display names to config keys", () => {
-    expect(normalizeAgentForPromptKey("Sisyphus (Ultraworker)")).toBe("sisyphus")
+    expect(normalizeAgentForPromptKey("Sisyphus (Ultraworker)")).toBe(
+      "sisyphus",
+    )
   })
 
   it("strips UI ordering prefixes before returning config keys", () => {
-    expect(normalizeAgentForPromptKey(getAgentListDisplayName("atlas"))).toBe("atlas")
+    expect(normalizeAgentForPromptKey(getAgentListDisplayName("atlas"))).toBe(
+      "atlas",
+    )
   })
 
   it("preserves custom agents", () => {

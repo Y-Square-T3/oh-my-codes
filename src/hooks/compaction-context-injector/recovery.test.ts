@@ -46,7 +46,9 @@ function createMockContext(
       session: {
         messages: async () => {
           const response =
-            messageResponses[Math.min(callIndex, messageResponses.length - 1)] ?? []
+            messageResponses[
+              Math.min(callIndex, messageResponses.length - 1)
+            ] ?? []
           callIndex += 1
           return { data: response }
         },
@@ -57,7 +59,10 @@ function createMockContext(
   }
 }
 
-function createAssistantMessageUpdatedEvent(sessionID: string, messageID: string) {
+function createAssistantMessageUpdatedEvent(
+  sessionID: string,
+  messageID: string,
+) {
   return {
     event: {
       type: "message.updated",
@@ -144,7 +149,10 @@ describe("createCompactionContextInjector recovery", () => {
     //#when
     await injector.capture("ses_missing_tools")
     await injector.event({
-      event: { type: "session.compacted", properties: { sessionID: "ses_missing_tools" } },
+      event: {
+        type: "session.compacted",
+        properties: { sessionID: "ses_missing_tools" },
+      },
     })
 
     //#then
@@ -239,7 +247,9 @@ describe("createCompactionContextInjector recovery", () => {
     //#when
     for (let index = 1; index <= 5; index++) {
       const messageID = `msg_reasoning_${index}`
-      await injector.event(createAssistantMessageUpdatedEvent(sessionID, messageID))
+      await injector.event(
+        createAssistantMessageUpdatedEvent(sessionID, messageID),
+      )
       await injector.event(
         createMeaningfulPartUpdatedEvent(sessionID, messageID, "reasoning"),
       )
@@ -280,7 +290,9 @@ describe("createCompactionContextInjector recovery", () => {
     //#when
     for (let index = 1; index <= 5; index++) {
       const messageID = `msg_tool_use_${index}`
-      await injector.event(createAssistantMessageUpdatedEvent(sessionID, messageID))
+      await injector.event(
+        createAssistantMessageUpdatedEvent(sessionID, messageID),
+      )
       await injector.event(
         createMeaningfulPartUpdatedEvent(sessionID, messageID, "tool_use"),
       )

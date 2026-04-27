@@ -38,7 +38,7 @@ function isSessionNotFoundError(error: unknown): boolean {
 export async function verifySessionExists(
   client: OpencodeClient,
   sessionID: string,
-  directory?: string
+  directory?: string,
 ): Promise<boolean> {
   try {
     const response = await client.session.get({

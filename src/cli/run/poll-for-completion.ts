@@ -23,7 +23,7 @@ export async function pollForCompletion(
   ctx: RunContext,
   eventState: EventState,
   abortController: AbortController,
-  options: PollOptions = {}
+  options: PollOptions = {},
 ): Promise<number> {
   const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS
   const requiredConsecutive =
@@ -32,8 +32,7 @@ export async function pollForCompletion(
     options.minStabilizationMs ?? MIN_STABILIZATION_MS
   const minStabilizationMs =
     rawMinStabilizationMs > 0 ? rawMinStabilizationMs : MIN_STABILIZATION_MS
-  const eventWatchdogMs =
-    options.eventWatchdogMs ?? DEFAULT_EVENT_WATCHDOG_MS
+  const eventWatchdogMs = options.eventWatchdogMs ?? DEFAULT_EVENT_WATCHDOG_MS
   const secondaryMeaningfulWorkTimeoutMs =
     options.secondaryMeaningfulWorkTimeoutMs ??
     DEFAULT_SECONDARY_MEANINGFUL_WORK_TIMEOUT_MS
@@ -54,10 +53,10 @@ export async function pollForCompletion(
       errorCycleCount++
       if (errorCycleCount >= ERROR_GRACE_CYCLES) {
         console.error(
-          pc.red(`\n\nSession ended with error: ${eventState.lastError}`)
+          pc.red(`\n\nSession ended with error: ${eventState.lastError}`),
         )
         console.error(
-          pc.yellow("Check if todos were completed before the error.")
+          pc.yellow("Check if todos were completed before the error."),
         )
         return 1
       }
@@ -73,15 +72,18 @@ export async function pollForCompletion(
         console.log(
           pc.yellow(
             `\n  No events for ${Math.round(
-              timeSinceLastEvent / 1000
-            )}s, verifying session status...`
-          )
+              timeSinceLastEvent / 1000,
+            )}s, verifying session status...`,
+          ),
         )
 
         mainSessionStatus = await getMainSessionStatus(ctx)
         if (mainSessionStatus === "idle") {
           eventState.mainSessionIdle = true
-        } else if (mainSessionStatus === "busy" || mainSessionStatus === "retry") {
+        } else if (
+          mainSessionStatus === "busy" ||
+          mainSessionStatus === "retry"
+        ) {
           eventState.mainSessionIdle = false
         }
 
@@ -130,14 +132,13 @@ export async function pollForCompletion(
         })
         const todos = normalizeSDKResponse(todosRes, [] as unknown[])
 
-        const hasActiveChildren =
-          Array.isArray(children) && children.length > 0
+        const hasActiveChildren = Array.isArray(children) && children.length > 0
         const hasActiveTodos =
           Array.isArray(todos) &&
           todos.some(
             (t: unknown) =>
               (t as { status?: string })?.status !== "completed" &&
-              (t as { status?: string })?.status !== "cancelled"
+              (t as { status?: string })?.status !== "cancelled",
           )
         const hasActiveWork = hasActiveChildren || hasActiveTodos
 
@@ -146,9 +147,9 @@ export async function pollForCompletion(
           console.log(
             pc.yellow(
               `\n  No meaningful work events for ${Math.round(
-                secondaryMeaningfulWorkTimeoutMs / 1000
-              )}s but session has active work - assuming in progress`
-            )
+                secondaryMeaningfulWorkTimeoutMs / 1000,
+              )}s but session has active work - assuming in progress`,
+            ),
           )
         }
       }
@@ -183,7 +184,7 @@ export async function pollForCompletion(
 }
 
 async function getMainSessionStatus(
-  ctx: RunContext
+  ctx: RunContext,
 ): Promise<"idle" | "busy" | "retry" | null> {
   try {
     const statusesRes = await ctx.client.session.status({
@@ -191,7 +192,7 @@ async function getMainSessionStatus(
     })
     const statuses = normalizeSDKResponse(
       statusesRes,
-      {} as Record<string, { type?: string }>
+      {} as Record<string, { type?: string }>,
     )
     if (!(ctx.sessionID in statuses)) {
       return "idle"

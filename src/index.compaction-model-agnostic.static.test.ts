@@ -9,7 +9,8 @@ describe("experimental.session.compacting", () => {
     const hookIndex = content.indexOf('"experimental.session.compacting"')
 
     //#when
-    const hookSlice = hookIndex >= 0 ? content.slice(hookIndex, hookIndex + 1200) : ""
+    const hookSlice =
+      hookIndex >= 0 ? content.slice(hookIndex, hookIndex + 1200) : ""
 
     //#then
     expect(hookIndex).toBeGreaterThanOrEqual(0)

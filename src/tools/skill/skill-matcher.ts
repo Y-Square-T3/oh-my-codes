@@ -2,9 +2,14 @@ import { sortByScopePriority } from "./scope-priority"
 import type { CommandInfo } from "../slashcommand/types"
 import type { LoadedSkill } from "../../features/opencode-skill-loader"
 
-export function matchSkillByName(skills: LoadedSkill[], requestedName: string): LoadedSkill | undefined {
+export function matchSkillByName(
+  skills: LoadedSkill[],
+  requestedName: string,
+): LoadedSkill | undefined {
   const normalizedName = requestedName.toLowerCase()
-  const exactMatch = skills.find((skill) => skill.name.toLowerCase() === normalizedName)
+  const exactMatch = skills.find(
+    (skill) => skill.name.toLowerCase() === normalizedName,
+  )
   if (exactMatch) {
     return exactMatch
   }
@@ -22,15 +27,20 @@ export function matchSkillByName(skills: LoadedSkill[], requestedName: string): 
   return undefined
 }
 
-export function matchCommandByName(commands: CommandInfo[], requestedName: string): CommandInfo | undefined {
+export function matchCommandByName(
+  commands: CommandInfo[],
+  requestedName: string,
+): CommandInfo | undefined {
   const normalizedName = requestedName.toLowerCase()
-  return sortByScopePriority(commands).find((command) => command.name.toLowerCase() === normalizedName)
+  return sortByScopePriority(commands).find(
+    (command) => command.name.toLowerCase() === normalizedName,
+  )
 }
 
 export function findPartialMatches(
   skills: LoadedSkill[],
   commands: CommandInfo[],
-  requestedName: string
+  requestedName: string,
 ): string[] {
   const normalizedName = requestedName.toLowerCase()
   return [

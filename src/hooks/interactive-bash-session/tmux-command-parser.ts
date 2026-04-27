@@ -63,7 +63,10 @@ function findFlagValue(tokens: string[], flag: string): string | null {
  * For new-session: prioritize -s over -t
  * For other commands: use -t
  */
-function extractSessionNameFromTokens(tokens: string[], subCommand: string): string | null {
+function extractSessionNameFromTokens(
+  tokens: string[],
+  subCommand: string,
+): string | null {
   if (subCommand === "new-session") {
     const sFlag = findFlagValue(tokens, "-s")
     if (sFlag) return normalizeSessionName(sFlag)

@@ -23,12 +23,15 @@ export async function runLookAtSession({
   isBase64Input,
 }: RunLookAtSessionInput): Promise<string> {
   const prompt = buildLookAtPrompt(goal, isBase64Input)
-  const { agentModel, agentVariant } = await resolveMultimodalLookerAgentMetadata(ctx)
+  const { agentModel, agentVariant } =
+    await resolveMultimodalLookerAgentMetadata(ctx)
 
   log(`[look_at] Creating session with parent: ${toolContext.sessionID}`)
-  const parentSession = await ctx.client.session.get({
-    path: { id: toolContext.sessionID },
-  }).catch(() => null)
+  const parentSession = await ctx.client.session
+    .get({
+      path: { id: toolContext.sessionID },
+    })
+    .catch(() => null)
   const parentDirectory = parentSession?.data?.directory ?? ctx.directory
 
   const createResult = await ctx.client.session.create({
@@ -59,7 +62,9 @@ Original error: ${createResult.error}`
   const sessionID = createResult.data.id
   log(`[look_at] Created session: ${sessionID}`)
 
-  log(`[look_at] Sending prompt with ${isBase64Input ? "base64 image" : "file"} to session ${sessionID}`)
+  log(
+    `[look_at] Sending prompt with ${isBase64Input ? "base64 image" : "file"} to session ${sessionID}`,
+  )
   try {
     await promptSyncWithModelSuggestionRetry(ctx.client, {
       path: { id: sessionID },
@@ -71,16 +76,23 @@ Original error: ${createResult.error}`
           look_at: false,
           read: READ_ENABLED,
         },
-        parts: [
-          { type: "text", text: prompt },
-          filePart,
-        ],
-        ...(agentModel ? { model: { providerID: agentModel.providerID, modelID: agentModel.modelID } } : {}),
+        parts: [{ type: "text", text: prompt }, filePart],
+        ...(agentModel
+          ? {
+              model: {
+                providerID: agentModel.providerID,
+                modelID: agentModel.modelID,
+              },
+            }
+          : {}),
         ...(agentVariant ? { variant: agentVariant } : {}),
       },
     })
   } catch (promptError) {
-    log("[look_at] Prompt error (ignored, will still fetch messages):", promptError)
+    log(
+      "[look_at] Prompt error (ignored, will still fetch messages):",
+      promptError,
+    )
   }
 
   log(`[look_at] Fetching messages from session ${sessionID}...`)

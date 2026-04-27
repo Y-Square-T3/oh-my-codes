@@ -10,7 +10,9 @@ export async function abortWithTimeout(
 
   try {
     const result = await Promise.race([
-      client.session.abort({ path: { id: sessionID } }).then(() => "aborted" as const),
+      client.session
+        .abort({ path: { id: sessionID } })
+        .then(() => "aborted" as const),
       new Promise<"timed_out">((resolve) => {
         timeoutHandle = setTimeout(() => {
           resolve("timed_out")

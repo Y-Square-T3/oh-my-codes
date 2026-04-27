@@ -32,7 +32,10 @@ export function detectLanguageSpecificMistake(
     if (src.startsWith("class ") && src.endsWith(":")) {
       return `Hint: Remove trailing colon. Try: "${src.slice(0, -1)}"`
     }
-    if ((src.startsWith("def ") || src.startsWith("async def ")) && src.endsWith(":")) {
+    if (
+      (src.startsWith("def ") || src.startsWith("async def ")) &&
+      src.endsWith(":")
+    ) {
       return `Hint: Remove trailing colon. Try: "${src.slice(0, -1)}"`
     }
   }
@@ -58,6 +61,11 @@ export function detectLanguageSpecificMistake(
   return null
 }
 
-export function getPatternHint(pattern: string, lang: CliLanguage): string | null {
-  return detectRegexMisuse(pattern) ?? detectLanguageSpecificMistake(pattern, lang)
+export function getPatternHint(
+  pattern: string,
+  lang: CliLanguage,
+): string | null {
+  return (
+    detectRegexMisuse(pattern) ?? detectLanguageSpecificMistake(pattern, lang)
+  )
 }

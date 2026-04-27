@@ -26,7 +26,9 @@ export class ReplyListenerRateLimiter {
 
   canProceed(): boolean {
     const now = Date.now()
-    const recent = this.timestamps.filter((timestamp) => now - timestamp < this.windowMs)
+    const recent = this.timestamps.filter(
+      (timestamp) => now - timestamp < this.windowMs,
+    )
     this.timestamps.length = 0
     this.timestamps.push(...recent)
 
@@ -57,7 +59,8 @@ export async function injectReplyIntoPane(
     return false
   }
 
-  const prefix = replyListener?.includePrefix === false ? "" : `[reply:${platform}] `
+  const prefix =
+    replyListener?.includePrefix === false ? "" : `[reply:${platform}] `
   const sanitized = sanitizeReplyInput(prefix + text)
   const truncated = sanitized.slice(0, replyListener?.maxMessageLength ?? 500)
   const success = await sendToPane(paneId, truncated, true)

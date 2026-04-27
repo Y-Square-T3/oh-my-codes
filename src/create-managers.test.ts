@@ -1,6 +1,14 @@
 /// <reference types="bun-types" />
 
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import type { PluginInput } from "@opencode-ai/plugin"
 
 import { OhMyCodesConfigSchema } from "./config/schema/oh-my-codes-config"
@@ -10,7 +18,11 @@ import { createModelCacheState } from "./plugin-state"
 
 const markServerRunningInProcess = mock(() => {})
 let backgroundManagerOptions: {
-  onSubagentSessionCreated?: (event: { sessionID: string; parentID: string; title: string }) => Promise<void>
+  onSubagentSessionCreated?: (event: {
+    sessionID: string
+    parentID: string
+    title: string
+  }) => Promise<void>
 } | null = null
 const trackedPaneBySession = new Map<string, string>()
 
@@ -20,7 +32,11 @@ class MockBackgroundManager {
     _config?: unknown,
     options?: {
       tmuxConfig?: unknown
-      onSubagentSessionCreated?: (event: { sessionID: string; parentID: string; title: string }) => Promise<void>
+      onSubagentSessionCreated?: (event: {
+        sessionID: string
+        parentID: string
+        title: string
+      }) => Promise<void>
       onShutdown?: () => void | Promise<void>
       enableParentSessionNotifications?: boolean
     },
@@ -38,7 +54,9 @@ class MockTmuxSessionManager {
 
   async cleanup(): Promise<void> {}
 
-  async onSessionCreated(event: { properties?: { info?: { id?: string } } }): Promise<void> {
+  async onSessionCreated(event: {
+    properties?: { info?: { id?: string } }
+  }): Promise<void> {
     const sessionID = event.properties?.info?.id
     if (sessionID) {
       trackedPaneBySession.set(sessionID, `%pane-${sessionID}`)
@@ -50,21 +68,32 @@ class MockTmuxSessionManager {
   }
 }
 
-function createConfigHandler(): ReturnType<typeof import("./plugin-handlers").createConfigHandler> {
+function createConfigHandler(): ReturnType<
+  typeof import("./plugin-handlers").createConfigHandler
+> {
   return async () => {}
 }
 
-function initTaskToastManager(): ReturnType<typeof import("./features/task-toast-manager").initTaskToastManager> {
-  return {} as ReturnType<typeof import("./features/task-toast-manager").initTaskToastManager>
+function initTaskToastManager(): ReturnType<
+  typeof import("./features/task-toast-manager").initTaskToastManager
+> {
+  return {} as ReturnType<
+    typeof import("./features/task-toast-manager").initTaskToastManager
+  >
 }
 
 function registerManagerForCleanup(): void {}
 
-function createDeps(): NonNullable<Parameters<typeof createManagers>[0]["deps"]> {
+function createDeps(): NonNullable<
+  Parameters<typeof createManagers>[0]["deps"]
+> {
   return {
-    BackgroundManagerClass: MockBackgroundManager as typeof import("./features/background-agent").BackgroundManager,
-    SkillMcpManagerClass: MockSkillMcpManager as typeof import("./features/skill-mcp-manager").SkillMcpManager,
-    TmuxSessionManagerClass: MockTmuxSessionManager as typeof import("./features/tmux-subagent").TmuxSessionManager,
+    BackgroundManagerClass:
+      MockBackgroundManager as typeof import("./features/background-agent").BackgroundManager,
+    SkillMcpManagerClass:
+      MockSkillMcpManager as typeof import("./features/skill-mcp-manager").SkillMcpManager,
+    TmuxSessionManagerClass:
+      MockTmuxSessionManager as typeof import("./features/tmux-subagent").TmuxSessionManager,
     initTaskToastManagerFn: initTaskToastManager,
     registerManagerForCleanupFn: registerManagerForCleanup,
     createConfigHandlerFn: createConfigHandler,
@@ -124,7 +153,10 @@ describe("createManagers", () => {
   let dispatchOpenClawEvent: ReturnType<typeof spyOn>
 
   beforeEach(() => {
-    dispatchOpenClawEvent = spyOn(openclawRuntimeDispatch, "dispatchOpenClawEvent")
+    dispatchOpenClawEvent = spyOn(
+      openclawRuntimeDispatch,
+      "dispatchOpenClawEvent",
+    )
     markServerRunningInProcess.mockClear()
     dispatchOpenClawEvent.mockReset()
     backgroundManagerOptions = null

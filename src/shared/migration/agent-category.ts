@@ -43,7 +43,7 @@ export function migrateAgentConfigToCategory(config: Record<string, unknown>): {
 
 export function shouldDeleteAgentConfig(
   config: Record<string, unknown>,
-  category: string
+  category: string,
 ): boolean {
   const { DEFAULT_CATEGORIES } = require("../../tools/delegate-task/constants")
   const defaults = DEFAULT_CATEGORIES[category]

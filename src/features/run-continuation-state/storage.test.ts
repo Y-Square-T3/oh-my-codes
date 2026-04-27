@@ -33,8 +33,20 @@ describe("run-continuation-state storage", () => {
     const sessionID = "ses_test"
 
     // when
-    setContinuationMarkerSource(directory, sessionID, "todo", "active", "2 todos remaining")
-    setContinuationMarkerSource(directory, sessionID, "stop", "stopped", "user requested stop")
+    setContinuationMarkerSource(
+      directory,
+      sessionID,
+      "todo",
+      "active",
+      "2 todos remaining",
+    )
+    setContinuationMarkerSource(
+      directory,
+      sessionID,
+      "stop",
+      "stopped",
+      "user requested stop",
+    )
     const marker = readContinuationMarker(directory, sessionID)
 
     // then
@@ -49,7 +61,13 @@ describe("run-continuation-state storage", () => {
     // given
     const directory = createTempDir()
     const sessionID = "ses_active"
-    setContinuationMarkerSource(directory, sessionID, "todo", "active", "pending")
+    setContinuationMarkerSource(
+      directory,
+      sessionID,
+      "todo",
+      "active",
+      "pending",
+    )
     setContinuationMarkerSource(directory, sessionID, "stop", "idle")
     const marker = readContinuationMarker(directory, sessionID)
 

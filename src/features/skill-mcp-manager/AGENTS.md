@@ -8,11 +8,11 @@
 
 ## THREE-TIER MCP CONTEXT
 
-| Tier | Manager | Scope |
-|------|---------|-------|
-| 1. Built-in | `createBuiltinMcps()` (src/mcp/) | Global, 3 remote HTTP |
-| 2. Claude Code | `claude-code-mcp-loader` (src/features/) | From `.mcp.json` |
-| 3. **Skill-embedded** | **`SkillMcpManager` (this module)** | **Per-session, from SKILL.md YAML** |
+| Tier                  | Manager                                  | Scope                               |
+| --------------------- | ---------------------------------------- | ----------------------------------- |
+| 1. Built-in           | `createBuiltinMcps()` (src/mcp/)         | Global, 3 remote HTTP               |
+| 2. Claude Code        | `claude-code-mcp-loader` (src/features/) | From `.mcp.json`                    |
+| 3. **Skill-embedded** | **`SkillMcpManager` (this module)**      | **Per-session, from SKILL.md YAML** |
 
 ## CLIENT KEY FORMAT
 
@@ -24,10 +24,10 @@ Enables: per-session isolation, same skill usable in multiple sessions concurren
 
 ## DUAL TRANSPORT
 
-| Type | File | Backend |
-|------|------|---------|
-| **stdio** | `stdio-client.ts` | `StdioClientTransport` (local process) |
-| **http** | `http-client.ts` | `StreamableHTTPClientTransport` (remote) |
+| Type      | File              | Backend                                  |
+| --------- | ----------------- | ---------------------------------------- |
+| **stdio** | `stdio-client.ts` | `StdioClientTransport` (local process)   |
+| **http**  | `http-client.ts`  | `StreamableHTTPClientTransport` (remote) |
 
 **Detection** (connection-type.ts): explicit `type` field → URL presence → command presence. Legacy `"sse"` mapped to http.
 
@@ -35,32 +35,33 @@ Enables: per-session isolation, same skill usable in multiple sessions concurren
 
 ```typescript
 interface SkillMcpManagerState {
-  clients: Map<clientKey, ManagedClient>              // Active connections
+  clients: Map<clientKey, ManagedClient> // Active connections
   pendingConnections: Map<clientKey, Promise<Client>> // Race prevention
-  disconnectedSessions: Map<sessionID, generation>    // Stale connection detection
-  authProviders: Map<url, OAuthProvider>              // OAuth state per server
-  inFlightConnections: Map<sessionID, count>          // Connection counting
+  disconnectedSessions: Map<sessionID, generation> // Stale connection detection
+  authProviders: Map<url, OAuthProvider> // OAuth state per server
+  inFlightConnections: Map<sessionID, count> // Connection counting
 }
 ```
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `manager.ts` | `SkillMcpManager` class — main API (getOrCreateClient, disconnectSession, listTools, callTool, etc.) |
-| `types.ts` | `ManagedStdioClient`, `ManagedHttpClient`, `SkillMcpManagerState`, `ConnectionType` |
-| `connection.ts` | Client factory with race prevention, retry, env var expansion |
-| `connection-type.ts` | Detect stdio vs http from config (legacy sse → http) |
-| `stdio-client.ts` | Stdio transport factory |
-| `http-client.ts` | HTTP transport factory |
-| `cleanup.ts` | SIGINT/SIGTERM handlers, idle timer (60s interval, 5min TTL) |
-| `oauth-handler.ts` | OAuth token management, refresh, step-up (403 scope escalation) |
-| `env-cleaner.ts` | Filter npm/pnpm/yarn config + 25+ secret patterns (_KEY, _SECRET, _TOKEN) |
-| `error-redaction.ts` | Redact sensitive data from error messages before logging |
+| File                 | Purpose                                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `manager.ts`         | `SkillMcpManager` class — main API (getOrCreateClient, disconnectSession, listTools, callTool, etc.) |
+| `types.ts`           | `ManagedStdioClient`, `ManagedHttpClient`, `SkillMcpManagerState`, `ConnectionType`                  |
+| `connection.ts`      | Client factory with race prevention, retry, env var expansion                                        |
+| `connection-type.ts` | Detect stdio vs http from config (legacy sse → http)                                                 |
+| `stdio-client.ts`    | Stdio transport factory                                                                              |
+| `http-client.ts`     | HTTP transport factory                                                                               |
+| `cleanup.ts`         | SIGINT/SIGTERM handlers, idle timer (60s interval, 5min TTL)                                         |
+| `oauth-handler.ts`   | OAuth token management, refresh, step-up (403 scope escalation)                                      |
+| `env-cleaner.ts`     | Filter npm/pnpm/yarn config + 25+ secret patterns (\_KEY, \_SECRET, \_TOKEN)                         |
+| `error-redaction.ts` | Redact sensitive data from error messages before logging                                             |
 
 ## LIFECYCLE INTEGRATION
 
 **Hook**: `src/plugin/event.ts` on `session.deleted`:
+
 ```typescript
 await managers.skillMcpManager.disconnectSession(sessionInfo.id)
 ```

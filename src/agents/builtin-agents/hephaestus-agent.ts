@@ -1,7 +1,11 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentOverrides } from "../types"
 import type { CategoryConfig } from "../../config/schema"
-import type { AvailableAgent, AvailableCategory, AvailableSkill } from "../dynamic-agent-prompt-builder"
+import type {
+  AvailableAgent,
+  AvailableCategory,
+  AvailableSkill,
+} from "../dynamic-agent-prompt-builder"
 import { AGENT_MODEL_REQUIREMENTS, isAnyProviderConnected } from "../../shared"
 import { createHephaestusAgent } from "../hephaestus"
 import { applyEnvironmentContext } from "./environment-context"
@@ -48,7 +52,10 @@ export function maybeCreateHephaestusConfig(input: {
     !hephaestusRequirement?.requiresProvider ||
     hasHephaestusExplicitConfig ||
     isFirstRunNoCache ||
-    isAnyProviderConnected(hephaestusRequirement.requiresProvider, availableModels)
+    isAnyProviderConnected(
+      hephaestusRequirement.requiresProvider,
+      availableModels,
+    )
 
   if (!hasRequiredProvider) return undefined
 
@@ -64,7 +71,8 @@ export function maybeCreateHephaestusConfig(input: {
   }
 
   if (!hephaestusResolution) return undefined
-  const { model: hephaestusModel, variant: hephaestusResolvedVariant } = hephaestusResolution
+  const { model: hephaestusModel, variant: hephaestusResolvedVariant } =
+    hephaestusResolution
 
   let hephaestusConfig = createHephaestusAgent(
     hephaestusModel,
@@ -72,20 +80,35 @@ export function maybeCreateHephaestusConfig(input: {
     undefined,
     availableSkills,
     availableCategories,
-    useTaskSystem
+    useTaskSystem,
   )
 
-  hephaestusConfig = { ...hephaestusConfig, variant: hephaestusResolvedVariant ?? "medium" }
-
-  const hepOverrideCategory = (hephaestusOverride as Record<string, unknown> | undefined)?.category as string | undefined
-  if (hepOverrideCategory) {
-    hephaestusConfig = applyCategoryOverride(hephaestusConfig, hepOverrideCategory, mergedCategories)
+  hephaestusConfig = {
+    ...hephaestusConfig,
+    variant: hephaestusResolvedVariant ?? "medium",
   }
 
-  hephaestusConfig = applyEnvironmentContext(hephaestusConfig, directory, { disableOmoEnv })
+  const hepOverrideCategory = (
+    hephaestusOverride as Record<string, unknown> | undefined
+  )?.category as string | undefined
+  if (hepOverrideCategory) {
+    hephaestusConfig = applyCategoryOverride(
+      hephaestusConfig,
+      hepOverrideCategory,
+      mergedCategories,
+    )
+  }
+
+  hephaestusConfig = applyEnvironmentContext(hephaestusConfig, directory, {
+    disableOmoEnv,
+  })
 
   if (hephaestusOverride) {
-    hephaestusConfig = mergeAgentConfig(hephaestusConfig, hephaestusOverride, directory)
+    hephaestusConfig = mergeAgentConfig(
+      hephaestusConfig,
+      hephaestusOverride,
+      directory,
+    )
   }
 
   const resolvedModel = hephaestusConfig.model ?? ""

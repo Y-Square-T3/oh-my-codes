@@ -1,7 +1,11 @@
 import type { createOpencodeClient } from "@opencode-ai/sdk"
 import type { MessageData } from "./types"
 import { extractMessageIndex } from "./detect-error-type"
-import { findMessageByIndexNeedingThinking, findMessagesWithOrphanThinking, prependThinkingPart } from "./storage"
+import {
+  findMessageByIndexNeedingThinking,
+  findMessagesWithOrphanThinking,
+  prependThinkingPart,
+} from "./storage"
 import { isSqliteBackend } from "../../shared/opencode-storage-detection"
 import { prependThinkingPartAsync } from "./storage/thinking-prepend"
 import { THINKING_TYPES } from "./constants"
@@ -14,7 +18,7 @@ export async function recoverThinkingBlockOrder(
   sessionID: string,
   _failedAssistantMsg: MessageData,
   _directory: string,
-  error: unknown
+  error: unknown,
 ): Promise<boolean> {
   if (isSqliteBackend()) {
     return recoverThinkingBlockOrderFromSDK(client, sessionID, error)
@@ -22,7 +26,10 @@ export async function recoverThinkingBlockOrder(
 
   const targetIndex = extractMessageIndex(error)
   if (targetIndex !== null) {
-    const targetMessageID = findMessageByIndexNeedingThinking(sessionID, targetIndex)
+    const targetMessageID = findMessageByIndexNeedingThinking(
+      sessionID,
+      targetIndex,
+    )
     if (targetMessageID) {
       return prependThinkingPart(sessionID, targetMessageID)
     }
@@ -46,17 +53,24 @@ export async function recoverThinkingBlockOrder(
 async function recoverThinkingBlockOrderFromSDK(
   client: Client,
   sessionID: string,
-  error: unknown
+  error: unknown,
 ): Promise<boolean> {
   const targetIndex = extractMessageIndex(error)
   if (targetIndex !== null) {
-    const targetMessageID = await findMessageByIndexNeedingThinkingFromSDK(client, sessionID, targetIndex)
+    const targetMessageID = await findMessageByIndexNeedingThinkingFromSDK(
+      client,
+      sessionID,
+      targetIndex,
+    )
     if (targetMessageID) {
       return prependThinkingPartAsync(client, sessionID, targetMessageID)
     }
   }
 
-  const orphanMessages = await findMessagesWithOrphanThinkingFromSDK(client, sessionID)
+  const orphanMessages = await findMessagesWithOrphanThinkingFromSDK(
+    client,
+    sessionID,
+  )
   if (orphanMessages.length === 0) {
     return false
   }
@@ -73,12 +87,14 @@ async function recoverThinkingBlockOrderFromSDK(
 
 async function findMessagesWithOrphanThinkingFromSDK(
   client: Client,
-  sessionID: string
+  sessionID: string,
 ): Promise<string[]> {
   let messages: MessageData[]
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
   } catch {
     return []
   }
@@ -90,11 +106,14 @@ async function findMessagesWithOrphanThinkingFromSDK(
     if (!msg.parts || msg.parts.length === 0) continue
 
     const partsWithIds = msg.parts.filter(
-      (part): part is { id: string; type: string } => typeof part.id === "string"
+      (part): part is { id: string; type: string } =>
+        typeof part.id === "string",
     )
     if (partsWithIds.length === 0) continue
 
-    const sortedParts = [...partsWithIds].sort((a, b) => a.id.localeCompare(b.id))
+    const sortedParts = [...partsWithIds].sort((a, b) =>
+      a.id.localeCompare(b.id),
+    )
     const firstPart = sortedParts[0]
     if (!THINKING_TYPES.has(firstPart.type)) {
       result.push(msg.info.id)
@@ -107,12 +126,14 @@ async function findMessagesWithOrphanThinkingFromSDK(
 async function findMessageByIndexNeedingThinkingFromSDK(
   client: Client,
   sessionID: string,
-  targetIndex: number
+  targetIndex: number,
 ): Promise<string | null> {
   let messages: MessageData[]
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
   } catch {
     return null
   }
@@ -125,7 +146,7 @@ async function findMessageByIndexNeedingThinkingFromSDK(
   if (!targetMessage.parts || targetMessage.parts.length === 0) return null
 
   const partsWithIds = targetMessage.parts.filter(
-    (part): part is { id: string; type: string } => typeof part.id === "string"
+    (part): part is { id: string; type: string } => typeof part.id === "string",
   )
   if (partsWithIds.length === 0) return null
 

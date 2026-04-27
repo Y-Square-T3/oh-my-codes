@@ -76,7 +76,9 @@ describe("extractVersionFromPluginEntry", () => {
   })
 
   it("handles prerelease versions", () => {
-    const version = extractVersionFromPluginEntry("oh-my-openagent@3.16.0-beta.1")
+    const version = extractVersionFromPluginEntry(
+      "oh-my-openagent@3.16.0-beta.1",
+    )
     expect(version).toBe("3.16.0-beta.1")
   })
 })

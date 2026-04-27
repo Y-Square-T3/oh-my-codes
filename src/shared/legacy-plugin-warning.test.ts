@@ -4,7 +4,10 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 const { checkForLegacyPluginEntry } = await import(
-  new URL("./legacy-plugin-warning.ts?real-legacy-plugin-warning-test", import.meta.url).href
+  new URL(
+    "./legacy-plugin-warning.ts?real-legacy-plugin-warning-test",
+    import.meta.url,
+  ).href
 )
 
 function createTestConfigDir(): string {
@@ -21,7 +24,10 @@ describe("checkForLegacyPluginEntry", () => {
 
     try {
       // given
-      writeFileSync(join(testConfigDir, "opencode.json"), JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2))
+      writeFileSync(
+        join(testConfigDir, "opencode.json"),
+        JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2),
+      )
 
       // when
       const result = checkForLegacyPluginEntry(testConfigDir)
@@ -41,7 +47,10 @@ describe("checkForLegacyPluginEntry", () => {
 
     try {
       // given
-      writeFileSync(join(testConfigDir, "opencode.json"), JSON.stringify({ plugin: ["oh-my-codes@3.10.0"] }, null, 2))
+      writeFileSync(
+        join(testConfigDir, "opencode.json"),
+        JSON.stringify({ plugin: ["oh-my-codes@3.10.0"] }, null, 2),
+      )
 
       // when
       const result = checkForLegacyPluginEntry(testConfigDir)
@@ -60,7 +69,10 @@ describe("checkForLegacyPluginEntry", () => {
 
     try {
       // given
-      writeFileSync(join(testConfigDir, "opencode.json"), JSON.stringify({ plugin: ["oh-my-openagent"] }, null, 2))
+      writeFileSync(
+        join(testConfigDir, "opencode.json"),
+        JSON.stringify({ plugin: ["oh-my-openagent"] }, null, 2),
+      )
 
       // when
       const result = checkForLegacyPluginEntry(testConfigDir)
@@ -79,7 +91,10 @@ describe("checkForLegacyPluginEntry", () => {
 
     try {
       // given
-      writeFileSync(join(testConfigDir, "opencode.jsonc"), '{\n  "plugin": ["oh-my-codes"]\n}\n')
+      writeFileSync(
+        join(testConfigDir, "opencode.jsonc"),
+        '{\n  "plugin": ["oh-my-codes"]\n}\n',
+      )
 
       // when
       const result = checkForLegacyPluginEntry(testConfigDir)

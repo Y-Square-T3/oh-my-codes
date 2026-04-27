@@ -24,7 +24,10 @@ function trimProcessedEntries(entries: Map<string, number>): void {
   }
 }
 
-function removeSessionEntries(entries: Map<string, number>, sessionID: string): void {
+function removeSessionEntries(
+  entries: Map<string, number>,
+  sessionID: string,
+): void {
   const sessionPrefix = `${sessionID}:`
   for (const entry of entries.keys()) {
     if (entry.startsWith(sessionPrefix)) {

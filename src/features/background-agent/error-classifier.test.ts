@@ -75,7 +75,9 @@ describe("isAbortedSessionError", () => {
     })
 
     test("returns true for object with message containing aborted", () => {
-      expect(isAbortedSessionError({ message: "The session was aborted" })).toBe(true)
+      expect(
+        isAbortedSessionError({ message: "The session was aborted" }),
+      ).toBe(true)
     })
   })
 
@@ -85,7 +87,9 @@ describe("isAbortedSessionError", () => {
     })
 
     test("returns false for Error without aborted", () => {
-      expect(isAbortedSessionError(new Error("Something went wrong"))).toBe(false)
+      expect(isAbortedSessionError(new Error("Something went wrong"))).toBe(
+        false,
+      )
     })
 
     test("returns false for empty string", () => {
@@ -121,11 +125,15 @@ describe("getErrorText", () => {
 
   describe("#given Error instance", () => {
     test("returns name and message format", () => {
-      expect(getErrorText(new Error("test message"))).toBe("Error: test message")
+      expect(getErrorText(new Error("test message"))).toBe(
+        "Error: test message",
+      )
     })
 
     test("returns TypeError format", () => {
-      expect(getErrorText(new TypeError("type error"))).toBe("TypeError: type error")
+      expect(getErrorText(new TypeError("type error"))).toBe(
+        "TypeError: type error",
+      )
     })
   })
 
@@ -139,7 +147,9 @@ describe("getErrorText", () => {
     })
 
     test("prefers message over name", () => {
-      expect(getErrorText({ name: "CustomError", message: "error message" })).toBe("error message")
+      expect(
+        getErrorText({ name: "CustomError", message: "error message" }),
+      ).toBe("error message")
     })
   })
 
@@ -225,7 +235,9 @@ describe("extractErrorMessage", () => {
 
   describe("#given object with message property", () => {
     test("returns message property", () => {
-      expect(extractErrorMessage({ message: "custom message" })).toBe("custom message")
+      expect(extractErrorMessage({ message: "custom message" })).toBe(
+        "custom message",
+      )
     })
 
     test("falls through to JSON.stringify for empty message value", () => {
@@ -235,11 +247,15 @@ describe("extractErrorMessage", () => {
 
   describe("#given nested error structure", () => {
     test("extracts message from nested error object", () => {
-      expect(extractErrorMessage({ error: { message: "nested error" } })).toBe("nested error")
+      expect(extractErrorMessage({ error: { message: "nested error" } })).toBe(
+        "nested error",
+      )
     })
 
     test("extracts message from data.error structure", () => {
-      expect(extractErrorMessage({ data: { error: "data error" } })).toBe("data error")
+      expect(extractErrorMessage({ data: { error: "data error" } })).toBe(
+        "data error",
+      )
     })
 
     test("extracts message from cause property", () => {
@@ -247,7 +263,9 @@ describe("extractErrorMessage", () => {
     })
 
     test("extracts message from cause object with message", () => {
-      expect(extractErrorMessage({ cause: { message: "cause message" } })).toBe("cause message")
+      expect(extractErrorMessage({ cause: { message: "cause message" } })).toBe(
+        "cause message",
+      )
     })
   })
 
@@ -337,15 +355,21 @@ describe("getSessionErrorMessage", () => {
     })
 
     test("returns undefined when data is not an object", () => {
-      expect(getSessionErrorMessage({ error: { data: "not an object" } })).toBe(undefined)
+      expect(getSessionErrorMessage({ error: { data: "not an object" } })).toBe(
+        undefined,
+      )
     })
 
     test("returns undefined when message is not string", () => {
-      expect(getSessionErrorMessage({ error: { message: 123 } })).toBe(undefined)
+      expect(getSessionErrorMessage({ error: { message: 123 } })).toBe(
+        undefined,
+      )
     })
 
     test("returns undefined when data.message is not string", () => {
-      expect(getSessionErrorMessage({ error: { data: { message: null } } })).toBe(undefined)
+      expect(
+        getSessionErrorMessage({ error: { data: { message: null } } }),
+      ).toBe(undefined)
     })
   })
 })

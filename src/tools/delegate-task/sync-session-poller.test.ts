@@ -37,14 +37,21 @@ describe("pollSyncSession", () => {
         session: {
           messages: async () => ({
             data: [
-              { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
               {
-                info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "stop" },
+                info: { id: "msg_001", role: "user", time: { created: 1000 } },
+              },
+              {
+                info: {
+                  id: "msg_002",
+                  role: "assistant",
+                  time: { created: 2000 },
+                  finish: "stop",
+                },
                 parts: [{ type: "text", text: "Done" }],
               },
             ],
           }),
-          status: async () => ({ data: { "ses_test": { type: "idle" } } }),
+          status: async () => ({ data: { ses_test: { type: "idle" } } }),
         },
       }
 
@@ -72,9 +79,20 @@ describe("pollSyncSession", () => {
             if (callCount <= 2) {
               return {
                 data: [
-                  { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                   {
-                    info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "tool-calls" },
+                    info: {
+                      id: "msg_001",
+                      role: "user",
+                      time: { created: 1000 },
+                    },
+                  },
+                  {
+                    info: {
+                      id: "msg_002",
+                      role: "assistant",
+                      time: { created: 2000 },
+                      finish: "tool-calls",
+                    },
                     parts: [{ type: "tool-call", text: "calling tool" }],
                   },
                 ],
@@ -82,20 +100,42 @@ describe("pollSyncSession", () => {
             }
             return {
               data: [
-                { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                 {
-                  info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "tool-calls" },
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "tool-calls",
+                  },
                   parts: [{ type: "tool-call", text: "calling tool" }],
                 },
-                { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
                 {
-                  info: { id: "msg_004", role: "assistant", time: { created: 4000 }, finish: "end_turn" },
+                  info: {
+                    id: "msg_003",
+                    role: "user",
+                    time: { created: 3000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_004",
+                    role: "assistant",
+                    time: { created: 4000 },
+                    finish: "end_turn",
+                  },
                   parts: [{ type: "text", text: "Final answer" }],
                 },
               ],
             }
           },
-          status: async () => ({ data: { "ses_test": { type: "idle" } } }),
+          status: async () => ({ data: { ses_test: { type: "idle" } } }),
         },
       }
 
@@ -124,9 +164,20 @@ describe("pollSyncSession", () => {
             if (callCount <= 1) {
               return {
                 data: [
-                  { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                   {
-                    info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "unknown" },
+                    info: {
+                      id: "msg_001",
+                      role: "user",
+                      time: { created: 1000 },
+                    },
+                  },
+                  {
+                    info: {
+                      id: "msg_002",
+                      role: "assistant",
+                      time: { created: 2000 },
+                      finish: "unknown",
+                    },
                     parts: [],
                   },
                 ],
@@ -134,20 +185,42 @@ describe("pollSyncSession", () => {
             }
             return {
               data: [
-                { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                 {
-                  info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "unknown" },
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "unknown",
+                  },
                   parts: [],
                 },
-                { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
                 {
-                  info: { id: "msg_004", role: "assistant", time: { created: 4000 }, finish: "stop" },
+                  info: {
+                    id: "msg_003",
+                    role: "user",
+                    time: { created: 3000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_004",
+                    role: "assistant",
+                    time: { created: 4000 },
+                    finish: "stop",
+                  },
                   parts: [{ type: "text", text: "Done" }],
                 },
               ],
             }
           },
-          status: async () => ({ data: { "ses_test": { type: "idle" } } }),
+          status: async () => ({ data: { ses_test: { type: "idle" } } }),
         },
       }
 
@@ -176,9 +249,20 @@ describe("pollSyncSession", () => {
             if (callCount <= 1) {
               return {
                 data: [
-                  { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                   {
-                    info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "stop" },
+                    info: {
+                      id: "msg_001",
+                      role: "user",
+                      time: { created: 1000 },
+                    },
+                  },
+                  {
+                    info: {
+                      id: "msg_002",
+                      role: "assistant",
+                      time: { created: 2000 },
+                      finish: "stop",
+                    },
                     parts: [{ type: "tool-call", text: "calling tool" }],
                   },
                 ],
@@ -186,20 +270,42 @@ describe("pollSyncSession", () => {
             }
             return {
               data: [
-                { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                 {
-                  info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "stop" },
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "stop",
+                  },
                   parts: [{ type: "tool-call", text: "calling tool" }],
                 },
-                { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
                 {
-                  info: { id: "msg_004", role: "assistant", time: { created: 4000 }, finish: "stop" },
+                  info: {
+                    id: "msg_003",
+                    role: "user",
+                    time: { created: 3000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_004",
+                    role: "assistant",
+                    time: { created: 4000 },
+                    finish: "stop",
+                  },
                   parts: [{ type: "text", text: "Done" }],
                 },
               ],
             }
           },
-          status: async () => ({ data: { "ses_test": { type: "idle" } } }),
+          status: async () => ({ data: { ses_test: { type: "idle" } } }),
         },
       }
 
@@ -228,31 +334,70 @@ describe("pollSyncSession", () => {
             if (callCount <= 1) {
               return {
                 data: [
-                  { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                   {
-                    info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+                    info: {
+                      id: "msg_001",
+                      role: "user",
+                      time: { created: 1000 },
+                    },
+                  },
+                  {
+                    info: {
+                      id: "msg_002",
+                      role: "assistant",
+                      time: { created: 2000 },
+                      finish: "end_turn",
+                    },
                     parts: [{ type: "text", text: "Partial" }],
                   },
-                  { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
+                  {
+                    info: {
+                      id: "msg_003",
+                      role: "user",
+                      time: { created: 3000 },
+                    },
+                  },
                 ],
               }
             }
             return {
               data: [
-                { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                 {
-                  info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "end_turn",
+                  },
                   parts: [{ type: "text", text: "Partial" }],
                 },
-                { info: { id: "msg_003", role: "user", time: { created: 3000 } } },
                 {
-                  info: { id: "msg_004", role: "assistant", time: { created: 4000 }, finish: "end_turn" },
+                  info: {
+                    id: "msg_003",
+                    role: "user",
+                    time: { created: 3000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_004",
+                    role: "assistant",
+                    time: { created: 4000 },
+                    finish: "end_turn",
+                  },
                   parts: [{ type: "text", text: "Final" }],
                 },
               ],
             }
           },
-          status: async () => ({ data: { "ses_test": { type: "idle" } } }),
+          status: async () => ({ data: { ses_test: { type: "idle" } } }),
         },
       }
 
@@ -288,9 +433,20 @@ describe("pollSyncSession", () => {
             messageCallCount++
             return {
               data: [
-                { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
                 {
-                  info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "stop" },
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "stop",
+                  },
                   parts: [{ type: "text", text: "Done" }],
                 },
               ],
@@ -301,18 +457,22 @@ describe("pollSyncSession", () => {
       }
 
       //#when
-      const result = await pollSyncSession({
-        sessionID: "parent-session",
-        messageID: "parent-message",
-        agent: "test-agent",
-        abort: controller.signal,
-      }, mockClient, {
-        sessionID: "ses_abort_complete",
-        agentToUse: "test-agent",
-        toastManager: { removeTask: () => {} },
-        taskId: "task_123",
-        anchorMessageCount: 1,
-      })
+      const result = await pollSyncSession(
+        {
+          sessionID: "parent-session",
+          messageID: "parent-message",
+          agent: "test-agent",
+          abort: controller.signal,
+        },
+        mockClient,
+        {
+          sessionID: "ses_abort_complete",
+          agentToUse: "test-agent",
+          toastManager: { removeTask: () => {} },
+          taskId: "task_123",
+          anchorMessageCount: 1,
+        },
+      )
 
       //#then
       expect(result).toBeNull()
@@ -369,71 +529,91 @@ describe("pollSyncSession", () => {
           },
           messages: async () => ({
             data: [
-              { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
+              {
+                info: { id: "msg_001", role: "user", time: { created: 1000 } },
+              },
             ],
           }),
-          status: async () => ({ data: { "ses_timeout": { type: "idle" } } }),
+          status: async () => ({ data: { ses_timeout: { type: "idle" } } }),
+        },
+      }
+
+      //#when
+      const result = await pollSyncSession(
+        createMockCtx(),
+        mockClient,
+        {
+          sessionID: "ses_timeout",
+          agentToUse: "test-agent",
+          toastManager: null,
+          taskId: undefined,
+        },
+        0,
+      )
+
+      //#then - timeout returns error string
+      expect(result).toBe(
+        "Poll timeout reached after 50ms for session ses_timeout",
+      )
+      expect(abortCount).toBe(1)
+    })
+  })
+
+  describe("non-idle session status", () => {
+    test("skips message check when session is not idle", async () => {
+      //#given
+      const { pollSyncSession } = require("./sync-session-poller")
+
+      let statusCallCount = 0
+      let messageCallCount = 0
+      const mockClient = {
+        session: {
+          messages: async () => {
+            messageCallCount++
+            return {
+              data: [
+                {
+                  info: {
+                    id: "msg_001",
+                    role: "user",
+                    time: { created: 1000 },
+                  },
+                },
+                {
+                  info: {
+                    id: "msg_002",
+                    role: "assistant",
+                    time: { created: 2000 },
+                    finish: "end_turn",
+                  },
+                  parts: [{ type: "text", text: "Done" }],
+                },
+              ],
+            }
+          },
+          status: async () => {
+            statusCallCount++
+            if (statusCallCount <= 2) {
+              return { data: { ses_busy: { type: "running" } } }
+            }
+            return { data: { ses_busy: { type: "idle" } } }
+          },
         },
       }
 
       //#when
       const result = await pollSyncSession(createMockCtx(), mockClient, {
-        sessionID: "ses_timeout",
+        sessionID: "ses_busy",
         agentToUse: "test-agent",
         toastManager: null,
         taskId: undefined,
-      }, 0)
+      })
 
-      //#then - timeout returns error string
-      expect(result).toBe("Poll timeout reached after 50ms for session ses_timeout")
-      expect(abortCount).toBe(1)
+      //#then - should have waited for idle before checking messages
+      expect(result).toBeNull()
+      expect(statusCallCount).toBeGreaterThanOrEqual(3)
     })
   })
-
-   describe("non-idle session status", () => {
-     test("skips message check when session is not idle", async () => {
-       //#given
-       const { pollSyncSession } = require("./sync-session-poller")
-
-        let statusCallCount = 0
-       let messageCallCount = 0
-       const mockClient = {
-         session: {
-           messages: async () => {
-             messageCallCount++
-             return {
-               data: [
-                 { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
-                 {
-                   info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
-                   parts: [{ type: "text", text: "Done" }],
-                 },
-               ],
-             }
-           },
-           status: async () => {
-             statusCallCount++
-             if (statusCallCount <= 2) {
-               return { data: { "ses_busy": { type: "running" } } }
-             }
-             return { data: { "ses_busy": { type: "idle" } } }
-           },
-         },
-       }
-
-       //#when
-       const result = await pollSyncSession(createMockCtx(), mockClient, {
-         sessionID: "ses_busy",
-         agentToUse: "test-agent",
-         toastManager: null,
-         taskId: undefined,
-       })
-
-       //#then - should have waited for idle before checking messages
-       expect(result).toBeNull()
-       expect(statusCallCount).toBeGreaterThanOrEqual(3)
-     })
-   })
 
   describe("isSessionComplete edge cases", () => {
     test("returns false when messages array is empty", () => {
@@ -471,7 +651,12 @@ describe("pollSyncSession", () => {
       //#given - only assistant message, no user message
       const messages = [
         {
-          info: { id: "msg_001", role: "assistant", time: { created: 1000 }, finish: "end_turn" },
+          info: {
+            id: "msg_001",
+            role: "assistant",
+            time: { created: 1000 },
+            finish: "end_turn",
+          },
           parts: [{ type: "text", text: "Response" }],
         },
       ]
@@ -509,7 +694,11 @@ describe("pollSyncSession", () => {
       const messages = [
         { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
         {
-          info: { role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+          info: {
+            role: "assistant",
+            time: { created: 2000 },
+            finish: "end_turn",
+          },
           parts: [{ type: "text", text: "Response" }],
         },
       ]
@@ -528,7 +717,12 @@ describe("pollSyncSession", () => {
       const messages = [
         { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
         {
-          info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "stop" },
+          info: {
+            id: "msg_002",
+            role: "assistant",
+            time: { created: 2000 },
+            finish: "stop",
+          },
           parts: [{ type: "tool-call", text: "calling tool" }],
         },
       ]
@@ -547,7 +741,12 @@ describe("pollSyncSession", () => {
       const messages = [
         { info: { id: "msg_001", role: "user", time: { created: 1000 } } },
         {
-          info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+          info: {
+            id: "msg_002",
+            role: "assistant",
+            time: { created: 2000 },
+            finish: "end_turn",
+          },
           parts: [{ type: "tool-call", text: "calling tool" }],
         },
       ]
@@ -566,7 +765,12 @@ describe("pollSyncSession", () => {
       const messages = [
         { info: { role: "user", time: { created: 1000 } } },
         {
-          info: { id: "msg_002", role: "assistant", time: { created: 2000 }, finish: "end_turn" },
+          info: {
+            id: "msg_002",
+            role: "assistant",
+            time: { created: 2000 },
+            finish: "end_turn",
+          },
           parts: [{ type: "text", text: "Response" }],
         },
       ]
@@ -578,5 +782,4 @@ describe("pollSyncSession", () => {
       expect(result).toBe(false)
     })
   })
-
 })

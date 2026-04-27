@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test"
-import { buildOrchestratorReminder, buildCompletionGate } from "./verification-reminders"
+import {
+  buildOrchestratorReminder,
+  buildCompletionGate,
+} from "./verification-reminders"
 
 // Test helpers for given/when/then pattern
 const given = describe
@@ -45,7 +48,9 @@ describe("buildCompletionGate", () => {
       then("step numbering remains consecutive after removal", () => {
         const stepMatches = gate.match(/STEP \d+:/g) ?? []
         if (stepMatches.length > 1) {
-          const numbers = stepMatches.map((s: string) => parseInt(s.match(/\d+/)?.[0] ?? "0"))
+          const numbers = stepMatches.map((s: string) =>
+            parseInt(s.match(/\d+/)?.[0] ?? "0"),
+          )
           for (let i = 1; i < numbers.length; i++) {
             expect(numbers[i]).toBe(numbers[i - 1] + 1)
           }
@@ -62,7 +67,12 @@ describe("buildOrchestratorReminder", () => {
     const progress = { total: 10, completed: 3 }
 
     when("buildOrchestratorReminder is called with autoCommit true", () => {
-      const reminder = buildOrchestratorReminder(planName, progress, sessionId, true)
+      const reminder = buildOrchestratorReminder(
+        planName,
+        progress,
+        sessionId,
+        true,
+      )
 
       then("old STEP 7 MARK COMPLETION IN PLAN FILE text is absent", () => {
         expect(reminder).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")
@@ -77,7 +87,12 @@ describe("buildOrchestratorReminder", () => {
     })
 
     when("buildOrchestratorReminder is called with autoCommit false", () => {
-      const reminder = buildOrchestratorReminder(planName, progress, sessionId, false)
+      const reminder = buildOrchestratorReminder(
+        planName,
+        progress,
+        sessionId,
+        false,
+      )
 
       then("old STEP 7 MARK COMPLETION IN PLAN FILE text is absent", () => {
         expect(reminder).not.toContain("STEP 7: MARK COMPLETION IN PLAN FILE")

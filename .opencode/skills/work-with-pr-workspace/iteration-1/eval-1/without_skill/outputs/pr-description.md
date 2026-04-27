@@ -17,10 +17,12 @@ Currently, concurrency is only limited per model/provider key (default 5 per key
 ## Changes
 
 ### Schema (`src/config/schema/background-task.ts`)
+
 - Added `maxBackgroundAgents: z.number().int().min(1).optional()` to `BackgroundTaskConfigSchema`
 - Grouped with existing limit fields (`maxDepth`, `maxDescendants`)
 
 ### ConcurrencyManager (`src/features/background-agent/concurrency.ts`)
+
 - Added `globalCount` tracking total active agents across all concurrency keys
 - Added `getGlobalLimit()` reading `maxBackgroundAgents` from config (defaults to `Infinity` = no global limit)
 - Modified `acquire()` to check both per-model AND global capacity
@@ -29,6 +31,7 @@ Currently, concurrency is only limited per model/provider key (default 5 per key
 - Added `getGlobalCount()` / `getGlobalQueueLength()` for testing
 
 ### Tests
+
 - `src/config/schema/background-task.test.ts`: 6 test cases for schema validation (valid, min boundary, below min, negative, non-integer, undefined)
 - `src/features/background-agent/concurrency.test.ts`: 8 test cases for global limit enforcement (cross-model blocking, release unblocking, per-model vs global interaction, no-config default, clear reset)
 
@@ -38,8 +41,8 @@ Currently, concurrency is only limited per model/provider key (default 5 per key
 {
   "background_task": {
     "maxBackgroundAgents": 5,
-    "defaultConcurrency": 3
-  }
+    "defaultConcurrency": 3,
+  },
 }
 ```
 

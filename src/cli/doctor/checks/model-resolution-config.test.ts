@@ -31,7 +31,11 @@ describe("model-resolution-config", () => {
       process.env.OPENCODE_CONFIG_DIR = testConfigDir
       writeFileSync(
         join(testConfigDir, "oh-my-openagent.json"),
-        JSON.stringify({ agents: { atlas: { model: "opencode-go/kimi-k2.5" } } }, null, 2) + "\n",
+        JSON.stringify(
+          { agents: { atlas: { model: "opencode-go/kimi-k2.5" } } },
+          null,
+          2,
+        ) + "\n",
         "utf-8",
       )
 

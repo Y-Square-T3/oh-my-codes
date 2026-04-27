@@ -37,10 +37,10 @@ export interface RunContext {
 }
 
 export interface Todo {
-  id?: string;
-  content: string;
-  status: string;
-  priority: string;
+  id?: string
+  content: string
+  status: string
+  priority: string
 }
 
 export interface SessionStatus {
@@ -92,7 +92,11 @@ export interface MessagePartUpdatedProps {
     /** Tool name (for part.type === "tool") */
     tool?: string
     /** Tool state (for part.type === "tool") */
-    state?: { status?: string; input?: Record<string, unknown>; output?: string }
+    state?: {
+      status?: string
+      input?: Record<string, unknown>
+      output?: string
+    }
     name?: string
     input?: unknown
     time?: { start?: number; end?: number }

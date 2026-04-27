@@ -1,4 +1,12 @@
-import { describe, it, expect, mock, beforeEach, afterEach, spyOn } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  beforeEach,
+  afterEach,
+  spyOn,
+} from "bun:test"
 import type { ClaudeHooksConfig } from "./types"
 import type { StopContext } from "./stop"
 import * as dispatchHookModule from "./dispatch-hook"
@@ -6,7 +14,7 @@ import * as logger from "../../shared/logger"
 import { executeStopHooks } from "./stop"
 
 const mockDispatchHook = mock(() =>
-  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" }),
 )
 
 function createStopContext(overrides?: Partial<StopContext>): StopContext {
@@ -25,11 +33,11 @@ describe("executeStopHooks", () => {
   beforeEach(() => {
     mockDispatchHook.mockReset()
     mockDispatchHook.mockImplementation(() =>
-      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" }),
     )
 
     spyOn(dispatchHookModule, "dispatchHook").mockImplementation(
-      async (_hook, _stdinJson, _cwd) => await mockDispatchHook()
+      async (_hook, _stdinJson, _cwd) => await mockDispatchHook(),
     )
     spyOn(logger, "log").mockImplementation(() => {})
   })
@@ -134,8 +142,14 @@ describe("executeStopHooks", () => {
       hook_source: "opencode-plugin",
     }
     const config = createConfig([
-      { matcher: "*", hooks: [{ type: "command", command: "check-console-log" }] },
-      { matcher: "*", hooks: [{ type: "command", command: "task-complete-notify" }] },
+      {
+        matcher: "*",
+        hooks: [{ type: "command", command: "check-console-log" }],
+      },
+      {
+        matcher: "*",
+        hooks: [{ type: "command", command: "task-complete-notify" }],
+      },
     ])
     mockDispatchHook
       .mockResolvedValueOnce({

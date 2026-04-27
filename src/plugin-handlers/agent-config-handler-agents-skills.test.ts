@@ -41,8 +41,15 @@ describe("applyAgentConfig .agents skills", () => {
   let logSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
-    createBuiltinAgentsSpy = spyOn(agents, "createBuiltinAgents").mockResolvedValue({
-      sisyphus: { name: "sisyphus", prompt: "builtin", mode: "primary" } satisfies AgentConfig,
+    createBuiltinAgentsSpy = spyOn(
+      agents,
+      "createBuiltinAgents",
+    ).mockResolvedValue({
+      sisyphus: {
+        name: "sisyphus",
+        prompt: "builtin",
+        mode: "primary",
+      } satisfies AgentConfig,
     })
     createSisyphusJuniorAgentSpy = spyOn(
       sisyphusJunior,
@@ -52,13 +59,34 @@ describe("applyAgentConfig .agents skills", () => {
       prompt: "junior",
       mode: "all",
     } satisfies AgentConfig)
-    discoverConfigSourceSkillsSpy = spyOn(skillLoader, "discoverConfigSourceSkills").mockResolvedValue([])
-    discoverUserClaudeSkillsSpy = spyOn(skillLoader, "discoverUserClaudeSkills").mockResolvedValue([])
-    discoverProjectClaudeSkillsSpy = spyOn(skillLoader, "discoverProjectClaudeSkills").mockResolvedValue([])
-    discoverOpencodeGlobalSkillsSpy = spyOn(skillLoader, "discoverOpencodeGlobalSkills").mockResolvedValue([])
-    discoverOpencodeProjectSkillsSpy = spyOn(skillLoader, "discoverOpencodeProjectSkills").mockResolvedValue([])
-    discoverProjectAgentsSkillsSpy = spyOn(skillLoader, "discoverProjectAgentsSkills").mockResolvedValue([])
-    discoverGlobalAgentsSkillsSpy = spyOn(skillLoader, "discoverGlobalAgentsSkills").mockResolvedValue([])
+    discoverConfigSourceSkillsSpy = spyOn(
+      skillLoader,
+      "discoverConfigSourceSkills",
+    ).mockResolvedValue([])
+    discoverUserClaudeSkillsSpy = spyOn(
+      skillLoader,
+      "discoverUserClaudeSkills",
+    ).mockResolvedValue([])
+    discoverProjectClaudeSkillsSpy = spyOn(
+      skillLoader,
+      "discoverProjectClaudeSkills",
+    ).mockResolvedValue([])
+    discoverOpencodeGlobalSkillsSpy = spyOn(
+      skillLoader,
+      "discoverOpencodeGlobalSkills",
+    ).mockResolvedValue([])
+    discoverOpencodeProjectSkillsSpy = spyOn(
+      skillLoader,
+      "discoverOpencodeProjectSkills",
+    ).mockResolvedValue([])
+    discoverProjectAgentsSkillsSpy = spyOn(
+      skillLoader,
+      "discoverProjectAgentsSkills",
+    ).mockResolvedValue([])
+    discoverGlobalAgentsSkillsSpy = spyOn(
+      skillLoader,
+      "discoverGlobalAgentsSkills",
+    ).mockResolvedValue([])
     logSpy = spyOn(shared, "log").mockImplementation(() => {})
   })
 
@@ -97,7 +125,10 @@ describe("applyAgentConfig .agents skills", () => {
     discoverProjectAgentsSkillsSpy.mockResolvedValue([
       {
         name: "project-agent-skill",
-        definition: { name: "project-agent-skill", template: "project-template" },
+        definition: {
+          name: "project-agent-skill",
+          template: "project-template",
+        },
         scope: "project",
       },
     ])
@@ -118,8 +149,13 @@ describe("applyAgentConfig .agents skills", () => {
     })
 
     // then
-    const discoveredSkills = createBuiltinAgentsSpy.mock.calls[0]?.[6] as Array<{ name: string }>
-    expect(discoveredSkills.map(skill => skill.name)).toContain("project-agent-skill")
-    expect(discoveredSkills.map(skill => skill.name)).toContain("global-agent-skill")
+    const discoveredSkills = createBuiltinAgentsSpy.mock
+      .calls[0]?.[6] as Array<{ name: string }>
+    expect(discoveredSkills.map((skill) => skill.name)).toContain(
+      "project-agent-skill",
+    )
+    expect(discoveredSkills.map((skill) => skill.name)).toContain(
+      "global-agent-skill",
+    )
   })
 })

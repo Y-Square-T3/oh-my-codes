@@ -11,30 +11,43 @@ afterEach(() => {
   while (managersToShutdown.length > 0) managersToShutdown.pop()?.shutdown()
 })
 
-function createBackgroundManager(config?: { defaultConcurrency?: number }): BackgroundManager {
+function createBackgroundManager(config?: {
+  defaultConcurrency?: number
+}): BackgroundManager {
   const directory = tmpdir()
-  const client = { session: {} as PluginInput["client"]["session"] } as PluginInput["client"]
+  const client = {
+    session: {} as PluginInput["client"]["session"],
+  } as PluginInput["client"]
 
   Reflect.set(client.session, "abort", async () => ({ data: true }))
-  Reflect.set(client.session, "create", async () => ({ data: { id: `session-${crypto.randomUUID().slice(0, 8)}` } }))
+  Reflect.set(client.session, "create", async () => ({
+    data: { id: `session-${crypto.randomUUID().slice(0, 8)}` },
+  }))
   Reflect.set(client.session, "get", async () => ({ data: { directory } }))
   Reflect.set(client.session, "messages", async () => ({ data: [] }))
-  Reflect.set(client.session, "prompt", async () => ({ data: { info: {}, parts: [] } }))
+  Reflect.set(client.session, "prompt", async () => ({
+    data: { info: {}, parts: [] },
+  }))
   Reflect.set(client.session, "promptAsync", async () => ({ data: undefined }))
 
-  const manager = new BackgroundManager({
-    $: {} as PluginInput["$"],
-    client,
-    directory,
-    project: {} as PluginInput["project"],
-    serverUrl: new URL("http://localhost"),
-    worktree: directory,
-  }, config)
+  const manager = new BackgroundManager(
+    {
+      $: {} as PluginInput["$"],
+      client,
+      directory,
+      project: {} as PluginInput["project"],
+      serverUrl: new URL("http://localhost"),
+      worktree: directory,
+    },
+    config,
+  )
   managersToShutdown.push(manager)
   return manager
 }
 
-function createMockTask(overrides: Partial<BackgroundTask> & { id: string; parentSessionID: string }): BackgroundTask {
+function createMockTask(
+  overrides: Partial<BackgroundTask> & { id: string; parentSessionID: string },
+): BackgroundTask {
   return {
     id: overrides.id,
     sessionID: overrides.sessionID,
@@ -55,18 +68,45 @@ function createMockTask(overrides: Partial<BackgroundTask> & { id: string; paren
   }
 }
 
-function getTaskMap(manager: BackgroundManager): Map<string, BackgroundTask> { return Reflect.get(manager, "tasks") as Map<string, BackgroundTask> }
+function getTaskMap(manager: BackgroundManager): Map<string, BackgroundTask> {
+  return Reflect.get(manager, "tasks") as Map<string, BackgroundTask>
+}
 
-function getPendingByParent(manager: BackgroundManager): Map<string, Set<string>> { return Reflect.get(manager, "pendingByParent") as Map<string, Set<string>> }
+function getPendingByParent(
+  manager: BackgroundManager,
+): Map<string, Set<string>> {
+  return Reflect.get(manager, "pendingByParent") as Map<string, Set<string>>
+}
 
-function getQueuesByKey(manager: BackgroundManager): Map<string, Array<{ task: BackgroundTask; input: LaunchInput }>> { return Reflect.get(manager, "queuesByKey") as Map<string, Array<{ task: BackgroundTask; input: LaunchInput }>> }
+function getQueuesByKey(
+  manager: BackgroundManager,
+): Map<string, Array<{ task: BackgroundTask; input: LaunchInput }>> {
+  return Reflect.get(manager, "queuesByKey") as Map<
+    string,
+    Array<{ task: BackgroundTask; input: LaunchInput }>
+  >
+}
 
-function getConcurrencyManager(manager: BackgroundManager): ConcurrencyManager { return Reflect.get(manager, "concurrencyManager") as ConcurrencyManager }
+function getConcurrencyManager(manager: BackgroundManager): ConcurrencyManager {
+  return Reflect.get(manager, "concurrencyManager") as ConcurrencyManager
+}
 
-function getCompletionTimers(manager: BackgroundManager): Map<string, ReturnType<typeof setTimeout>> { return Reflect.get(manager, "completionTimers") as Map<string, ReturnType<typeof setTimeout>> }
+function getCompletionTimers(
+  manager: BackgroundManager,
+): Map<string, ReturnType<typeof setTimeout>> {
+  return Reflect.get(manager, "completionTimers") as Map<
+    string,
+    ReturnType<typeof setTimeout>
+  >
+}
 
-async function processKeyForTest(manager: BackgroundManager, key: string): Promise<void> {
-  const processKey = Reflect.get(manager, "processKey") as (key: string) => Promise<void>
+async function processKeyForTest(
+  manager: BackgroundManager,
+  key: string,
+): Promise<void> {
+  const processKey = Reflect.get(manager, "processKey") as (
+    key: string,
+  ) => Promise<void>
   await processKey.call(manager, key)
 }
 
@@ -105,7 +145,9 @@ describe("BackgroundManager.cancelTask cleanup", () => {
 
     // then
     expect(cancelled).toBe(true)
-    expect(getPendingByParent(manager).get(task.parentSessionID)).toBeUndefined()
+    expect(
+      getPendingByParent(manager).get(task.parentSessionID),
+    ).toBeUndefined()
     runScheduledCleanup(manager, task.id)
     expect(manager.getTask(task.id)).toBeUndefined()
   })
@@ -166,16 +208,25 @@ describe("BackgroundManager.cancelTask cleanup", () => {
 
     getTaskMap(manager).set(runningTask.id, runningTask)
     getTaskMap(manager).set(pendingTask.id, pendingTask)
-    getPendingByParent(manager).set(runningTask.parentSessionID, new Set([runningTask.id, pendingTask.id]))
-    getQueuesByKey(manager).set(concurrencyKey, [{ input: queuedInput, task: pendingTask }])
+    getPendingByParent(manager).set(
+      runningTask.parentSessionID,
+      new Set([runningTask.id, pendingTask.id]),
+    )
+    getQueuesByKey(manager).set(concurrencyKey, [
+      { input: queuedInput, task: pendingTask },
+    ])
 
-    Reflect.set(manager, "startTask", async ({ task }: { task: BackgroundTask; input: LaunchInput }) => {
-      task.status = "running"
-      task.startedAt = new Date()
-      task.sessionID = "session-started-after-cancel"
-      task.concurrencyKey = concurrencyKey
-      task.concurrencyGroup = concurrencyKey
-    })
+    Reflect.set(
+      manager,
+      "startTask",
+      async ({ task }: { task: BackgroundTask; input: LaunchInput }) => {
+        task.status = "running"
+        task.startedAt = new Date()
+        task.sessionID = "session-started-after-cancel"
+        task.concurrencyKey = concurrencyKey
+        task.concurrencyGroup = concurrencyKey
+      },
+    )
 
     // when
     const cancelled = await manager.cancelTask(runningTask.id, {

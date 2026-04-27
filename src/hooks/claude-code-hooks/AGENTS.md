@@ -15,16 +15,17 @@
 
 ## CC → OPENCODE HOOK MAPPING
 
-| CC Hook | OpenCode Event |
-|---------|---------------|
-| PreToolUse | tool.execute.before |
-| PostToolUse | tool.execute.after |
+| CC Hook      | OpenCode Event       |
+| ------------ | -------------------- |
+| PreToolUse   | tool.execute.before  |
+| PostToolUse  | tool.execute.after   |
 | Notification | event (session.idle) |
-| Stop | event (session.idle) |
+| Stop         | event (session.idle) |
 
 ## PERMISSION SYSTEM
 
 CC permissions format:
+
 ```json
 {
   "permissions": {

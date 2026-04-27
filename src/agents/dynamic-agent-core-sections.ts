@@ -58,18 +58,22 @@ export function buildToolSelectionTable(
   const sortedAgents = [...agents]
     .filter((agent) => agent.metadata.category !== "utility")
     .sort(
-      (left, right) => costOrder[left.metadata.cost] - costOrder[right.metadata.cost],
+      (left, right) =>
+        costOrder[left.metadata.cost] - costOrder[right.metadata.cost],
     )
 
   for (const agent of sortedAgents) {
-    const shortDescription = agent.description.split(".")[0] || agent.description
+    const shortDescription =
+      agent.description.split(".")[0] || agent.description
     rows.push(
       `- \`${agent.name}\` agent - **${agent.metadata.cost}** - ${shortDescription}`,
     )
   }
 
   rows.push("")
-  rows.push("**Default flow**: explore/librarian (background) + tools → oracle (if required)")
+  rows.push(
+    "**Default flow**: explore/librarian (background) + tools → oracle (if required)",
+  )
 
   return rows.join("\n")
 }
@@ -120,7 +124,9 @@ export function buildDelegationTable(agents: AvailableAgent[]): string {
 
   for (const agent of agents) {
     for (const trigger of agent.metadata.triggers) {
-      rows.push(`- **${trigger.domain}** → \`${agent.name}\` - ${trigger.trigger}`)
+      rows.push(
+        `- **${trigger.domain}** → \`${agent.name}\` - ${trigger.trigger}`,
+      )
     }
   }
 
@@ -194,7 +200,8 @@ export function buildParallelDelegationSection(
 ): string {
   const isNonClaude = !model.toLowerCase().includes("claude")
   const hasDelegationCategory = categories.some(
-    (category) => category.name === "deep" || category.name === "unspecified-high",
+    (category) =>
+      category.name === "deep" || category.name === "unspecified-high",
   )
 
   if (!isNonClaude || !hasDelegationCategory) {

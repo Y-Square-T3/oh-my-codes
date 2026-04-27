@@ -1,5 +1,10 @@
 import { describe, it, expect } from "bun:test"
-import { PLUGIN_NAME, CONFIG_BASENAME, LOG_FILENAME, CACHE_DIR_NAME } from "./plugin-identity"
+import {
+  PLUGIN_NAME,
+  CONFIG_BASENAME,
+  LOG_FILENAME,
+  CACHE_DIR_NAME,
+} from "./plugin-identity"
 
 describe("plugin-identity constants", () => {
   describe("PLUGIN_NAME", () => {

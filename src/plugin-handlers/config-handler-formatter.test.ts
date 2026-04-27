@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, spyOn, test, mock } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  spyOn,
+  test,
+  mock,
+} from "bun:test"
 
 import type { OhMyCodesConfig } from "../config"
 import * as agentConfigHandler from "./agent-config-handler"
@@ -18,11 +26,15 @@ let applyCommandConfigSpy: ReturnType<typeof spyOn>
 let applyProviderConfigSpy: ReturnType<typeof spyOn>
 let createConfigHandler: (typeof import("./config-handler"))["createConfigHandler"]
 
-async function importFreshConfigHandlerModule(): Promise<typeof import("./config-handler")> {
+async function importFreshConfigHandlerModule(): Promise<
+  typeof import("./config-handler")
+> {
   return import(`./config-handler?test=${Date.now()}-${Math.random()}`)
 }
 
-function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig {
+function createPluginConfig(
+  overrides: Partial<OhMyCodesConfig> = {},
+): OhMyCodesConfig {
   return {
     git_master: {
       commit_footer: true,
@@ -49,13 +61,18 @@ beforeEach(async () => {
     plugins: [],
     errors: [],
   })
-  applyAgentConfigSpy = spyOn(agentConfigHandler, "applyAgentConfig").mockResolvedValue(
-    {},
-  )
-  applyToolConfigSpy = spyOn(toolConfigHandler, "applyToolConfig").mockImplementation(
-    () => {},
-  )
-  applyMcpConfigSpy = spyOn(mcpConfigHandler, "applyMcpConfig").mockResolvedValue()
+  applyAgentConfigSpy = spyOn(
+    agentConfigHandler,
+    "applyAgentConfig",
+  ).mockResolvedValue({})
+  applyToolConfigSpy = spyOn(
+    toolConfigHandler,
+    "applyToolConfig",
+  ).mockImplementation(() => {})
+  applyMcpConfigSpy = spyOn(
+    mcpConfigHandler,
+    "applyMcpConfig",
+  ).mockResolvedValue()
   applyCommandConfigSpy = spyOn(
     commandConfigHandler,
     "applyCommandConfig",

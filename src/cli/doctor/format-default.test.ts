@@ -28,7 +28,14 @@ function createBaseResult(): DoctorResult {
       mcpBuiltin: [],
       mcpUser: [],
     },
-    summary: { total: 2, passed: 2, failed: 0, warnings: 0, skipped: 0, duration: 10 },
+    summary: {
+      total: 2,
+      passed: 2,
+      failed: 0,
+      warnings: 0,
+      skipped: 0,
+      duration: 10,
+    },
     exitCode: 0,
   }
 }

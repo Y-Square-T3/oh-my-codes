@@ -71,7 +71,7 @@ body:
         This helps us diagnose your environment and configuration.
       placeholder: |
         Paste the output of: bunx oh-my-codes doctor
-        
+
         Example:
         ✓ OpenCode version: 1.0.150
         ✓ oh-my-codes version: 1.2.3

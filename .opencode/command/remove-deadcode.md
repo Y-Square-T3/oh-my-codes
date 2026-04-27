@@ -31,9 +31,11 @@ Run ALL of these in parallel:
 <parallel-scan>
 
 **TypeScript strict mode (your primary scanner — run this FIRST):**
+
 ```bash
 bunx tsc --noEmit --noUnusedLocals --noUnusedParameters 2>&1
 ```
+
 This gives you the definitive list of unused locals, imports, parameters, and types with exact file:line locations.
 
 **Explore agents (fire ALL simultaneously as background):**
@@ -59,7 +61,7 @@ Collect all results into a master candidate list.
 For EACH candidate from Phase 1:
 
 ```typescript
-LspFindReferences(filePath, line, character, includeDeclaration=false)
+LspFindReferences(filePath, line, character, (includeDeclaration = false))
 // 0 references → CONFIRMED dead
 // 1+ references → NOT dead, drop from list
 ```
@@ -75,6 +77,7 @@ Also apply the false-positive-guards above. Produce a confirmed list:
 ```
 
 **Action types:**
+
 - `REMOVE` — delete the symbol/import/file entirely
 - `PREFIX _` — unused function parameter required by signature → rename to `_paramName`
 
@@ -94,6 +97,7 @@ If ZERO confirmed: report "No dead code found" and STOP.
 4. Target 5-15 batches. If fewer than 5 items total, use 1 batch per item.
 
 **Example batching:**
+
 ```
 Batch A: [src/hooks/foo/hook.ts — 3 unused imports]
 Batch B: [src/features/bar/manager.ts — 2 unused constants, 1 dead function]
@@ -181,15 +185,18 @@ Produce summary:
 ## Dead Code Removal Complete
 
 ### Removed
-| # | Symbol | File | Type | Commit | Agent |
-|---|--------|------|------|--------|-------|
-| 1 | unusedFunc | src/foo.ts | function | abc1234 | Batch A |
+
+| #   | Symbol     | File       | Type     | Commit  | Agent   |
+| --- | ---------- | ---------- | -------- | ------- | ------- |
+| 1   | unusedFunc | src/foo.ts | function | abc1234 | Batch A |
 
 ### Skipped (agent reported failure)
-| # | Symbol | File | Reason |
-|---|--------|------|--------|
+
+| #   | Symbol | File | Reason |
+| --- | ------ | ---- | ------ |
 
 ### Verification
+
 - Typecheck: PASS/FAIL
 - Tests: X passing, Y failing (Z pre-existing)
 - Build: PASS/FAIL
@@ -203,6 +210,7 @@ Produce summary:
 ## SCOPE CONTROL
 
 If `$ARGUMENTS` is provided, narrow the scan:
+
 - File path → only that file
 - Directory → only that directory
 - Symbol name → only that symbol
@@ -211,6 +219,7 @@ If `$ARGUMENTS` is provided, narrow the scan:
 ## ABORT CONDITIONS
 
 STOP and report if:
+
 - More than 50 candidates found (ask user to narrow scope or confirm proceeding)
 - Build breaks and cannot be fixed by reverting
 

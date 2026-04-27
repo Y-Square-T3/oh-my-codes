@@ -74,7 +74,10 @@ describe("findNearestMessageExcludingCompaction", () => {
 
   afterEach(() => {
     rmSync(tempDir, { force: true, recursive: true })
-    rmSync(getCompactionPartStorageDir("msg_test_background_compaction_marker"), { force: true, recursive: true })
+    rmSync(
+      getCompactionPartStorageDir("msg_test_background_compaction_marker"),
+      { force: true, recursive: true },
+    )
     clearCompactionAgentConfigCheckpoint("ses_checkpoint")
   })
 
@@ -107,7 +110,10 @@ describe("findNearestMessageExcludingCompaction", () => {
         agent: "sisyphus",
         model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
       }
-      writeFileSync(join(tempDir, "002.json"), JSON.stringify(compactionMessage))
+      writeFileSync(
+        join(tempDir, "002.json"),
+        JSON.stringify(compactionMessage),
+      )
       writeFileSync(join(tempDir, "001.json"), JSON.stringify(validMessage))
 
       // when
@@ -122,18 +128,27 @@ describe("findNearestMessageExcludingCompaction", () => {
       // given
       const compactionMessageID = "msg_test_background_compaction_marker"
       const partDir = getCompactionPartStorageDir(compactionMessageID)
-      writeFileSync(join(tempDir, "002.json"), JSON.stringify({
-        id: compactionMessageID,
-        agent: "atlas",
-        model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
-      }))
-      writeFileSync(join(tempDir, "001.json"), JSON.stringify({
-        id: "msg_001",
-        agent: "sisyphus",
-        model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
-      }))
+      writeFileSync(
+        join(tempDir, "002.json"),
+        JSON.stringify({
+          id: compactionMessageID,
+          agent: "atlas",
+          model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
+        }),
+      )
+      writeFileSync(
+        join(tempDir, "001.json"),
+        JSON.stringify({
+          id: "msg_001",
+          agent: "sisyphus",
+          model: { providerID: "anthropic", modelID: "claude-opus-4-7" },
+        }),
+      )
       mkdirSync(partDir, { recursive: true })
-      writeFileSync(join(partDir, "prt_0001.json"), JSON.stringify({ type: "compaction" }))
+      writeFileSync(
+        join(partDir, "prt_0001.json"),
+        JSON.stringify({ type: "compaction" }),
+      )
 
       // when
       const result = findNearestMessageExcludingCompaction(tempDir)
@@ -150,8 +165,14 @@ describe("findNearestMessageExcludingCompaction", () => {
       const messageWithModelOnly = {
         model: { providerID: "openai", modelID: "gpt-5.3" },
       }
-      writeFileSync(join(tempDir, "001.json"), JSON.stringify(messageWithModelOnly))
-      writeFileSync(join(tempDir, "002.json"), JSON.stringify(messageWithAgentOnly))
+      writeFileSync(
+        join(tempDir, "001.json"),
+        JSON.stringify(messageWithModelOnly),
+      )
+      writeFileSync(
+        join(tempDir, "002.json"),
+        JSON.stringify(messageWithAgentOnly),
+      )
 
       // when
       const result = findNearestMessageExcludingCompaction(tempDir)
@@ -226,10 +247,18 @@ describe("findNearestMessageExcludingCompaction", () => {
       // given
       writeFileSync(
         join(tempDir, "003.json"),
-        JSON.stringify({ model: { providerID: "anthropic", modelID: "claude-opus-4-1" } }),
+        JSON.stringify({
+          model: { providerID: "anthropic", modelID: "claude-opus-4-1" },
+        }),
       )
-      writeFileSync(join(tempDir, "002.json"), JSON.stringify({ agent: "atlas" }))
-      writeFileSync(join(tempDir, "001.json"), JSON.stringify({ tools: { bash: true } }))
+      writeFileSync(
+        join(tempDir, "002.json"),
+        JSON.stringify({ agent: "atlas" }),
+      )
+      writeFileSync(
+        join(tempDir, "001.json"),
+        JSON.stringify({ tools: { bash: true } }),
+      )
 
       // when
       const result = findNearestMessageExcludingCompaction(tempDir)
@@ -248,10 +277,16 @@ describe("findNearestMessageExcludingCompaction", () => {
         agent: "sisyphus",
         model: { providerID: "openai", modelID: "gpt-5" },
       })
-      writeFileSync(join(tempDir, "001.json"), JSON.stringify({ tools: { bash: true } }))
+      writeFileSync(
+        join(tempDir, "001.json"),
+        JSON.stringify({ tools: { bash: true } }),
+      )
 
       // when
-      const result = findNearestMessageExcludingCompaction(tempDir, "ses_checkpoint")
+      const result = findNearestMessageExcludingCompaction(
+        tempDir,
+        "ses_checkpoint",
+      )
 
       // then
       expect(result).toEqual({
@@ -268,7 +303,11 @@ describe("resolvePromptContextFromSessionMessages", () => {
     // given
     const messages = [
       { info: { agent: "atlas" } },
-      { info: { model: { providerID: "anthropic", modelID: "claude-opus-4-1" } } },
+      {
+        info: {
+          model: { providerID: "anthropic", modelID: "claude-opus-4-1" },
+        },
+      },
       { info: { tools: { bash: true } } },
     ]
 
@@ -288,11 +327,18 @@ describe("resolvePromptContextFromSessionMessages", () => {
     const messages = [
       {
         id: "msg_compaction",
-        info: { agent: "atlas", model: { providerID: "openai", modelID: "gpt-5" } },
+        info: {
+          agent: "atlas",
+          model: { providerID: "openai", modelID: "gpt-5" },
+        },
         parts: [{ type: "compaction" }],
       },
       { info: { agent: "sisyphus" } },
-      { info: { model: { providerID: "anthropic", modelID: "claude-opus-4-1" } } },
+      {
+        info: {
+          model: { providerID: "anthropic", modelID: "claude-opus-4-1" },
+        },
+      },
       { info: { tools: { bash: true } } },
     ]
 

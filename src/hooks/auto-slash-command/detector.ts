@@ -1,7 +1,4 @@
-import {
-  SLASH_COMMAND_PATTERN,
-  EXCLUDED_COMMANDS,
-} from "./constants"
+import { SLASH_COMMAND_PATTERN, EXCLUDED_COMMANDS } from "./constants"
 import type { ParsedSlashCommand } from "./types"
 
 const CODE_BLOCK_PATTERN = /```[\s\S]*?```/g
@@ -56,7 +53,7 @@ export function detectSlashCommand(text: string): ParsedSlashCommand | null {
 }
 
 export function extractPromptText(
-  parts: Array<{ type: string; text?: string }>
+  parts: Array<{ type: string; text?: string }>,
 ): string {
   const textParts = parts.filter((p) => p.type === "text")
   const slashPart = textParts.find((p) => (p.text ?? "").trim().startsWith("/"))
@@ -65,7 +62,7 @@ export function extractPromptText(
   }
 
   const nonSyntheticParts = textParts.filter(
-    (p) => !(p as { synthetic?: boolean }).synthetic
+    (p) => !(p as { synthetic?: boolean }).synthetic,
   )
   if (nonSyntheticParts.length > 0) {
     return nonSyntheticParts.map((p) => p.text || "").join(" ")
@@ -75,7 +72,7 @@ export function extractPromptText(
 }
 
 export function findSlashCommandPartIndex(
-  parts: Array<{ type: string; text?: string }>
+  parts: Array<{ type: string; text?: string }>,
 ): number {
   for (let idx = 0; idx < parts.length; idx += 1) {
     const part = parts[idx]

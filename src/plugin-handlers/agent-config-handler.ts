@@ -1,10 +1,10 @@
-import { createBuiltinAgents } from "../agents";
-import { createSisyphusJuniorAgentWithOverrides } from "../agents/sisyphus-junior";
-import type { OhMyCodesConfig } from "../config";
-import { isTaskSystemEnabled, log, migrateAgentConfig } from "../shared";
-import { getAgentRuntimeName } from "../shared/agent-display-names";
-import { AGENT_NAME_MAP } from "../shared/migration";
-import { registerAgentName } from "../features/claude-code-session-state";
+import { createBuiltinAgents } from "../agents"
+import { createSisyphusJuniorAgentWithOverrides } from "../agents/sisyphus-junior"
+import type { OhMyCodesConfig } from "../config"
+import { isTaskSystemEnabled, log, migrateAgentConfig } from "../shared"
+import { getAgentRuntimeName } from "../shared/agent-display-names"
+import { AGENT_NAME_MAP } from "../shared/migration"
+import { registerAgentName } from "../features/claude-code-session-state"
 import {
   discoverConfigSourceSkills,
   discoverGlobalAgentsSkills,
@@ -13,50 +13,53 @@ import {
   discoverProjectAgentsSkills,
   discoverProjectClaudeSkills,
   discoverUserClaudeSkills,
-} from "../features/opencode-skill-loader";
-import { 
-  loadProjectAgents, 
-  loadUserAgents, 
-  loadOpencodeGlobalAgents, 
+} from "../features/opencode-skill-loader"
+import {
+  loadProjectAgents,
+  loadUserAgents,
+  loadOpencodeGlobalAgents,
   loadOpencodeProjectAgents,
   loadAgentDefinitions,
   readOpencodeConfigAgents,
-} from "../features/claude-code-agent-loader";
-import type { PluginComponents } from "./plugin-components-loader";
-import { reorderAgentsByPriority } from "./agent-priority-order";
-import { remapAgentKeysToDisplayNames } from "./agent-key-remapper";
+} from "../features/claude-code-agent-loader"
+import type { PluginComponents } from "./plugin-components-loader"
+import { reorderAgentsByPriority } from "./agent-priority-order"
+import { remapAgentKeysToDisplayNames } from "./agent-key-remapper"
 import {
   createProtectedAgentNameSet,
   filterProtectedAgentOverrides,
-} from "./agent-override-protection";
-import { buildPrometheusAgentConfig } from "./prometheus-agent-config-builder";
-import { buildPlanDemoteConfig } from "./plan-model-inheritance";
+} from "./agent-override-protection"
+import { buildPrometheusAgentConfig } from "./prometheus-agent-config-builder"
+import { buildPlanDemoteConfig } from "./plan-model-inheritance"
 
 type AgentConfigRecord = Record<string, Record<string, unknown> | undefined> & {
-  build?: Record<string, unknown>;
-  plan?: Record<string, unknown>;
-};
+  build?: Record<string, unknown>
+  plan?: Record<string, unknown>
+}
 
-function getConfiguredDefaultAgent(config: Record<string, unknown>): string | undefined {
-  const defaultAgent = config.default_agent;
-  if (typeof defaultAgent !== "string") return undefined;
-  const trimmedDefaultAgent = defaultAgent.trim();
-  return trimmedDefaultAgent.length > 0 ? trimmedDefaultAgent : undefined;
+function getConfiguredDefaultAgent(
+  config: Record<string, unknown>,
+): string | undefined {
+  const defaultAgent = config.default_agent
+  if (typeof defaultAgent !== "string") return undefined
+  const trimmedDefaultAgent = defaultAgent.trim()
+  return trimmedDefaultAgent.length > 0 ? trimmedDefaultAgent : undefined
 }
 
 export async function applyAgentConfig(params: {
-  config: Record<string, unknown>;
-  pluginConfig: OhMyCodesConfig;
-  ctx: { directory: string; client?: any };
-  pluginComponents: PluginComponents;
+  config: Record<string, unknown>
+  pluginConfig: OhMyCodesConfig
+  ctx: { directory: string; client?: any }
+  pluginComponents: PluginComponents
 }): Promise<Record<string, unknown>> {
-  const migratedDisabledAgents = (params.pluginConfig.disabled_agents ?? []).map(
-    (agent) => {
-      return AGENT_NAME_MAP[agent.toLowerCase()] ?? AGENT_NAME_MAP[agent] ?? agent;
-    },
-  ) as typeof params.pluginConfig.disabled_agents;
+  const migratedDisabledAgents = (
+    params.pluginConfig.disabled_agents ?? []
+  ).map((agent) => {
+    return AGENT_NAME_MAP[agent.toLowerCase()] ?? AGENT_NAME_MAP[agent] ?? agent
+  }) as typeof params.pluginConfig.disabled_agents
 
-  const includeClaudeSkillsForAwareness = params.pluginConfig.claude_code?.skills ?? true;
+  const includeClaudeSkillsForAwareness =
+    params.pluginConfig.claude_code?.skills ?? true
   const [
     discoveredConfigSourceSkills,
     discoveredUserSkills,
@@ -70,17 +73,21 @@ export async function applyAgentConfig(params: {
       config: params.pluginConfig.skills,
       configDir: params.ctx.directory,
     }),
-    includeClaudeSkillsForAwareness ? discoverUserClaudeSkills() : Promise.resolve([]),
     includeClaudeSkillsForAwareness
-       ? discoverProjectClaudeSkills(params.ctx.directory)
-       : Promise.resolve([]),
+      ? discoverUserClaudeSkills()
+      : Promise.resolve([]),
+    includeClaudeSkillsForAwareness
+      ? discoverProjectClaudeSkills(params.ctx.directory)
+      : Promise.resolve([]),
     includeClaudeSkillsForAwareness
       ? discoverProjectAgentsSkills(params.ctx.directory)
       : Promise.resolve([]),
     discoverOpencodeGlobalSkills(),
     discoverOpencodeProjectSkills(params.ctx.directory),
-    includeClaudeSkillsForAwareness ? discoverGlobalAgentsSkills() : Promise.resolve([]),
-  ]);
+    includeClaudeSkillsForAwareness
+      ? discoverGlobalAgentsSkills()
+      : Promise.resolve([]),
+  ])
 
   const allDiscoveredSkills = [
     ...discoveredConfigSourceSkills,
@@ -90,37 +97,45 @@ export async function applyAgentConfig(params: {
     ...discoveredOpencodeGlobalSkills,
     ...discoveredUserSkills,
     ...discoveredGlobalAgentsSkills,
-  ];
+  ]
 
   const browserProvider =
-    params.pluginConfig.browser_automation_engine?.provider ?? "playwright";
-  const currentModel = params.config.model as string | undefined;
-  const disabledSkills = new Set<string>(params.pluginConfig.disabled_skills ?? []);
-  const useTaskSystem = isTaskSystemEnabled(params.pluginConfig);
-  const disableOmoEnv = params.pluginConfig.experimental?.disable_omo_env ?? false;
+    params.pluginConfig.browser_automation_engine?.provider ?? "playwright"
+  const currentModel = params.config.model as string | undefined
+  const disabledSkills = new Set<string>(
+    params.pluginConfig.disabled_skills ?? [],
+  )
+  const useTaskSystem = isTaskSystemEnabled(params.pluginConfig)
+  const disableOmoEnv =
+    params.pluginConfig.experimental?.disable_omo_env ?? false
 
-  const includeClaudeAgents = params.pluginConfig.claude_code?.agents ?? true;
-  const userAgents = includeClaudeAgents ? loadUserAgents() : {};
-  const projectAgents = includeClaudeAgents ? loadProjectAgents(params.ctx.directory) : {};
-  const opencodeGlobalAgents = loadOpencodeGlobalAgents();
-  const opencodeProjectAgents = loadOpencodeProjectAgents(params.ctx.directory);
-  const rawPluginAgents = params.pluginComponents.agents;
+  const includeClaudeAgents = params.pluginConfig.claude_code?.agents ?? true
+  const userAgents = includeClaudeAgents ? loadUserAgents() : {}
+  const projectAgents = includeClaudeAgents
+    ? loadProjectAgents(params.ctx.directory)
+    : {}
+  const opencodeGlobalAgents = loadOpencodeGlobalAgents()
+  const opencodeProjectAgents = loadOpencodeProjectAgents(params.ctx.directory)
+  const rawPluginAgents = params.pluginComponents.agents
 
   const agentDefinitionAgents = params.pluginConfig.agent_definitions
-    ? loadAgentDefinitions(params.pluginConfig.agent_definitions, "definition-file")
-    : {};
-  const opencodeConfigAgents = readOpencodeConfigAgents(params.ctx.directory);
+    ? loadAgentDefinitions(
+        params.pluginConfig.agent_definitions,
+        "definition-file",
+      )
+    : {}
+  const opencodeConfigAgents = readOpencodeConfigAgents(params.ctx.directory)
 
   const pluginAgents = Object.fromEntries(
     Object.entries(rawPluginAgents).map(([key, value]) => {
-      if (!value) return [key, value];
-      const migrated = migrateAgentConfig(value as Record<string, unknown>);
-      if (!migrated.mode) migrated.mode = "subagent";
-      return [key, migrated];
+      if (!value) return [key, value]
+      const migrated = migrateAgentConfig(value as Record<string, unknown>)
+      if (!migrated.mode) migrated.mode = "subagent"
+      return [key, migrated]
     }),
-  );
+  )
 
-  const configAgent = params.config.agent as AgentConfigRecord | undefined;
+  const configAgent = params.config.agent as AgentConfigRecord | undefined
 
   const customAgentSummaries = [
     ...Object.entries(configAgent ?? {}),
@@ -128,31 +143,31 @@ export async function applyAgentConfig(params: {
     ...Object.entries(projectAgents),
     ...Object.entries(opencodeGlobalAgents),
     ...Object.entries(opencodeProjectAgents),
-    ...Object.entries(pluginAgents).filter(([, config]) => config !== undefined),
+    ...Object.entries(pluginAgents).filter(
+      ([, config]) => config !== undefined,
+    ),
     ...Object.entries(agentDefinitionAgents),
     ...Object.entries(opencodeConfigAgents),
   ]
     .filter(([, config]) => config != null)
     .map(([name, config]) => ({
       name,
-      description: typeof (config as Record<string, unknown>)?.description === "string"
-        ? ((config as Record<string, unknown>).description as string)
-        : "",
-    }));
+      description:
+        typeof (config as Record<string, unknown>)?.description === "string"
+          ? ((config as Record<string, unknown>).description as string)
+          : "",
+    }))
 
-  log(
-    "[agent-config-handler] Agent sources loaded",
-    {
-      user: Object.keys(userAgents).length,
-      project: Object.keys(projectAgents).length,
-      opencodeGlobal: Object.keys(opencodeGlobalAgents).length,
-      opencodeProject: Object.keys(opencodeProjectAgents).length,
-      plugin: Object.keys(pluginAgents).length,
-      agentDefinitions: Object.keys(agentDefinitionAgents).length,
-      opencodeConfig: Object.keys(opencodeConfigAgents).length,
-      config: Object.keys(configAgent ?? {}).length,
-    }
-  );
+  log("[agent-config-handler] Agent sources loaded", {
+    user: Object.keys(userAgents).length,
+    project: Object.keys(projectAgents).length,
+    opencodeGlobal: Object.keys(opencodeGlobalAgents).length,
+    opencodeProject: Object.keys(opencodeProjectAgents).length,
+    plugin: Object.keys(pluginAgents).length,
+    agentDefinitions: Object.keys(agentDefinitionAgents).length,
+    opencodeConfig: Object.keys(opencodeConfigAgents).length,
+    config: Object.keys(configAgent ?? {}).length,
+  })
 
   const builtinAgents = await createBuiltinAgents(
     migratedDisabledAgents,
@@ -168,47 +183,51 @@ export async function applyAgentConfig(params: {
     disabledSkills,
     useTaskSystem,
     disableOmoEnv,
-  );
+  )
 
   const disabledAgentNames = new Set(
-    (migratedDisabledAgents ?? []).map(a => a.toLowerCase())
-  );
+    (migratedDisabledAgents ?? []).map((a) => a.toLowerCase()),
+  )
 
   const filterDisabledAgents = (agents: Record<string, unknown>) =>
     Object.fromEntries(
-      Object.entries(agents).filter(([name]) => !disabledAgentNames.has(name.toLowerCase()))
-    );
+      Object.entries(agents).filter(
+        ([name]) => !disabledAgentNames.has(name.toLowerCase()),
+      ),
+    )
 
-  const isSisyphusEnabled = params.pluginConfig.sisyphus_agent?.disabled !== true;
+  const isSisyphusEnabled =
+    params.pluginConfig.sisyphus_agent?.disabled !== true
   const builderEnabled =
-    params.pluginConfig.sisyphus_agent?.default_builder_enabled ?? false;
-  const plannerEnabled = params.pluginConfig.sisyphus_agent?.planner_enabled ?? true;
-  const replacePlan = params.pluginConfig.sisyphus_agent?.replace_plan ?? true;
-  const shouldDemotePlan = plannerEnabled && replacePlan;
-  const configuredDefaultAgent = getConfiguredDefaultAgent(params.config);
+    params.pluginConfig.sisyphus_agent?.default_builder_enabled ?? false
+  const plannerEnabled =
+    params.pluginConfig.sisyphus_agent?.planner_enabled ?? true
+  const replacePlan = params.pluginConfig.sisyphus_agent?.replace_plan ?? true
+  const shouldDemotePlan = plannerEnabled && replacePlan
+  const configuredDefaultAgent = getConfiguredDefaultAgent(params.config)
 
   if (isSisyphusEnabled && builtinAgents.sisyphus) {
     if (configuredDefaultAgent) {
-      (params.config as { default_agent?: string }).default_agent =
-        getAgentRuntimeName(configuredDefaultAgent);
+      ;(params.config as { default_agent?: string }).default_agent =
+        getAgentRuntimeName(configuredDefaultAgent)
     } else {
-      (params.config as { default_agent?: string }).default_agent =
-        getAgentRuntimeName("sisyphus");
+      ;(params.config as { default_agent?: string }).default_agent =
+        getAgentRuntimeName("sisyphus")
     }
 
     // Assembly order: Sisyphus -> Hephaestus -> Prometheus -> Atlas
     const agentConfig: Record<string, unknown> = {
       sisyphus: builtinAgents.sisyphus,
-    };
+    }
 
     if (builtinAgents.hephaestus) {
-      agentConfig["hephaestus"] = builtinAgents.hephaestus;
+      agentConfig["hephaestus"] = builtinAgents.hephaestus
     }
 
     if (plannerEnabled) {
       const prometheusOverride = params.pluginConfig.agents?.["prometheus"] as
         | (Record<string, unknown> & { prompt_append?: string })
-        | undefined;
+        | undefined
 
       agentConfig["prometheus"] = await buildPrometheusAgentConfig({
         configAgentPlan: configAgent?.plan,
@@ -216,100 +235,107 @@ export async function applyAgentConfig(params: {
         userCategories: params.pluginConfig.categories,
         currentModel,
         disabledTools: params.pluginConfig.disabled_tools,
-      });
+      })
     }
 
     if (builtinAgents.atlas) {
-      agentConfig["atlas"] = builtinAgents.atlas;
+      agentConfig["atlas"] = builtinAgents.atlas
     }
 
     agentConfig["sisyphus-junior"] = createSisyphusJuniorAgentWithOverrides(
       params.pluginConfig.agents?.["sisyphus-junior"],
       (builtinAgents.atlas as { model?: string } | undefined)?.model,
       useTaskSystem,
-    );
+    )
 
     if (builderEnabled) {
       const { name: _buildName, ...buildConfigWithoutName } =
-        configAgent?.build ?? {};
+        configAgent?.build ?? {}
       const migratedBuildConfig = migrateAgentConfig(
         buildConfigWithoutName as Record<string, unknown>,
-      );
-      const override = params.pluginConfig.agents?.["OpenCode-Builder"];
+      )
+      const override = params.pluginConfig.agents?.["OpenCode-Builder"]
       const base = {
         ...migratedBuildConfig,
         description: `${(configAgent?.build?.description as string) ?? "Build agent"} (OpenCode default)`,
-      };
-      agentConfig["OpenCode-Builder"] = override ? { ...base, ...override } : base;
+      }
+      agentConfig["OpenCode-Builder"] = override
+        ? { ...base, ...override }
+        : base
     }
 
     const filteredConfigAgents = configAgent
       ? Object.fromEntries(
           Object.entries(configAgent)
             .filter(([key]) => {
-              if (key === "build") return false;
-              if (key === "plan" && shouldDemotePlan) return false;
-              if (key in builtinAgents) return false;
-              return true;
+              if (key === "build") return false
+              if (key === "plan" && shouldDemotePlan) return false
+              if (key in builtinAgents) return false
+              return true
             })
             .map(([key, value]) => {
-              if (!value) return [key, value];
-              const migrated = migrateAgentConfig(value as Record<string, unknown>);
-              if (!migrated.mode) migrated.mode = "subagent";
-              return [key, migrated];
+              if (!value) return [key, value]
+              const migrated = migrateAgentConfig(
+                value as Record<string, unknown>,
+              )
+              if (!migrated.mode) migrated.mode = "subagent"
+              return [key, migrated]
             }),
         )
-      : {};
+      : {}
 
     const migratedBuild = configAgent?.build
       ? migrateAgentConfig(configAgent.build as Record<string, unknown>)
-      : {};
+      : {}
 
     const planDemoteConfig = shouldDemotePlan
       ? buildPlanDemoteConfig(
           agentConfig["prometheus"] as Record<string, unknown> | undefined,
-          params.pluginConfig.agents?.plan as Record<string, unknown> | undefined,
+          params.pluginConfig.agents?.plan as
+            | Record<string, unknown>
+            | undefined,
         )
-      : undefined;
+      : undefined
 
     const protectedBuiltinAgentNames = createProtectedAgentNameSet([
       ...Object.keys(agentConfig),
       ...Object.keys(builtinAgents),
-    ]);
+    ])
     const filteredUserAgents = filterProtectedAgentOverrides(
       userAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredProjectAgents = filterProtectedAgentOverrides(
       projectAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredPluginAgents = filterProtectedAgentOverrides(
       pluginAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeGlobalAgents = filterProtectedAgentOverrides(
       opencodeGlobalAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeProjectAgents = filterProtectedAgentOverrides(
       opencodeProjectAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredAgentDefinitionAgents = filterProtectedAgentOverrides(
       agentDefinitionAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeConfigAgents = filterProtectedAgentOverrides(
       opencodeConfigAgents,
       protectedBuiltinAgentNames,
-    );
+    )
 
     params.config.agent = {
       ...agentConfig,
       ...Object.fromEntries(
         Object.entries(builtinAgents).filter(
-          ([key]) => key !== "sisyphus" && key !== "hephaestus" && key !== "atlas",
+          ([key]) =>
+            key !== "sisyphus" && key !== "hephaestus" && key !== "atlas",
         ),
       ),
       // Precedence: later entries override earlier (project > global > user > plugin)
@@ -323,50 +349,52 @@ export async function applyAgentConfig(params: {
       ...filteredConfigAgents,
       build: { ...migratedBuild, mode: "subagent", hidden: true },
       ...(planDemoteConfig ? { plan: planDemoteConfig } : {}),
-    };
+    }
   } else {
     const protectedBuiltinAgentNames = createProtectedAgentNameSet(
       Object.keys(builtinAgents),
-    );
+    )
     const filteredUserAgents = filterProtectedAgentOverrides(
       userAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredProjectAgents = filterProtectedAgentOverrides(
       projectAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredPluginAgents = filterProtectedAgentOverrides(
       pluginAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeGlobalAgents = filterProtectedAgentOverrides(
       opencodeGlobalAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeProjectAgents = filterProtectedAgentOverrides(
       opencodeProjectAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredAgentDefinitionAgents = filterProtectedAgentOverrides(
       agentDefinitionAgents,
       protectedBuiltinAgentNames,
-    );
+    )
     const filteredOpencodeConfigAgents = filterProtectedAgentOverrides(
       opencodeConfigAgents,
       protectedBuiltinAgentNames,
-    );
+    )
 
     const defaultedConfigAgents = configAgent
       ? Object.fromEntries(
           Object.entries(configAgent).map(([key, value]) => {
-            if (!value) return [key, value];
-            const migrated = migrateAgentConfig(value as Record<string, unknown>);
-            if (!migrated.mode) migrated.mode = "subagent";
-            return [key, migrated];
+            if (!value) return [key, value]
+            const migrated = migrateAgentConfig(
+              value as Record<string, unknown>,
+            )
+            if (!migrated.mode) migrated.mode = "subagent"
+            return [key, migrated]
           }),
         )
-      : {};
+      : {}
 
     params.config.agent = {
       ...builtinAgents,
@@ -379,22 +407,22 @@ export async function applyAgentConfig(params: {
       ...filterDisabledAgents(filteredAgentDefinitionAgents),
       ...filterDisabledAgents(filteredOpencodeConfigAgents),
       ...defaultedConfigAgents,
-    };
+    }
   }
 
   if (params.config.agent) {
     params.config.agent = remapAgentKeysToDisplayNames(
       params.config.agent as Record<string, unknown>,
-    );
+    )
     params.config.agent = reorderAgentsByPriority(
       params.config.agent as Record<string, unknown>,
-    );
+    )
   }
 
-  const agentResult = params.config.agent as Record<string, unknown>;
+  const agentResult = params.config.agent as Record<string, unknown>
   for (const name of Object.keys(agentResult)) {
-    registerAgentName(name);
+    registerAgentName(name)
   }
-  log("[config-handler] agents loaded", { agentKeys: Object.keys(agentResult) });
-  return agentResult;
+  log("[config-handler] agents loaded", { agentKeys: Object.keys(agentResult) })
+  return agentResult
 }

@@ -11,19 +11,21 @@ Both files violate the project's 200 LOC modular-code-enforcement rule. `constan
 ## Changes
 
 ### `src/tools/delegate-task/`
-| New File | Responsibility |
-|----------|---------------|
-| `default-categories.ts` | `DEFAULT_CATEGORIES` record |
-| `category-descriptions.ts` | `CATEGORY_DESCRIPTIONS` record |
+
+| New File                     | Responsibility                                              |
+| ---------------------------- | ----------------------------------------------------------- |
+| `default-categories.ts`      | `DEFAULT_CATEGORIES` record                                 |
+| `category-descriptions.ts`   | `CATEGORY_DESCRIPTIONS` record                              |
 | `category-prompt-appends.ts` | 8 prompt template constants + `CATEGORY_PROMPT_APPENDS` map |
-| `plan-agent-prompt.ts` | Plan agent system prompts + builder functions |
-| `plan-agent-identity.ts` | `isPlanAgent`, `isPlanFamily` + name lists |
+| `plan-agent-prompt.ts`       | Plan agent system prompts + builder functions               |
+| `plan-agent-identity.ts`     | `isPlanAgent`, `isPlanFamily` + name lists                  |
 
 `constants.ts` is now a barrel re-export file (~25 LOC).
 
 ### `src/shared/`
-| New File | Responsibility |
-|----------|---------------|
+
+| New File                         | Responsibility                       |
+| -------------------------------- | ------------------------------------ |
 | `category-model-requirements.ts` | `CATEGORY_MODEL_REQUIREMENTS` record |
 
 `model-requirements.ts` retains types + `AGENT_MODEL_REQUIREMENTS` and re-exports `CATEGORY_MODEL_REQUIREMENTS`.

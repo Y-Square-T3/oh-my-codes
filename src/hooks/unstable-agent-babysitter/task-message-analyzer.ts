@@ -29,24 +29,30 @@ export function getMessageInfo(value: unknown): MessageInfo | undefined {
   if (!isRecord(value)) return undefined
   if (!isRecord(value.info)) return undefined
   const info = value.info
-  const modelValue = isRecord(info.model)
-    ? info.model
-    : undefined
-  const model = modelValue && typeof modelValue.providerID === "string" && typeof modelValue.modelID === "string"
-    ? {
-        providerID: modelValue.providerID,
-        modelID: modelValue.modelID,
-        ...(typeof modelValue.variant === "string" ? { variant: modelValue.variant } : {}),
-      }
-    : undefined
+  const modelValue = isRecord(info.model) ? info.model : undefined
+  const model =
+    modelValue &&
+    typeof modelValue.providerID === "string" &&
+    typeof modelValue.modelID === "string"
+      ? {
+          providerID: modelValue.providerID,
+          modelID: modelValue.modelID,
+          ...(typeof modelValue.variant === "string"
+            ? { variant: modelValue.variant }
+            : {}),
+        }
+      : undefined
   return {
     role: typeof info.role === "string" ? info.role : undefined,
     agent: typeof info.agent === "string" ? info.agent : undefined,
     model,
-    providerID: typeof info.providerID === "string" ? info.providerID : undefined,
+    providerID:
+      typeof info.providerID === "string" ? info.providerID : undefined,
     modelID: typeof info.modelID === "string" ? info.modelID : undefined,
     tools: isRecord(info.tools)
-      ? Object.entries(info.tools).reduce<Record<string, boolean | "allow" | "deny" | "ask">>((acc, [key, value]) => {
+      ? Object.entries(info.tools).reduce<
+          Record<string, boolean | "allow" | "deny" | "ask">
+        >((acc, [key, value]) => {
           if (
             value === true ||
             value === false ||
@@ -85,10 +91,16 @@ export function extractMessages(value: unknown): unknown[] {
 export function isUnstableTask(task: BackgroundTask): boolean {
   if (task.isUnstableAgent === true) return true
   const modelId = task.model?.modelID?.toLowerCase()
-  return modelId ? modelId.includes("gemini") || modelId.includes("minimax") : false
+  return modelId
+    ? modelId.includes("gemini") || modelId.includes("minimax")
+    : false
 }
 
-export function buildReminder(task: BackgroundTask, summary: string | null, idleMs: number): string {
+export function buildReminder(
+  task: BackgroundTask,
+  summary: string | null,
+  idleMs: number,
+): string {
   const idleSeconds = Math.round(idleMs / 1000)
   const summaryText = summary ?? "(No thinking trace available)"
   return `Unstable background agent appears idle for ${idleSeconds}s.

@@ -6,15 +6,25 @@ import type { FallbackModelObject } from "../config/schema/fallback-models"
 import type { FallbackEntry } from "../shared/model-requirements"
 import type { InstallConfig } from "./types"
 
-import type { AgentConfig, CategoryConfig, GeneratedOmoConfig } from "./model-fallback-types"
-import { applyOpenAiOnlyModelCatalog, isOpenAiOnlyAvailability } from "./openai-only-model-catalog"
-import { isProviderAvailable, toProviderAvailability } from "./provider-availability"
+import type {
+  AgentConfig,
+  CategoryConfig,
+  GeneratedOmoConfig,
+} from "./model-fallback-types"
 import {
-	getSisyphusFallbackChain,
-	isAnyFallbackEntryAvailable,
-	isRequiredModelAvailable,
-	isRequiredProviderAvailable,
-	resolveModelFromChain,
+  applyOpenAiOnlyModelCatalog,
+  isOpenAiOnlyAvailability,
+} from "./openai-only-model-catalog"
+import {
+  isProviderAvailable,
+  toProviderAvailability,
+} from "./provider-availability"
+import {
+  getSisyphusFallbackChain,
+  isAnyFallbackEntryAvailable,
+  isRequiredModelAvailable,
+  isRequiredProviderAvailable,
+  resolveModelFromChain,
 } from "./fallback-chain-resolution"
 import { transformModelForProvider } from "./provider-model-id-transform"
 
@@ -23,14 +33,25 @@ export type { GeneratedOmoConfig } from "./model-fallback-types"
 const ZAI_MODEL = "zai-coding-plan/glm-4.7"
 
 const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
-const SCHEMA_URL = "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json"
+const SCHEMA_URL =
+  "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json"
 
-function toFallbackModelObject(entry: FallbackEntry, provider: string): FallbackModelObject {
+function toFallbackModelObject(
+  entry: FallbackEntry,
+  provider: string,
+): FallbackModelObject {
   return {
     model: `${provider}/${transformModelForProvider(provider, entry.model)}`,
     ...(entry.variant ? { variant: entry.variant } : {}),
-    ...(entry.reasoningEffort ? { reasoningEffort: entry.reasoningEffort as FallbackModelObject["reasoningEffort"] } : {}),
-    ...(entry.temperature !== undefined ? { temperature: entry.temperature } : {}),
+    ...(entry.reasoningEffort
+      ? {
+          reasoningEffort:
+            entry.reasoningEffort as FallbackModelObject["reasoningEffort"],
+        }
+      : {}),
+    ...(entry.temperature !== undefined
+      ? { temperature: entry.temperature }
+      : {}),
     ...(entry.top_p !== undefined ? { top_p: entry.top_p } : {}),
     ...(entry.maxTokens !== undefined ? { maxTokens: entry.maxTokens } : {}),
     ...(entry.thinking ? { thinking: entry.thinking } : {}),
@@ -44,13 +65,15 @@ function collectAvailableFallbacks(
   const expandedFallbacks = fallbackChain.flatMap((entry) =>
     entry.providers
       .filter((provider) => isProviderAvailable(provider, availability))
-      .map((provider) => toFallbackModelObject(entry, provider))
+      .map((provider) => toFallbackModelObject(entry, provider)),
   )
-  return expandedFallbacks.filter((entry, index, allEntries) =>
-    allEntries.findIndex((candidate) =>
-      candidate.model === entry.model &&
-      candidate.variant === entry.variant
-    ) === index
+  return expandedFallbacks.filter(
+    (entry, index, allEntries) =>
+      allEntries.findIndex(
+        (candidate) =>
+          candidate.model === entry.model &&
+          candidate.variant === entry.variant,
+      ) === index,
   )
 }
 
@@ -60,7 +83,9 @@ function attachFallbackModels<T extends AgentConfig | CategoryConfig>(
   availability: ReturnType<typeof toProviderAvailability>,
 ): T {
   const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability)
-  const primaryIndex = uniqueFallbacks.findIndex((entry) => entry.model === config.model)
+  const primaryIndex = uniqueFallbacks.findIndex(
+    (entry) => entry.model === config.model,
+  )
   if (primaryIndex === -1) {
     return config
   }
@@ -82,7 +107,9 @@ function attachAllFallbackModels<T extends AgentConfig | CategoryConfig>(
   availability: ReturnType<typeof toProviderAvailability>,
 ): T {
   const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability)
-  const fallbackModels = uniqueFallbacks.filter((entry) => entry.model !== config.model)
+  const fallbackModels = uniqueFallbacks.filter(
+    (entry) => entry.model !== config.model,
+  )
   if (fallbackModels.length === 0) {
     return config
   }
@@ -92,8 +119,6 @@ function attachAllFallbackModels<T extends AgentConfig | CategoryConfig>(
     fallback_models: fallbackModels,
   }
 }
-
-
 
 export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
   const avail = toProviderAvailability(config)
@@ -112,11 +137,16 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
       $schema: SCHEMA_URL,
       agents: Object.fromEntries(
         Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)
-          .filter(([role, req]) => !(role === "sisyphus" && req.requiresAnyModel))
-          .map(([role]) => [role, { model: ULTIMATE_FALLBACK }])
+          .filter(
+            ([role, req]) => !(role === "sisyphus" && req.requiresAnyModel),
+          )
+          .map(([role]) => [role, { model: ULTIMATE_FALLBACK }]),
       ),
       categories: Object.fromEntries(
-        Object.keys(CLI_CATEGORY_MODEL_REQUIREMENTS).map((cat) => [cat, { model: ULTIMATE_FALLBACK }])
+        Object.keys(CLI_CATEGORY_MODEL_REQUIREMENTS).map((cat) => [
+          cat,
+          { model: ULTIMATE_FALLBACK },
+        ]),
       ),
     }
   }
@@ -137,7 +167,11 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
         agentConfig = { model: "vercel/minimax/minimax-m2.7" }
       }
       if (agentConfig) {
-        agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail)
+        agents[role] = attachAllFallbackModels(
+          agentConfig,
+          req.fallbackChain,
+          avail,
+        )
       }
       continue
     }
@@ -159,35 +193,52 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
       } else {
         agentConfig = { model: "opencode/gpt-5-nano" }
       }
-      agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail)
+      agents[role] = attachAllFallbackModels(
+        agentConfig,
+        req.fallbackChain,
+        avail,
+      )
       continue
     }
 
     if (role === "sisyphus") {
       const fallbackChain = getSisyphusFallbackChain()
-      if (req.requiresAnyModel && !isAnyFallbackEntryAvailable(fallbackChain, avail)) {
+      if (
+        req.requiresAnyModel &&
+        !isAnyFallbackEntryAvailable(fallbackChain, avail)
+      ) {
         continue
       }
       const resolved = resolveModelFromChain(fallbackChain, avail)
       if (resolved) {
         const variant = resolved.variant ?? req.variant
-        const agentConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
+        const agentConfig = variant
+          ? { model: resolved.model, variant }
+          : { model: resolved.model }
         agents[role] = attachFallbackModels(agentConfig, fallbackChain, avail)
       }
       continue
     }
 
-    if (req.requiresModel && !isRequiredModelAvailable(req.requiresModel, req.fallbackChain, avail)) {
+    if (
+      req.requiresModel &&
+      !isRequiredModelAvailable(req.requiresModel, req.fallbackChain, avail)
+    ) {
       continue
     }
-    if (req.requiresProvider && !isRequiredProviderAvailable(req.requiresProvider, avail)) {
+    if (
+      req.requiresProvider &&
+      !isRequiredProviderAvailable(req.requiresProvider, avail)
+    ) {
       continue
     }
 
     const resolved = resolveModelFromChain(req.fallbackChain, avail)
     if (resolved) {
       const variant = resolved.variant ?? req.variant
-      const agentConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
+      const agentConfig = variant
+        ? { model: resolved.model, variant }
+        : { model: resolved.model }
       agents[role] = attachFallbackModels(agentConfig, req.fallbackChain, avail)
     } else {
       agents[role] = { model: ULTIMATE_FALLBACK }
@@ -201,18 +252,30 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
         ? CLI_CATEGORY_MODEL_REQUIREMENTS["unspecified-low"].fallbackChain
         : req.fallbackChain
 
-    if (req.requiresModel && !isRequiredModelAvailable(req.requiresModel, req.fallbackChain, avail)) {
+    if (
+      req.requiresModel &&
+      !isRequiredModelAvailable(req.requiresModel, req.fallbackChain, avail)
+    ) {
       continue
     }
-    if (req.requiresProvider && !isRequiredProviderAvailable(req.requiresProvider, avail)) {
+    if (
+      req.requiresProvider &&
+      !isRequiredProviderAvailable(req.requiresProvider, avail)
+    ) {
       continue
     }
 
     const resolved = resolveModelFromChain(fallbackChain, avail)
     if (resolved) {
       const variant = resolved.variant ?? req.variant
-      const categoryConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
-      categories[cat] = attachFallbackModels(categoryConfig, fallbackChain, avail)
+      const categoryConfig = variant
+        ? { model: resolved.model, variant }
+        : { model: resolved.model }
+      categories[cat] = attachFallbackModels(
+        categoryConfig,
+        fallbackChain,
+        avail,
+      )
     } else {
       categories[cat] = { model: ULTIMATE_FALLBACK }
     }

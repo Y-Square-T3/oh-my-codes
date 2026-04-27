@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from "bun:test"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
@@ -70,23 +78,31 @@ describe("pollDiscordReplies", () => {
   })
 
   test("records HTTP failures in daemon state when Discord returns non-ok", async () => {
-    const fetchMock = mock(() => Promise.resolve(
-      new Response("unauthorized", {
-        status: 401,
-      }),
-    ))
+    const fetchMock = mock(() =>
+      Promise.resolve(
+        new Response("unauthorized", {
+          status: 401,
+        }),
+      ),
+    )
     globalThis.fetch = fetchMock as unknown as typeof fetch
 
     const state = createState()
 
-    await pollDiscordReplies(createConfig(), state, new ReplyListenerRateLimiter(10))
+    await pollDiscordReplies(
+      createConfig(),
+      state,
+      new ReplyListenerRateLimiter(10),
+    )
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(state.errors).toBe(1)
     expect(state.lastError).toBe("Discord API error: HTTP 401")
     expect(existsSync(stateFilePath)).toBe(true)
 
-    const persistedState = JSON.parse(readFileSync(stateFilePath, "utf-8")) as ReplyListenerDaemonState
+    const persistedState = JSON.parse(
+      readFileSync(stateFilePath, "utf-8"),
+    ) as ReplyListenerDaemonState
     expect(persistedState.errors).toBe(1)
     expect(persistedState.lastError).toBe("Discord API error: HTTP 401")
     expect(persistedState.messagesSeen).toBe(0)
@@ -110,7 +126,10 @@ describe("pollDiscordReplies", () => {
       )
       .mockResolvedValueOnce(new Response(null, { status: 204 }))
     globalThis.fetch = fetchMock as unknown as typeof fetch
-    const lookupSpy = spyOn(sessionRegistryModule, "lookupByMessageId").mockReturnValue({
+    const lookupSpy = spyOn(
+      sessionRegistryModule,
+      "lookupByMessageId",
+    ).mockReturnValue({
       sessionId: "ses-1",
       tmuxSession: "session-1",
       tmuxPaneId: "%7",
@@ -119,14 +138,26 @@ describe("pollDiscordReplies", () => {
       messageId: "outbound-1",
       createdAt: "2026-04-07T00:00:00.000Z",
     })
-    const injectSpy = spyOn(injectionModule, "injectReplyIntoPane").mockResolvedValue(true)
+    const injectSpy = spyOn(
+      injectionModule,
+      "injectReplyIntoPane",
+    ).mockResolvedValue(true)
 
     const state = createState()
 
-    await pollDiscordReplies(createConfig(), state, new ReplyListenerRateLimiter(10))
+    await pollDiscordReplies(
+      createConfig(),
+      state,
+      new ReplyListenerRateLimiter(10),
+    )
 
     expect(lookupSpy).toHaveBeenCalledWith("discord-bot", "outbound-1")
-    expect(injectSpy).toHaveBeenCalledWith("%7", "Ship it", "discord", createConfig())
+    expect(injectSpy).toHaveBeenCalledWith(
+      "%7",
+      "Ship it",
+      "discord",
+      createConfig(),
+    )
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(state.messagesSeen).toBe(1)
     expect(state.messagesInjected).toBe(1)

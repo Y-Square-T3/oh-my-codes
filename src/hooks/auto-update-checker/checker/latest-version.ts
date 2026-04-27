@@ -1,7 +1,9 @@
 import { NPM_FETCH_TIMEOUT, NPM_REGISTRY_URL } from "../constants"
 import type { NpmDistTags } from "../types"
 
-export async function getLatestVersion(channel: string = "latest"): Promise<string | null> {
+export async function getLatestVersion(
+  channel: string = "latest",
+): Promise<string | null> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), NPM_FETCH_TIMEOUT)
 

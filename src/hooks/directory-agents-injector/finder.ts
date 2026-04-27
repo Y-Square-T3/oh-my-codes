@@ -1,42 +1,45 @@
-import { constants, promises as fsPromises } from "node:fs";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { constants, promises as fsPromises } from "node:fs"
+import { dirname, isAbsolute, join, resolve } from "node:path"
 
-import { AGENTS_FILENAME } from "./constants";
+import { AGENTS_FILENAME } from "./constants"
 
-export function resolveFilePath(rootDirectory: string, path: string): string | null {
-  if (!path) return null;
-  if (isAbsolute(path)) return path;
-  return resolve(rootDirectory, path);
+export function resolveFilePath(
+  rootDirectory: string,
+  path: string,
+): string | null {
+  if (!path) return null
+  if (isAbsolute(path)) return path
+  return resolve(rootDirectory, path)
 }
 
 export async function findAgentsMdUp(input: {
-  startDir: string;
-  rootDir: string;
+  startDir: string
+  rootDir: string
 }): Promise<string[]> {
-  const found: string[] = [];
-  let current = input.startDir;
+  const found: string[] = []
+  let current = input.startDir
 
   while (true) {
     // Skip root AGENTS.md - OpenCode's system.ts already loads it via custom()
     // See: https://github.com/vibration-autos/oh-my-codes/issues/379
-    const isRootDir = current === input.rootDir;
+    const isRootDir = current === input.rootDir
     if (!isRootDir) {
-      const agentsPath = join(current, AGENTS_FILENAME);
+      const agentsPath = join(current, AGENTS_FILENAME)
       const exists = await fsPromises
         .access(agentsPath, constants.F_OK)
         .then(() => true)
-        .catch(() => false);
+        .catch(() => false)
       if (exists) {
-        found.push(agentsPath);
+        found.push(agentsPath)
       }
     }
 
-    if (isRootDir) break;
-    const parent = dirname(current);
-    if (parent === current) break;
-    if (!parent.startsWith(input.rootDir)) break;
-    current = parent;
+    if (isRootDir) break
+    const parent = dirname(current)
+    if (parent === current) break
+    if (!parent.startsWith(input.rootDir)) break
+    current = parent
   }
 
-  return found.reverse();
+  return found.reverse()
 }

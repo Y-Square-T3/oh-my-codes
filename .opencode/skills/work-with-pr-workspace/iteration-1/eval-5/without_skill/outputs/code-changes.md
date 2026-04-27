@@ -43,7 +43,10 @@ export const CommentCheckerConfigSchema = z.object({
   /** Custom prompt to replace the default warning message. Use {{comments}} placeholder for detected comments XML. */
   custom_prompt: z.string().optional(),
   /** Comment prefixes considered legitimate (not AI slop). Case-insensitive. Defaults include Note:, TODO:, FIXME:, etc. */
-  allowed_comment_prefixes: z.array(z.string()).optional().default(DEFAULT_ALLOWED_COMMENT_PREFIXES),
+  allowed_comment_prefixes: z
+    .array(z.string())
+    .optional()
+    .default(DEFAULT_ALLOWED_COMMENT_PREFIXES),
 })
 
 export type CommentCheckerConfig = z.infer<typeof CommentCheckerConfigSchema>
@@ -55,7 +58,8 @@ export type CommentCheckerConfig = z.infer<typeof CommentCheckerConfigSchema>
 
 ```typescript
 const COMMENT_XML_REGEX = /<comment\s+line-number="\d+">([\s\S]*?)<\/comment>/g
-const COMMENTS_BLOCK_REGEX = /<comments\s+file="[^"]*">\s*([\s\S]*?)\s*<\/comments>/g
+const COMMENTS_BLOCK_REGEX =
+  /<comments\s+file="[^"]*">\s*([\s\S]*?)\s*<\/comments>/g
 const AGENT_MEMO_HEADER_REGEX = /🚨 AGENT MEMO COMMENT DETECTED.*?---\n\n/s
 
 function stripCommentPrefix(text: string): string {
@@ -69,9 +73,14 @@ function stripCommentPrefix(text: string): string {
   return stripped
 }
 
-function isAllowedComment(commentText: string, allowedPrefixes: string[]): boolean {
+function isAllowedComment(
+  commentText: string,
+  allowedPrefixes: string[],
+): boolean {
   const stripped = stripCommentPrefix(commentText).toLowerCase()
-  return allowedPrefixes.some((prefix) => stripped.startsWith(prefix.toLowerCase()))
+  return allowedPrefixes.some((prefix) =>
+    stripped.startsWith(prefix.toLowerCase()),
+  )
 }
 
 function extractCommentTexts(xmlBlock: string): string[] {
@@ -114,7 +123,10 @@ export function filterAllowedComments(
   for (const text of commentTexts) {
     if (isAllowedComment(text, allowedPrefixes)) {
       const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-      const lineRegex = new RegExp(`\\s*<comment\\s+line-number="\\d+">${escapedText}</comment>\\n?`, "g")
+      const lineRegex = new RegExp(
+        `\\s*<comment\\s+line-number="\\d+">${escapedText}</comment>\\n?`,
+        "g",
+      )
       filteredMessage = filteredMessage.replace(lineRegex, "")
     }
   }
@@ -139,16 +151,20 @@ export async function processWithCli(
   customPrompt: string | undefined,
   debugLog: (...args: unknown[]) => void,
 ): Promise<void> {
-  await withCommentCheckerLock(async () => {
-    // ...
-    const result = await runCommentChecker(hookInput, cliPath, customPrompt)
-    if (result.hasComments && result.message) {
-      debugLog("CLI detected comments, appending message")
-      output.output += `\n\n${result.message}`
-    } else {
-      debugLog("CLI: no comments detected")
-    }
-  }, undefined, debugLog)
+  await withCommentCheckerLock(
+    async () => {
+      // ...
+      const result = await runCommentChecker(hookInput, cliPath, customPrompt)
+      if (result.hasComments && result.message) {
+        debugLog("CLI detected comments, appending message")
+        output.output += `\n\n${result.message}`
+      } else {
+        debugLog("CLI: no comments detected")
+      }
+    },
+    undefined,
+    debugLog,
+  )
 }
 ```
 
@@ -165,42 +181,49 @@ export async function processWithCli(
   allowedPrefixes: string[],
   debugLog: (...args: unknown[]) => void,
 ): Promise<void> {
-  await withCommentCheckerLock(async () => {
-    void input
-    debugLog("using CLI mode with path:", cliPath)
+  await withCommentCheckerLock(
+    async () => {
+      void input
+      debugLog("using CLI mode with path:", cliPath)
 
-    const hookInput: HookInput = {
-      session_id: pendingCall.sessionID,
-      tool_name: pendingCall.tool.charAt(0).toUpperCase() + pendingCall.tool.slice(1),
-      transcript_path: "",
-      cwd: process.cwd(),
-      hook_event_name: "PostToolUse",
-      tool_input: {
-        file_path: pendingCall.filePath,
-        content: pendingCall.content,
-        old_string: pendingCall.oldString,
-        new_string: pendingCall.newString,
-        edits: pendingCall.edits,
-      },
-    }
-
-    const result = await runCommentChecker(hookInput, cliPath, customPrompt)
-
-    if (result.hasComments && result.message) {
-      const { hasRemainingComments, filteredMessage } = filterAllowedComments(
-        result.message,
-        allowedPrefixes,
-      )
-      if (hasRemainingComments && filteredMessage) {
-        debugLog("CLI detected comments, appending filtered message")
-        output.output += `\n\n${filteredMessage}`
-      } else {
-        debugLog("CLI: all detected comments matched allowed prefixes, suppressing")
+      const hookInput: HookInput = {
+        session_id: pendingCall.sessionID,
+        tool_name:
+          pendingCall.tool.charAt(0).toUpperCase() + pendingCall.tool.slice(1),
+        transcript_path: "",
+        cwd: process.cwd(),
+        hook_event_name: "PostToolUse",
+        tool_input: {
+          file_path: pendingCall.filePath,
+          content: pendingCall.content,
+          old_string: pendingCall.oldString,
+          new_string: pendingCall.newString,
+          edits: pendingCall.edits,
+        },
       }
-    } else {
-      debugLog("CLI: no comments detected")
-    }
-  }, undefined, debugLog)
+
+      const result = await runCommentChecker(hookInput, cliPath, customPrompt)
+
+      if (result.hasComments && result.message) {
+        const { hasRemainingComments, filteredMessage } = filterAllowedComments(
+          result.message,
+          allowedPrefixes,
+        )
+        if (hasRemainingComments && filteredMessage) {
+          debugLog("CLI detected comments, appending filtered message")
+          output.output += `\n\n${filteredMessage}`
+        } else {
+          debugLog(
+            "CLI: all detected comments matched allowed prefixes, suppressing",
+          )
+        }
+      } else {
+        debugLog("CLI: no comments detected")
+      }
+    },
+    undefined,
+    debugLog,
+  )
 }
 
 // Same change applied to processApplyPatchEditsWithCli - add allowedPrefixes parameter
@@ -216,33 +239,38 @@ export async function processApplyPatchEditsWithCli(
   debugLog("processing apply_patch edits:", edits.length)
 
   for (const edit of edits) {
-    await withCommentCheckerLock(async () => {
-      const hookInput: HookInput = {
-        session_id: sessionID,
-        tool_name: "Edit",
-        transcript_path: "",
-        cwd: process.cwd(),
-        hook_event_name: "PostToolUse",
-        tool_input: {
-          file_path: edit.filePath,
-          old_string: edit.before,
-          new_string: edit.after,
-        },
-      }
-
-      const result = await runCommentChecker(hookInput, cliPath, customPrompt)
-
-      if (result.hasComments && result.message) {
-        const { hasRemainingComments, filteredMessage } = filterAllowedComments(
-          result.message,
-          allowedPrefixes,
-        )
-        if (hasRemainingComments && filteredMessage) {
-          debugLog("CLI detected comments for apply_patch file:", edit.filePath)
-          output.output += `\n\n${filteredMessage}`
+    await withCommentCheckerLock(
+      async () => {
+        const hookInput: HookInput = {
+          session_id: sessionID,
+          tool_name: "Edit",
+          transcript_path: "",
+          cwd: process.cwd(),
+          hook_event_name: "PostToolUse",
+          tool_input: {
+            file_path: edit.filePath,
+            old_string: edit.before,
+            new_string: edit.after,
+          },
         }
-      }
-    }, undefined, debugLog)
+
+        const result = await runCommentChecker(hookInput, cliPath, customPrompt)
+
+        if (result.hasComments && result.message) {
+          const { hasRemainingComments, filteredMessage } =
+            filterAllowedComments(result.message, allowedPrefixes)
+          if (hasRemainingComments && filteredMessage) {
+            debugLog(
+              "CLI detected comments for apply_patch file:",
+              edit.filePath,
+            )
+            output.output += `\n\n${filteredMessage}`
+          }
+        }
+      },
+      undefined,
+      debugLog,
+    )
   }
 }
 ```
@@ -253,11 +281,26 @@ export async function processApplyPatchEditsWithCli(
 
 ```typescript
 // BEFORE (in tool.execute.after handler, around line 177)
-await processWithCli(input, pendingCall, output, cliPath, config?.custom_prompt, debugLog)
+await processWithCli(
+  input,
+  pendingCall,
+  output,
+  cliPath,
+  config?.custom_prompt,
+  debugLog,
+)
 
 // AFTER
 const allowedPrefixes = config?.allowed_comment_prefixes ?? []
-await processWithCli(input, pendingCall, output, cliPath, config?.custom_prompt, allowedPrefixes, debugLog)
+await processWithCli(
+  input,
+  pendingCall,
+  output,
+  cliPath,
+  config?.custom_prompt,
+  allowedPrefixes,
+  debugLog,
+)
 ```
 
 ```typescript
@@ -294,19 +337,37 @@ import { describe, test, expect } from "bun:test"
 import { filterAllowedComments } from "./allowed-prefix-filter"
 
 const DEFAULT_PREFIXES = [
-  "note:", "todo:", "fixme:", "hack:", "xxx:", "warning:",
-  "important:", "bug:", "optimize:", "workaround:", "safety:",
-  "security:", "perf:", "see:", "ref:", "cf.",
+  "note:",
+  "todo:",
+  "fixme:",
+  "hack:",
+  "xxx:",
+  "warning:",
+  "important:",
+  "bug:",
+  "optimize:",
+  "workaround:",
+  "safety:",
+  "security:",
+  "perf:",
+  "see:",
+  "ref:",
+  "cf.",
 ]
 
-function buildMessage(comments: { line: number; text: string }[], filePath = "/tmp/test.ts"): string {
+function buildMessage(
+  comments: { line: number; text: string }[],
+  filePath = "/tmp/test.ts",
+): string {
   const xml = comments
     .map((c) => `\t<comment line-number="${c.line}">${c.text}</comment>`)
     .join("\n")
-  return `COMMENT/DOCSTRING DETECTED - IMMEDIATE ACTION REQUIRED\n\n` +
+  return (
+    `COMMENT/DOCSTRING DETECTED - IMMEDIATE ACTION REQUIRED\n\n` +
     `Your recent changes contain comments or docstrings, which triggered this hook.\n` +
     `Detected comments/docstrings:\n` +
     `<comments file="${filePath}">\n${xml}\n</comments>\n`
+  )
 }
 
 describe("allowed-prefix-filter", () => {
@@ -364,8 +425,12 @@ describe("allowed-prefix-filter", () => {
         const result = filterAllowedComments(message, DEFAULT_PREFIXES)
 
         expect(result.hasRemainingComments).toBe(true)
-        expect(result.filteredMessage).not.toContain("Thread-safe implementation")
-        expect(result.filteredMessage).toContain("Changed from old API to new API")
+        expect(result.filteredMessage).not.toContain(
+          "Thread-safe implementation",
+        )
+        expect(result.filteredMessage).toContain(
+          "Changed from old API to new API",
+        )
       })
     })
 
@@ -465,7 +530,7 @@ describe("allowed-prefix-filter", () => {
         const message =
           "🚨 AGENT MEMO COMMENT DETECTED - CODE SMELL ALERT 🚨\n\n" +
           "⚠️  AGENT MEMO COMMENTS DETECTED - THIS IS A CODE SMELL  ⚠️\n\n" +
-          "You left \"memo-style\" comments...\n\n---\n\n" +
+          'You left "memo-style" comments...\n\n---\n\n' +
           "Your recent changes contain comments...\n" +
           "Detected comments/docstrings:\n" +
           '<comments file="/tmp/test.ts">\n' +
@@ -493,8 +558,16 @@ The `processApplyPatchEditsWithCli` mock needs to account for the new `allowedPr
 expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
   "ses_test",
   [
-    { filePath: "/repo/src/a.ts", before: "const a = 1\n", after: "// comment\nconst a = 1\n" },
-    { filePath: "/repo/src/new.ts", before: "const b = 1\n", after: "// moved comment\nconst b = 1\n" },
+    {
+      filePath: "/repo/src/a.ts",
+      before: "const a = 1\n",
+      after: "// comment\nconst a = 1\n",
+    },
+    {
+      filePath: "/repo/src/new.ts",
+      before: "const b = 1\n",
+      after: "// moved comment\nconst b = 1\n",
+    },
   ],
   expect.any(Object),
   "/tmp/fake-comment-checker",
@@ -506,8 +579,16 @@ expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
 expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
   "ses_test",
   [
-    { filePath: "/repo/src/a.ts", before: "const a = 1\n", after: "// comment\nconst a = 1\n" },
-    { filePath: "/repo/src/new.ts", before: "const b = 1\n", after: "// moved comment\nconst b = 1\n" },
+    {
+      filePath: "/repo/src/a.ts",
+      before: "const a = 1\n",
+      after: "// comment\nconst a = 1\n",
+    },
+    {
+      filePath: "/repo/src/new.ts",
+      before: "const b = 1\n",
+      after: "// moved comment\nconst b = 1\n",
+    },
   ],
   expect.any(Object),
   "/tmp/fake-comment-checker",
@@ -519,11 +600,11 @@ expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
 
 ## Summary of all touched files
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/config/schema/comment-checker.ts` | Modified | Add `allowed_comment_prefixes` with defaults |
-| `src/hooks/comment-checker/allowed-prefix-filter.ts` | **New** | Post-processing filter for legitimate comment prefixes |
-| `src/hooks/comment-checker/allowed-prefix-filter.test.ts` | **New** | 11 test cases covering false positives and edge cases |
-| `src/hooks/comment-checker/cli-runner.ts` | Modified | Thread `allowedPrefixes` param, apply filter after binary result |
-| `src/hooks/comment-checker/hook.ts` | Modified | Pass `allowed_comment_prefixes` from config to CLI runner |
-| `src/hooks/comment-checker/hook.apply-patch.test.ts` | Modified | Update mock assertions for new parameter |
+| File                                                      | Action   | Description                                                      |
+| --------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `src/config/schema/comment-checker.ts`                    | Modified | Add `allowed_comment_prefixes` with defaults                     |
+| `src/hooks/comment-checker/allowed-prefix-filter.ts`      | **New**  | Post-processing filter for legitimate comment prefixes           |
+| `src/hooks/comment-checker/allowed-prefix-filter.test.ts` | **New**  | 11 test cases covering false positives and edge cases            |
+| `src/hooks/comment-checker/cli-runner.ts`                 | Modified | Thread `allowedPrefixes` param, apply filter after binary result |
+| `src/hooks/comment-checker/hook.ts`                       | Modified | Pass `allowed_comment_prefixes` from config to CLI runner        |
+| `src/hooks/comment-checker/hook.apply-patch.test.ts`      | Modified | Update mock assertions for new parameter                         |

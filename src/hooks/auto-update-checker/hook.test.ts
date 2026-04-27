@@ -1,7 +1,8 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 import { describe, expect, mock, test } from "bun:test"
 
-type CreateAutoUpdateCheckerHook = typeof import("./hook").createAutoUpdateCheckerHook
+type CreateAutoUpdateCheckerHook =
+  typeof import("./hook").createAutoUpdateCheckerHook
 type HookOptions = Parameters<CreateAutoUpdateCheckerHook>[1]
 type HookDeps = NonNullable<Parameters<CreateAutoUpdateCheckerHook>[2]>
 
@@ -34,14 +35,15 @@ mock.module("./hook/deferred-startup-check", () => ({
   scheduleDeferredStartupCheck: scheduleDeferredStartupCheckMock,
 }))
 
-const createPluginInput = (): PluginInput => ({
-  client: {} as PluginInput["client"],
-  directory: "/tmp/project",
-  project: {} as PluginInput["project"],
-  worktree: "/tmp/project",
-  serverUrl: new URL("https://example.com"),
-  $: {} as PluginInput["$"],
-} satisfies PluginInput)
+const createPluginInput = (): PluginInput =>
+  ({
+    client: {} as PluginInput["client"],
+    directory: "/tmp/project",
+    project: {} as PluginInput["project"],
+    worktree: "/tmp/project",
+    serverUrl: new URL("https://example.com"),
+    $: {} as PluginInput["$"],
+  }) satisfies PluginInput
 
 const createDeps = (overrides: Partial<HookDeps> = {}) => {
   const showConfigErrorsIfAny = mock(async () => undefined)
@@ -121,7 +123,9 @@ const triggerSessionCreated = (
   hook.event({ event: { type: "session.created", properties } })
 }
 
-const triggerSessionIdle = (hook: ReturnType<CreateAutoUpdateCheckerHook>): void => {
+const triggerSessionIdle = (
+  hook: ReturnType<CreateAutoUpdateCheckerHook>,
+): void => {
   hook.event({ event: { type: "session.idle" } })
 }
 
@@ -188,7 +192,9 @@ describe("auto-update-checker hook", () => {
 
     // then
     expect(mocks.showConfigErrorsIfAny).toHaveBeenCalledTimes(1)
-    expect(mocks.updateAndShowConnectedProvidersCacheStatus).toHaveBeenCalledTimes(1)
+    expect(
+      mocks.updateAndShowConnectedProvidersCacheStatus,
+    ).toHaveBeenCalledTimes(1)
     expect(mocks.refreshModelCapabilitiesOnStartup).toHaveBeenCalledTimes(1)
     expect(mocks.showModelCacheWarningIfNeeded).toHaveBeenCalledTimes(1)
     expect(mocks.showVersionToast).toHaveBeenCalledTimes(1)
@@ -214,7 +220,9 @@ describe("auto-update-checker hook", () => {
     // then
     expect(scheduleDeferredStartupCheckCallCount).toBe(1)
     expect(mocks.showConfigErrorsIfAny).toHaveBeenCalledTimes(1)
-    expect(mocks.updateAndShowConnectedProvidersCacheStatus).toHaveBeenCalledTimes(1)
+    expect(
+      mocks.updateAndShowConnectedProvidersCacheStatus,
+    ).toHaveBeenCalledTimes(1)
     expect(mocks.showModelCacheWarningIfNeeded).toHaveBeenCalledTimes(1)
     expect(mocks.showVersionToast).toHaveBeenCalledTimes(1)
     expect(mocks.runBackgroundUpdateCheck).toHaveBeenCalledTimes(1)
@@ -223,9 +231,12 @@ describe("auto-update-checker hook", () => {
   test("shows localDevToast when local dev version exists", async () => {
     // given
     resetDeferredState()
-    const { hook, mocks } = await createHook({}, {
-      getLocalDevVersion: () => "3.0.0-dev",
-    })
+    const { hook, mocks } = await createHook(
+      {},
+      {
+        getLocalDevVersion: () => "3.0.0-dev",
+      },
+    )
 
     // when
     triggerSessionCreated(hook)
@@ -233,7 +244,9 @@ describe("auto-update-checker hook", () => {
 
     // then
     expect(mocks.showConfigErrorsIfAny).toHaveBeenCalledTimes(1)
-    expect(mocks.updateAndShowConnectedProvidersCacheStatus).toHaveBeenCalledTimes(1)
+    expect(
+      mocks.updateAndShowConnectedProvidersCacheStatus,
+    ).toHaveBeenCalledTimes(1)
     expect(mocks.showModelCacheWarningIfNeeded).toHaveBeenCalledTimes(1)
     expect(mocks.showLocalDevToast).toHaveBeenCalledTimes(1)
     expect(mocks.showVersionToast).not.toHaveBeenCalled()

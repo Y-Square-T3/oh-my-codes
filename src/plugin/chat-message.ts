@@ -4,7 +4,11 @@ import type { PluginContext } from "./types"
 import { isModelCacheAvailable, log } from "../shared"
 import { getAgentConfigKey } from "../shared/agent-display-names"
 import { getSessionModel, setSessionModel } from "../shared/session-model-state"
-import { getMainSessionID, setSessionAgent, subagentSessions } from "../features/claude-code-session-state"
+import {
+  getMainSessionID,
+  setSessionAgent,
+  subagentSessions,
+} from "../features/claude-code-session-state"
 import { applyUltraworkModelOverrideOnMessage } from "./ultrawork-model-override"
 import { NATIVE_LOOP_TRIGGERED_FLAG } from "./command-execute-before"
 import { parseRalphLoopArguments } from "../hooks/ralph-loop/command-arguments"
@@ -17,7 +21,10 @@ type FirstMessageVariantGate = {
 }
 
 type ChatMessagePart = { type: string; text?: string; [key: string]: unknown }
-export type ChatMessageHandlerOutput = { message: Record<string, unknown>; parts: ChatMessagePart[] }
+export type ChatMessageHandlerOutput = {
+  message: Record<string, unknown>
+  parts: ChatMessagePart[]
+}
 export type ChatMessageInput = {
   sessionID: string
   agent?: string
@@ -46,24 +53,32 @@ function isStartWorkHookOutput(value: unknown): value is StartWorkHookOutput {
 
 function hasExplicitAgentModelOverride(
   agent: string | undefined,
-  pluginConfig: OhMyCodesConfig
+  pluginConfig: OhMyCodesConfig,
 ): boolean {
   const configuredAgents = pluginConfig.agents
-  const normalizedAgent = typeof agent === "string" ? getAgentConfigKey(agent) : undefined
-  if (!normalizedAgent || !configuredAgents || !(normalizedAgent in configuredAgents)) {
+  const normalizedAgent =
+    typeof agent === "string" ? getAgentConfigKey(agent) : undefined
+  if (
+    !normalizedAgent ||
+    !configuredAgents ||
+    !(normalizedAgent in configuredAgents)
+  ) {
     return false
   }
 
-  const configuredAgent = configuredAgents[normalizedAgent as keyof typeof configuredAgents]
+  const configuredAgent =
+    configuredAgents[normalizedAgent as keyof typeof configuredAgents]
   const configuredModel = configuredAgent?.model
-  return typeof configuredModel === "string" && configuredModel.trim().length > 0
+  return (
+    typeof configuredModel === "string" && configuredModel.trim().length > 0
+  )
 }
 
 function getStoredMainSessionModel(
   input: ChatMessageInput,
   pluginConfig: OhMyCodesConfig,
   isFirstMessage: boolean,
-  output: ChatMessageHandlerOutput
+  output: ChatMessageHandlerOutput,
 ): SessionModelOverride | undefined {
   if (isFirstMessage) {
     return undefined
@@ -99,7 +114,9 @@ function parseRawLoopSlashCommand(promptText: string): RawLoopCommand | null {
     : trimmed
         .split("\n")
         .map((line) => line.trim())
-        .filter((line) => /^\/(?:ralph-loop|ulw-loop|cancel-ralph)\b/i.test(line))
+        .filter((line) =>
+          /^\/(?:ralph-loop|ulw-loop|cancel-ralph)\b/i.test(line),
+        )
         .at(-1)
 
   if (!commandText) {
@@ -146,14 +163,17 @@ function isStartWorkFallbackTemplate(promptText: string): boolean {
 function clearStoppedContinuationBeforeWorkStart(
   hooks: CreatedHooks,
   sessionID: string,
-  command: "start-work" | "ralph-loop" | "ulw-loop"
+  command: "start-work" | "ralph-loop" | "ulw-loop",
 ): void {
   if (hooks.stopContinuationGuard?.isStopped(sessionID)) {
     hooks.stopContinuationGuard.clear(sessionID)
-    log("[stop-continuation] Stop state cleared by chat.message work-starting command", {
-      sessionID,
-      command,
-    })
+    log(
+      "[stop-continuation] Stop state cleared by chat.message work-starting command",
+      {
+        sessionID,
+        command,
+      },
+    )
   }
 }
 
@@ -164,7 +184,7 @@ export function createChatMessageHandler(args: {
   hooks: CreatedHooks
 }): (
   input: ChatMessageInput,
-  output: ChatMessageHandlerOutput
+  output: ChatMessageHandlerOutput,
 ) => Promise<void> {
   const { ctx, pluginConfig, firstMessageVariantGate, hooks } = args
   const pluginContext = ctx as {
@@ -190,13 +210,15 @@ export function createChatMessageHandler(args: {
 
   return async (
     input: ChatMessageInput,
-    output: ChatMessageHandlerOutput
+    output: ChatMessageHandlerOutput,
   ): Promise<void> => {
     if (input.agent) {
       setSessionAgent(input.sessionID, input.agent)
     }
 
-    const isFirstMessage = firstMessageVariantGate.shouldOverride(input.sessionID)
+    const isFirstMessage = firstMessageVariantGate.shouldOverride(
+      input.sessionID,
+    )
     if (isFirstMessage) {
       firstMessageVariantGate.markApplied(input.sessionID)
     }
@@ -241,7 +263,11 @@ export function createChatMessageHandler(args: {
     if (hooks.startWork && isStartWorkHookOutput(output)) {
       const promptText = extractPromptText(output.parts)
       if (isStartWorkFallbackTemplate(promptText)) {
-        clearStoppedContinuationBeforeWorkStart(hooks, input.sessionID, "start-work")
+        clearStoppedContinuationBeforeWorkStart(
+          hooks,
+          input.sessionID,
+          "start-work",
+        )
       }
       await hooks.startWork["chat.message"]?.(input, output)
     }
@@ -260,7 +286,10 @@ export function createChatMessageHandler(args: {
         .catch(() => {})
     }
 
-    if (hooks.ralphLoop && output.message[NATIVE_LOOP_TRIGGERED_FLAG] !== true) {
+    if (
+      hooks.ralphLoop &&
+      output.message[NATIVE_LOOP_TRIGGERED_FLAG] !== true
+    ) {
       const parts = output.parts
       const promptText = extractPromptText(parts)
 
@@ -278,11 +307,19 @@ export function createChatMessageHandler(args: {
           ? parseRawLoopSlashCommand(promptText)
           : null
 
-      if (isRalphLoopTemplate || isUlwLoopTemplate || rawLoopCommand?.command === "ralph-loop" || rawLoopCommand?.command === "ulw-loop") {
-        const taskMatch = promptText.match(/<user-task>\s*([\s\S]*?)\s*<\/user-task>/i)
+      if (
+        isRalphLoopTemplate ||
+        isUlwLoopTemplate ||
+        rawLoopCommand?.command === "ralph-loop" ||
+        rawLoopCommand?.command === "ulw-loop"
+      ) {
+        const taskMatch = promptText.match(
+          /<user-task>\s*([\s\S]*?)\s*<\/user-task>/i,
+        )
         const rawTask = taskMatch?.[1]?.trim() || rawLoopCommand?.args || ""
         const parsedArguments = parseRalphLoopArguments(rawTask)
-        const ultrawork = isUlwLoopTemplate || rawLoopCommand?.command === "ulw-loop"
+        const ultrawork =
+          isUlwLoopTemplate || rawLoopCommand?.command === "ulw-loop"
         const command = ultrawork ? "ulw-loop" : "ralph-loop"
 
         clearStoppedContinuationBeforeWorkStart(hooks, input.sessionID, command)
@@ -292,7 +329,10 @@ export function createChatMessageHandler(args: {
           completionPromise: parsedArguments.completionPromise,
           strategy: parsedArguments.strategy,
         })
-      } else if (isCancelRalphTemplate || rawLoopCommand?.command === "cancel-ralph") {
+      } else if (
+        isCancelRalphTemplate ||
+        rawLoopCommand?.command === "cancel-ralph"
+      ) {
         hooks.ralphLoop.cancelLoop(input.sessionID)
       }
     }

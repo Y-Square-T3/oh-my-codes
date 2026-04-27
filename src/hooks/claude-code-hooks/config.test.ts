@@ -1,9 +1,17 @@
-const { afterEach, beforeEach, describe, expect, mock, test } = require("bun:test")
+const {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} = require("bun:test")
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-const { clearClaudeHooksConfigCache, loadClaudeHooksConfig } = await import("./config")
+const { clearClaudeHooksConfigCache, loadClaudeHooksConfig } =
+  await import("./config")
 
 describe("loadClaudeHooksConfig", () => {
   const originalDateNow = Date.now
@@ -65,7 +73,9 @@ describe("loadClaudeHooksConfig", () => {
     expect(getStopCommands(ttlReloaded)).toContain("second-stop-command")
     expect(getStopCommands(ttlReloaded)).not.toContain("first-stop-command")
     expect(getStopCommands(manuallyReloaded)).toContain("third-stop-command")
-    expect(getStopCommands(manuallyReloaded)).not.toContain("second-stop-command")
+    expect(getStopCommands(manuallyReloaded)).not.toContain(
+      "second-stop-command",
+    )
   })
 })
 
@@ -85,10 +95,14 @@ function writeSettingsFile(filePath: string, command: string): void {
   )
 }
 
-function getStopCommands(config: Awaited<ReturnType<typeof loadClaudeHooksConfig>>): string[] {
+function getStopCommands(
+  config: Awaited<ReturnType<typeof loadClaudeHooksConfig>>,
+): string[] {
   return (config?.Stop ?? []).flatMap((matcher) =>
     matcher.hooks.flatMap((hook) =>
-      "command" in hook && typeof hook.command === "string" ? [hook.command] : [],
+      "command" in hook && typeof hook.command === "string"
+        ? [hook.command]
+        : [],
     ),
   )
 }

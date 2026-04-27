@@ -24,7 +24,9 @@ export async function waitForEventProcessorShutdown(
 ): Promise<void> {
   const completed = await Promise.race([
     eventProcessor.then(() => true),
-    new Promise<boolean>((resolve) => setTimeout(() => resolve(false), timeoutMs)),
+    new Promise<boolean>((resolve) =>
+      setTimeout(() => resolve(false), timeoutMs),
+    ),
   ])
 
   void completed
@@ -35,16 +37,14 @@ export async function run(options: RunOptions): Promise<number> {
   process.env.OPENCODE_CLIENT = "run"
 
   const startTime = Date.now()
-  const {
-    message,
-    directory = process.cwd(),
-  } = options
+  const { message, directory = process.cwd() } = options
 
   const jsonManager = options.json ? createJsonOutputManager() : null
   if (jsonManager) jsonManager.redirectToStderr()
-  const timestampOutput = options.json || options.timestamp === false
-    ? null
-    : createTimestampedStdoutController()
+  const timestampOutput =
+    options.json || options.timestamp === false
+      ? null
+      : createTimestampedStdoutController()
   timestampOutput?.enable()
 
   const pluginConfig = loadPluginConfig(directory, { command: "run" })
@@ -106,7 +106,9 @@ export async function run(options: RunOptions): Promise<number> {
       console.log(pc.dim(`Session: ${sessionID}`))
 
       if (resolvedModel) {
-        console.log(pc.dim(`Model: ${resolvedModel.providerID}/${resolvedModel.modelID}`))
+        console.log(
+          pc.dim(`Model: ${resolvedModel.providerID}/${resolvedModel.modelID}`),
+        )
       }
 
       const ctx: RunContext = {
@@ -119,9 +121,11 @@ export async function run(options: RunOptions): Promise<number> {
       const events = await client.event.subscribe({ query: { directory } })
       const eventState = createEventState()
       eventState.agentColorsByName = await loadAgentProfileColors(client)
-      const eventProcessor = processEvents(ctx, events.stream, eventState).catch(
-        () => {},
-      )
+      const eventProcessor = processEvents(
+        ctx,
+        events.stream,
+        eventState,
+      ).catch(() => {})
 
       await client.session.promptAsync({
         path: { id: sessionID },

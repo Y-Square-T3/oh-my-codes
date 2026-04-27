@@ -34,8 +34,10 @@ describe("loadAvailableModelsFromCache", () => {
       join(tempDir, "cache", "opencode", "models.json"),
       JSON.stringify({
         openai: { models: { "gpt-5.4": {} } },
-        anthropic: { models: { "claude-opus-4-7": {}, "claude-sonnet-4-6": {} } },
-      })
+        anthropic: {
+          models: { "claude-opus-4-7": {}, "claude-sonnet-4-6": {} },
+        },
+      }),
     )
 
     const result = loadAvailableModelsFromCache()
@@ -50,7 +52,7 @@ describe("loadAvailableModelsFromCache", () => {
       join(tempDir, "cache", "opencode", "models.json"),
       JSON.stringify({
         openai: { models: { "gpt-5.4": {} } },
-      })
+      }),
     )
     writeFileSync(
       join(tempDir, "config", "opencode", "opencode.json"),
@@ -65,7 +67,7 @@ describe("loadAvailableModelsFromCache", () => {
             models: { "local-model": {} },
           },
         },
-      })
+      }),
     )
 
     const result = loadAvailableModelsFromCache()
@@ -80,7 +82,7 @@ describe("loadAvailableModelsFromCache", () => {
       join(tempDir, "cache", "opencode", "models.json"),
       JSON.stringify({
         openai: { models: { "gpt-5.4": {} } },
-      })
+      }),
     )
     writeFileSync(
       join(tempDir, "config", "opencode", "opencode.json"),
@@ -88,7 +90,7 @@ describe("loadAvailableModelsFromCache", () => {
         provider: {
           openai: { models: { "custom-model": {} } },
         },
-      })
+      }),
     )
 
     const result = loadAvailableModelsFromCache()
@@ -107,7 +109,7 @@ describe("loadAvailableModelsFromCache", () => {
             models: { "gpt-5.4": {} },
           },
         },
-      })
+      }),
     )
 
     const result = loadAvailableModelsFromCache()
@@ -125,7 +127,7 @@ describe("loadAvailableModelsFromCache", () => {
             "models": { "test-model": {} }
           }
         }
-      }`
+      }`,
     )
 
     const result = loadAvailableModelsFromCache()
@@ -135,7 +137,7 @@ describe("loadAvailableModelsFromCache", () => {
   test("ignores malformed opencode.json gracefully", () => {
     writeFileSync(
       join(tempDir, "cache", "opencode", "models.json"),
-      JSON.stringify({ openai: { models: { "gpt-5.4": {} } } })
+      JSON.stringify({ openai: { models: { "gpt-5.4": {} } } }),
     )
     writeFileSync(
       join(tempDir, "config", "opencode", "opencode.json"),

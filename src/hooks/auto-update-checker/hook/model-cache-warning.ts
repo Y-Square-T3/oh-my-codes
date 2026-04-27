@@ -2,7 +2,9 @@ import type { PluginInput } from "@opencode-ai/plugin"
 import { isModelCacheAvailable } from "../../../shared/model-availability"
 import { log } from "../../../shared/logger"
 
-export async function showModelCacheWarningIfNeeded(ctx: PluginInput): Promise<void> {
+export async function showModelCacheWarningIfNeeded(
+  ctx: PluginInput,
+): Promise<void> {
   if (isModelCacheAvailable()) return
 
   await ctx.client.tui

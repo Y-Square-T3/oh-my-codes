@@ -7,7 +7,12 @@ import { getOpenCodeCacheDir, getOpenCodeConfigPaths } from "../../../shared"
 import { invalidatePackage } from "../cache"
 import { PACKAGE_NAME } from "../constants"
 import { extractChannel } from "../version-channel"
-import { findPluginEntry, getCachedVersion, getLatestVersion, syncCachePackageJsonToIntent } from "../checker"
+import {
+  findPluginEntry,
+  getCachedVersion,
+  getLatestVersion,
+  syncCachePackageJsonToIntent,
+} from "../checker"
 import { showAutoUpdatedToast, showUpdateAvailableToast } from "./update-toasts"
 
 type BackgroundUpdateCheckDeps = {
@@ -62,16 +67,30 @@ function getPinnedVersionToastMessage(latestVersion: string): string {
  * Resolves the active install workspace.
  * Same logic as doctor check: prefer config-dir if installed, fall back to cache-dir.
  */
-function resolveActiveInstallWorkspace(deps: BackgroundUpdateCheckDeps): string {
+function resolveActiveInstallWorkspace(
+  deps: BackgroundUpdateCheckDeps,
+): string {
   const configPaths = deps.getOpenCodeConfigPaths({ binary: "opencode" })
   const cacheDir = getCacheWorkspaceDir(deps)
 
-  const configInstallPath = deps.join(configPaths.configDir, "node_modules", PACKAGE_NAME, "package.json")
-  const cacheInstallPath = deps.join(cacheDir, "node_modules", PACKAGE_NAME, "package.json")
+  const configInstallPath = deps.join(
+    configPaths.configDir,
+    "node_modules",
+    PACKAGE_NAME,
+    "package.json",
+  )
+  const cacheInstallPath = deps.join(
+    cacheDir,
+    "node_modules",
+    PACKAGE_NAME,
+    "package.json",
+  )
 
   // Prefer config-dir if installed there, otherwise fall back to cache-dir
   if (deps.existsSync(configInstallPath)) {
-    deps.log(`[auto-update-checker] Active workspace: config-dir (${configPaths.configDir})`)
+    deps.log(
+      `[auto-update-checker] Active workspace: config-dir (${configPaths.configDir})`,
+    )
     return configPaths.configDir
   }
 
@@ -82,18 +101,28 @@ function resolveActiveInstallWorkspace(deps: BackgroundUpdateCheckDeps): string 
 
   const cachePackageJsonPath = deps.join(cacheDir, "package.json")
   if (deps.existsSync(cachePackageJsonPath)) {
-    deps.log(`[auto-update-checker] Active workspace: cache-dir (${cacheDir}, package.json present)`) 
+    deps.log(
+      `[auto-update-checker] Active workspace: cache-dir (${cacheDir}, package.json present)`,
+    )
     return cacheDir
   }
 
   // Default to config-dir if neither exists (matches doctor behavior)
-  deps.log(`[auto-update-checker] Active workspace: config-dir (default, no install detected)`)
+  deps.log(
+    `[auto-update-checker] Active workspace: config-dir (default, no install detected)`,
+  )
   return configPaths.configDir
 }
 
-async function runBunInstallSafe(workspaceDir: string, deps: BackgroundUpdateCheckDeps): Promise<boolean> {
+async function runBunInstallSafe(
+  workspaceDir: string,
+  deps: BackgroundUpdateCheckDeps,
+): Promise<boolean> {
   try {
-    const result = await deps.runBunInstallWithDetails({ outputMode: "pipe", workspaceDir })
+    const result = await deps.runBunInstallWithDetails({
+      outputMode: "pipe",
+      workspaceDir,
+    })
     if (!result.success && result.error) {
       deps.log("[auto-update-checker] bun install error:", result.error)
     }
@@ -114,7 +143,9 @@ async function primeCacheWorkspace(
     return true
   }
 
-  deps.log(`[auto-update-checker] Priming cache workspace after install: ${cacheWorkspace}`)
+  deps.log(
+    `[auto-update-checker] Priming cache workspace after install: ${cacheWorkspace}`,
+  )
   return runBunInstallSafe(cacheWorkspace, deps)
 }
 
@@ -141,19 +172,29 @@ export function createBackgroundUpdateCheckRunner(
       return
     }
 
-    const channel = deps.extractChannel(pluginInfo.pinnedVersion ?? currentVersion)
+    const channel = deps.extractChannel(
+      pluginInfo.pinnedVersion ?? currentVersion,
+    )
     const latestVersion = await deps.getLatestVersion(channel)
     if (!latestVersion) {
-      deps.log("[auto-update-checker] Failed to fetch latest version for channel:", channel)
+      deps.log(
+        "[auto-update-checker] Failed to fetch latest version for channel:",
+        channel,
+      )
       return
     }
 
     if (currentVersion === latestVersion) {
-      deps.log("[auto-update-checker] Already on latest version for channel:", channel)
+      deps.log(
+        "[auto-update-checker] Already on latest version for channel:",
+        channel,
+      )
       return
     }
 
-    deps.log(`[auto-update-checker] Update available (${channel}): ${currentVersion} → ${latestVersion}`)
+    deps.log(
+      `[auto-update-checker] Update available (${channel}): ${currentVersion} → ${latestVersion}`,
+    )
 
     if (!autoUpdate) {
       await deps.showUpdateAvailableToast(ctx, latestVersion, getToastMessage)
@@ -162,14 +203,21 @@ export function createBackgroundUpdateCheckRunner(
     }
 
     if (pluginInfo.isPinned) {
-      await deps.showUpdateAvailableToast(ctx, latestVersion, () => getPinnedVersionToastMessage(latestVersion))
-      deps.log(`[auto-update-checker] User-pinned version detected (${pluginInfo.entry}), skipping auto-update. Notification only.`)
+      await deps.showUpdateAvailableToast(ctx, latestVersion, () =>
+        getPinnedVersionToastMessage(latestVersion),
+      )
+      deps.log(
+        `[auto-update-checker] User-pinned version detected (${pluginInfo.entry}), skipping auto-update. Notification only.`,
+      )
       return
     }
 
     const syncResult = deps.syncCachePackageJsonToIntent(pluginInfo)
     if (syncResult.error) {
-      deps.log(`[auto-update-checker] Sync failed with error: ${syncResult.error}`, syncResult.message)
+      deps.log(
+        `[auto-update-checker] Sync failed with error: ${syncResult.error}`,
+        syncResult.message,
+      )
       await deps.showUpdateAvailableToast(ctx, latestVersion, getToastMessage)
       return
     }
@@ -182,17 +230,23 @@ export function createBackgroundUpdateCheckRunner(
       const cachePrimed = await primeCacheWorkspace(activeWorkspace, deps)
       if (!cachePrimed) {
         await deps.showUpdateAvailableToast(ctx, latestVersion, getToastMessage)
-        deps.log("[auto-update-checker] cache workspace priming failed after install")
+        deps.log(
+          "[auto-update-checker] cache workspace priming failed after install",
+        )
         return
       }
 
       await deps.showAutoUpdatedToast(ctx, currentVersion, latestVersion)
-      deps.log(`[auto-update-checker] Update installed: ${currentVersion} → ${latestVersion}`)
+      deps.log(
+        `[auto-update-checker] Update installed: ${currentVersion} → ${latestVersion}`,
+      )
       return
     }
 
     await deps.showUpdateAvailableToast(ctx, latestVersion, getToastMessage)
-    deps.log("[auto-update-checker] bun install failed; update not installed (falling back to notification-only)")
+    deps.log(
+      "[auto-update-checker] bun install failed; update not installed (falling back to notification-only)",
+    )
   }
 }
 

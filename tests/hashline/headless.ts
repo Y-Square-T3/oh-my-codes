@@ -8,7 +8,10 @@ import { z } from "zod"
 import { formatHashLines } from "../../src/tools/hashline-edit/hash-computation"
 import { normalizeHashlineEdits } from "../../src/tools/hashline-edit/normalize-edits"
 import { applyHashlineEditsWithReport } from "../../src/tools/hashline-edit/edit-operations"
-import { canonicalizeFileText, restoreFileText } from "../../src/tools/hashline-edit/file-text-canonicalization"
+import {
+  canonicalizeFileText,
+  restoreFileText,
+} from "../../src/tools/hashline-edit/file-text-canonicalization"
 import { HASHLINE_EDIT_DESCRIPTION } from "../../src/tools/hashline-edit/tool-description"
 
 const DEFAULT_MODEL = "minimax-m2.5-free"
@@ -16,7 +19,13 @@ const MAX_STEPS = 50
 const sessionId = `hashline-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
 const emit = (event: Record<string, unknown>) =>
-  console.log(JSON.stringify({ sessionId, timestamp: new Date().toISOString(), ...event }))
+  console.log(
+    JSON.stringify({
+      sessionId,
+      timestamp: new Date().toISOString(),
+      ...event,
+    }),
+  )
 
 // ── CLI ──────────────────────────────────────────────────────
 function parseArgs(): { prompt: string; modelId: string } {
@@ -34,7 +43,9 @@ function parseArgs(): { prompt: string; modelId: string } {
     // --no-translate, --think consumed silently
   }
   if (!prompt) {
-    console.error("Usage: bun run tests/hashline/headless.ts -p <prompt> [-m <model>]")
+    console.error(
+      "Usage: bun run tests/hashline/headless.ts -p <prompt> [-m <model>]",
+    )
     process.exit(1)
   }
   return { prompt, modelId }
@@ -61,14 +72,16 @@ const editFileTool = tool({
   description: HASHLINE_EDIT_DESCRIPTION,
   inputSchema: z.object({
     path: z.string(),
-    edits: z.array(
-      z.object({
-        op: z.enum(["replace", "append", "prepend"]),
-        pos: z.string().optional(),
-        end: z.string().optional(),
-        lines: z.union([z.array(z.string()), z.string(), z.null()]),
-      })
-    ).min(1),
+    edits: z
+      .array(
+        z.object({
+          op: z.enum(["replace", "append", "prepend"]),
+          pos: z.string().optional(),
+          end: z.string().optional(),
+          lines: z.union([z.array(z.string()), z.string(), z.null()]),
+        }),
+      )
+      .min(1),
   }),
   execute: async ({ path, edits }) => {
     const fullPath = join(process.cwd(), path)
@@ -85,7 +98,7 @@ const editFileTool = tool({
 
       if (!exists) {
         const canCreate = normalized.every(
-          (e) => (e.op === "append" || e.op === "prepend") && !e.pos
+          (e) => (e.op === "append" || e.op === "prepend") && !e.pos,
         )
         if (!canCreate) return `Error: File not found: ${path}`
       }
@@ -119,8 +132,11 @@ async function run() {
 
   const provider = createOpenAICompatible({
     name: "hashline-test",
-    baseURL: process.env.HASHLINE_TEST_BASE_URL ?? "https://quotio.mengmota.com/v1",
-    apiKey: process.env.HASHLINE_TEST_API_KEY ?? "quotio-local-60A613FE-DB74-40FF-923E-A14151951E5D",
+    baseURL:
+      process.env.HASHLINE_TEST_BASE_URL ?? "https://quotio.mengmota.com/v1",
+    apiKey:
+      process.env.HASHLINE_TEST_API_KEY ??
+      "quotio-local-60A613FE-DB74-40FF-923E-A14151951E5D",
   })
   const model = provider.chatModel(modelId)
   const tools = { read_file: readFileTool, edit_file: editFileTool }
@@ -131,7 +147,8 @@ async function run() {
   const system =
     "You are a code editing assistant. Use read_file to read files and edit_file to edit them. " +
     "Always read a file before editing it to get fresh LINE#ID anchors.\n\n" +
-    "edit_file tool description:\n" + HASHLINE_EDIT_DESCRIPTION
+    "edit_file tool description:\n" +
+    HASHLINE_EDIT_DESCRIPTION
 
   for (let step = 0; step < MAX_STEPS; step++) {
     const stream = streamText({
@@ -158,8 +175,12 @@ async function run() {
           })
           break
         case "tool-result": {
-          const output = typeof part.result === "string" ? part.result : JSON.stringify(part.result)
-          const isError = typeof output === "string" && output.startsWith("Error:")
+          const output =
+            typeof part.result === "string"
+              ? part.result
+              : JSON.stringify(part.result)
+          const isError =
+            typeof output === "string" && output.startsWith("Error:")
           emit({
             type: "tool_result",
             tool_call_id: part.toolCallId,
@@ -191,11 +212,13 @@ process.once("SIGTERM", () => process.exit(143))
 const startTime = Date.now()
 run()
   .catch((error) => {
-    emit({ type: "error", error: error instanceof Error ? error.message : String(error) })
+    emit({
+      type: "error",
+      error: error instanceof Error ? error.message : String(error),
+    })
     process.exit(1)
   })
   .then(() => {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)
     console.error(`[headless] Completed in ${elapsed}s`)
   })
-

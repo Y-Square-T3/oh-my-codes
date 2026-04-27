@@ -1,7 +1,10 @@
 declare const require: (name: string) => any
 const { afterEach, describe, expect, test } = require("bun:test")
 import { clearSessionTools, setSessionTools } from "./session-tools-store"
-import { normalizePromptTools, resolveInheritedPromptTools } from "./prompt-tools"
+import {
+  normalizePromptTools,
+  resolveInheritedPromptTools,
+} from "./prompt-tools"
 
 describe("prompt-tools", () => {
   afterEach(() => {
@@ -37,7 +40,10 @@ describe("prompt-tools", () => {
     setSessionTools(sessionID, { question: false, bash: true })
 
     // when
-    const resolved = resolveInheritedPromptTools(sessionID, { question: true, bash: false })
+    const resolved = resolveInheritedPromptTools(sessionID, {
+      question: true,
+      bash: false,
+    })
 
     // then
     expect(resolved).toEqual({ question: false, bash: true })
@@ -48,7 +54,10 @@ describe("prompt-tools", () => {
     const sessionID = "ses_fallback_only"
 
     // when
-    const resolved = resolveInheritedPromptTools(sessionID, { question: "deny", write: "allow" })
+    const resolved = resolveInheritedPromptTools(sessionID, {
+      question: "deny",
+      write: "allow",
+    })
 
     // then
     expect(resolved).toEqual({ question: false, write: true })

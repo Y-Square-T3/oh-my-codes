@@ -26,14 +26,14 @@ These are standard engineering comments, not AI agent memos.
 
 ## Changes
 
-| File | Change |
-|------|--------|
-| `src/config/schema/comment-checker.ts` | Add `exclude_patterns: string[]` optional field |
-| `src/hooks/comment-checker/cli.ts` | Pass `--exclude-pattern` flags to binary |
-| `src/hooks/comment-checker/cli-runner.ts` | Thread `excludePatterns` through `processWithCli` and `processApplyPatchEditsWithCli` |
-| `src/hooks/comment-checker/hook.ts` | Pass `config.exclude_patterns` to CLI runner calls |
-| `src/hooks/comment-checker/cli.test.ts` | Add 6 new test cases for false positive scenarios |
-| `src/hooks/comment-checker/hook.apply-patch.test.ts` | Add test verifying exclude_patterns config threading |
+| File                                                 | Change                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `src/config/schema/comment-checker.ts`               | Add `exclude_patterns: string[]` optional field                                       |
+| `src/hooks/comment-checker/cli.ts`                   | Pass `--exclude-pattern` flags to binary                                              |
+| `src/hooks/comment-checker/cli-runner.ts`            | Thread `excludePatterns` through `processWithCli` and `processApplyPatchEditsWithCli` |
+| `src/hooks/comment-checker/hook.ts`                  | Pass `config.exclude_patterns` to CLI runner calls                                    |
+| `src/hooks/comment-checker/cli.test.ts`              | Add 6 new test cases for false positive scenarios                                     |
+| `src/hooks/comment-checker/hook.apply-patch.test.ts` | Add test verifying exclude_patterns config threading                                  |
 
 ## Usage
 
@@ -41,8 +41,8 @@ These are standard engineering comments, not AI agent memos.
 // .opencode/oh-my-codes.jsonc
 {
   "comment_checker": {
-    "exclude_patterns": ["^Note:", "^TODO:", "^FIXME:"]
-  }
+    "exclude_patterns": ["^Note:", "^TODO:", "^FIXME:"],
+  },
 }
 ```
 

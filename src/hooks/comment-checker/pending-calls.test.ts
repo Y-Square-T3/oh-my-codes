@@ -22,7 +22,9 @@ describe("pending-calls cleanup interval", () => {
 
     try {
       const modulePath = new URL("./pending-calls.ts", import.meta.url).pathname
-      const pendingCallsModule = await import(`${modulePath}?pending-calls-test-once`)
+      const pendingCallsModule = await import(
+        `${modulePath}?pending-calls-test-once`
+      )
 
       //#when
       pendingCallsModule.startPendingCallCleanup()
@@ -48,7 +50,9 @@ describe("pending-calls cleanup interval", () => {
       _timeout?: number,
       ..._args: any[]
     ) => {
-      intervalHandle = { unref: () => {} } as unknown as ReturnType<typeof setInterval>
+      intervalHandle = { unref: () => {} } as unknown as ReturnType<
+        typeof setInterval
+      >
       return intervalHandle
     }) as unknown as typeof setInterval
 
@@ -60,7 +64,9 @@ describe("pending-calls cleanup interval", () => {
 
     try {
       const modulePath = new URL("./pending-calls.ts", import.meta.url).pathname
-      const pendingCallsModule = await import(`${modulePath}?pending-calls-test-stop`)
+      const pendingCallsModule = await import(
+        `${modulePath}?pending-calls-test-stop`
+      )
       pendingCallsModule.startPendingCallCleanup()
 
       //#when

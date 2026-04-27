@@ -12,7 +12,9 @@ describe("createBackgroundNotificationHook", () => {
     } as never)
 
     //#when
-    await hook.event({ event: { type: "message.removed", properties: { sessionID: "ses-1" } } })
+    await hook.event({
+      event: { type: "message.removed", properties: { sessionID: "ses-1" } },
+    })
 
     //#then
     expect(handleEvent).not.toHaveBeenCalled()
@@ -26,7 +28,10 @@ describe("createBackgroundNotificationHook", () => {
       injectPendingNotificationsIntoChatMessage: () => {},
     } as never)
 
-    const event = { type: "message.part.delta", properties: { sessionID: "ses-1", field: "text", delta: "x" } }
+    const event = {
+      type: "message.part.delta",
+      properties: { sessionID: "ses-1", field: "text", delta: "x" },
+    }
 
     //#when
     await hook.event({ event })
@@ -47,7 +52,14 @@ describe("createBackgroundNotificationHook", () => {
       type: "todo.updated",
       properties: {
         sessionID: "ses-1",
-        todos: [{ id: "todo-1", content: "done", status: "completed", priority: "high" }],
+        todos: [
+          {
+            id: "todo-1",
+            content: "done",
+            status: "completed",
+            priority: "high",
+          },
+        ],
       },
     }
 

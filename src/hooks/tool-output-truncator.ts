@@ -34,23 +34,27 @@ interface ToolOutputTruncatorOptions {
   experimental?: ExperimentalConfig
 }
 
-export function createToolOutputTruncatorHook(ctx: PluginInput, options?: ToolOutputTruncatorOptions) {
+export function createToolOutputTruncatorHook(
+  ctx: PluginInput,
+  options?: ToolOutputTruncatorOptions,
+) {
   const truncator = createDynamicTruncator(ctx, options?.modelCacheState)
   const truncateAll = options?.experimental?.truncate_all_tool_outputs ?? false
 
   const toolExecuteAfter = async (
     input: { tool: string; sessionID: string; callID: string },
-    output: { title: string; output: string; metadata: unknown }
+    output: { title: string; output: string; metadata: unknown },
   ) => {
     if (!truncateAll && !TRUNCATABLE_TOOLS.includes(input.tool)) return
-    if (typeof output.output !== 'string') return
+    if (typeof output.output !== "string") return
 
     try {
-      const targetMaxTokens = TOOL_SPECIFIC_MAX_TOKENS[input.tool] ?? DEFAULT_MAX_TOKENS
+      const targetMaxTokens =
+        TOOL_SPECIFIC_MAX_TOKENS[input.tool] ?? DEFAULT_MAX_TOKENS
       const { result, truncated } = await truncator.truncate(
         input.sessionID,
         output.output,
-        { targetMaxTokens }
+        { targetMaxTokens },
       )
       if (truncated) {
         output.output = result

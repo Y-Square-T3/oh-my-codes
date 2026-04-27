@@ -7,7 +7,11 @@ import type { LoadedSkill } from "./types"
 const TEST_DIR = join(tmpdir(), "async-loader-test-" + Date.now())
 const SKILLS_DIR = join(TEST_DIR, ".opencode", "skills")
 
-function createTestSkill(name: string, content: string, mcpJson?: object): string {
+function createTestSkill(
+  name: string,
+  content: string,
+  mcpJson?: object,
+): string {
   const skillDir = join(SKILLS_DIR, name)
   mkdirSync(skillDir, { recursive: true })
   const skillPath = join(skillDir, "SKILL.md")
@@ -118,7 +122,7 @@ name: brainstorming
 description: Nested brainstorming skill
 ---
 Nested skill.
-`
+`,
       )
 
       // when
@@ -142,7 +146,7 @@ name: brainstorming
 description: Nested brainstorming skill
 ---
 Nested skill.
-`
+`,
       )
 
       // when
@@ -166,7 +170,7 @@ name: brainstorming
 description: Nested brainstorming skill
 ---
 Nested skill.
-`
+`,
       )
 
       // when
@@ -218,7 +222,7 @@ Invalid skill.
       createTestSkill("valid-skill", validContent)
       const invalidDir = createTestSkill("invalid-skill", invalidContent)
       const invalidFile = join(invalidDir, "SKILL.md")
-      
+
       // Make file unreadable on Unix systems
       if (process.platform !== "win32") {
         chmodSync(invalidFile, 0o000)
@@ -230,7 +234,9 @@ Invalid skill.
 
       // then - should skip invalid and return only valid
       expect(skills.length).toBeGreaterThanOrEqual(1)
-      expect(skills.some((s: LoadedSkill) => s.name === "valid-skill")).toBe(true)
+      expect(skills.some((s: LoadedSkill) => s.name === "valid-skill")).toBe(
+        true,
+      )
 
       // Cleanup: restore permissions before cleanup
       if (process.platform !== "win32") {
@@ -261,9 +267,14 @@ Skill two.
 
       // then
       expect(asyncSkills.length).toBe(2)
-      expect(asyncSkills.map((s: LoadedSkill) => s.name).sort()).toEqual(["skill-one", "skill-two"])
-      
-      const skill1Result = asyncSkills.find((s: LoadedSkill) => s.name === "skill-one")
+      expect(asyncSkills.map((s: LoadedSkill) => s.name).sort()).toEqual([
+        "skill-one",
+        "skill-two",
+      ])
+
+      const skill1Result = asyncSkills.find(
+        (s: LoadedSkill) => s.name === "skill-one",
+      )
       expect(skill1Result?.definition.description).toContain("First skill")
     })
 
@@ -304,9 +315,9 @@ Skill body.
         mcpServers: {
           playwright: {
             command: "npx",
-            args: ["@playwright/mcp"]
-          }
-        }
+            args: ["@playwright/mcp"],
+          },
+        },
       }
       createTestSkill("json-mcp-skill", skillContent, mcpJson)
 
@@ -333,9 +344,9 @@ Skill.
       const mcpJson = {
         mcpServers: {
           "from-json": {
-            command: "json-cmd"
-          }
-        }
+            command: "json-cmd",
+          },
+        },
       }
       createTestSkill("priority-test", skillContent, mcpJson)
 
@@ -361,7 +372,7 @@ Skill.
       const mapper = async (item: number) => {
         currentConcurrent++
         maxConcurrent = Math.max(maxConcurrent, currentConcurrent)
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise((resolve) => setTimeout(resolve, 10))
         currentConcurrent--
         return item * 2
       }
@@ -370,7 +381,7 @@ Skill.
       const results = await mapWithConcurrency(items, mapper, 16)
 
       // then
-      expect(results).toEqual(items.map(i => i * 2))
+      expect(results).toEqual(items.map((i) => i * 2))
       expect(maxConcurrent).toBeLessThanOrEqual(16)
       expect(maxConcurrent).toBeGreaterThan(1) // Should actually run concurrently
     })
@@ -380,7 +391,11 @@ Skill.
       const { mapWithConcurrency } = await import("./async-loader")
 
       // when
-      const results = await mapWithConcurrency([], async (x: number) => x * 2, 16)
+      const results = await mapWithConcurrency(
+        [],
+        async (x: number) => x * 2,
+        16,
+      )
 
       // then
       expect(results).toEqual([])
@@ -391,7 +406,11 @@ Skill.
       const { mapWithConcurrency } = await import("./async-loader")
 
       // when
-      const results = await mapWithConcurrency([42], async (x: number) => x * 2, 16)
+      const results = await mapWithConcurrency(
+        [42],
+        async (x: number) => x * 2,
+        16,
+      )
 
       // then
       expect(results).toEqual([84])
@@ -412,7 +431,12 @@ Path skill.
 
       // when
       const { loadSkillFromPathAsync } = await import("./async-loader")
-      const skill = await loadSkillFromPathAsync(skillPath, skillDir, "path-skill", "opencode-project")
+      const skill = await loadSkillFromPathAsync(
+        skillPath,
+        skillDir,
+        "path-skill",
+        "opencode-project",
+      )
 
       // then
       expect(skill).not.toBeNull()
@@ -426,7 +450,12 @@ Path skill.
 
       // when
       const { loadSkillFromPathAsync } = await import("./async-loader")
-      const skill = await loadSkillFromPathAsync(invalidPath, TEST_DIR, "invalid", "opencode")
+      const skill = await loadSkillFromPathAsync(
+        invalidPath,
+        TEST_DIR,
+        "invalid",
+        "opencode",
+      )
 
       // then
       expect(skill).toBeNull()
@@ -434,14 +463,20 @@ Path skill.
 
     it("returns null for malformed skill file", async () => {
       // given
-      const malformedContent = "This is not valid frontmatter content\nNo YAML here!"
+      const malformedContent =
+        "This is not valid frontmatter content\nNo YAML here!"
       mkdirSync(SKILLS_DIR, { recursive: true })
       const malformedPath = join(SKILLS_DIR, "malformed.md")
       writeFileSync(malformedPath, malformedContent)
 
       // when
       const { loadSkillFromPathAsync } = await import("./async-loader")
-      const skill = await loadSkillFromPathAsync(malformedPath, SKILLS_DIR, "malformed", "user")
+      const skill = await loadSkillFromPathAsync(
+        malformedPath,
+        SKILLS_DIR,
+        "malformed",
+        "user",
+      )
 
       // then
       expect(skill).not.toBeNull() // parseFrontmatter handles missing frontmatter gracefully
@@ -456,9 +491,9 @@ Path skill.
         mcpServers: {
           test: {
             command: "test-cmd",
-            args: ["arg1"]
-          }
-        }
+            args: ["arg1"],
+          },
+        },
       }
       writeFileSync(join(SKILLS_DIR, "mcp.json"), JSON.stringify(mcpJson))
 
@@ -503,8 +538,8 @@ Path skill.
       const mcpJson = {
         direct: {
           command: "direct-cmd",
-          args: ["arg"]
-        }
+          args: ["arg"],
+        },
       }
       writeFileSync(join(SKILLS_DIR, "mcp.json"), JSON.stringify(mcpJson))
 

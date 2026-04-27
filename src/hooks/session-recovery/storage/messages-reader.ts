@@ -10,13 +10,14 @@ type OpencodeClient = PluginInput["client"]
 
 function normalizeSDKMessage(
   sessionID: string,
-  value: unknown
+  value: unknown,
 ): StoredMessageMeta | null {
   if (!isRecord(value)) return null
   if (typeof value.id !== "string") return null
 
   const roleValue = value.role
-  const role: StoredMessageMeta["role"] = roleValue === "assistant" ? "assistant" : "user"
+  const role: StoredMessageMeta["role"] =
+    roleValue === "assistant" ? "assistant" : "user"
 
   const created =
     isRecord(value.time) && typeof value.time.created === "number"
@@ -58,7 +59,7 @@ export function readMessages(sessionID: string): StoredMessageMeta[] {
 
 export async function readMessagesFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<StoredMessageMeta[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
@@ -68,7 +69,9 @@ export async function readMessagesFromSDK(
     if (!Array.isArray(data)) return []
 
     const messages = data
-      .map((msg): StoredMessageMeta | null => normalizeSDKMessage(sessionID, msg))
+      .map((msg): StoredMessageMeta | null =>
+        normalizeSDKMessage(sessionID, msg),
+      )
       .filter((msg): msg is StoredMessageMeta => msg !== null)
 
     return messages.sort((a, b) => {

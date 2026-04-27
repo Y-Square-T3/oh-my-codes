@@ -1,5 +1,13 @@
 import { existsSync, realpathSync } from "fs"
-import { basename, dirname, isAbsolute, join, normalize, relative, resolve } from "path"
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  normalize,
+  relative,
+  resolve,
+} from "path"
 
 function findNearestExistingAncestor(resolvedPath: string): string {
   let candidatePath = resolvedPath
@@ -32,9 +40,14 @@ function toCanonicalPath(pathToNormalize: string): string {
   const canonicalAncestor = existsSync(nearestExistingAncestor)
     ? realpathSync.native(nearestExistingAncestor)
     : nearestExistingAncestor
-  const relativePathFromAncestor = relative(nearestExistingAncestor, resolvedPath)
+  const relativePathFromAncestor = relative(
+    nearestExistingAncestor,
+    resolvedPath,
+  )
 
-  return normalize(join(canonicalAncestor, relativePathFromAncestor || basename(resolvedPath)))
+  return normalize(
+    join(canonicalAncestor, relativePathFromAncestor || basename(resolvedPath)),
+  )
 }
 
 export function containsPath(rootPath: string, candidatePath: string): boolean {
@@ -42,9 +55,15 @@ export function containsPath(rootPath: string, candidatePath: string): boolean {
   const canonicalCandidatePath = toCanonicalPath(candidatePath)
   const relativePath = relative(canonicalRootPath, canonicalCandidatePath)
 
-  return relativePath === "" || (!relativePath.startsWith("..") && !isAbsolute(relativePath))
+  return (
+    relativePath === "" ||
+    (!relativePath.startsWith("..") && !isAbsolute(relativePath))
+  )
 }
 
-export function isWithinProject(candidatePath: string, projectRoot: string): boolean {
+export function isWithinProject(
+  candidatePath: string,
+  projectRoot: string,
+): boolean {
   return containsPath(projectRoot, candidatePath)
 }

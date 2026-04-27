@@ -16,7 +16,10 @@ function normalizeCallID(value: unknown): string | undefined {
 }
 
 export function resolveToolCallID(ctx: ToolCallIDCarrier): string | undefined {
-  const resolved = normalizeCallID(ctx.callID) ?? normalizeCallID(ctx.callId) ?? normalizeCallID(ctx.call_id)
+  const resolved =
+    normalizeCallID(ctx.callID) ??
+    normalizeCallID(ctx.callId) ??
+    normalizeCallID(ctx.call_id)
 
   if (!resolved) {
     log("[tool-metadata-store] Missing tool call ID for metadata correlation")

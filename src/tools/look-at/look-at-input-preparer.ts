@@ -38,7 +38,10 @@ function getTemporaryConversionPath(error: unknown): string | null {
   }
 
   const temporaryOutputPath = Reflect.get(error, "temporaryOutputPath")
-  if (typeof temporaryOutputPath === "string" && temporaryOutputPath.length > 0) {
+  if (
+    typeof temporaryOutputPath === "string" &&
+    temporaryOutputPath.length > 0
+  ) {
     return temporaryOutputPath
   }
 
@@ -62,9 +65,14 @@ export function prepareLookAtInput(args: LookAtArgs): PrepareLookAtInputResult {
     let tempFilesToCleanup: string[] = []
 
     if (needsConversion(mimeType)) {
-      log(`[look_at] Detected unsupported Base64 format: ${mimeType}, converting to JPEG...`)
+      log(
+        `[look_at] Detected unsupported Base64 format: ${mimeType}, converting to JPEG...`,
+      )
       try {
-        const { base64, tempFiles } = convertBase64ImageToJpeg(finalBase64Data, mimeType)
+        const { base64, tempFiles } = convertBase64ImageToJpeg(
+          finalBase64Data,
+          mimeType,
+        )
         finalBase64Data = base64
         finalMimeType = "image/jpeg"
         tempFilesToCleanup = tempFiles
@@ -104,7 +112,9 @@ export function prepareLookAtInput(args: LookAtArgs): PrepareLookAtInputResult {
     let tempConversionPath: string | null = null
 
     if (needsConversion(mimeType)) {
-      log(`[look_at] Detected unsupported format: ${mimeType}, converting to JPEG...`)
+      log(
+        `[look_at] Detected unsupported format: ${mimeType}, converting to JPEG...`,
+      )
       try {
         const convertedFilePath = convertImageToJpeg(filePath, mimeType)
         tempConversionPath = convertedFilePath

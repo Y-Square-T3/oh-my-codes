@@ -36,10 +36,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-opus-4-7", 1_000_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-opus-4-7", {
-      anthropicContext1MEnabled: false,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-opus-4-7",
+      {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache,
+      },
+    )
 
     expect(actualLimit).toBe(1_000_000)
   })
@@ -52,10 +56,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-sonnet-4-5", 500_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-sonnet-4-5", {
-      anthropicContext1MEnabled: false,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-sonnet-4-5",
+      {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache,
+      },
+    )
 
     // then
     expect(actualLimit).toBe(200_000)
@@ -67,9 +75,13 @@ describe("resolveActualContextLimit", () => {
     delete process.env[VERTEX_CONTEXT_ENV_KEY]
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-sonnet-4-5", {
-      anthropicContext1MEnabled: false,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-sonnet-4-5",
+      {
+        anthropicContext1MEnabled: false,
+      },
+    )
 
     // then
     expect(actualLimit).toBe(200_000)
@@ -83,10 +95,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-sonnet-4-5", 200_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-sonnet-4-5", {
-      anthropicContext1MEnabled: true,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-sonnet-4-5",
+      {
+        anthropicContext1MEnabled: true,
+        modelContextLimitsCache,
+      },
+    )
 
     expect(actualLimit).toBe(1_000_000)
   })
@@ -115,10 +131,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-opus-4.7", 1_000_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-opus-4.7", {
-      anthropicContext1MEnabled: false,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-opus-4.7",
+      {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache,
+      },
+    )
 
     // then
     expect(actualLimit).toBe(1_000_000)
@@ -132,10 +152,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-sonnet-4-6-high", 500_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-sonnet-4-6-high", {
-      anthropicContext1MEnabled: false,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-sonnet-4-6-high",
+      {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache,
+      },
+    )
 
     // then
     expect(actualLimit).toBe(500_000)
@@ -149,10 +173,14 @@ describe("resolveActualContextLimit", () => {
     modelContextLimitsCache.set("anthropic/claude-sonnet-4-5-high", 500_000)
 
     // when
-    const actualLimit = resolveActualContextLimit("anthropic", "claude-sonnet-4-5-high", {
-      anthropicContext1MEnabled: false,
-      modelContextLimitsCache,
-    })
+    const actualLimit = resolveActualContextLimit(
+      "anthropic",
+      "claude-sonnet-4-5-high",
+      {
+        anthropicContext1MEnabled: false,
+        modelContextLimitsCache,
+      },
+    )
 
     // then
     expect(actualLimit).toBe(200_000)

@@ -45,7 +45,9 @@ describe("createToolExecuteBeforeHandler", () => {
     }
 
     const hooks = {
-      sessionNotification: async (input: { event: { type: string; properties?: Record<string, unknown> } }) => {
+      sessionNotification: async (input: {
+        event: { type: string; properties?: Record<string, unknown> }
+      }) => {
         called = true
         expect(input.event.type).toBe("tool.execute.before")
         expect(input.event.properties?.sessionID).toBe("ses_q")
@@ -55,7 +57,11 @@ describe("createToolExecuteBeforeHandler", () => {
 
     const handler = createToolExecuteBeforeHandler({ ctx, hooks })
     const input = { tool: "question", sessionID: "ses_q", callID: "call_q" }
-    const output = { args: { questions: [{ question: "Proceed?", options: [{ label: "Yes" }] }] } as Record<string, unknown> }
+    const output = {
+      args: {
+        questions: [{ question: "Proceed?", options: [{ label: "Yes" }] }],
+      } as Record<string, unknown>,
+    }
 
     await handler(input, output)
 
@@ -91,7 +97,9 @@ describe("createToolExecuteBeforeHandler", () => {
   describe("task tool subagent_type normalization", () => {
     const emptyHooks = {}
 
-    function createCtxWithSessionMessages(messages: Array<{ info?: { agent?: string; role?: string } }> = []) {
+    function createCtxWithSessionMessages(
+      messages: Array<{ info?: { agent?: string; role?: string } }> = [],
+    ) {
       return {
         client: {
           session: {
@@ -106,7 +114,12 @@ describe("createToolExecuteBeforeHandler", () => {
       const ctx = createCtxWithSessionMessages()
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { category: "quick", description: "Test" } as Record<string, unknown> }
+      const output = {
+        args: { category: "quick", description: "Test" } as Record<
+          string,
+          unknown
+        >,
+      }
 
       //#when
       await handler(input, output)
@@ -120,7 +133,12 @@ describe("createToolExecuteBeforeHandler", () => {
       const ctx = createCtxWithSessionMessages()
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { subagent_type: "plan", description: "Plan test" } as Record<string, unknown> }
+      const output = {
+        args: { subagent_type: "plan", description: "Plan test" } as Record<
+          string,
+          unknown
+        >,
+      }
 
       //#when
       await handler(input, output)
@@ -134,7 +152,13 @@ describe("createToolExecuteBeforeHandler", () => {
       const ctx = createCtxWithSessionMessages()
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { category: "quick", subagent_type: "oracle", description: "Test" } as Record<string, unknown> }
+      const output = {
+        args: {
+          category: "quick",
+          subagent_type: "oracle",
+          description: "Test",
+        } as Record<string, unknown>,
+      }
 
       //#when
       await handler(input, output)
@@ -152,7 +176,13 @@ describe("createToolExecuteBeforeHandler", () => {
       ])
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { task_id: "ses_abc123", description: "Continue task", prompt: "fix it" } as Record<string, unknown> }
+      const output = {
+        args: {
+          task_id: "ses_abc123",
+          description: "Continue task",
+          prompt: "fix it",
+        } as Record<string, unknown>,
+      }
 
       //#when
       await handler(input, output)
@@ -168,7 +198,13 @@ describe("createToolExecuteBeforeHandler", () => {
       ])
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { task_id: "ses_resume_123", description: "Continue task", prompt: "fix it" } as Record<string, unknown> }
+      const output = {
+        args: {
+          task_id: "ses_resume_123",
+          description: "Continue task",
+          prompt: "fix it",
+        } as Record<string, unknown>,
+      }
 
       //#when
       await handler(input, output)
@@ -186,7 +222,13 @@ describe("createToolExecuteBeforeHandler", () => {
       ])
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { task_id: "ses_abc123", description: "Continue task", prompt: "fix it" } as Record<string, unknown> }
+      const output = {
+        args: {
+          task_id: "ses_abc123",
+          description: "Continue task",
+          prompt: "fix it",
+        } as Record<string, unknown>,
+      }
 
       //#when
       await handler(input, output)
@@ -200,7 +242,13 @@ describe("createToolExecuteBeforeHandler", () => {
       const ctx = createCtxWithSessionMessages()
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { task_id: "ses_abc123", subagent_type: "explore", description: "Continue explore" } as Record<string, unknown> }
+      const output = {
+        args: {
+          task_id: "ses_abc123",
+          subagent_type: "explore",
+          description: "Continue explore",
+        } as Record<string, unknown>,
+      }
 
       //#when
       await handler(input, output)
@@ -228,7 +276,12 @@ describe("createToolExecuteBeforeHandler", () => {
       const ctx = createCtxWithSessionMessages()
       const handler = createToolExecuteBeforeHandler({ ctx, hooks: emptyHooks })
       const input = { tool: "task", sessionID: "ses_123", callID: "call_1" }
-      const output = { args: { subagent_type: "oracle", description: "Oracle task" } as Record<string, unknown> }
+      const output = {
+        args: { subagent_type: "oracle", description: "Oracle task" } as Record<
+          string,
+          unknown
+        >,
+      }
 
       //#when
       await handler(input, output)
@@ -305,7 +358,9 @@ describe("createToolRegistry", () => {
           }),
         )
 
-        expect(Object.keys(result.filteredTools)).toHaveLength(Object.keys(builtinTools).length)
+        expect(Object.keys(result.filteredTools)).toHaveLength(
+          Object.keys(builtinTools).length,
+        )
       })
     })
   })

@@ -20,7 +20,9 @@ export type McpOAuthProviderOptions = {
   scopes?: string[]
 }
 
-async function parseTokenResponse(tokenResponse: Response): Promise<Record<string, unknown>> {
+async function parseTokenResponse(
+  tokenResponse: Response,
+): Promise<Record<string, unknown>> {
   if (!tokenResponse.ok) {
     let errorDetail = `${tokenResponse.status}`
     try {
@@ -52,12 +54,19 @@ function buildOAuthTokenData(
 
   return {
     accessToken,
-    refreshToken: typeof tokenData.refresh_token === "string" ? tokenData.refresh_token : fallbackRefreshToken,
+    refreshToken:
+      typeof tokenData.refresh_token === "string"
+        ? tokenData.refresh_token
+        : fallbackRefreshToken,
     expiresAt:
-      typeof tokenData.expires_in === "number" ? Math.floor(Date.now() / 1000) + tokenData.expires_in : undefined,
+      typeof tokenData.expires_in === "number"
+        ? Math.floor(Date.now() / 1000) + tokenData.expires_in
+        : undefined,
     clientInfo: {
       clientId: clientInfo.clientId,
-      ...(clientInfo.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
+      ...(clientInfo.clientSecret
+        ? { clientSecret: clientInfo.clientSecret }
+        : {}),
     },
   }
 }
@@ -106,10 +115,14 @@ export class McpOAuthProvider {
     return this.storedCodeVerifier
   }
 
-  async redirectToAuthorization(metadata: OAuthServerMetadata): Promise<{ code: string }> {
+  async redirectToAuthorization(
+    metadata: OAuthServerMetadata,
+  ): Promise<{ code: string }> {
     const clientInfo = this.clientInformation()
     if (!clientInfo) {
-      throw new Error("No client information available. Run login() or register a client first.")
+      throw new Error(
+        "No client information available. Run login() or register a client first.",
+      )
     }
 
     if (this.callbackPort === null) {
@@ -134,7 +147,10 @@ export class McpOAuthProvider {
 
     const clientRegistrationStorage: ClientRegistrationStorage = {
       getClientRegistration: () => this.storedClientInfo,
-      setClientRegistration: (_serverIdentifier: string, credentials: ClientCredentials) => {
+      setClientRegistration: (
+        _serverIdentifier: string,
+        credentials: ClientCredentials,
+      ) => {
         this.storedClientInfo = credentials
       },
     }
@@ -150,7 +166,9 @@ export class McpOAuthProvider {
     })
 
     if (!clientInfo) {
-      throw new Error("Failed to obtain client credentials. Provide a clientId or ensure the server supports DCR.")
+      throw new Error(
+        "Failed to obtain client credentials. Provide a clientId or ensure the server supports DCR.",
+      )
     }
 
     this.storedClientInfo = clientInfo
@@ -186,7 +204,9 @@ export class McpOAuthProvider {
     const clientInfo = this.clientInformation()
     const clientId = clientInfo?.clientId ?? this.configClientId
     if (!clientId) {
-      throw new Error("No client information available. Run login() or register a client first.")
+      throw new Error(
+        "No client information available. Run login() or register a client first.",
+      )
     }
 
     const tokenResponse = await fetch(metadata.tokenEndpoint, {
@@ -196,20 +216,33 @@ export class McpOAuthProvider {
         grant_type: "refresh_token",
         refresh_token: refreshToken,
         client_id: clientId,
-        ...(clientInfo?.clientSecret ? { client_secret: clientInfo.clientSecret } : {}),
+        ...(clientInfo?.clientSecret
+          ? { client_secret: clientInfo.clientSecret }
+          : {}),
         ...(metadata.resource ? { resource: metadata.resource } : {}),
       }).toString(),
     })
 
     const tokenData = await parseTokenResponse(tokenResponse)
-    const oauthTokenData = buildOAuthTokenData(tokenData, {
-      clientId,
-      ...(clientInfo?.clientSecret ? { clientSecret: clientInfo.clientSecret } : {}),
-    }, refreshToken)
+    const oauthTokenData = buildOAuthTokenData(
+      tokenData,
+      {
+        clientId,
+        ...(clientInfo?.clientSecret
+          ? { clientSecret: clientInfo.clientSecret }
+          : {}),
+      },
+      refreshToken,
+    )
 
     this.saveTokens(oauthTokenData)
     return oauthTokenData
   }
 }
 
-export { generateCodeVerifier, generateCodeChallenge, buildAuthorizationUrl, startCallbackServer }
+export {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  buildAuthorizationUrl,
+  startCallbackServer,
+}

@@ -8,7 +8,9 @@ export interface TodoContinuationEnforcerOptions {
 }
 
 export interface TodoContinuationEnforcer {
-  handler: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
+  handler: (input: {
+    event: { type: string; properties?: unknown }
+  }) => Promise<void>
   markRecovering: (sessionID: string) => void
   markRecoveryComplete: (sessionID: string) => void
   cancelAllCountdowns: () => void
@@ -16,10 +18,10 @@ export interface TodoContinuationEnforcer {
 }
 
 export interface Todo {
-  content: string;
-  status: string;
-  priority: string;
-  id?: string;
+  content: string
+  status: string
+  priority: string
+  id?: string
 }
 
 export interface SessionState {

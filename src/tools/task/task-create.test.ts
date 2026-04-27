@@ -174,7 +174,10 @@ describe("task_create tool", () => {
       //#then
       const taskFile = join(TEST_DIR, `${taskId}.json`)
       const taskContent = JSON.parse(await Bun.file(taskFile).text())
-      expect(taskContent.metadata).toEqual({ priority: "high", tags: ["urgent"] })
+      expect(taskContent.metadata).toEqual({
+        priority: "high",
+        tags: ["urgent"],
+      })
     })
 
     test("accepts optional blockedBy array", async () => {

@@ -17,7 +17,9 @@ export interface CreateBuiltinSkillsOptions {
   disabledSkills?: Set<string>
 }
 
-export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): BuiltinSkill[] {
+export function createBuiltinSkills(
+  options: CreateBuiltinSkillsOptions = {},
+): BuiltinSkill[] {
   const { browserProvider = "playwright", disabledSkills } = options
 
   let browserSkill: BuiltinSkill
@@ -29,7 +31,14 @@ export function createBuiltinSkills(options: CreateBuiltinSkillsOptions = {}): B
     browserSkill = playwrightSkill
   }
 
-  const skills = [browserSkill, frontendUiUxSkill, gitMasterSkill, devBrowserSkill, reviewWorkSkill, aiSlopRemoverSkill]
+  const skills = [
+    browserSkill,
+    frontendUiUxSkill,
+    gitMasterSkill,
+    devBrowserSkill,
+    reviewWorkSkill,
+    aiSlopRemoverSkill,
+  ]
 
   if (!disabledSkills) {
     return skills

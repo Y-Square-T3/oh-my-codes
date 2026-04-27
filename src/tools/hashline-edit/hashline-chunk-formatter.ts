@@ -8,7 +8,9 @@ interface HashlineChunkFormatterOptions {
   maxChunkBytes: number
 }
 
-export function createHashlineChunkFormatter(options: HashlineChunkFormatterOptions): HashlineChunkFormatter {
+export function createHashlineChunkFormatter(
+  options: HashlineChunkFormatterOptions,
+): HashlineChunkFormatter {
   const { maxChunkLines, maxChunkBytes } = options
   let outputLines: string[] = []
   let outputBytes = 0
@@ -28,7 +30,8 @@ export function createHashlineChunkFormatter(options: HashlineChunkFormatterOpti
 
     if (
       outputLines.length > 0 &&
-      (outputLines.length >= maxChunkLines || outputBytes + separatorBytes + lineBytes > maxChunkBytes)
+      (outputLines.length >= maxChunkLines ||
+        outputBytes + separatorBytes + lineBytes > maxChunkBytes)
     ) {
       const flushed = flush()
       if (flushed) chunksToYield.push(flushed)

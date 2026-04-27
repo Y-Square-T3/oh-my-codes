@@ -28,7 +28,9 @@ function getInstalledPluginsPath(pluginsBaseDir?: string): string {
   return join(pluginsBaseDir ?? getPluginsBaseDir(), "installed_plugins.json")
 }
 
-function loadInstalledPlugins(pluginsBaseDir?: string): InstalledPluginsDatabase | null {
+function loadInstalledPlugins(
+  pluginsBaseDir?: string,
+): InstalledPluginsDatabase | null {
   const dbPath = getInstalledPluginsPath(pluginsBaseDir)
   if (!existsSync(dbPath)) {
     return null
@@ -81,16 +83,22 @@ export function loadPluginManifest(installPath: string): PluginManifest | null {
 }
 
 function derivePluginNameFromKey(pluginKey: string): string {
-  const keyWithoutSource = pluginKey.startsWith("npm:") ? pluginKey.slice(4) : pluginKey
+  const keyWithoutSource = pluginKey.startsWith("npm:")
+    ? pluginKey.slice(4)
+    : pluginKey
 
   let versionSeparator: number
   if (keyWithoutSource.startsWith("@")) {
     const scopeEnd = keyWithoutSource.indexOf("/")
-    versionSeparator = scopeEnd > 0 ? keyWithoutSource.indexOf("@", scopeEnd) : -1
+    versionSeparator =
+      scopeEnd > 0 ? keyWithoutSource.indexOf("@", scopeEnd) : -1
   } else {
     versionSeparator = keyWithoutSource.lastIndexOf("@")
   }
-  const keyWithoutVersion = versionSeparator > 0 ? keyWithoutSource.slice(0, versionSeparator) : keyWithoutSource
+  const keyWithoutVersion =
+    versionSeparator > 0
+      ? keyWithoutSource.slice(0, versionSeparator)
+      : keyWithoutSource
 
   if (keyWithoutVersion.startsWith("file://")) {
     try {
@@ -125,7 +133,9 @@ function isPluginEnabled(
   return true
 }
 
-function v3EntryToInstallation(entry: InstalledPluginEntryV3): PluginInstallation {
+function v3EntryToInstallation(
+  entry: InstalledPluginEntryV3,
+): PluginInstallation {
   return {
     scope: entry.scope,
     installPath: entry.installPath,
@@ -159,12 +169,20 @@ function extractPluginEntries(
       ])
   }
   if (db.version === 1) {
-    return Object.entries(db.plugins).map(([key, installation]) => [key, installation])
+    return Object.entries(db.plugins).map(([key, installation]) => [
+      key,
+      installation,
+    ])
   }
-  return Object.entries(db.plugins).map(([key, installations]) => [key, installations[0]])
+  return Object.entries(db.plugins).map(([key, installations]) => [
+    key,
+    installations[0],
+  ])
 }
 
-export function discoverInstalledPlugins(options?: PluginLoaderOptions): PluginLoadResult {
+export function discoverInstalledPlugins(
+  options?: PluginLoaderOptions,
+): PluginLoadResult {
   // Allow overriding the plugins base directory for testing
   const pluginsBaseDir = options?.pluginsHomeOverride ?? getPluginsBaseDir()
   const db = loadInstalledPlugins(pluginsBaseDir)
@@ -178,22 +196,32 @@ export function discoverInstalledPlugins(options?: PluginLoaderOptions): PluginL
 
   const settingsEnabledPlugins = settings?.enabledPlugins
   const overrideEnabledPlugins = options?.enabledPluginsOverride
-  const pluginManifestLoader = options?.loadPluginManifestOverride ?? loadPluginManifest
+  const pluginManifestLoader =
+    options?.loadPluginManifestOverride ?? loadPluginManifest
   const cwd = process.cwd()
 
   for (const [pluginKey, installation] of extractPluginEntries(db)) {
     if (!installation) continue
 
-    if (!isPluginEnabled(pluginKey, settingsEnabledPlugins, overrideEnabledPlugins)) {
+    if (
+      !isPluginEnabled(
+        pluginKey,
+        settingsEnabledPlugins,
+        overrideEnabledPlugins,
+      )
+    ) {
       log(`Plugin disabled: ${pluginKey}`)
       continue
     }
 
     if (!shouldLoadPluginForCwd(installation, cwd)) {
-      log(`Skipping ${installation.scope}-scoped plugin outside current cwd: ${pluginKey}`, {
-        projectPath: installation.projectPath,
-        cwd,
-      })
+      log(
+        `Skipping ${installation.scope}-scoped plugin outside current cwd: ${pluginKey}`,
+        {
+          projectPath: installation.projectPath,
+          cwd,
+        },
+      )
       continue
     }
 

@@ -20,7 +20,9 @@ function isSessionMessageArray(value: unknown): value is SessionMessage[] {
   return Array.isArray(value) && value.every(isSessionMessage)
 }
 
-export function extractSessionMessages(messagesResponse: unknown): SessionMessage[] | undefined {
+export function extractSessionMessages(
+  messagesResponse: unknown,
+): SessionMessage[] | undefined {
   if (isSessionMessageArray(messagesResponse)) {
     return messagesResponse
   }

@@ -26,7 +26,10 @@ interface ToolExecuteOutput {
 export function createTaskReminderHook(_ctx: PluginInput) {
   const sessionCounters = new Map<string, number>()
 
-  const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
+  const toolExecuteAfter = async (
+    input: ToolExecuteInput,
+    output: ToolExecuteOutput,
+  ) => {
     const { tool, sessionID } = input
     const toolLower = tool.toLowerCase()
 
@@ -48,7 +51,11 @@ export function createTaskReminderHook(_ctx: PluginInput) {
 
   return {
     "tool.execute.after": toolExecuteAfter,
-    event: async ({ event }: { event: { type: string; properties?: unknown } }) => {
+    event: async ({
+      event,
+    }: {
+      event: { type: string; properties?: unknown }
+    }) => {
       if (event.type !== "session.deleted") return
       const props = event.properties as { info?: { id?: string } } | undefined
       const sessionId = props?.info?.id

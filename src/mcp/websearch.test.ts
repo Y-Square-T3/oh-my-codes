@@ -7,7 +7,9 @@ let logSpy: ReturnType<typeof spyOn>
 let createWebsearchConfig: (typeof import("./websearch"))["createWebsearchConfig"]
 let originalEnv: Record<"EXA_API_KEY" | "TAVILY_API_KEY", string | undefined>
 
-async function importFreshWebsearchModule(): Promise<typeof import("./websearch")> {
+async function importFreshWebsearchModule(): Promise<
+  typeof import("./websearch")
+> {
   return import(`./websearch?test=${Date.now()}-${Math.random()}`)
 }
 
@@ -41,7 +43,9 @@ describe("createWebsearchConfig Tavily handling", () => {
     const config = createWebsearchConfig({ provider: "tavily" })
 
     expect(config).toBeUndefined()
-    expect(logSpy).toHaveBeenCalledWith("[websearch] Tavily API key not found, skipping websearch MCP")
+    expect(logSpy).toHaveBeenCalledWith(
+      "[websearch] Tavily API key not found, skipping websearch MCP",
+    )
   })
 
   test("returns valid config when Tavily API key is present", () => {

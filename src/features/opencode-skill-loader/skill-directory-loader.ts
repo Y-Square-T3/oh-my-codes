@@ -2,7 +2,10 @@ import { promises as fs } from "fs"
 import { join } from "path"
 import { resolveSymlinkAsync, isMarkdownFile } from "../../shared/file-utils"
 import type { LoadedSkill, SkillScope } from "./types"
-import { inferSkillNameFromFileName, loadSkillFromPath } from "./loaded-skill-from-path"
+import {
+  inferSkillNameFromFileName,
+  loadSkillFromPath,
+} from "./loaded-skill-from-path"
 
 export async function loadSkillsFromDir(options: {
   skillsDir: string
@@ -15,18 +18,22 @@ export async function loadSkillsFromDir(options: {
   const depth = options.depth ?? 0
   const maxDepth = options.maxDepth ?? 2
 
-  const entries = await fs.readdir(options.skillsDir, { withFileTypes: true }).catch(() => [])
+  const entries = await fs
+    .readdir(options.skillsDir, { withFileTypes: true })
+    .catch(() => [])
   const skillMap = new Map<string, LoadedSkill>()
 
   const directories = entries.filter(
-    (entry) => !entry.name.startsWith(".") && (entry.isDirectory() || entry.isSymbolicLink())
+    (entry) =>
+      !entry.name.startsWith(".") &&
+      (entry.isDirectory() || entry.isSymbolicLink()),
   )
   const files = entries.filter(
     (entry) =>
       !entry.name.startsWith(".") &&
       !entry.isDirectory() &&
       !entry.isSymbolicLink() &&
-      isMarkdownFile(entry)
+      isMarkdownFile(entry),
   )
 
   for (const entry of directories) {

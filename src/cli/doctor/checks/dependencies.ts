@@ -6,7 +6,9 @@ import type { DependencyInfo } from "../types"
 import { spawnWithTimeout } from "../spawn-with-timeout"
 import { getCachedBinaryPath } from "../../../hooks/comment-checker/downloader"
 
-async function checkBinaryExists(binary: string): Promise<{ exists: boolean; path: string | null }> {
+async function checkBinaryExists(
+  binary: string,
+): Promise<{ exists: boolean; path: string | null }> {
   try {
     const path = Bun.which(binary)
     if (path) {
@@ -20,7 +22,10 @@ async function checkBinaryExists(binary: string): Promise<{ exists: boolean; pat
 
 async function getBinaryVersion(binary: string): Promise<string | null> {
   try {
-    const result = await spawnWithTimeout([binary, "--version"], { stdout: "pipe", stderr: "pipe" })
+    const result = await spawnWithTimeout([binary, "--version"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    })
     if (result.timedOut || result.exitCode !== 0) return null
     return result.stdout.trim().split("\n")[0] ?? null
   } catch {
@@ -30,7 +35,9 @@ async function getBinaryVersion(binary: string): Promise<string | null> {
 
 export async function checkAstGrepCli(): Promise<DependencyInfo> {
   const binaryCheck = await checkBinaryExists("sg")
-  const altBinaryCheck = !binaryCheck.exists ? await checkBinaryExists("ast-grep") : null
+  const altBinaryCheck = !binaryCheck.exists
+    ? await checkBinaryExists("ast-grep")
+    : null
 
   const binary = binaryCheck.exists ? binaryCheck : altBinaryCheck
   if (!binary || !binary.exists) {
@@ -73,7 +80,14 @@ export async function checkAstGrepNapi(): Promise<DependencyInfo> {
     const { homedir } = await import("os")
 
     const pathsToCheck = [
-      join(homedir(), ".config", "opencode", "node_modules", "@ast-grep", "napi"),
+      join(
+        homedir(),
+        ".config",
+        "opencode",
+        "node_modules",
+        "@ast-grep",
+        "napi",
+      ),
       join(process.cwd(), "node_modules", "@ast-grep", "napi"),
     ]
 
@@ -101,10 +115,12 @@ export async function checkAstGrepNapi(): Promise<DependencyInfo> {
 }
 
 function findCommentCheckerPackageBinary(): string | null {
-  const binaryName = process.platform === "win32" ? "comment-checker.exe" : "comment-checker"
+  const binaryName =
+    process.platform === "win32" ? "comment-checker.exe" : "comment-checker"
   try {
     const require = createRequire(import.meta.url)
-    const pkgPath = require.resolve("@code-yeongyu/comment-checker/package.json")
+    const pkgPath =
+      require.resolve("@code-yeongyu/comment-checker/package.json")
     const binaryPath = join(dirname(pkgPath), "bin", binaryName)
     if (existsSync(binaryPath)) return binaryPath
   } catch {
@@ -128,7 +144,9 @@ export async function checkCommentChecker(): Promise<DependencyInfo> {
   }
 
   const binaryCheck = await checkBinaryExists("comment-checker")
-  const resolvedPath = binaryCheck.exists ? binaryCheck.path : findCommentCheckerPackageBinary()
+  const resolvedPath = binaryCheck.exists
+    ? binaryCheck.path
+    : findCommentCheckerPackageBinary()
 
   if (!resolvedPath) {
     return {

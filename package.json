@@ -100,9 +100,5 @@
   ],
   "peerDependencies": {
     "zod": "^4.0.0"
-  },
-  "prettier": {
-    "semi": false,
-    "printWidth": 120
   }
 }

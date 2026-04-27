@@ -21,9 +21,18 @@ export function getConfigPaths(directory: string): string[] {
     const appdataDir = getWindowsAppdataDir()
 
     if (appdataDir) {
-      const alternateDir = userConfigDir === crossPlatformDir ? appdataDir : crossPlatformDir
-      const alternateConfig = path.join(alternateDir, "opencode", "opencode.json")
-      const alternateConfigJsonc = path.join(alternateDir, "opencode", "opencode.jsonc")
+      const alternateDir =
+        userConfigDir === crossPlatformDir ? appdataDir : crossPlatformDir
+      const alternateConfig = path.join(
+        alternateDir,
+        "opencode",
+        "opencode.json",
+      )
+      const alternateConfigJsonc = path.join(
+        alternateDir,
+        "opencode",
+        "opencode.jsonc",
+      )
 
       if (!paths.includes(alternateConfig)) {
         paths.push(alternateConfig)

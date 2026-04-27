@@ -26,13 +26,21 @@ export class TaskHistory {
       const current = list[existing]
       list[existing] = {
         ...current,
-        ...(entry.sessionID !== undefined ? { sessionID: entry.sessionID } : {}),
+        ...(entry.sessionID !== undefined
+          ? { sessionID: entry.sessionID }
+          : {}),
         ...(entry.agent !== undefined ? { agent: entry.agent } : {}),
-        ...(entry.description !== undefined ? { description: entry.description } : {}),
+        ...(entry.description !== undefined
+          ? { description: entry.description }
+          : {}),
         ...(entry.status !== undefined ? { status: entry.status } : {}),
         ...(entry.category !== undefined ? { category: entry.category } : {}),
-        ...(entry.startedAt !== undefined ? { startedAt: entry.startedAt } : {}),
-        ...(entry.completedAt !== undefined ? { completedAt: entry.completedAt } : {}),
+        ...(entry.startedAt !== undefined
+          ? { startedAt: entry.startedAt }
+          : {}),
+        ...(entry.completedAt !== undefined
+          ? { completedAt: entry.completedAt }
+          : {}),
       }
     } else {
       if (list.length >= MAX_ENTRIES_PER_PARENT) {

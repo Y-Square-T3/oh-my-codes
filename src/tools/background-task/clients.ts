@@ -19,7 +19,9 @@ export type BackgroundOutputMessagesResult =
 
 export type BackgroundOutputClient = {
   session: {
-    messages: (args: { path: { id: string } }) => Promise<BackgroundOutputMessagesResult>
+    messages: (args: {
+      path: { id: string }
+    }) => Promise<BackgroundOutputMessagesResult>
   }
 }
 

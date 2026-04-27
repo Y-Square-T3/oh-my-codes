@@ -108,7 +108,10 @@ describe("task_get tool", () => {
       expect(result.task).toEqual(taskData)
       expect(result.task.blocks).toEqual(["T-blocked-1", "T-blocked-2"])
       expect(result.task.blockedBy).toEqual(["T-blocker-1"])
-      expect(result.task.metadata).toEqual({ priority: "high", tags: ["urgent", "backend"] })
+      expect(result.task.metadata).toEqual({
+        priority: "high",
+        tags: ["urgent", "backend"],
+      })
     })
 
     test("rejects invalid task ID format", async () => {

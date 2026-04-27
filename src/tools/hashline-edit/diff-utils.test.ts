@@ -4,7 +4,10 @@ import { parsePatch } from "diff"
 import { generateUnifiedDiff } from "./diff-utils"
 
 function createNumberedLines(totalLineCount: number): string {
-  return Array.from({ length: totalLineCount }, (_, index) => `line ${index + 1}`).join("\n")
+  return Array.from(
+    { length: totalLineCount },
+    (_, index) => `line ${index + 1}`,
+  ).join("\n")
 }
 
 describe("generateUnifiedDiff", () => {
@@ -64,7 +67,12 @@ describe("generateUnifiedDiff", () => {
 
       //#then
       expect(diff).toContain("\\ No newline at end of file")
-      expect(hunkLines).toEqual(["-a", "\\ No newline at end of file", "+b", "\\ No newline at end of file"])
+      expect(hunkLines).toEqual([
+        "-a",
+        "\\ No newline at end of file",
+        "+b",
+        "\\ No newline at end of file",
+      ])
     })
   })
 

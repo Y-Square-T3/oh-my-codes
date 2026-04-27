@@ -39,7 +39,10 @@ async function importExecuteSync(): Promise<ExecuteSync> {
 
 function createDependencies(overrides?: Partial<Dependencies>): Dependencies {
   return {
-    createOrGetSession: mock(async () => ({ sessionID: "ses-test-123", isNew: true })),
+    createOrGetSession: mock(async () => ({
+      sessionID: "ses-test-123",
+      isNew: true,
+    })),
     waitForCompletion: mock(async () => {}),
     processMessages: mock(async () => "agent response"),
     setSessionFallbackChain: mock(() => {}),
@@ -48,7 +51,9 @@ function createDependencies(overrides?: Partial<Dependencies>): Dependencies {
   }
 }
 
-function createPromptAsyncRecorder(implementation?: (input: PromptAsyncInput) => Promise<unknown>) {
+function createPromptAsyncRecorder(
+  implementation?: (input: PromptAsyncInput) => Promise<unknown>,
+) {
   let capturedInput: PromptAsyncInput | undefined
 
   const promptAsync = mock(async (input: PromptAsyncInput) => {
@@ -103,7 +108,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     const promptInput = recorder.getCapturedInput()
@@ -112,7 +122,9 @@ describe("executeSync", () => {
     expect(promptInput?.body.agent).toBe("explore")
     expect(promptInput?.body.tools.question).toBe(false)
     expect(promptInput?.body.tools.task).toBe(false)
-    expect(promptInput?.body.parts).toEqual([{ type: "text", text: "find something" }])
+    expect(promptInput?.body.parts).toEqual([
+      { type: "text", text: "find something" },
+    ])
   })
 
   test("removes invisible agent characters before sending the sync prompt", async () => {
@@ -129,7 +141,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     const promptInput = recorder.getCapturedInput()
@@ -140,7 +157,10 @@ describe("executeSync", () => {
     //#given
     const executeSync = await importExecuteSync()
     const deps = createDependencies({
-      createOrGetSession: mock(async () => ({ sessionID: "ses-test-456", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-test-456",
+        isNew: true,
+      })),
       processMessages: mock(async () => "final answer"),
     })
     const toolContext = createToolContext()
@@ -153,7 +173,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    const result = await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    const result = await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     expect(result).toContain("final answer")
@@ -163,7 +188,7 @@ describe("executeSync", () => {
     expect(deps.waitForCompletion).toHaveBeenCalledWith(
       "ses-test-456",
       toolContext,
-      expect.objectContaining({ client: expect.anything() })
+      expect.objectContaining({ client: expect.anything() }),
     )
   })
 
@@ -221,7 +246,10 @@ describe("executeSync", () => {
     //#given
     const executeSync = await importExecuteSync()
     const deps = createDependencies({
-      createOrGetSession: mock(async () => ({ sessionID: "ses-metadata", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-metadata",
+        isNew: true,
+      })),
     })
     const toolContext = createToolContext()
     const recorder = createPromptAsyncRecorder()
@@ -233,7 +261,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     expect(toolContext.metadata).toHaveBeenCalledWith({
@@ -246,7 +279,10 @@ describe("executeSync", () => {
     //#given
     const executeSync = await importExecuteSync()
     const deps = createDependencies({
-      createOrGetSession: mock(async () => ({ sessionID: "ses-fallback", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-fallback",
+        isNew: true,
+      })),
     })
     const toolContext = createToolContext()
     const recorder = createPromptAsyncRecorder()
@@ -267,18 +303,24 @@ describe("executeSync", () => {
       toolContext,
       createContext(recorder.promptAsync) as never,
       deps,
-      fallbackChain
+      fallbackChain,
     )
 
     //#then
-    expect(deps.setSessionFallbackChain).toHaveBeenCalledWith("ses-fallback", fallbackChain)
+    expect(deps.setSessionFallbackChain).toHaveBeenCalledWith(
+      "ses-fallback",
+      fallbackChain,
+    )
   })
 
   test("returns dedicated agent-not-found error with task metadata", async () => {
     //#given
     const executeSync = await importExecuteSync()
     const deps = createDependencies({
-      createOrGetSession: mock(async () => ({ sessionID: "ses-missing-agent", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-missing-agent",
+        isNew: true,
+      })),
     })
     const toolContext = createToolContext()
     const recorder = createPromptAsyncRecorder(async () => {
@@ -292,7 +334,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    const result = await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    const result = await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     expect(result).toContain('Error: Agent "explore" not found')
@@ -315,7 +362,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     const promptInput = recorder.getCapturedInput()
@@ -326,7 +378,10 @@ describe("executeSync", () => {
     //#given
     const executeSync = await importExecuteSync()
     const deps = createDependencies({
-      createOrGetSession: mock(async () => ({ sessionID: "ses-prompt-error", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-prompt-error",
+        isNew: true,
+      })),
     })
     const toolContext = createToolContext()
     const recorder = createPromptAsyncRecorder(async () => {
@@ -340,7 +395,12 @@ describe("executeSync", () => {
     }
 
     //#when
-    const result = await executeSync(args, toolContext, createContext(recorder.promptAsync) as never, deps)
+    const result = await executeSync(
+      args,
+      toolContext,
+      createContext(recorder.promptAsync) as never,
+      deps,
+    )
 
     //#then
     expect(result).toContain("Error: Failed to send prompt: network exploded")
@@ -354,7 +414,10 @@ describe("executeSync", () => {
     const { executeSync } = require("./sync-executor")
 
     const deps = {
-      createOrGetSession: mock(async () => ({ sessionID: "ses-test-789", isNew: true })),
+      createOrGetSession: mock(async () => ({
+        sessionID: "ses-test-789",
+        isNew: true,
+      })),
       waitForCompletion: mock(async () => {}),
       processMessages: mock(async () => "agent response"),
       setSessionFallbackChain: mock(() => {}),
@@ -389,7 +452,14 @@ describe("executeSync", () => {
     }
 
     //#when
-    await executeSync(args, toolContext, ctx as any, deps, undefined, spawnReservation)
+    await executeSync(
+      args,
+      toolContext,
+      ctx as any,
+      deps,
+      undefined,
+      spawnReservation,
+    )
 
     //#then
     expect(spawnReservation.commit).toHaveBeenCalledTimes(1)

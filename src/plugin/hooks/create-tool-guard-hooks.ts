@@ -29,18 +29,32 @@ import { safeCreateHook } from "../../shared/safe-create-hook"
 export type ToolGuardHooks = {
   commentChecker: ReturnType<typeof createCommentCheckerHooks> | null
   toolOutputTruncator: ReturnType<typeof createToolOutputTruncatorHook> | null
-  directoryAgentsInjector: ReturnType<typeof createDirectoryAgentsInjectorHook> | null
-  directoryReadmeInjector: ReturnType<typeof createDirectoryReadmeInjectorHook> | null
-  emptyTaskResponseDetector: ReturnType<typeof createEmptyTaskResponseDetectorHook> | null
+  directoryAgentsInjector: ReturnType<
+    typeof createDirectoryAgentsInjectorHook
+  > | null
+  directoryReadmeInjector: ReturnType<
+    typeof createDirectoryReadmeInjectorHook
+  > | null
+  emptyTaskResponseDetector: ReturnType<
+    typeof createEmptyTaskResponseDetectorHook
+  > | null
   rulesInjector: ReturnType<typeof createRulesInjectorHook> | null
-  tasksTodowriteDisabler: ReturnType<typeof createTasksTodowriteDisablerHook> | null
-  writeExistingFileGuard: ReturnType<typeof createWriteExistingFileGuardHook> | null
+  tasksTodowriteDisabler: ReturnType<
+    typeof createTasksTodowriteDisablerHook
+  > | null
+  writeExistingFileGuard: ReturnType<
+    typeof createWriteExistingFileGuardHook
+  > | null
   bashFileReadGuard: ReturnType<typeof createBashFileReadGuardHook> | null
   hashlineReadEnhancer: ReturnType<typeof createHashlineReadEnhancerHook> | null
   jsonErrorRecovery: ReturnType<typeof createJsonErrorRecoveryHook> | null
   readImageResizer: ReturnType<typeof createReadImageResizerHook> | null
-  todoDescriptionOverride: ReturnType<typeof createTodoDescriptionOverrideHook> | null
-  webfetchRedirectGuard: ReturnType<typeof createWebFetchRedirectGuardHook> | null
+  todoDescriptionOverride: ReturnType<
+    typeof createTodoDescriptionOverrideHook
+  > | null
+  webfetchRedirectGuard: ReturnType<
+    typeof createWebFetchRedirectGuardHook
+  > | null
 }
 
 export function createToolGuardHooks(args: {
@@ -50,12 +64,15 @@ export function createToolGuardHooks(args: {
   isHookEnabled: (hookName: HookName) => boolean
   safeHookEnabled: boolean
 }): ToolGuardHooks {
-  const { ctx, pluginConfig, modelCacheState, isHookEnabled, safeHookEnabled } = args
+  const { ctx, pluginConfig, modelCacheState, isHookEnabled, safeHookEnabled } =
+    args
   const safeHook = <T>(hookName: HookName, factory: () => T): T | null =>
     safeCreateHook(hookName, factory, { enabled: safeHookEnabled })
 
   const commentChecker = isHookEnabled("comment-checker")
-    ? safeHook("comment-checker", () => createCommentCheckerHooks(pluginConfig.comment_checker))
+    ? safeHook("comment-checker", () =>
+        createCommentCheckerHooks(pluginConfig.comment_checker),
+      )
     : null
 
   const toolOutputTruncator = isHookEnabled("tool-output-truncator")
@@ -63,32 +80,45 @@ export function createToolGuardHooks(args: {
         createToolOutputTruncatorHook(ctx, {
           modelCacheState,
           experimental: pluginConfig.experimental,
-        }))
+        }),
+      )
     : null
 
-  let directoryAgentsInjector: ReturnType<typeof createDirectoryAgentsInjectorHook> | null = null
+  let directoryAgentsInjector: ReturnType<
+    typeof createDirectoryAgentsInjectorHook
+  > | null = null
   if (isHookEnabled("directory-agents-injector")) {
     const currentVersion = getOpenCodeVersion()
     const hasNativeSupport =
-      currentVersion !== null && isOpenCodeVersionAtLeast(OPENCODE_NATIVE_AGENTS_INJECTION_VERSION)
+      currentVersion !== null &&
+      isOpenCodeVersionAtLeast(OPENCODE_NATIVE_AGENTS_INJECTION_VERSION)
     if (hasNativeSupport) {
-      log("directory-agents-injector auto-disabled due to native OpenCode support", {
-        currentVersion,
-        nativeVersion: OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
-      })
+      log(
+        "directory-agents-injector auto-disabled due to native OpenCode support",
+        {
+          currentVersion,
+          nativeVersion: OPENCODE_NATIVE_AGENTS_INJECTION_VERSION,
+        },
+      )
     } else {
       directoryAgentsInjector = safeHook("directory-agents-injector", () =>
-        createDirectoryAgentsInjectorHook(ctx, modelCacheState))
+        createDirectoryAgentsInjectorHook(ctx, modelCacheState),
+      )
     }
   }
 
   const directoryReadmeInjector = isHookEnabled("directory-readme-injector")
     ? safeHook("directory-readme-injector", () =>
-        createDirectoryReadmeInjectorHook(ctx, modelCacheState))
+        createDirectoryReadmeInjectorHook(ctx, modelCacheState),
+      )
     : null
 
-  const emptyTaskResponseDetector = isHookEnabled("empty-task-response-detector")
-    ? safeHook("empty-task-response-detector", () => createEmptyTaskResponseDetectorHook(ctx))
+  const emptyTaskResponseDetector = isHookEnabled(
+    "empty-task-response-detector",
+  )
+    ? safeHook("empty-task-response-detector", () =>
+        createEmptyTaskResponseDetectorHook(ctx),
+      )
     : null
 
   const cc = pluginConfig.claude_code
@@ -97,16 +127,22 @@ export function createToolGuardHooks(args: {
     ? safeHook("rules-injector", () =>
         createRulesInjectorHook(ctx, modelCacheState, {
           skipClaudeUserRules,
-        }))
+        }),
+      )
     : null
 
   const tasksTodowriteDisabler = isHookEnabled("tasks-todowrite-disabler")
     ? safeHook("tasks-todowrite-disabler", () =>
-        createTasksTodowriteDisablerHook({ experimental: pluginConfig.experimental }))
+        createTasksTodowriteDisablerHook({
+          experimental: pluginConfig.experimental,
+        }),
+      )
     : null
 
   const writeExistingFileGuard = isHookEnabled("write-existing-file-guard")
-    ? safeHook("write-existing-file-guard", () => createWriteExistingFileGuardHook(ctx))
+    ? safeHook("write-existing-file-guard", () =>
+        createWriteExistingFileGuardHook(ctx),
+      )
     : null
 
   const bashFileReadGuard = isHookEnabled("bash-file-read-guard")
@@ -114,7 +150,11 @@ export function createToolGuardHooks(args: {
     : null
 
   const hashlineReadEnhancer = isHookEnabled("hashline-read-enhancer")
-    ? safeHook("hashline-read-enhancer", () => createHashlineReadEnhancerHook(ctx, { hashline_edit: { enabled: pluginConfig.hashline_edit ?? false } }))
+    ? safeHook("hashline-read-enhancer", () =>
+        createHashlineReadEnhancerHook(ctx, {
+          hashline_edit: { enabled: pluginConfig.hashline_edit ?? false },
+        }),
+      )
     : null
 
   const jsonErrorRecovery = isHookEnabled("json-error-recovery")
@@ -126,11 +166,15 @@ export function createToolGuardHooks(args: {
     : null
 
   const todoDescriptionOverride = isHookEnabled("todo-description-override")
-    ? safeHook("todo-description-override", () => createTodoDescriptionOverrideHook())
+    ? safeHook("todo-description-override", () =>
+        createTodoDescriptionOverrideHook(),
+      )
     : null
 
   const webfetchRedirectGuard = isHookEnabled("webfetch-redirect-guard")
-    ? safeHook("webfetch-redirect-guard", () => createWebFetchRedirectGuardHook(ctx))
+    ? safeHook("webfetch-redirect-guard", () =>
+        createWebFetchRedirectGuardHook(ctx),
+      )
     : null
 
   return {

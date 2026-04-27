@@ -1,11 +1,14 @@
 import type { OpencodeClient } from "./types"
 import { log } from "../../shared/logger"
-import { readConnectedProvidersCache, readProviderModelsCache } from "../../shared/connected-providers-cache"
+import {
+  readConnectedProvidersCache,
+  readProviderModelsCache,
+} from "../../shared/connected-providers-cache"
 
 function addFromProviderModels(
   out: Set<string>,
   providerID: string,
-  models: Array<string | { id?: string }> | undefined
+  models: Array<string | { id?: string }> | undefined,
 ): void {
   if (!models) return
   for (const item of models) {
@@ -15,16 +18,24 @@ function addFromProviderModels(
   }
 }
 
-export async function getAvailableModelsForDelegateTask(client: OpencodeClient): Promise<Set<string>> {
+export async function getAvailableModelsForDelegateTask(
+  client: OpencodeClient,
+): Promise<Set<string>> {
   const providerModelsCache = readProviderModelsCache()
 
   if (providerModelsCache?.models) {
     const connected = new Set(providerModelsCache.connected)
 
     const out = new Set<string>()
-    for (const [providerID, models] of Object.entries(providerModelsCache.models)) {
+    for (const [providerID, models] of Object.entries(
+      providerModelsCache.models,
+    )) {
       if (!connected.has(providerID)) continue
-      addFromProviderModels(out, providerID, models as Array<string | { id?: string }> | undefined)
+      addFromProviderModels(
+        out,
+        providerID,
+        models as Array<string | { id?: string }> | undefined,
+      )
     }
     return out
   }
@@ -35,9 +46,9 @@ export async function getAvailableModelsForDelegateTask(client: OpencodeClient):
     return new Set()
   }
 
-  const modelList = (client as unknown as { model?: { list?: () => Promise<unknown> } })
-    ?.model
-    ?.list
+  const modelList = (
+    client as unknown as { model?: { list?: () => Promise<unknown> } }
+  )?.model?.list
 
   if (!modelList) {
     return new Set()
@@ -47,7 +58,9 @@ export async function getAvailableModelsForDelegateTask(client: OpencodeClient):
     const result = await modelList()
     const rows = Array.isArray(result)
       ? result
-      : ((result as { data?: unknown }).data as Array<{ provider?: string; id?: string }> | undefined) ?? []
+      : (((result as { data?: unknown }).data as
+          | Array<{ provider?: string; id?: string }>
+          | undefined) ?? [])
 
     const connected = new Set(connectedProviders)
     const out = new Set<string>()

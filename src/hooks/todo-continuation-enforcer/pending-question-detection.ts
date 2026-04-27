@@ -29,7 +29,9 @@ export function hasUnansweredQuestion(messages: Message[]): boolean {
           (part.name === "question" || part.toolName === "question"),
       )
       if (hasQuestion) {
-        log(`[${HOOK_NAME}] Detected pending question tool in last assistant message`)
+        log(
+          `[${HOOK_NAME}] Detected pending question tool in last assistant message`,
+        )
         return true
       }
       return false

@@ -1,6 +1,12 @@
 import { detectHeuristicModelFamily } from "./model-capability-heuristics"
 
-type CompatibilityField = "variant" | "reasoningEffort" | "temperature" | "topP" | "maxTokens" | "thinking"
+type CompatibilityField =
+  | "variant"
+  | "reasoningEffort"
+  | "temperature"
+  | "topP"
+  | "maxTokens"
+  | "thinking"
 
 type DesiredModelSettings = {
   variant?: string
@@ -51,7 +57,11 @@ export type ModelSettingsCompatibilityResult = {
 const VARIANT_LADDER = ["low", "medium", "high", "xhigh", "max"]
 const REASONING_LADDER = ["none", "minimal", "low", "medium", "high", "xhigh"]
 
-function downgradeWithinLadder(value: string, allowed: string[], ladder: string[]): string | undefined {
+function downgradeWithinLadder(
+  value: string,
+  allowed: string[],
+  ladder: string[],
+): string | undefined {
   const requestedIndex = ladder.indexOf(value)
   if (requestedIndex === -1) return undefined
 
@@ -64,21 +74,31 @@ function downgradeWithinLadder(value: string, allowed: string[], ladder: string[
   return undefined
 }
 
-function normalizeCapabilitiesVariants(capabilities: CompatibilityCapabilities | undefined): string[] | undefined {
+function normalizeCapabilitiesVariants(
+  capabilities: CompatibilityCapabilities | undefined,
+): string[] | undefined {
   if (!capabilities?.variants || capabilities.variants.length === 0) {
     return undefined
   }
   return capabilities.variants.map((v) => v.toLowerCase())
 }
 
-function normalizeCapabilitiesReasoningEfforts(capabilities: CompatibilityCapabilities | undefined): string[] | undefined {
-  if (!capabilities?.reasoningEfforts || capabilities.reasoningEfforts.length === 0) {
+function normalizeCapabilitiesReasoningEfforts(
+  capabilities: CompatibilityCapabilities | undefined,
+): string[] | undefined {
+  if (
+    !capabilities?.reasoningEfforts ||
+    capabilities.reasoningEfforts.length === 0
+  ) {
     return undefined
   }
   return capabilities.reasoningEfforts.map((value) => value.toLowerCase())
 }
 
-type FieldResolution = { value?: string; reason?: ModelSettingsCompatibilityChange["reason"] }
+type FieldResolution = {
+  value?: string
+  reason?: ModelSettingsCompatibilityChange["reason"]
+}
 
 function resolveField(
   normalized: string,
@@ -117,14 +137,27 @@ export function resolveCompatibleModelSettings(
   const familyKnown = Boolean(family)
   const changes: ModelSettingsCompatibilityChange[] = []
   const metadataVariants = normalizeCapabilitiesVariants(input.capabilities)
-  const metadataReasoningEfforts = normalizeCapabilitiesReasoningEfforts(input.capabilities)
+  const metadataReasoningEfforts = normalizeCapabilitiesReasoningEfforts(
+    input.capabilities,
+  )
 
   let variant = input.desired.variant
   if (variant !== undefined) {
     const normalized = variant.toLowerCase()
-    const resolved = resolveField(normalized, family?.variants, VARIANT_LADDER, familyKnown, metadataVariants)
+    const resolved = resolveField(
+      normalized,
+      family?.variants,
+      VARIANT_LADDER,
+      familyKnown,
+      metadataVariants,
+    )
     if (resolved.value !== normalized && resolved.reason) {
-      changes.push({ field: "variant", from: variant, to: resolved.value, reason: resolved.reason })
+      changes.push({
+        field: "variant",
+        from: variant,
+        to: resolved.value,
+        reason: resolved.reason,
+      })
     }
     variant = resolved.value
   }
@@ -132,15 +165,29 @@ export function resolveCompatibleModelSettings(
   let reasoningEffort = input.desired.reasoningEffort
   if (reasoningEffort !== undefined) {
     const normalized = reasoningEffort.toLowerCase()
-    const resolved = resolveField(normalized, family?.reasoningEfforts, REASONING_LADDER, familyKnown, metadataReasoningEfforts)
+    const resolved = resolveField(
+      normalized,
+      family?.reasoningEfforts,
+      REASONING_LADDER,
+      familyKnown,
+      metadataReasoningEfforts,
+    )
     if (resolved.value !== normalized && resolved.reason) {
-      changes.push({ field: "reasoningEffort", from: reasoningEffort, to: resolved.value, reason: resolved.reason })
+      changes.push({
+        field: "reasoningEffort",
+        from: reasoningEffort,
+        to: resolved.value,
+        reason: resolved.reason,
+      })
     }
     reasoningEffort = resolved.value
   }
 
   let temperature = input.desired.temperature
-  if (temperature !== undefined && input.capabilities?.supportsTemperature === false) {
+  if (
+    temperature !== undefined &&
+    input.capabilities?.supportsTemperature === false
+  ) {
     changes.push({
       field: "temperature",
       from: String(temperature),
@@ -178,7 +225,10 @@ export function resolveCompatibleModelSettings(
   }
 
   let thinking = input.desired.thinking
-  if (thinking !== undefined && input.capabilities?.supportsThinking === false) {
+  if (
+    thinking !== undefined &&
+    input.capabilities?.supportsThinking === false
+  ) {
     changes.push({
       field: "thinking",
       from: JSON.stringify(thinking),

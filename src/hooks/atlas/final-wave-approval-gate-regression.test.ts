@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, mock, test, afterAll } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} from "bun:test"
 import { randomUUID } from "node:crypto"
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -6,9 +14,15 @@ import { join } from "node:path"
 import { createOpencodeClient } from "@opencode-ai/sdk"
 import type { AssistantMessage, Session } from "@opencode-ai/sdk"
 import type { BoulderState } from "../../features/boulder-state"
-import { clearBoulderState, writeBoulderState } from "../../features/boulder-state"
+import {
+  clearBoulderState,
+  writeBoulderState,
+} from "../../features/boulder-state"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-final-wave-regression-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `atlas-final-wave-regression-storage-${randomUUID()}`,
+)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -29,7 +43,9 @@ mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => false,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createAtlasHook } = await import("./index")
 const { MESSAGE_STORAGE } = await import("../../features/hook-message-injector")
@@ -54,22 +70,27 @@ describe("Atlas final-wave approval gate regressions", () => {
       response: new Response(),
     }))
 
-    Reflect.set(client.session, "get", async ({ path }: { path: { id: string } }) => {
-      const parentID = path.id === "ses_nested_scope_review"
-        ? "atlas-nested-final-wave-session"
-        : path.id.startsWith("ses_parallel_review_")
-          ? "atlas-parallel-final-wave-session"
-          : "main-session-123"
+    Reflect.set(
+      client.session,
+      "get",
+      async ({ path }: { path: { id: string } }) => {
+        const parentID =
+          path.id === "ses_nested_scope_review"
+            ? "atlas-nested-final-wave-session"
+            : path.id.startsWith("ses_parallel_review_")
+              ? "atlas-parallel-final-wave-session"
+              : "main-session-123"
 
-      return {
-        data: {
-          id: path.id,
-          parentID,
-        } as Session,
-        request: new Request(`http://localhost/session/${path.id}`),
-        response: new Response(),
-      }
-    })
+        return {
+          data: {
+            id: path.id,
+            parentID,
+          } as Session,
+          request: new Request(`http://localhost/session/${path.id}`),
+          response: new Response(),
+        }
+      },
+    )
 
     return {
       directory: testDirectory,
@@ -96,7 +117,11 @@ describe("Atlas final-wave approval gate regressions", () => {
     )
   }
 
-  function writePlanState(sessionID: string, planName: string, planContent: string): void {
+  function writePlanState(
+    sessionID: string,
+    planName: string,
+    planContent: string,
+  ): void {
     const planPath = join(testDirectory, `${planName}.md`)
     writeFileSync(planPath, planContent)
 
@@ -112,7 +137,10 @@ describe("Atlas final-wave approval gate regressions", () => {
   }
 
   beforeEach(() => {
-    testDirectory = join(tmpdir(), `atlas-final-wave-regression-${randomUUID()}`)
+    testDirectory = join(
+      tmpdir(),
+      `atlas-final-wave-regression-${randomUUID()}`,
+    )
     mkdirSync(join(testDirectory, ".sisyphus"), { recursive: true })
     clearBoulderState(testDirectory)
   })
@@ -128,7 +156,10 @@ describe("Atlas final-wave approval gate regressions", () => {
     // given
     const sessionID = "atlas-nested-final-wave-session"
     setupMessageStorage(sessionID)
-    writePlanState(sessionID, "nested-final-wave-plan", `# Plan
+    writePlanState(
+      sessionID,
+      "nested-final-wave-plan",
+      `# Plan
 
 ## TODOs
 - [x] 1. Implement feature
@@ -147,7 +178,8 @@ describe("Atlas final-wave approval gate regressions", () => {
 
 ## Final Checklist
 - [ ] All tests pass
-`)
+`,
+    )
 
     const hook = createAtlasHook(createMockPluginInput())
     const toolOutput = {
@@ -173,7 +205,10 @@ session_id: ses_nested_scope_review
     // given
     const sessionID = "atlas-parallel-final-wave-session"
     setupMessageStorage(sessionID)
-    writePlanState(sessionID, "parallel-final-wave-plan", `# Plan
+    writePlanState(
+      sessionID,
+      "parallel-final-wave-plan",
+      `# Plan
 
 ## TODOs
 - [x] 1. Ship implementation
@@ -184,7 +219,8 @@ session_id: ses_nested_scope_review
 - [ ] F2. **Code Quality Review** - \`unspecified-high\`
 - [ ] F3. **Real Manual QA** - \`unspecified-high\`
 - [ ] F4. **Scope Fidelity Check** - \`deep\`
-`)
+`,
+    )
 
     const hook = createAtlasHook(createMockPluginInput())
     const firstThreeOutputs = [1, 2, 3].map((index) => ({

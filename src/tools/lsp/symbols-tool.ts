@@ -13,8 +13,13 @@ export const lsp_symbols: ToolDefinition = tool({
     scope: tool.schema
       .enum(["document", "workspace"])
       .default("document")
-      .describe("'document' for file symbols, 'workspace' for project-wide search"),
-    query: tool.schema.string().optional().describe("Symbol name to search (required for workspace scope)"),
+      .describe(
+        "'document' for file symbols, 'workspace' for project-wide search",
+      ),
+    query: tool.schema
+      .string()
+      .optional()
+      .describe("Symbol name to search (required for workspace scope)"),
     limit: tool.schema.number().optional().describe("Max results (default 50)"),
   },
   execute: async (args, _context) => {
@@ -27,7 +32,9 @@ export const lsp_symbols: ToolDefinition = tool({
         }
 
         const result = await withLspClient(args.filePath, async (client) => {
-          return (await client.workspaceSymbols(args.query!)) as SymbolInfo[] | null
+          return (await client.workspaceSymbols(args.query!)) as
+            | SymbolInfo[]
+            | null
         })
 
         if (!result || result.length === 0) {
@@ -35,7 +42,10 @@ export const lsp_symbols: ToolDefinition = tool({
         }
 
         const total = result.length
-        const limit = Math.min(args.limit ?? DEFAULT_MAX_SYMBOLS, DEFAULT_MAX_SYMBOLS)
+        const limit = Math.min(
+          args.limit ?? DEFAULT_MAX_SYMBOLS,
+          DEFAULT_MAX_SYMBOLS,
+        )
         const truncated = total > limit
         const limited = result.slice(0, limit)
         const lines = limited.map(formatSymbolInfo)
@@ -45,7 +55,10 @@ export const lsp_symbols: ToolDefinition = tool({
         return lines.join("\n")
       } else {
         const result = await withLspClient(args.filePath, async (client) => {
-          return (await client.documentSymbols(args.filePath)) as DocumentSymbol[] | SymbolInfo[] | null
+          return (await client.documentSymbols(args.filePath)) as
+            | DocumentSymbol[]
+            | SymbolInfo[]
+            | null
         })
 
         if (!result || result.length === 0) {
@@ -53,7 +66,10 @@ export const lsp_symbols: ToolDefinition = tool({
         }
 
         const total = result.length
-        const limit = Math.min(args.limit ?? DEFAULT_MAX_SYMBOLS, DEFAULT_MAX_SYMBOLS)
+        const limit = Math.min(
+          args.limit ?? DEFAULT_MAX_SYMBOLS,
+          DEFAULT_MAX_SYMBOLS,
+        )
         const truncated = total > limit
         const limited = truncated ? result.slice(0, limit) : result
 
@@ -63,7 +79,11 @@ export const lsp_symbols: ToolDefinition = tool({
         }
 
         if ("range" in limited[0]) {
-          lines.push(...(limited as DocumentSymbol[]).map((s) => formatDocumentSymbol(s)))
+          lines.push(
+            ...(limited as DocumentSymbol[]).map((s) =>
+              formatDocumentSymbol(s),
+            ),
+          )
         } else {
           lines.push(...(limited as SymbolInfo[]).map(formatSymbolInfo))
         }

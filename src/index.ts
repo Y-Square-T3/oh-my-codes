@@ -5,7 +5,10 @@ import type { HookName } from "./config"
 
 import { createHooks } from "./create-hooks"
 import { createManagers } from "./create-managers"
-import { createRuntimeTmuxConfig, isTmuxIntegrationEnabled } from "./create-runtime-tmux-config"
+import {
+  createRuntimeTmuxConfig,
+  isTmuxIntegrationEnabled,
+} from "./create-runtime-tmux-config"
 import { createTools } from "./create-tools"
 import { initializeOpenClaw } from "./openclaw"
 import { createPluginInterface } from "./plugin-interface"
@@ -13,8 +16,15 @@ import { createPluginInterface } from "./plugin-interface"
 import { loadPluginConfig } from "./plugin-config"
 import { createModelCacheState } from "./plugin-state"
 import { createFirstMessageVariantGate } from "./shared/first-message-variant"
-import { injectServerAuthIntoClient, log, logLegacyPluginStartupWarning } from "./shared"
-import { detectExternalSkillPlugin, getSkillPluginConflictWarning } from "./shared/external-plugin-detector"
+import {
+  injectServerAuthIntoClient,
+  log,
+  logLegacyPluginStartupWarning,
+} from "./shared"
+import {
+  detectExternalSkillPlugin,
+  getSkillPluginConflictWarning,
+} from "./shared/external-plugin-detector"
 import { startBackgroundCheck as startTmuxCheck } from "./tools/interactive-bash"
 import { createPluginPostHog, getPostHogDistinctId } from "./shared/posthog"
 
@@ -63,7 +73,8 @@ const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
   }
   const disabledHooks = new Set(pluginConfig.disabled_hooks ?? [])
 
-  const isHookEnabled = (hookName: HookName): boolean => !disabledHooks.has(hookName)
+  const isHookEnabled = (hookName: HookName): boolean =>
+    !disabledHooks.has(hookName)
   const safeHookEnabled = pluginConfig.experimental?.safe_hook_creation ?? true
 
   const firstMessageVariantGate = createFirstMessageVariantGate()
@@ -121,7 +132,9 @@ const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
         output,
       )
       if (hooks.compactionContextInjector) {
-        output.context.push(hooks.compactionContextInjector.inject(compactingInput.sessionID))
+        output.context.push(
+          hooks.compactionContextInjector.inject(compactingInput.sessionID),
+        )
       }
     },
   }

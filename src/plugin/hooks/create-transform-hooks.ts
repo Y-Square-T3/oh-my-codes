@@ -17,8 +17,12 @@ import { safeCreateHook } from "../../shared/safe-create-hook"
 export type TransformHooks = {
   claudeCodeHooks: ReturnType<typeof createClaudeCodeHooksHook> | null
   keywordDetector: ReturnType<typeof createKeywordDetectorHook> | null
-  contextInjectorMessagesTransform: ReturnType<typeof createContextInjectorMessagesTransformHook>
-  thinkingBlockValidator: ReturnType<typeof createThinkingBlockValidatorHook> | null
+  contextInjectorMessagesTransform: ReturnType<
+    typeof createContextInjectorMessagesTransformHook
+  >
+  thinkingBlockValidator: ReturnType<
+    typeof createThinkingBlockValidatorHook
+  > | null
   toolPairValidator: ReturnType<typeof createToolPairValidatorHook> | null
 }
 
@@ -39,7 +43,8 @@ export function createTransformHooks(args: {
           createClaudeCodeHooksHook(
             ctx,
             {
-              disabledHooks: (pluginConfig.claude_code?.hooks ?? true) ? undefined : true,
+              disabledHooks:
+                (pluginConfig.claude_code?.hooks ?? true) ? undefined : true,
               keywordDetectorDisabled: !isHookEnabled("keyword-detector"),
             },
             contextCollector,
@@ -51,7 +56,12 @@ export function createTransformHooks(args: {
   const keywordDetector = isHookEnabled("keyword-detector")
     ? safeCreateHook(
         "keyword-detector",
-        () => createKeywordDetectorHook(ctx, contextCollector, ralphLoop ?? undefined),
+        () =>
+          createKeywordDetectorHook(
+            ctx,
+            contextCollector,
+            ralphLoop ?? undefined,
+          ),
         { enabled: safeHookEnabled },
       )
     : null

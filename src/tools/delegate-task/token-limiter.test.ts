@@ -42,7 +42,9 @@ describe("token-limiter", () => {
     const result = truncateToTokenBudget(content, maxTokens)
 
     // then
-    expect(estimateTokenCount(result)).toBeLessThanOrEqual(maxTokens + TRUNCATION_MARKER_TOKEN_OVERHEAD)
+    expect(estimateTokenCount(result)).toBeLessThanOrEqual(
+      maxTokens + TRUNCATION_MARKER_TOKEN_OVERHEAD,
+    )
   })
 
   describe("truncateToTokenBudget", () => {
@@ -136,7 +138,9 @@ describe("token-limiter", () => {
     expect(result).toContain("AGENTS_C")
     expect(result).toContain("CATE")
     expect(result).toContain("SKILL_ALPHA:")
-    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(80 + TRUNCATION_MARKER_TOKEN_OVERHEAD)
+    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(
+      80 + TRUNCATION_MARKER_TOKEN_OVERHEAD,
+    )
   })
 
   test("buildSystemContentWithTokenLimit truncates category after skills are exhausted", () => {
@@ -154,7 +158,9 @@ describe("token-limiter", () => {
     // then
     expect(result).toContain("AGENTS_C")
     expect(result).not.toContain("SKILL_ALPHA:" + "a".repeat(80))
-    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(30 + TRUNCATION_MARKER_TOKEN_OVERHEAD)
+    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(
+      30 + TRUNCATION_MARKER_TOKEN_OVERHEAD,
+    )
   })
 
   test("buildSystemContentWithTokenLimit truncates agents context last", () => {
@@ -173,6 +179,8 @@ describe("token-limiter", () => {
     expect(result).toContain("AGENTS_CONTEXT:")
     expect(result).not.toContain("SKILL_ALPHA:")
     expect(result).not.toContain("CATEGORY_APPEND:")
-    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(10 + TRUNCATION_MARKER_TOKEN_OVERHEAD)
+    expect(estimateTokenCount(result as string)).toBeLessThanOrEqual(
+      10 + TRUNCATION_MARKER_TOKEN_OVERHEAD,
+    )
   })
 })

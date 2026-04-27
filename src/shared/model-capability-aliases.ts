@@ -24,13 +24,15 @@ const EXACT_ALIAS_RULES: ReadonlyArray<ExactAliasRule> = [
     aliasModelID: "gemini-3-pro-high",
     ruleID: "gemini-3-pro-tier-alias",
     canonicalModelID: "gemini-3-pro-preview",
-    rationale: "Legacy Gemini 3 tier suffixes still need to land on the canonical preview model.",
+    rationale:
+      "Legacy Gemini 3 tier suffixes still need to land on the canonical preview model.",
   },
   {
     aliasModelID: "gemini-3-pro-low",
     ruleID: "gemini-3-pro-tier-alias",
     canonicalModelID: "gemini-3-pro-preview",
-    rationale: "Legacy Gemini 3 tier suffixes still need to land on the canonical preview model.",
+    rationale:
+      "Legacy Gemini 3 tier suffixes still need to land on the canonical preview model.",
   },
 ]
 
@@ -41,14 +43,18 @@ const EXACT_ALIAS_RULES_BY_MODEL: ReadonlyMap<string, ExactAliasRule> = new Map(
 const PATTERN_ALIAS_RULES: ReadonlyArray<PatternAliasRule> = [
   {
     ruleID: "claude-thinking-legacy-alias",
-    description: "Normalizes legacy Claude Opus thinking suffixes (4-6, 4-7) to the canonical snapshot ID.",
-    match: (normalizedModelID) => /^claude-opus-4-(?:6|7)-thinking$/.test(normalizedModelID),
+    description:
+      "Normalizes legacy Claude Opus thinking suffixes (4-6, 4-7) to the canonical snapshot ID.",
+    match: (normalizedModelID) =>
+      /^claude-opus-4-(?:6|7)-thinking$/.test(normalizedModelID),
     canonicalize: () => "claude-opus-4-7",
   },
   {
     ruleID: "gemini-3.1-pro-tier-alias",
-    description: "Normalizes Gemini 3.1 Pro tier suffixes to the canonical snapshot ID.",
-    match: (normalizedModelID) => /^gemini-3\.1-pro-(?:high|low)$/.test(normalizedModelID),
+    description:
+      "Normalizes Gemini 3.1 Pro tier suffixes to the canonical snapshot ID.",
+    match: (normalizedModelID) =>
+      /^gemini-3\.1-pro-(?:high|low)$/.test(normalizedModelID),
     canonicalize: () => "gemini-3.1-pro",
   },
 ]

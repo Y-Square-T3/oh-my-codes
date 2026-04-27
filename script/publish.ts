@@ -35,7 +35,10 @@ async function fetchPreviousVersion(): Promise<string> {
   }
 }
 
-function bumpVersion(version: string, type: "major" | "minor" | "patch"): string {
+function bumpVersion(
+  version: string,
+  type: "major" | "minor" | "patch",
+): string {
   // Handle prerelease versions (e.g., 3.0.0-beta.7)
   const baseVersion = version.split("-")[0]
   const [major, minor, patch] = baseVersion.split(".").map(Number)
@@ -49,7 +52,10 @@ function bumpVersion(version: string, type: "major" | "minor" | "patch"): string
   }
 }
 
-async function updatePackageVersion(pkgPath: string, newVersion: string): Promise<void> {
+async function updatePackageVersion(
+  pkgPath: string,
+  newVersion: string,
+): Promise<void> {
   let pkg = await Bun.file(pkgPath).text()
   pkg = pkg.replace(/"version": "[^"]+"/, `"version": "${newVersion}"`)
   await Bun.write(pkgPath, pkg)
@@ -58,25 +64,28 @@ async function updatePackageVersion(pkgPath: string, newVersion: string): Promis
 
 async function updateAllPackageVersions(newVersion: string): Promise<void> {
   console.log("\nSyncing version across all packages...")
-  
+
   // Update main package.json
   const mainPkgPath = new URL("../package.json", import.meta.url).pathname
   await updatePackageVersion(mainPkgPath, newVersion)
-  
+
   // Update optionalDependencies versions in main package.json
   let mainPkg = await Bun.file(mainPkgPath).text()
   for (const platform of PLATFORM_PACKAGES) {
     const pkgName = `oh-my-codes-${platform}`
     mainPkg = mainPkg.replace(
       new RegExp(`"${pkgName}": "[^"]+"`),
-      `"${pkgName}": "${newVersion}"`
+      `"${pkgName}": "${newVersion}"`,
     )
   }
   await Bun.write(mainPkgPath, mainPkg)
-  
+
   // Update each platform package.json
   for (const platform of PLATFORM_PACKAGES) {
-    const pkgPath = new URL(`../packages/${platform}/package.json`, import.meta.url).pathname
+    const pkgPath = new URL(
+      `../packages/${platform}/package.json`,
+      import.meta.url,
+    ).pathname
     if (existsSync(pkgPath)) {
       await updatePackageVersion(pkgPath, newVersion)
     } else {
@@ -100,7 +109,10 @@ async function findPreviousTag(currentVersion: string): Promise<string | null> {
   return null
 }
 
-async function generateChangelog(previous: string, currentVersion?: string): Promise<string[]> {
+async function generateChangelog(
+  previous: string,
+  currentVersion?: string,
+): Promise<string[]> {
   const notes: string[] = []
 
   // Try to find the most accurate previous tag for comparison
@@ -114,10 +126,14 @@ async function generateChangelog(previous: string, currentVersion?: string): Pro
   }
 
   try {
-    const log = await $`git log v${compareTag}..HEAD --oneline --format="%h %s"`.text()
+    const log =
+      await $`git log v${compareTag}..HEAD --oneline --format="%h %s"`.text()
     const commits = log
       .split("\n")
-      .filter((line) => line && !line.match(/^\w+ (ignore:|test:|chore:|ci:|release:)/i))
+      .filter(
+        (line) =>
+          line && !line.match(/^\w+ (ignore:|test:|chore:|ci:|release:)/i),
+      )
 
     if (commits.length > 0) {
       for (const commit of commits) {
@@ -145,7 +161,10 @@ async function getContributors(previous: string): Promise<string[]> {
     const contributors = new Map<string, string[]>()
 
     for (const line of compare.split("\n").filter(Boolean)) {
-      const { login, message } = JSON.parse(line) as { login: string | null; message: string }
+      const { login, message } = JSON.parse(line) as {
+        login: string | null
+        message: string
+      }
       const title = message.split("\n")[0] ?? ""
       if (title.match(/^(ignore:|test:|chore:|ci:|release:)/i)) continue
 
@@ -157,7 +176,9 @@ async function getContributors(previous: string): Promise<string[]> {
 
     if (contributors.size > 0) {
       notes.push("")
-      notes.push(`**Thank you to ${contributors.size} community contributor${contributors.size > 1 ? "s" : ""}:**`)
+      notes.push(
+        `**Thank you to ${contributors.size} community contributor${contributors.size > 1 ? "s" : ""}:**`,
+      )
       for (const [username, userCommits] of contributors) {
         notes.push(`- @${username}:`)
         for (const commit of userCommits) {
@@ -188,7 +209,10 @@ interface PublishResult {
   error?: string
 }
 
-async function checkPackageVersionExists(pkgName: string, version: string): Promise<boolean> {
+async function checkPackageVersionExists(
+  pkgName: string,
+  version: string,
+): Promise<boolean> {
   try {
     const res = await fetch(`https://registry.npmjs.org/${pkgName}/${version}`)
     return res.ok
@@ -197,7 +221,13 @@ async function checkPackageVersionExists(pkgName: string, version: string): Prom
   }
 }
 
-async function publishPackage(cwd: string, distTag: string | null, useProvenance = true, pkgName?: string, version?: string): Promise<PublishResult> {
+async function publishPackage(
+  cwd: string,
+  distTag: string | null,
+  useProvenance = true,
+  pkgName?: string,
+  version?: string,
+): Promise<PublishResult> {
   // In republish mode, skip if package already exists on npm
   if (republishMode && pkgName && version) {
     const exists = await checkPackageVersionExists(pkgName, version)
@@ -210,24 +240,28 @@ async function publishPackage(cwd: string, distTag: string | null, useProvenance
   const tagArgs = distTag ? ["--tag", distTag] : []
   const provenanceArgs = process.env.CI && useProvenance ? ["--provenance"] : []
   const env = useProvenance ? {} : { NPM_CONFIG_PROVENANCE: "false" }
-  
+
   try {
-    await $`npm publish --access public --ignore-scripts ${provenanceArgs} ${tagArgs}`.cwd(cwd).env({ ...process.env, ...env })
+    await $`npm publish --access public --ignore-scripts ${provenanceArgs} ${tagArgs}`
+      .cwd(cwd)
+      .env({ ...process.env, ...env })
     return { success: true }
   } catch (error: any) {
     const stderr = error?.stderr?.toString() || error?.message || ""
-    
+
     // Only treat as "already published" if we're certain the package exists
     // E409/EPUBLISHCONFLICT = definitive "version already exists"
     if (
       stderr.includes("EPUBLISHCONFLICT") ||
       stderr.includes("E409") ||
       stderr.includes("cannot publish over") ||
-      stderr.includes("You cannot publish over the previously published versions")
+      stderr.includes(
+        "You cannot publish over the previously published versions",
+      )
     ) {
       return { success: true, alreadyPublished: true }
     }
-    
+
     // E403 can mean "already exists" OR "no permission" - verify by checking npm registry
     if (stderr.includes("E403")) {
       if (pkgName && version) {
@@ -239,7 +273,7 @@ async function publishPackage(cwd: string, distTag: string | null, useProvenance
       // If we can't verify or it doesn't exist, it's a real error
       return { success: false, error: stderr }
     }
-    
+
     // 404 errors are NEVER "already published" - they indicate the package doesn't exist
     // or OIDC token issues. Always treat as failure.
     return { success: false, error: stderr }
@@ -249,37 +283,47 @@ async function publishPackage(cwd: string, distTag: string | null, useProvenance
 async function publishAllPackages(version: string): Promise<void> {
   const distTag = getDistTag(version)
   const skipPlatform = process.env.SKIP_PLATFORM_PACKAGES === "true"
-  
+
   if (skipPlatform) {
-    console.log("\n⏭️  Skipping platform packages (SKIP_PLATFORM_PACKAGES=true)")
+    console.log(
+      "\n⏭️  Skipping platform packages (SKIP_PLATFORM_PACKAGES=true)",
+    )
   } else {
-    console.log("\n📦 Publishing platform packages in batches (to avoid OIDC token expiration)...")
-    
+    console.log(
+      "\n📦 Publishing platform packages in batches (to avoid OIDC token expiration)...",
+    )
+
     // Publish in batches of 2 to avoid OIDC token expiration
     // npm processes requests sequentially even when sent in parallel,
     // so too many parallel requests can cause token expiration
     const BATCH_SIZE = 2
     const failures: string[] = []
-    
+
     for (let i = 0; i < PLATFORM_PACKAGES.length; i += BATCH_SIZE) {
       const batch = PLATFORM_PACKAGES.slice(i, i + BATCH_SIZE)
       const batchNum = Math.floor(i / BATCH_SIZE) + 1
       const totalBatches = Math.ceil(PLATFORM_PACKAGES.length / BATCH_SIZE)
-      
+
       console.log(`\n  Batch ${batchNum}/${totalBatches}: ${batch.join(", ")}`)
-      
+
       const publishPromises = batch.map(async (platform) => {
         const pkgDir = join(process.cwd(), "packages", platform)
         const pkgName = `oh-my-codes-${platform}`
-        
+
         console.log(`    Starting ${pkgName}...`)
-        const result = await publishPackage(pkgDir, distTag, false, pkgName, version)
-        
+        const result = await publishPackage(
+          pkgDir,
+          distTag,
+          false,
+          pkgName,
+          version,
+        )
+
         return { platform, pkgName, result }
       })
-      
+
       const results = await Promise.all(publishPromises)
-      
+
       for (const { pkgName, result } of results) {
         if (result.success) {
           if (result.alreadyPublished) {
@@ -293,16 +337,22 @@ async function publishAllPackages(version: string): Promise<void> {
         }
       }
     }
-    
+
     if (failures.length > 0) {
       throw new Error(`Failed to publish: ${failures.join(", ")}`)
     }
   }
-  
+
   // Publish main package last
   console.log(`\n📦 Publishing main package...`)
-  const mainResult = await publishPackage(process.cwd(), distTag, true, PACKAGE_NAME, version)
-  
+  const mainResult = await publishPackage(
+    process.cwd(),
+    distTag,
+    true,
+    PACKAGE_NAME,
+    version,
+  )
+
   if (mainResult.success) {
     if (mainResult.alreadyPublished) {
       console.log(`  ✓ ${PACKAGE_NAME}@${version} (already published)`)
@@ -317,10 +367,10 @@ async function publishAllPackages(version: string): Promise<void> {
 
 async function buildPackages(): Promise<void> {
   const skipPlatform = process.env.SKIP_PLATFORM_PACKAGES === "true"
-  
+
   console.log("\nBuilding packages...")
   await $`bun run clean && bun run build`
-  
+
   if (skipPlatform) {
     console.log("⏭️  Skipping platform binaries (SKIP_PLATFORM_PACKAGES=true)")
   } else {
@@ -329,13 +379,16 @@ async function buildPackages(): Promise<void> {
   }
 }
 
-async function gitTagAndRelease(newVersion: string, notes: string[]): Promise<void> {
+async function gitTagAndRelease(
+  newVersion: string,
+  notes: string[],
+): Promise<void> {
   if (!process.env.CI) return
 
   console.log("\nCommitting and tagging...")
   await $`git config user.email "github-actions[bot]@users.noreply.github.com"`
   await $`git config user.name "github-actions[bot]"`
-  
+
   // Add all package.json files
   await $`git add package.json assets/oh-my-codes.schema.json`
   for (const platform of PLATFORM_PACKAGES) {
@@ -359,16 +412,19 @@ async function gitTagAndRelease(newVersion: string, notes: string[]): Promise<vo
   // Push tags first (critical for release), then try branch push (non-critical)
   console.log("Pushing tags...")
   await $`git push origin --tags`
-  
+
   console.log("Pushing branch...")
   const branchPush = await $`git push origin HEAD`.nothrow()
   if (branchPush.exitCode !== 0) {
-    console.log(`⚠️  Branch push failed (remote may have new commits). Tag was pushed successfully.`)
+    console.log(
+      `⚠️  Branch push failed (remote may have new commits). Tag was pushed successfully.`,
+    )
     console.log(`   To sync manually: git pull --rebase && git push`)
   }
 
   console.log("\nCreating GitHub release...")
-  const releaseNotes = notes.length > 0 ? notes.join("\n") : "No notable changes"
+  const releaseNotes =
+    notes.length > 0 ? notes.join("\n") : "No notable changes"
   const releaseExists = await $`gh release view v${newVersion}`.nothrow()
   if (releaseExists.exitCode !== 0) {
     await $`gh release create v${newVersion} --title "v${newVersion}" --notes ${releaseNotes}`
@@ -379,7 +435,9 @@ async function gitTagAndRelease(newVersion: string, notes: string[]): Promise<vo
 
 async function checkVersionExists(version: string): Promise<boolean> {
   try {
-    const res = await fetch(`https://registry.npmjs.org/${PACKAGE_NAME}/${version}`)
+    const res = await fetch(
+      `https://registry.npmjs.org/${PACKAGE_NAME}/${version}`,
+    )
     return res.ok
   } catch {
     return false
@@ -388,7 +446,9 @@ async function checkVersionExists(version: string): Promise<boolean> {
 
 async function main() {
   const previous = await fetchPreviousVersion()
-  const newVersion = versionOverride || (bump ? bumpVersion(previous, bump) : bumpVersion(previous, "patch"))
+  const newVersion =
+    versionOverride ||
+    (bump ? bumpVersion(previous, bump) : bumpVersion(previous, "patch"))
   console.log(`New version: ${newVersion}\n`)
 
   if (prepareOnly) {
@@ -400,9 +460,13 @@ async function main() {
 
   if (await checkVersionExists(newVersion)) {
     if (republishMode) {
-      console.log(`Version ${newVersion} exists on npm. REPUBLISH mode: checking for missing platform packages...`)
+      console.log(
+        `Version ${newVersion} exists on npm. REPUBLISH mode: checking for missing platform packages...`,
+      )
     } else {
-      console.log(`Version ${newVersion} already exists on npm. Skipping publish.`)
+      console.log(
+        `Version ${newVersion} already exists on npm. Skipping publish.`,
+      )
       console.log(`(Use REPUBLISH=true to publish missing platform packages)`)
       process.exit(0)
     }
@@ -417,7 +481,9 @@ async function main() {
   await publishAllPackages(newVersion)
   await gitTagAndRelease(newVersion, notes)
 
-  console.log(`\n=== Successfully published ${PACKAGE_NAME}@${newVersion} (8 packages) ===`)
+  console.log(
+    `\n=== Successfully published ${PACKAGE_NAME}@${newVersion} (8 packages) ===`,
+  )
 }
 
 main()

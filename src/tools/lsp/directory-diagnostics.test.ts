@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs"
 import { join } from "path"
 import os from "os"
@@ -9,7 +17,9 @@ import { isDirectoryPath } from "./lsp-client-wrapper"
 import { aggregateDiagnosticsForDirectory } from "./directory-diagnostics"
 import type { Diagnostic } from "./types"
 
-const diagnosticsMock = mock(async (_filePath: string) => ({ items: [] as Diagnostic[] }))
+const diagnosticsMock = mock(async (_filePath: string) => ({
+  items: [] as Diagnostic[],
+}))
 const getClientMock = mock(async () => ({ diagnostics: diagnosticsMock }))
 const releaseClientMock = mock(() => {})
 
@@ -27,7 +37,9 @@ function createDiagnostic(message: string): Diagnostic {
 describe("directory diagnostics", () => {
   beforeEach(() => {
     diagnosticsMock.mockReset()
-    diagnosticsMock.mockImplementation(async (_filePath: string) => ({ items: [] }))
+    diagnosticsMock.mockImplementation(async (_filePath: string) => ({
+      items: [],
+    }))
     getClientMock.mockClear()
     releaseClientMock.mockClear()
 
@@ -79,8 +91,10 @@ describe("directory diagnostics", () => {
     it("throws error when extension does not start with dot", async () => {
       const tmp = mkdtempSync(join(os.tmpdir(), "omo-aggr-ext-"))
       try {
-        await expect(aggregateDiagnosticsForDirectory(tmp, "ts")).rejects.toThrow(
-          'Extension must start with a dot (e.g., ".ts", not "ts")'
+        await expect(
+          aggregateDiagnosticsForDirectory(tmp, "ts"),
+        ).rejects.toThrow(
+          'Extension must start with a dot (e.g., ".ts", not "ts")',
         )
       } finally {
         rmSync(tmp, { recursive: true, force: true })
@@ -89,9 +103,9 @@ describe("directory diagnostics", () => {
 
     it("throws error when directory does not exist", async () => {
       const nonExistent = join(os.tmpdir(), "omo-nonexistent-dir-" + Date.now())
-      await expect(aggregateDiagnosticsForDirectory(nonExistent, ".ts")).rejects.toThrow(
-        "Directory does not exist"
-      )
+      await expect(
+        aggregateDiagnosticsForDirectory(nonExistent, ".ts"),
+      ).rejects.toThrow("Directory does not exist")
     })
 
     it("#given diagnostics from multiple files #when aggregating directory diagnostics #then each entry includes the source file path", async () => {
@@ -109,8 +123,12 @@ describe("directory diagnostics", () => {
 
         const result = await aggregateDiagnosticsForDirectory(tmp, ".ts")
 
-        expect(result).toContain(`${firstFile}: error at 1:0: problem in ${firstFile}`)
-        expect(result).toContain(`${secondFile}: error at 1:0: problem in ${secondFile}`)
+        expect(result).toContain(
+          `${firstFile}: error at 1:0: problem in ${firstFile}`,
+        )
+        expect(result).toContain(
+          `${secondFile}: error at 1:0: problem in ${secondFile}`,
+        )
       } finally {
         rmSync(tmp, { recursive: true, force: true })
       }

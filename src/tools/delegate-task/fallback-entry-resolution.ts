@@ -13,15 +13,25 @@ export function resolveEffectiveFallbackEntry(input: {
   const { categoryModel, configuredFallbackChain, resolution } = input
 
   const resolutionSkipped = resolution && "skipped" in resolution
-  const resolvedFallbackEntry = resolution && !resolutionSkipped ? resolution.fallbackEntry : undefined
-  const matchedFallback = resolution && !resolutionSkipped ? resolution.matchedFallback === true : false
+  const resolvedFallbackEntry =
+    resolution && !resolutionSkipped ? resolution.fallbackEntry : undefined
+  const matchedFallback =
+    resolution && !resolutionSkipped
+      ? resolution.matchedFallback === true
+      : false
 
   if (!matchedFallback || !categoryModel) {
     return undefined
   }
 
-  return resolvedFallbackEntry
-    ?? (configuredFallbackChain
-      ? findMostSpecificFallbackEntry(categoryModel.providerID, categoryModel.modelID, configuredFallbackChain)
+  return (
+    resolvedFallbackEntry ??
+    (configuredFallbackChain
+      ? findMostSpecificFallbackEntry(
+          categoryModel.providerID,
+          categoryModel.modelID,
+          configuredFallbackChain,
+        )
       : undefined)
+  )
 }

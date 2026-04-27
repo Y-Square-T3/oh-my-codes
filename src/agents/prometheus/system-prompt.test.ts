@@ -23,7 +23,11 @@ describe("getPrometheusPrompt", () => {
 
     describe("#when disabled_tools includes question among other tools", () => {
       it("#then should strip Question tool code examples", () => {
-        const prompt = getPrometheusPrompt(undefined, ["todowrite", "question", "interactive_bash"])
+        const prompt = getPrometheusPrompt(undefined, [
+          "todowrite",
+          "question",
+          "interactive_bash",
+        ])
 
         expect(prompt).not.toContain("Question({")
       })

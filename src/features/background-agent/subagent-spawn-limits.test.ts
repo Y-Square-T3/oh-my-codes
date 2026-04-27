@@ -7,7 +7,9 @@ import {
   createSubagentDepthLimitError,
 } from "./subagent-spawn-limits"
 
-function createMockClient(sessionGet: OpencodeClient["session"]["get"]): OpencodeClient {
+function createMockClient(
+  sessionGet: OpencodeClient["session"]["get"],
+): OpencodeClient {
   return {
     session: {
       get: sessionGet,
@@ -30,7 +32,11 @@ describe("resolveSubagentSpawnContext", () => {
       }) as unknown as OpencodeClient["session"]["get"])
 
       // when
-      const result = await resolveSubagentSpawnContext(client, "child-session", "/project/root")
+      const result = await resolveSubagentSpawnContext(
+        client,
+        "child-session",
+        "/project/root",
+      )
 
       // then
       expect(result.rootSessionID).toBe("root-session")
@@ -59,7 +65,9 @@ describe("resolveSubagentSpawnContext", () => {
       const result = resolveSubagentSpawnContext(client, "parent-session")
 
       // then
-      await expect(result).rejects.toThrow(/background_task\.maxDepth cannot be enforced safely.*lookup failed/)
+      await expect(result).rejects.toThrow(
+        /background_task\.maxDepth cannot be enforced safely.*lookup failed/,
+      )
     })
   })
 
@@ -74,7 +82,9 @@ describe("resolveSubagentSpawnContext", () => {
       const result = resolveSubagentSpawnContext(client, "parent-session")
 
       // then
-      await expect(result).rejects.toThrow(/background_task\.maxDepth cannot be enforced safely.*No session data returned/)
+      await expect(result).rejects.toThrow(
+        /background_task\.maxDepth cannot be enforced safely.*No session data returned/,
+      )
     })
   })
 
@@ -122,9 +132,9 @@ describe("resolveSubagentSpawnContext", () => {
       // given - grandchild -> child -> root chain
       const client = createMockClient((async (opts) => {
         const sessions: Record<string, { id: string; parentID?: string }> = {
-          "grandchild": { id: "grandchild", parentID: "child" },
-          "child": { id: "child", parentID: "root" },
-          "root": { id: "root", parentID: undefined },
+          grandchild: { id: "grandchild", parentID: "child" },
+          child: { id: "child", parentID: "root" },
+          root: { id: "root", parentID: undefined },
         }
         const session = sessions[opts.path.id]
         if (session) return { data: session }
@@ -144,7 +154,7 @@ describe("resolveSubagentSpawnContext", () => {
       // given - chain of exactly DEFAULT_MAX_SUBAGENT_DEPTH depth
       // With default=3: session-3 -> session-2 -> session-1 -> root
       const sessions: Record<string, { id: string; parentID?: string }> = {
-        "root": { id: "root" },
+        root: { id: "root" },
       }
       for (let i = 1; i <= DEFAULT_MAX_SUBAGENT_DEPTH; i++) {
         sessions[`session-${i}`] = {

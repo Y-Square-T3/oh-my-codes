@@ -4,11 +4,14 @@ import { writeFileAtomically } from "../write-file-atomically"
 import { AGENT_NAME_MAP, migrateAgentNames } from "./agent-names"
 import { migrateHookNames } from "./hook-names"
 import { migrateModelVersions } from "./model-versions"
-import { readAppliedMigrations, writeAppliedMigrations } from "./migrations-sidecar"
+import {
+  readAppliedMigrations,
+  writeAppliedMigrations,
+} from "./migrations-sidecar"
 
 export function migrateConfigFile(
   configPath: string,
-  rawConfig: Record<string, unknown>
+  rawConfig: Record<string, unknown>,
 ): boolean {
   const copy = JSON.parse(JSON.stringify(rawConfig)) as Record<string, unknown>
   let needsWrite = false
@@ -32,7 +35,9 @@ export function migrateConfigFile(
   const allNewMigrations: string[] = []
 
   if (copy.agents && typeof copy.agents === "object") {
-    const { migrated, changed } = migrateAgentNames(copy.agents as Record<string, unknown>)
+    const { migrated, changed } = migrateAgentNames(
+      copy.agents as Record<string, unknown>,
+    )
     if (changed) {
       copy.agents = migrated
       needsWrite = true
@@ -43,7 +48,7 @@ export function migrateConfigFile(
   if (copy.agents && typeof copy.agents === "object") {
     const { migrated, changed, newMigrations } = migrateModelVersions(
       copy.agents as Record<string, unknown>,
-      existingMigrations
+      existingMigrations,
     )
     if (changed) {
       copy.agents = migrated
@@ -57,7 +62,7 @@ export function migrateConfigFile(
   if (copy.categories && typeof copy.categories === "object") {
     const { migrated, changed, newMigrations } = migrateModelVersions(
       copy.categories as Record<string, unknown>,
-      existingMigrations
+      existingMigrations,
     )
     if (changed) {
       copy.categories = migrated
@@ -73,12 +78,15 @@ export function migrateConfigFile(
   // think about a field that never should have been in their config in
   // the first place. The in-memory `rawConfig` never re-exposes
   // `_migrations` to downstream schema validation.
-  const newMigrationsToRecord = allNewMigrations.filter(mKey => !existingMigrations.has(mKey))
+  const newMigrationsToRecord = allNewMigrations.filter(
+    (mKey) => !existingMigrations.has(mKey),
+  )
   const fullMigrationSet = new Set<string>([
     ...existingMigrations,
     ...newMigrationsToRecord,
   ])
-  const shouldWriteSidecar = newMigrationsToRecord.length > 0 || hadLegacyInConfigMigrations
+  const shouldWriteSidecar =
+    newMigrationsToRecord.length > 0 || hadLegacyInConfigMigrations
   if (newMigrationsToRecord.length > 0) {
     needsWrite = true
   }
@@ -89,7 +97,8 @@ export function migrateConfigFile(
   if (shouldWriteSidecar) {
     // Keep `_migrations` in the first config write so a later sidecar failure
     // does not strand the config with migrated state missing from disk.
-    ;(copy as Record<string, unknown>)._migrations = Array.from(fullMigrationSet)
+    ;(copy as Record<string, unknown>)._migrations =
+      Array.from(fullMigrationSet)
     needsWrite = true
   }
 
@@ -117,7 +126,8 @@ export function migrateConfigFile(
     const migrated: string[] = []
     let changed = false
     for (const agent of copy.disabled_agents as string[]) {
-      const newAgent = AGENT_NAME_MAP[agent.toLowerCase()] ?? AGENT_NAME_MAP[agent] ?? agent
+      const newAgent =
+        AGENT_NAME_MAP[agent.toLowerCase()] ?? AGENT_NAME_MAP[agent] ?? agent
       if (newAgent !== agent) {
         changed = true
       }
@@ -130,20 +140,25 @@ export function migrateConfigFile(
   }
 
   if (copy.disabled_hooks && Array.isArray(copy.disabled_hooks)) {
-    const { migrated, changed, removed } = migrateHookNames(copy.disabled_hooks as string[])
+    const { migrated, changed, removed } = migrateHookNames(
+      copy.disabled_hooks as string[],
+    )
     if (changed) {
       copy.disabled_hooks = migrated
       needsWrite = true
     }
     if (removed.length > 0) {
       log(
-        `Removed obsolete hooks from disabled_hooks: ${removed.join(", ")} (these hooks no longer exist in v3.0.0)`
+        `Removed obsolete hooks from disabled_hooks: ${removed.join(", ")} (these hooks no longer exist in v3.0.0)`,
       )
     }
   }
 
   if (needsWrite) {
-    let finalConfig = JSON.parse(JSON.stringify(copy)) as Record<string, unknown>
+    let finalConfig = JSON.parse(JSON.stringify(copy)) as Record<
+      string,
+      unknown
+    >
     const newContent = JSON.stringify(finalConfig, null, 2) + "\n"
 
     // Compare with existing file content to skip backup when unchanged.
@@ -179,15 +194,26 @@ export function migrateConfigFile(
     }
 
     if (writeSucceeded && shouldWriteSidecar) {
-      const sidecarWriteSucceeded = writeAppliedMigrations(configPath, fullMigrationSet)
+      const sidecarWriteSucceeded = writeAppliedMigrations(
+        configPath,
+        fullMigrationSet,
+      )
       if (sidecarWriteSucceeded && "_migrations" in finalConfig) {
-        const configWithoutLegacyMigrations = JSON.parse(JSON.stringify(finalConfig)) as Record<string, unknown>
+        const configWithoutLegacyMigrations = JSON.parse(
+          JSON.stringify(finalConfig),
+        ) as Record<string, unknown>
         delete configWithoutLegacyMigrations._migrations
         try {
-          writeFileAtomically(configPath, JSON.stringify(configWithoutLegacyMigrations, null, 2) + "\n")
+          writeFileAtomically(
+            configPath,
+            JSON.stringify(configWithoutLegacyMigrations, null, 2) + "\n",
+          )
           finalConfig = configWithoutLegacyMigrations
         } catch (err) {
-          log(`Failed to remove legacy _migrations fallback from ${configPath}:`, err)
+          log(
+            `Failed to remove legacy _migrations fallback from ${configPath}:`,
+            err,
+          )
         }
       }
     }
@@ -202,7 +228,9 @@ export function migrateConfigFile(
       log(`Migrated config file: ${configPath}${backupMessage}`)
     } else {
       const backupMessage = backupSucceeded ? ` (backup: ${backupPath})` : ""
-      log(`Applied migrated config in-memory for: ${configPath}${backupMessage}`)
+      log(
+        `Applied migrated config in-memory for: ${configPath}${backupMessage}`,
+      )
     }
   }
 

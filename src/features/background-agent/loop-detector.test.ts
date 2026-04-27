@@ -10,24 +10,24 @@ import {
 
 function buildWindow(
   toolNames: string[],
-  override?: Parameters<typeof resolveCircuitBreakerSettings>[0]
+  override?: Parameters<typeof resolveCircuitBreakerSettings>[0],
 ) {
   const settings = resolveCircuitBreakerSettings(override)
 
   return toolNames.reduce(
     (window, toolName) => recordToolCall(window, toolName, settings),
-    undefined as ReturnType<typeof recordToolCall> | undefined
+    undefined as ReturnType<typeof recordToolCall> | undefined,
   )
 }
 
 function buildWindowWithInputs(
   calls: Array<{ tool: string; input?: Record<string, unknown> | null }>,
-  override?: Parameters<typeof resolveCircuitBreakerSettings>[0]
+  override?: Parameters<typeof resolveCircuitBreakerSettings>[0],
 ) {
   const settings = resolveCircuitBreakerSettings(override)
   return calls.reduce(
     (window, { tool, input }) => recordToolCall(window, tool, settings, input),
-    undefined as ReturnType<typeof recordToolCall> | undefined
+    undefined as ReturnType<typeof recordToolCall> | undefined,
   )
 }
 
@@ -133,8 +133,14 @@ describe("loop-detector", () => {
     })
 
     test("#given same input different key order #when signatures compared #then they are equal", () => {
-      const first = createToolCallSignature("read", { filePath: "/a.ts", offset: 0 })
-      const second = createToolCallSignature("read", { offset: 0, filePath: "/a.ts" })
+      const first = createToolCallSignature("read", {
+        filePath: "/a.ts",
+        offset: 0,
+      })
+      const second = createToolCallSignature("read", {
+        offset: 0,
+        filePath: "/a.ts",
+      })
 
       expect(first).toBe(second)
     })
@@ -168,7 +174,7 @@ describe("loop-detector", () => {
           Array.from({ length: 20 }, () => ({
             tool: "read",
             input: { filePath: "/src/same.ts" },
-          }))
+          })),
         )
 
         const result = detectRepetitiveToolUse(window)
@@ -201,7 +207,7 @@ describe("loop-detector", () => {
           Array.from({ length: 19 }, () => ({
             tool: "read",
             input: { filePath: "/src/same.ts" },
-          }))
+          })),
         )
 
         const result = detectRepetitiveToolUse(belowThresholdWindow)
@@ -214,7 +220,7 @@ describe("loop-detector", () => {
           Array.from({ length: 20 }, () => ({
             tool: "read",
             input: { filePath: "/src/same.ts" },
-          }))
+          })),
         )
 
         const result = detectRepetitiveToolUse(atThresholdWindow)
@@ -266,7 +272,10 @@ describe("loop-detector", () => {
 
     describe("#given tool calls with null input", () => {
       test("#when evaluated #then it does not trigger", () => {
-        const calls = Array.from({ length: 20 }, () => ({ tool: "read", input: null }))
+        const calls = Array.from({ length: 20 }, () => ({
+          tool: "read",
+          input: null,
+        }))
         const window = buildWindowWithInputs(calls)
         const result = detectRepetitiveToolUse(window)
 
@@ -280,7 +289,12 @@ describe("loop-detector", () => {
         const settings = resolveCircuitBreakerSettings()
 
         // when
-        const undefinedWindow = recordToolCall(undefined, "read", settings, undefined)
+        const undefinedWindow = recordToolCall(
+          undefined,
+          "read",
+          settings,
+          undefined,
+        )
         const nullWindow = recordToolCall(undefined, "read", settings, null)
 
         // then

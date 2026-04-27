@@ -9,7 +9,9 @@ type RemoteMcpConfig = {
   oauth?: false
 }
 
-export function createWebsearchConfig(config?: WebsearchConfig): RemoteMcpConfig | undefined {
+export function createWebsearchConfig(
+  config?: WebsearchConfig,
+): RemoteMcpConfig | undefined {
   const provider = config?.provider || "exa"
 
   if (provider === "tavily") {
@@ -36,7 +38,9 @@ export function createWebsearchConfig(config?: WebsearchConfig): RemoteMcpConfig
       ? `https://mcp.exa.ai/mcp?tools=web_search_exa&exaApiKey=${encodeURIComponent(process.env.EXA_API_KEY)}`
       : "https://mcp.exa.ai/mcp?tools=web_search_exa",
     enabled: true,
-    ...(process.env.EXA_API_KEY ? { headers: { "x-api-key": process.env.EXA_API_KEY } } : {}),
+    ...(process.env.EXA_API_KEY
+      ? { headers: { "x-api-key": process.env.EXA_API_KEY } }
+      : {}),
     oauth: false as const,
   }
 }

@@ -18,7 +18,10 @@ export function shouldPauseForFinalWaveApproval(input: {
     return false
   }
 
-  if (planState.pendingImplementationTaskCount > 0 || planState.pendingFinalWaveTaskCount === 0) {
+  if (
+    planState.pendingImplementationTaskCount > 0 ||
+    planState.pendingFinalWaveTaskCount === 0
+  ) {
     clearFinalWaveApprovalTracking(input.sessionState)
     return false
   }
@@ -32,13 +35,20 @@ export function shouldPauseForFinalWaveApproval(input: {
     return true
   }
 
-  if (input.sessionState.pendingFinalWaveTaskCount !== planState.pendingFinalWaveTaskCount) {
-    input.sessionState.pendingFinalWaveTaskCount = planState.pendingFinalWaveTaskCount
+  if (
+    input.sessionState.pendingFinalWaveTaskCount !==
+    planState.pendingFinalWaveTaskCount
+  ) {
+    input.sessionState.pendingFinalWaveTaskCount =
+      planState.pendingFinalWaveTaskCount
     input.sessionState.approvedFinalWaveTaskCount = 0
   }
 
-  input.sessionState.approvedFinalWaveTaskCount = (input.sessionState.approvedFinalWaveTaskCount ?? 0) + 1
-  const shouldPause = input.sessionState.approvedFinalWaveTaskCount >= planState.pendingFinalWaveTaskCount
+  input.sessionState.approvedFinalWaveTaskCount =
+    (input.sessionState.approvedFinalWaveTaskCount ?? 0) + 1
+  const shouldPause =
+    input.sessionState.approvedFinalWaveTaskCount >=
+    planState.pendingFinalWaveTaskCount
   if (shouldPause) {
     clearFinalWaveApprovalTracking(input.sessionState)
   }

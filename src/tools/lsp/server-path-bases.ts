@@ -2,7 +2,9 @@ import { join } from "path"
 
 import { getDataDir, getOpenCodeConfigDir } from "../../shared"
 
-export function getLspServerAdditionalPathBases(workingDirectory: string): string[] {
+export function getLspServerAdditionalPathBases(
+  workingDirectory: string,
+): string[] {
   const configDir = getOpenCodeConfigDir({ binary: "opencode" })
   const dataDir = join(getDataDir(), "opencode")
 

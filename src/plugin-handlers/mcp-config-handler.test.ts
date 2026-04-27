@@ -11,10 +11,16 @@ let loadMcpConfigsSpy: ReturnType<typeof spyOn>
 let createBuiltinMcpsSpy: ReturnType<typeof spyOn>
 
 beforeEach(() => {
-  loadMcpConfigsSpy = spyOn(mcpLoader, "loadMcpConfigs" as any).mockResolvedValue({
+  loadMcpConfigsSpy = spyOn(
+    mcpLoader,
+    "loadMcpConfigs" as any,
+  ).mockResolvedValue({
     servers: {},
   })
-  createBuiltinMcpsSpy = spyOn(mcpModule, "createBuiltinMcps" as any).mockReturnValue({})
+  createBuiltinMcpsSpy = spyOn(
+    mcpModule,
+    "createBuiltinMcps" as any,
+  ).mockReturnValue({})
   spyOn(shared, "log" as any).mockImplementation(() => {})
 })
 
@@ -24,7 +30,9 @@ afterEach(() => {
   ;(shared.log as any)?.mockRestore?.()
 })
 
-function createPluginConfig(overrides: Partial<OhMyCodesConfig> = {}): OhMyCodesConfig {
+function createPluginConfig(
+  overrides: Partial<OhMyCodesConfig> = {},
+): OhMyCodesConfig {
   return {
     disabled_mcps: [],
     ...overrides,
@@ -45,13 +53,21 @@ describe("applyMcpConfig", () => {
   test("preserves enabled:false from user config after merge with .mcp.json MCPs", async () => {
     //#given
     const userMcp = {
-      firecrawl: { type: "remote", url: "https://firecrawl.example.com", enabled: false },
+      firecrawl: {
+        type: "remote",
+        url: "https://firecrawl.example.com",
+        enabled: false,
+      },
       exa: { type: "remote", url: "https://exa.example.com", enabled: true },
     }
 
     loadMcpConfigsSpy.mockResolvedValue({
       servers: {
-        firecrawl: { type: "remote", url: "https://firecrawl.example.com", enabled: true },
+        firecrawl: {
+          type: "remote",
+          url: "https://firecrawl.example.com",
+          enabled: true,
+        },
         exa: { type: "remote", url: "https://exa.example.com", enabled: true },
       },
     })
@@ -61,7 +77,11 @@ describe("applyMcpConfig", () => {
 
     //#when
     const { applyMcpConfig } = await import("./mcp-config-handler")
-    await applyMcpConfig({ config, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+    await applyMcpConfig({
+      config,
+      pluginConfig,
+      pluginComponents: EMPTY_PLUGIN_COMPONENTS,
+    })
 
     //#then
     const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
@@ -72,17 +92,27 @@ describe("applyMcpConfig", () => {
   test("applies disabled_mcps to MCPs from all sources", async () => {
     //#given
     createBuiltinMcpsSpy.mockReturnValue({
-      websearch: { type: "remote", url: "https://mcp.exa.ai/mcp", enabled: true },
+      websearch: {
+        type: "remote",
+        url: "https://mcp.exa.ai/mcp",
+        enabled: true,
+      },
     })
 
     loadMcpConfigsSpy.mockResolvedValue({
       servers: {
-        playwright: { type: "local", command: ["npx", "@playwright/mcp"], enabled: true },
+        playwright: {
+          type: "local",
+          command: ["npx", "@playwright/mcp"],
+          enabled: true,
+        },
       },
     })
 
     const config: Record<string, unknown> = { mcp: {} }
-    const pluginConfig = createPluginConfig({ disabled_mcps: ["playwright"] as any })
+    const pluginConfig = createPluginConfig({
+      disabled_mcps: ["playwright"] as any,
+    })
 
     //#when
     const { applyMcpConfig } = await import("./mcp-config-handler")
@@ -92,7 +122,11 @@ describe("applyMcpConfig", () => {
       pluginComponents: {
         ...EMPTY_PLUGIN_COMPONENTS,
         mcpServers: {
-          "plugin:custom": { type: "local", command: ["npx", "custom"], enabled: true },
+          "plugin:custom": {
+            type: "local",
+            command: ["npx", "custom"],
+            enabled: true,
+          },
         },
       },
     })
@@ -107,11 +141,17 @@ describe("applyMcpConfig", () => {
   test("passes disabled_mcps to loadMcpConfigs", async () => {
     //#given
     const config: Record<string, unknown> = { mcp: {} }
-    const pluginConfig = createPluginConfig({ disabled_mcps: ["firecrawl", "exa"] as any })
+    const pluginConfig = createPluginConfig({
+      disabled_mcps: ["firecrawl", "exa"] as any,
+    })
 
     //#when
     const { applyMcpConfig } = await import("./mcp-config-handler")
-    await applyMcpConfig({ config, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+    await applyMcpConfig({
+      config,
+      pluginConfig,
+      pluginComponents: EMPTY_PLUGIN_COMPONENTS,
+    })
 
     //#then
     expect(loadMcpConfigsSpy).toHaveBeenCalledWith(["firecrawl", "exa"])
@@ -125,7 +165,11 @@ describe("applyMcpConfig", () => {
 
     loadMcpConfigsSpy.mockResolvedValue({
       servers: {
-        firecrawl: { type: "remote", url: "https://firecrawl.example.com", enabled: true },
+        firecrawl: {
+          type: "remote",
+          url: "https://firecrawl.example.com",
+          enabled: true,
+        },
       },
     })
 
@@ -134,7 +178,11 @@ describe("applyMcpConfig", () => {
 
     //#when
     const { applyMcpConfig } = await import("./mcp-config-handler")
-    await applyMcpConfig({ config, pluginConfig, pluginComponents: EMPTY_PLUGIN_COMPONENTS })
+    await applyMcpConfig({
+      config,
+      pluginConfig,
+      pluginComponents: EMPTY_PLUGIN_COMPONENTS,
+    })
 
     //#then
     const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
@@ -145,7 +193,9 @@ describe("applyMcpConfig", () => {
   test("deletes plugin MCPs that are in disabled_mcps", async () => {
     //#given
     const config: Record<string, unknown> = { mcp: {} }
-    const pluginConfig = createPluginConfig({ disabled_mcps: ["plugin:custom"] as any })
+    const pluginConfig = createPluginConfig({
+      disabled_mcps: ["plugin:custom"] as any,
+    })
 
     //#when
     const { applyMcpConfig } = await import("./mcp-config-handler")
@@ -155,7 +205,11 @@ describe("applyMcpConfig", () => {
       pluginComponents: {
         ...EMPTY_PLUGIN_COMPONENTS,
         mcpServers: {
-          "plugin:custom": { type: "local", command: ["npx", "custom"], enabled: true },
+          "plugin:custom": {
+            type: "local",
+            command: ["npx", "custom"],
+            enabled: true,
+          },
         },
       },
     })
@@ -164,5 +218,4 @@ describe("applyMcpConfig", () => {
     const mergedMcp = config.mcp as Record<string, Record<string, unknown>>
     expect(mergedMcp).not.toHaveProperty("plugin:custom")
   })
-
 })

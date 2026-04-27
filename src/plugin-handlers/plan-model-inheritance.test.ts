@@ -112,7 +112,11 @@ describe("buildPlanDemoteConfig", () => {
     const result = buildPlanDemoteConfig(prometheusConfig, undefined)
 
     //#then
-    expect(result).toEqual({ mode: "subagent", hidden: true, model: "anthropic/claude-opus-4-7" })
+    expect(result).toEqual({
+      mode: "subagent",
+      hidden: true,
+      model: "anthropic/claude-opus-4-7",
+    })
     expect(Object.keys(result)).toEqual(["mode", "hidden", "model"])
   })
 })

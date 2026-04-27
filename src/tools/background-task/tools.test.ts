@@ -2,10 +2,20 @@
 
 import { describe, test, expect } from "bun:test"
 import { createBackgroundCancel, createBackgroundOutput } from "./tools"
-import type { BackgroundManager, BackgroundTask } from "../../features/background-agent"
+import type {
+  BackgroundManager,
+  BackgroundTask,
+} from "../../features/background-agent"
 import type { ToolContext } from "@opencode-ai/plugin/tool"
-import type { BackgroundCancelClient, BackgroundOutputManager, BackgroundOutputClient } from "./tools"
-import { consumeToolMetadata, clearPendingStore } from "../../features/tool-metadata-store"
+import type {
+  BackgroundCancelClient,
+  BackgroundOutputManager,
+  BackgroundOutputClient,
+} from "./tools"
+import {
+  consumeToolMetadata,
+  clearPendingStore,
+} from "../../features/tool-metadata-store"
 
 const projectDir = "/Users/yeongyu/local-workspaces/oh-my-codes"
 
@@ -26,7 +36,9 @@ function createMockManager(task: BackgroundTask): BackgroundOutputManager {
   }
 }
 
-function createMockClient(messagesBySession: Record<string, BackgroundOutputMessage[]>): BackgroundOutputClient {
+function createMockClient(
+  messagesBySession: Record<string, BackgroundOutputMessage[]>,
+): BackgroundOutputClient {
   const emptyMessages: BackgroundOutputMessage[] = []
   const client = {
     session: {
@@ -114,7 +126,11 @@ describe("background_output full_session", () => {
       "ses-1": [
         {
           id: "m1",
-          info: { role: "assistant", time: "2026-01-01T00:00:00Z", agent: "test" },
+          info: {
+            role: "assistant",
+            time: "2026-01-01T00:00:00Z",
+            agent: "test",
+          },
           parts: [
             { type: "text", text: "hello" },
             { type: "thinking", thinking: "thinking text" },
@@ -134,12 +150,15 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      include_thinking: true,
-      include_tool_results: true,
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        include_thinking: true,
+        include_tool_results: true,
+      },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("thinking text")
@@ -168,11 +187,14 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      since_message_id: "m1",
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        since_message_id: "m1",
+      },
+      mockContext,
+    )
 
     // #then
     expect(output.includes("hello")).toBe(false)
@@ -195,11 +217,14 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      since_message_id: "missing",
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        since_message_id: "missing",
+      },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("since_message_id not found")
@@ -221,11 +246,14 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      message_limit: 200,
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        message_limit: 200,
+      },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("Returned: 100")
@@ -255,7 +283,10 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({ task_id: "task-1", full_session: true }, mockContext)
+    const output = await tool.execute(
+      { task_id: "task-1", full_session: true },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("# Full Session Output")
@@ -269,7 +300,10 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({ task_id: "task-1", full_session: false }, mockContext)
+    const output = await tool.execute(
+      { task_id: "task-1", full_session: false },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("# Task Status")
@@ -296,12 +330,15 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      include_thinking: true,
-      thinking_max_chars: 100,
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        include_thinking: true,
+        thinking_max_chars: 100,
+      },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("[thinking] " + "x".repeat(100) + "...")
@@ -328,11 +365,14 @@ describe("background_output full_session", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when
-    const output = await tool.execute({
-      task_id: "task-1",
-      full_session: true,
-      include_thinking: true,
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        full_session: true,
+        include_thinking: true,
+      },
+      mockContext,
+    )
 
     // #then
     expect(output).toContain("[thinking] " + "y".repeat(2000) + "...")
@@ -340,12 +380,14 @@ describe("background_output full_session", () => {
   })
 })
 
-
 describe("background_output blocking", () => {
   test("block=true keeps legacy task result output when full_session is not provided", async () => {
     // #given a task that transitions running → completed after 2 polls
     let pollCount = 0
-    const task = createTask({ status: "running", sessionID: "ses-blocking-default" })
+    const task = createTask({
+      status: "running",
+      sessionID: "ses-blocking-default",
+    })
     const manager: BackgroundOutputManager = {
       getTask: (id: string) => {
         if (id !== task.id) return undefined
@@ -368,11 +410,14 @@ describe("background_output blocking", () => {
     const tool = createBackgroundOutput(manager, client)
 
     // #when block=true, full_session not specified
-    const output = await tool.execute({
-      task_id: "task-1",
-      block: true,
-      timeout: 10000,
-    }, mockContext)
+    const output = await tool.execute(
+      {
+        task_id: "task-1",
+        block: true,
+        timeout: 10000,
+      },
+      mockContext,
+    )
 
     // #then should have waited and returned task result output
     expect(task.status).toBe("completed")
@@ -396,7 +441,9 @@ describe("background_cancel", () => {
         return true
       },
     } as unknown as BackgroundManager
-    const client = { session: { abort: async () => ({}) } } as BackgroundCancelClient
+    const client = {
+      session: { abort: async () => ({}) },
+    } as BackgroundCancelClient
     const tool = createBackgroundCancel(manager, client)
 
     // #when
@@ -422,7 +469,9 @@ describe("background_cancel", () => {
         return true
       },
     } as unknown as BackgroundManager
-    const client = { session: { abort: async () => ({}) } } as BackgroundCancelClient
+    const client = {
+      session: { abort: async () => ({}) },
+    } as BackgroundCancelClient
     const tool = createBackgroundCancel(manager, client)
 
     // #when
@@ -435,8 +484,18 @@ describe("background_cancel", () => {
 
   test("preserves original status in cancellation table", async () => {
     // #given
-    const taskA = createTask({ id: "task-a", status: "running", sessionID: "ses-a", description: "running task" })
-    const taskB = createTask({ id: "task-b", status: "pending", sessionID: undefined, description: "pending task" })
+    const taskA = createTask({
+      id: "task-a",
+      status: "running",
+      sessionID: "ses-a",
+      description: "running task",
+    })
+    const taskB = createTask({
+      id: "task-b",
+      status: "pending",
+      sessionID: undefined,
+      description: "pending task",
+    })
     const manager = {
       getTask: () => undefined,
       getAllDescendantTasks: () => [taskA, taskB],
@@ -446,7 +505,9 @@ describe("background_cancel", () => {
         return true
       },
     } as unknown as BackgroundManager
-    const client = { session: { abort: async () => ({}) } } as BackgroundCancelClient
+    const client = {
+      session: { abort: async () => ({}) },
+    } as BackgroundCancelClient
     const tool = createBackgroundCancel(manager, client)
 
     // #when
@@ -454,7 +515,9 @@ describe("background_cancel", () => {
 
     // #then
     expect(output).toContain("| `task-a` | running task | running | `ses-a` |")
-    expect(output).toContain("| `task-b` | pending task | pending | (not started) |")
+    expect(output).toContain(
+      "| `task-b` | pending task | pending | (not started) |",
+    )
   })
 
   test("passes skipNotification: true to cancelTask to prevent deadlock", async () => {
@@ -470,7 +533,9 @@ describe("background_cancel", () => {
         return true
       },
     } as unknown as BackgroundManager
-    const client = { session: { abort: async () => ({}) } } as BackgroundCancelClient
+    const client = {
+      session: { abort: async () => ({}) },
+    } as BackgroundCancelClient
     const tool = createBackgroundCancel(manager, client)
 
     // #when - cancel all tasks
@@ -479,7 +544,7 @@ describe("background_cancel", () => {
     // #then - skipNotification should be true to prevent self-deadlock
     expect(cancelOptions).toHaveLength(1)
     expect(cancelOptions[0].options).toEqual(
-      expect.objectContaining({ skipNotification: true })
+      expect.objectContaining({ skipNotification: true }),
     )
   })
 
@@ -496,7 +561,9 @@ describe("background_cancel", () => {
         return true
       },
     } as unknown as BackgroundManager
-    const client = { session: { abort: async () => ({}) } } as BackgroundCancelClient
+    const client = {
+      session: { abort: async () => ({}) },
+    } as BackgroundCancelClient
     const tool = createBackgroundCancel(manager, client)
 
     // #when - cancel single task
@@ -505,7 +572,7 @@ describe("background_cancel", () => {
     // #then - skipNotification should be true
     expect(cancelOptions).toHaveLength(1)
     expect(cancelOptions[0].options).toEqual(
-      expect.objectContaining({ skipNotification: true })
+      expect.objectContaining({ skipNotification: true }),
     )
   })
 })

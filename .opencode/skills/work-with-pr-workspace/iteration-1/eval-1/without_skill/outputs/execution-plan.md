@@ -69,22 +69,22 @@ Check `src/config/schema/background-task.ts` and `src/features/background-agent/
 
 ## Files Modified (4 files)
 
-| File | Change |
-|------|--------|
-| `src/config/schema/background-task.ts` | Add `maxBackgroundAgents` field |
-| `src/features/background-agent/concurrency.ts` | Add global count tracking + enforcement |
-| `src/config/schema/background-task.test.ts` | Add schema validation tests |
-| `src/features/background-agent/concurrency.test.ts` | Add global limit enforcement tests |
+| File                                                | Change                                  |
+| --------------------------------------------------- | --------------------------------------- |
+| `src/config/schema/background-task.ts`              | Add `maxBackgroundAgents` field         |
+| `src/features/background-agent/concurrency.ts`      | Add global count tracking + enforcement |
+| `src/config/schema/background-task.test.ts`         | Add schema validation tests             |
+| `src/features/background-agent/concurrency.test.ts` | Add global limit enforcement tests      |
 
 ## Files NOT Modified (intentional)
 
-| File | Reason |
-|------|--------|
-| `src/config/schema/oh-my-codes-config.ts` | No change needed - `BackgroundTaskConfigSchema` is already composed into root schema via `background_task` field |
-| `src/create-managers.ts` | No change needed - `pluginConfig.background_task` already passed to `BackgroundManager` constructor |
-| `src/features/background-agent/manager.ts` | No change needed - already passes config to `ConcurrencyManager` |
-| `src/plugin-config.ts` | No change needed - `background_task` is a simple object field, uses default override merge |
-| `src/config/schema.ts` | No change needed - barrel already exports `BackgroundTaskConfigSchema` |
+| File                                       | Reason                                                                                                           |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `src/config/schema/oh-my-codes-config.ts`  | No change needed - `BackgroundTaskConfigSchema` is already composed into root schema via `background_task` field |
+| `src/create-managers.ts`                   | No change needed - `pluginConfig.background_task` already passed to `BackgroundManager` constructor              |
+| `src/features/background-agent/manager.ts` | No change needed - already passes config to `ConcurrencyManager`                                                 |
+| `src/plugin-config.ts`                     | No change needed - `background_task` is a simple object field, uses default override merge                       |
+| `src/config/schema.ts`                     | No change needed - barrel already exports `BackgroundTaskConfigSchema`                                           |
 
 ## Design Decisions
 

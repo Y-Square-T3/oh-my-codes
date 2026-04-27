@@ -22,13 +22,17 @@ function createArgs(overrides: Partial<InstallArgs> = {}): InstallArgs {
 describe("validateNonTuiArgs", () => {
   test("rejects invalid --opencode-go values", () => {
     // #given
-    const args = createArgs({ opencodeGo: "maybe" as InstallArgs["opencodeGo"] })
+    const args = createArgs({
+      opencodeGo: "maybe" as InstallArgs["opencodeGo"],
+    })
 
     // #when
     const result = validateNonTuiArgs(args)
 
     // #then
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain("Invalid --opencode-go value: maybe (expected: no, yes)")
+    expect(result.errors).toContain(
+      "Invalid --opencode-go value: maybe (expected: no, yes)",
+    )
   })
 })

@@ -47,7 +47,9 @@ export function extractMessageIndex(error: unknown): number | null {
 export function extractUnavailableToolName(error: unknown): string | null {
   try {
     const message = getErrorMessage(error)
-    const match = message.match(/(?:unavailable tool|no such tool)[:\s'"]+([^'".\s]+)/)
+    const match = message.match(
+      /(?:unavailable tool|no such tool)[:\s'"]+([^'".\s]+)/,
+    )
     return match ? match[1] : null
   } catch {
     return null
@@ -77,7 +79,10 @@ export function detectErrorType(error: unknown): RecoveryErrorType {
       return "thinking_block_order"
     }
 
-    if (message.includes("thinking is disabled") && message.includes("cannot contain")) {
+    if (
+      message.includes("thinking is disabled") &&
+      message.includes("cannot contain")
+    ) {
       return "thinking_disabled_violation"
     }
 

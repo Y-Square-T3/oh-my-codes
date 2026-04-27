@@ -12,8 +12,12 @@ import { readState, writeState } from "../hooks/ralph-loop/storage"
 
 import type { CreatedHooks } from "../create-hooks"
 
-function getLoopCommandArguments(args: Record<string, unknown>, command: "ralph-loop" | "ulw-loop"): string {
-  const rawUserMessage = typeof args.user_message === "string" ? args.user_message.trim() : ""
+function getLoopCommandArguments(
+  args: Record<string, unknown>,
+  command: "ralph-loop" | "ulw-loop",
+): string {
+  const rawUserMessage =
+    typeof args.user_message === "string" ? args.user_message.trim() : ""
   if (rawUserMessage) {
     return rawUserMessage
   }
@@ -31,7 +35,11 @@ export function createToolExecuteBeforeHandler(args: {
 ) => Promise<void> {
   const { ctx, hooks } = args
 
-  function buildUltraworkOracleVerificationPrompt(prompt: string, originalTask: string, verificationAttemptId: string): string {
+  function buildUltraworkOracleVerificationPrompt(
+    prompt: string,
+    originalTask: string,
+    verificationAttemptId: string,
+  ): string {
     const verificationPrompt = [
       "You are verifying the active ULTRAWORK loop result for this session.",
       "",
@@ -52,7 +60,10 @@ export function createToolExecuteBeforeHandler(args: {
   }
 
   return async (input, output): Promise<void> => {
-    if (input.tool.toLowerCase() === "bash" && typeof output.args.command === "string") {
+    if (
+      input.tool.toLowerCase() === "bash" &&
+      typeof output.args.command === "string"
+    ) {
       if (output.args.command.includes("\x00")) {
         output.args.command = output.args.command.replace(/\x00/g, "")
         log("[tool-execute-before] Stripped null bytes from bash command", {
@@ -68,8 +79,14 @@ export function createToolExecuteBeforeHandler(args: {
     await hooks.nonInteractiveEnv?.["tool.execute.before"]?.(input, output)
     await hooks.bashFileReadGuard?.["tool.execute.before"]?.(input, output)
     await hooks.commentChecker?.["tool.execute.before"]?.(input, output)
-    await hooks.directoryAgentsInjector?.["tool.execute.before"]?.(input, output)
-    await hooks.directoryReadmeInjector?.["tool.execute.before"]?.(input, output)
+    await hooks.directoryAgentsInjector?.["tool.execute.before"]?.(
+      input,
+      output,
+    )
+    await hooks.directoryReadmeInjector?.["tool.execute.before"]?.(
+      input,
+      output,
+    )
     await hooks.rulesInjector?.["tool.execute.before"]?.(input, output)
     await hooks.tasksTodowriteDisabler?.["tool.execute.before"]?.(input, output)
     await hooks.webfetchRedirectGuard?.["tool.execute.before"]?.(input, output)
@@ -79,9 +96,9 @@ export function createToolExecuteBeforeHandler(args: {
 
     const normalizedToolName = input.tool.toLowerCase()
     if (
-      normalizedToolName === "question"
-      || normalizedToolName === "ask_user_question"
-      || normalizedToolName === "askuserquestion"
+      normalizedToolName === "question" ||
+      normalizedToolName === "ask_user_question" ||
+      normalizedToolName === "askuserquestion"
     ) {
       const sessionID = input.sessionID || getMainSessionID()
       await hooks.sessionNotification?.({
@@ -98,9 +115,16 @@ export function createToolExecuteBeforeHandler(args: {
 
     if (input.tool === "task") {
       const argsObject = output.args
-      const category = typeof argsObject.category === "string" ? argsObject.category : undefined
-      const subagentType = typeof argsObject.subagent_type === "string" ? argsObject.subagent_type : undefined
-      const taskId = typeof argsObject.task_id === "string" ? argsObject.task_id : undefined
+      const category =
+        typeof argsObject.category === "string"
+          ? argsObject.category
+          : undefined
+      const subagentType =
+        typeof argsObject.subagent_type === "string"
+          ? argsObject.subagent_type
+          : undefined
+      const taskId =
+        typeof argsObject.task_id === "string" ? argsObject.task_id : undefined
 
       if (category) {
         argsObject.subagent_type = "sisyphus-junior"
@@ -110,15 +134,19 @@ export function createToolExecuteBeforeHandler(args: {
       }
 
       const normalizedSubagentType =
-        typeof argsObject.subagent_type === "string" ? stripInvisibleAgentCharacters(argsObject.subagent_type) : undefined
-      const prompt = typeof argsObject.prompt === "string" ? argsObject.prompt : ""
-      const loopState = typeof ctx.directory === "string" ? readState(ctx.directory) : null
+        typeof argsObject.subagent_type === "string"
+          ? stripInvisibleAgentCharacters(argsObject.subagent_type)
+          : undefined
+      const prompt =
+        typeof argsObject.prompt === "string" ? argsObject.prompt : ""
+      const loopState =
+        typeof ctx.directory === "string" ? readState(ctx.directory) : null
       const shouldInjectOracleVerification =
-        normalizedSubagentType === "oracle"
-        && loopState?.active === true
-        && loopState.ultrawork === true
-        && loopState.verification_pending === true
-        && loopState.session_id === input.sessionID
+        normalizedSubagentType === "oracle" &&
+        loopState?.active === true &&
+        loopState.ultrawork === true &&
+        loopState.verification_pending === true &&
+        loopState.session_id === input.sessionID
 
       if (shouldInjectOracleVerification) {
         const verificationAttemptId = randomUUID()
@@ -143,7 +171,8 @@ export function createToolExecuteBeforeHandler(args: {
     }
 
     if (hooks.ralphLoop && input.tool === "skill") {
-      const rawName = typeof output.args.name === "string" ? output.args.name : undefined
+      const rawName =
+        typeof output.args.name === "string" ? output.args.name : undefined
       const command = rawName?.replace(/^\//, "").toLowerCase()
       const sessionID = input.sessionID || getMainSessionID()
 
@@ -172,7 +201,8 @@ export function createToolExecuteBeforeHandler(args: {
     }
 
     if (input.tool === "skill") {
-      const rawName = typeof output.args.name === "string" ? output.args.name : undefined
+      const rawName =
+        typeof output.args.name === "string" ? output.args.name : undefined
       const command = rawName?.replace(/^\//, "").toLowerCase()
       const sessionID = input.sessionID || getMainSessionID()
 
@@ -192,10 +222,13 @@ export function createToolExecuteBeforeHandler(args: {
       if (workStartingCommands.includes(command ?? "") && sessionID) {
         if (hooks.stopContinuationGuard?.isStopped(sessionID)) {
           hooks.stopContinuationGuard.clear(sessionID)
-          log("[stop-continuation] Stop state cleared by work-starting command", {
-            sessionID,
-            command,
-          })
+          log(
+            "[stop-continuation] Stop state cleared by work-starting command",
+            {
+              sessionID,
+              command,
+            },
+          )
         }
       }
     }

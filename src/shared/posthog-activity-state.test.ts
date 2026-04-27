@@ -9,7 +9,9 @@ function createDataHomePath(): string {
   return join(tmpdir(), `posthog-activity-state-${Date.now()}-${Math.random()}`)
 }
 
-async function importPostHogActivityStateModule(): Promise<typeof import("./posthog-activity-state")> {
+async function importPostHogActivityStateModule(): Promise<
+  typeof import("./posthog-activity-state")
+> {
   return import(`./posthog-activity-state?test=${Date.now()}-${Math.random()}`)
 }
 
@@ -29,10 +31,13 @@ describe("getPostHogActivityCaptureState", () => {
     mkdirSync(cachePath, { recursive: true })
     writeFileSync(join(cachePath, "posthog-activity.json"), "null\n")
     process.env.XDG_DATA_HOME = dataHomePath
-    const { getPostHogActivityCaptureState } = await importPostHogActivityStateModule()
+    const { getPostHogActivityCaptureState } =
+      await importPostHogActivityStateModule()
 
     // when
-    const result = getPostHogActivityCaptureState(new Date("2026-04-11T10:15:00.000Z"))
+    const result = getPostHogActivityCaptureState(
+      new Date("2026-04-11T10:15:00.000Z"),
+    )
 
     // then
     expect(result).toEqual({
@@ -52,10 +57,13 @@ describe("getPostHogActivityCaptureState", () => {
     mkdirSync(cachePath, { recursive: true })
     writeFileSync(join(cachePath, "posthog-activity.json"), "[]\n")
     process.env.XDG_DATA_HOME = dataHomePath
-    const { getPostHogActivityCaptureState } = await importPostHogActivityStateModule()
+    const { getPostHogActivityCaptureState } =
+      await importPostHogActivityStateModule()
 
     // when
-    const result = getPostHogActivityCaptureState(new Date("2026-04-11T10:15:00.000Z"))
+    const result = getPostHogActivityCaptureState(
+      new Date("2026-04-11T10:15:00.000Z"),
+    )
 
     // then
     expect(result).toEqual({
@@ -75,10 +83,13 @@ describe("getPostHogActivityCaptureState", () => {
     mkdirSync(cachePath, { recursive: true })
     writeFileSync(join(cachePath, "posthog-activity.json"), "42\n")
     process.env.XDG_DATA_HOME = dataHomePath
-    const { getPostHogActivityCaptureState } = await importPostHogActivityStateModule()
+    const { getPostHogActivityCaptureState } =
+      await importPostHogActivityStateModule()
 
     // when
-    const result = getPostHogActivityCaptureState(new Date("2026-04-11T10:15:00.000Z"))
+    const result = getPostHogActivityCaptureState(
+      new Date("2026-04-11T10:15:00.000Z"),
+    )
 
     // then
     expect(result).toEqual({
@@ -104,10 +115,13 @@ describe("getPostHogActivityCaptureState", () => {
       })}\n`,
     )
     process.env.XDG_DATA_HOME = dataHomePath
-    const { getPostHogActivityCaptureState } = await importPostHogActivityStateModule()
+    const { getPostHogActivityCaptureState } =
+      await importPostHogActivityStateModule()
 
     // when
-    const result = getPostHogActivityCaptureState(new Date("2026-04-11T10:15:00.000Z"))
+    const result = getPostHogActivityCaptureState(
+      new Date("2026-04-11T10:15:00.000Z"),
+    )
 
     // then
     expect(result).toEqual({

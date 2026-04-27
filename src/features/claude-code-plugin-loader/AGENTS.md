@@ -29,18 +29,18 @@ Called from `src/plugin-handlers/plugin-components-loader.ts` during Phase 2 of 
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | Barrel: `loadAllPluginComponents`, `PluginManifest`, `ClaudeSettings` types |
-| `plugin-discovery.ts` | Find plugin directories across scopes |
-| `plugin-manifest-parser.ts` | Parse `plugin.json` with Zod validation |
-| `command-loader.ts` | Load commands from `commands/` or `COMMANDS.md` |
-| `agent-loader.ts` | Load agents from `agents/` or `AGENTS.md` frontmatter |
-| `skill-loader.ts` | Load skills from `skills/` or `SKILL.md` |
-| `hook-loader.ts` | Load hooks config from `hooks/` or manifest |
-| `mcp-loader.ts` | Extract MCP server configs |
-| `lsp-loader.ts` | Extract LSP server configs |
-| `settings-loader.ts` | Parse Claude Code `settings.json` |
+| File                        | Purpose                                                                     |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `index.ts`                  | Barrel: `loadAllPluginComponents`, `PluginManifest`, `ClaudeSettings` types |
+| `plugin-discovery.ts`       | Find plugin directories across scopes                                       |
+| `plugin-manifest-parser.ts` | Parse `plugin.json` with Zod validation                                     |
+| `command-loader.ts`         | Load commands from `commands/` or `COMMANDS.md`                             |
+| `agent-loader.ts`           | Load agents from `agents/` or `AGENTS.md` frontmatter                       |
+| `skill-loader.ts`           | Load skills from `skills/` or `SKILL.md`                                    |
+| `hook-loader.ts`            | Load hooks config from `hooks/` or manifest                                 |
+| `mcp-loader.ts`             | Extract MCP server configs                                                  |
+| `lsp-loader.ts`             | Extract LSP server configs                                                  |
+| `settings-loader.ts`        | Parse Claude Code `settings.json`                                           |
 
 ## PLUGIN MANIFEST (plugin.json)
 
@@ -49,23 +49,23 @@ Called from `src/plugin-handlers/plugin-components-loader.ts` during Phase 2 of 
   "name": "my-plugin",
   "version": "1.0.0",
   "description": "...",
-  "commands": ["./commands"],       // or string[] of paths
+  "commands": ["./commands"], // or string[] of paths
   "agents": ["./agents"],
   "skills": ["./skills"],
   "hooks": "./hooks/config.json",
   "mcpServers": "./.mcp.json",
-  "lspServers": "./lsp"
+  "lspServers": "./lsp",
 }
 ```
 
 ## SCOPES
 
-| Scope | Path | Priority |
-|-------|------|----------|
-| `project` | `.opencode/plugins/` | Highest |
-| `local` | `~/.opencode/plugins/` | Medium |
-| `user` | `~/.claude/plugins/` | Medium |
-| `managed` | Built-in | Lowest |
+| Scope     | Path                   | Priority |
+| --------- | ---------------------- | -------- |
+| `project` | `.opencode/plugins/`   | Highest  |
+| `local`   | `~/.opencode/plugins/` | Medium   |
+| `user`    | `~/.claude/plugins/`   | Medium   |
+| `managed` | Built-in               | Lowest   |
 
 ## ERROR ISOLATION
 

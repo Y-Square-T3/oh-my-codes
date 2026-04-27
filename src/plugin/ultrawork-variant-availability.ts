@@ -33,7 +33,8 @@ export async function resolveValidUltraworkVariant(
     return undefined
   }
 
-  const providerList = (client as ProviderListClient | null | undefined)?.provider?.list
+  const providerList = (client as ProviderListClient | null | undefined)
+    ?.provider?.list
   if (typeof providerList !== "function") {
     return undefined
   }

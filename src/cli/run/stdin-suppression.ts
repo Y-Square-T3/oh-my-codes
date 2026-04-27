@@ -6,11 +6,15 @@ type StdinLike = {
   resume: () => void
   pause: () => void
   on: (event: "data", listener: (chunk: string | Uint8Array) => void) => void
-  removeListener: (event: "data", listener: (chunk: string | Uint8Array) => void) => void
+  removeListener: (
+    event: "data",
+    listener: (chunk: string | Uint8Array) => void,
+  ) => void
 }
 
 function includesCtrlC(chunk: string | Uint8Array): boolean {
-  const text = typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8")
+  const text =
+    typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8")
   return text.includes("\u0003")
 }
 
@@ -18,7 +22,7 @@ export function suppressRunInput(
   stdin: StdinLike = process.stdin,
   onInterrupt: () => void = () => {
     process.kill(process.pid, "SIGINT")
-  }
+  },
 ): () => void {
   if (!stdin.isTTY) {
     return () => {}

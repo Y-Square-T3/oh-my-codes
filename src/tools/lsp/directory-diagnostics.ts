@@ -2,21 +2,38 @@ import { existsSync, lstatSync, readdirSync, type Stats } from "fs"
 import { extname, join, resolve } from "path"
 
 import { findServerForExtension } from "./config"
-import { findWorkspaceRoot, formatServerLookupError } from "./lsp-client-wrapper"
+import {
+  findWorkspaceRoot,
+  formatServerLookupError,
+} from "./lsp-client-wrapper"
 import { filterDiagnosticsBySeverity, formatDiagnostic } from "./lsp-formatters"
 import { LSPClient } from "./lsp-client"
 import { lspManager } from "./lsp-server"
-import { DEFAULT_MAX_DIAGNOSTICS, DEFAULT_MAX_DIRECTORY_FILES } from "./constants"
+import {
+  DEFAULT_MAX_DIAGNOSTICS,
+  DEFAULT_MAX_DIRECTORY_FILES,
+} from "./constants"
 import type { Diagnostic } from "./types"
 
-const SKIP_DIRECTORIES = new Set(["node_modules", ".git", "dist", "build", ".next", "out"])
+const SKIP_DIRECTORIES = new Set([
+  "node_modules",
+  ".git",
+  "dist",
+  "build",
+  ".next",
+  "out",
+])
 
 type FileDiagnostic = {
   filePath: string
   diagnostic: Diagnostic
 }
 
-function collectFilesWithExtension(dir: string, extension: string, maxFiles: number): string[] {
+function collectFilesWithExtension(
+  dir: string,
+  extension: string,
+  maxFiles: number,
+): string[] {
   const files: string[] = []
 
   function walk(currentDir: string): void {
@@ -65,12 +82,12 @@ export async function aggregateDiagnosticsForDirectory(
   directory: string,
   extension: string,
   severity?: "error" | "warning" | "information" | "hint" | "all",
-  maxFiles: number = DEFAULT_MAX_DIRECTORY_FILES
+  maxFiles: number = DEFAULT_MAX_DIRECTORY_FILES,
 ): Promise<string> {
   if (!extension.startsWith(".")) {
     throw new Error(
       `Extension must start with a dot (e.g., ".ts", not "${extension}"). ` +
-        `Use ".${extension}" instead.`
+        `Use ".${extension}" instead.`,
     )
   }
 
@@ -115,7 +132,7 @@ export async function aggregateDiagnosticsForDirectory(
           ...filtered.map((diagnostic) => ({
             filePath: file,
             diagnostic,
-          }))
+          })),
         )
       } catch (e) {
         fileErrors.push({
@@ -154,7 +171,7 @@ export async function aggregateDiagnosticsForDirectory(
     if (wasDiagCapped) {
       lines.push(
         "",
-        `... (${allDiagnostics.length - DEFAULT_MAX_DIAGNOSTICS} more diagnostics not shown)`
+        `... (${allDiagnostics.length - DEFAULT_MAX_DIAGNOSTICS} more diagnostics not shown)`,
       )
     }
   }

@@ -51,11 +51,12 @@ function buildChatParamsInput(raw: unknown): ChatParamsHookInput | null {
   if (!agentName) return null
 
   const providerID = model.providerID
-  const modelID = typeof model.modelID === "string"
-    ? model.modelID
-    : typeof model.id === "string"
-      ? model.id
-      : undefined
+  const modelID =
+    typeof model.modelID === "string"
+      ? model.modelID
+      : typeof model.id === "string"
+        ? model.id
+        : undefined
   const providerId = provider.id
   if (typeof providerID !== "string") return null
   if (typeof modelID !== "string") return null
@@ -80,7 +81,12 @@ function isChatParamsOutput(raw: unknown): raw is ChatParamsOutput {
 }
 
 export function createChatParamsHandler(args: {
-  anthropicEffort: { "chat.params"?: (input: ChatParamsHookInput, output: ChatParamsOutput) => Promise<void> } | null
+  anthropicEffort: {
+    "chat.params"?: (
+      input: ChatParamsHookInput,
+      output: ChatParamsOutput,
+    ) => Promise<void>
+  } | null
   client?: unknown
 }): (input: unknown, output: unknown) => Promise<void> {
   return async (input, output): Promise<void> => {
@@ -97,7 +103,8 @@ export function createChatParamsHandler(args: {
         output.topP = storedPromptParams.topP
       }
       if (storedPromptParams.maxOutputTokens !== undefined) {
-        (output as Record<string, unknown>).maxOutputTokens = storedPromptParams.maxOutputTokens
+        ;(output as Record<string, unknown>).maxOutputTokens =
+          storedPromptParams.maxOutputTokens
       }
       if (storedPromptParams.options) {
         output.options = {
@@ -116,16 +123,26 @@ export function createChatParamsHandler(args: {
       providerID: normalizedInput.model.providerID,
       modelID: normalizedInput.model.modelID,
       desired: {
-        variant: typeof normalizedInput.message.variant === "string"
-          ? normalizedInput.message.variant
-          : undefined,
-        reasoningEffort: typeof output.options.reasoningEffort === "string"
-          ? output.options.reasoningEffort
-          : undefined,
-        temperature: typeof output.temperature === "number" ? output.temperature : undefined,
+        variant:
+          typeof normalizedInput.message.variant === "string"
+            ? normalizedInput.message.variant
+            : undefined,
+        reasoningEffort:
+          typeof output.options.reasoningEffort === "string"
+            ? output.options.reasoningEffort
+            : undefined,
+        temperature:
+          typeof output.temperature === "number"
+            ? output.temperature
+            : undefined,
         topP: typeof output.topP === "number" ? output.topP : undefined,
-        maxTokens: typeof output.maxOutputTokens === "number" ? output.maxOutputTokens : undefined,
-        thinking: isRecord(output.options.thinking) ? output.options.thinking : undefined,
+        maxTokens:
+          typeof output.maxOutputTokens === "number"
+            ? output.maxOutputTokens
+            : undefined,
+        thinking: isRecord(output.options.thinking)
+          ? output.options.thinking
+          : undefined,
       },
       capabilities,
     })

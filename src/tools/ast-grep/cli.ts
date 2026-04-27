@@ -1,9 +1,6 @@
 import { spawn } from "bun"
 import { existsSync } from "fs"
-import {
-	getSgCliPath,
-	DEFAULT_TIMEOUT_MS,
-} from "./constants"
+import { getSgCliPath, DEFAULT_TIMEOUT_MS } from "./constants"
 import { ensureAstGrepBinary } from "./downloader"
 import type { CliLanguage, SgResult } from "./types"
 
@@ -12,20 +9,20 @@ import { collectProcessOutputWithTimeout } from "./process-output-timeout"
 import { createSgResultFromStdout } from "./sg-compact-json-output"
 
 export {
-	ensureCliAvailable,
-	getAstGrepPath,
-	isCliAvailable,
-	startBackgroundInit,
+  ensureCliAvailable,
+  getAstGrepPath,
+  isCliAvailable,
+  startBackgroundInit,
 } from "./cli-binary-path-resolution"
 
 export interface RunOptions {
-	pattern: string
-	lang: CliLanguage
-	paths?: string[]
-	globs?: string[]
-	rewrite?: string
-	context?: number
-	updateAll?: boolean
+  pattern: string
+  lang: CliLanguage
+  paths?: string[]
+  globs?: string[]
+  rewrite?: string
+  context?: number
+  updateAll?: boolean
 }
 
 export async function runSg(options: RunOptions): Promise<SgResult> {
@@ -35,7 +32,14 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
   // another with --update-all to perform the actual file writes.
   const shouldSeparateWritePass = !!(options.rewrite && options.updateAll)
 
-  const args = ["run", "-p", options.pattern, "--lang", options.lang, "--json=compact"]
+  const args = [
+    "run",
+    "-p",
+    options.pattern,
+    "--lang",
+    options.lang,
+    "--json=compact",
+  ]
 
   if (options.rewrite) {
     args.push("-r", options.rewrite)
@@ -54,7 +58,8 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
     }
   }
 
-  const paths = options.paths && options.paths.length > 0 ? options.paths : ["."]
+  const paths =
+    options.paths && options.paths.length > 0 ? options.paths : ["."]
   args.push(...paths)
 
   let cliPath = getSgCliPath()
@@ -80,44 +85,46 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
 
   const timeout = DEFAULT_TIMEOUT_MS
 
-	const proc = spawn([cliPath, ...args], {
-		stdout: "pipe",
-		stderr: "pipe",
-	})
+  const proc = spawn([cliPath, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  })
 
-	let stdout: string
-	let stderr: string
-	let exitCode: number
+  let stdout: string
+  let stderr: string
+  let exitCode: number
 
-	try {
-		const output = await collectProcessOutputWithTimeout(proc, timeout)
-		stdout = output.stdout
-		stderr = output.stderr
-		exitCode = output.exitCode
-	} catch (error) {
-		if (error instanceof Error && error.message.includes("timeout")) {
-			return {
-				matches: [],
-				totalMatches: 0,
-				truncated: true,
-				truncatedReason: "timeout",
-				error: error.message,
-			}
-		}
+  try {
+    const output = await collectProcessOutputWithTimeout(proc, timeout)
+    stdout = output.stdout
+    stderr = output.stderr
+    exitCode = output.exitCode
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("timeout")) {
+      return {
+        matches: [],
+        totalMatches: 0,
+        truncated: true,
+        truncatedReason: "timeout",
+        error: error.message,
+      }
+    }
 
-		const errorMessage = error instanceof Error ? error.message : String(error)
-		const errorCode =
-			typeof error === "object" && error !== null && "code" in error
-				? (error as { code?: unknown }).code
-				: undefined
-		const isNoEntry =
-			errorCode === "ENOENT" || errorMessage.includes("ENOENT") || errorMessage.includes("not found")
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorCode =
+      typeof error === "object" && error !== null && "code" in error
+        ? (error as { code?: unknown }).code
+        : undefined
+    const isNoEntry =
+      errorCode === "ENOENT" ||
+      errorMessage.includes("ENOENT") ||
+      errorMessage.includes("not found")
 
-		if (isNoEntry) {
-			const downloadedPath = await ensureAstGrepBinary()
-			if (downloadedPath) {
-				return runSg(options)
-			} else {
+    if (isNoEntry) {
+      const downloadedPath = await ensureAstGrepBinary()
+      if (downloadedPath) {
+        return runSg(options)
+      } else {
         return {
           matches: [],
           totalMatches: 0,
@@ -132,20 +139,25 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
       }
     }
 
-		return {
-			matches: [],
-			totalMatches: 0,
-			truncated: false,
-			error: `Failed to spawn ast-grep: ${errorMessage}`,
-		}
-	}
+    return {
+      matches: [],
+      totalMatches: 0,
+      truncated: false,
+      error: `Failed to spawn ast-grep: ${errorMessage}`,
+    }
+  }
 
   if (exitCode !== 0 && stdout.trim() === "") {
     if (stderr.includes("No files found")) {
       return { matches: [], totalMatches: 0, truncated: false }
     }
     if (stderr.trim()) {
-      return { matches: [], totalMatches: 0, truncated: false, error: stderr.trim() }
+      return {
+        matches: [],
+        totalMatches: 0,
+        truncated: false,
+        error: stderr.trim(),
+      }
     }
     return { matches: [], totalMatches: 0, truncated: false }
   }
@@ -153,7 +165,7 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
   const jsonResult = createSgResultFromStdout(stdout)
 
   if (shouldSeparateWritePass && jsonResult.matches.length > 0) {
-    const writeArgs = args.filter(a => a !== "--json=compact")
+    const writeArgs = args.filter((a) => a !== "--json=compact")
     writeArgs.push("--update-all")
 
     const writeProc = spawn([cliPath, ...writeArgs], {
@@ -162,13 +174,19 @@ export async function runSg(options: RunOptions): Promise<SgResult> {
     })
 
     try {
-      const writeOutput = await collectProcessOutputWithTimeout(writeProc, timeout)
+      const writeOutput = await collectProcessOutputWithTimeout(
+        writeProc,
+        timeout,
+      )
       if (writeOutput.exitCode !== 0) {
-        const errorDetail = writeOutput.stderr.trim() || `ast-grep exited with code ${writeOutput.exitCode}`
+        const errorDetail =
+          writeOutput.stderr.trim() ||
+          `ast-grep exited with code ${writeOutput.exitCode}`
         return { ...jsonResult, error: `Replace failed: ${errorDetail}` }
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
       return { ...jsonResult, error: `Replace failed: ${errorMessage}` }
     }
   }

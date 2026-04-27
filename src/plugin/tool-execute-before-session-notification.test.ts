@@ -6,7 +6,10 @@ const { createToolExecuteBeforeHandler } = require("./tool-execute-before")
 describe("createToolExecuteBeforeHandler session notification sessionID", () => {
   test("uses main session fallback when input sessionID is empty", async () => {
     const mainSessionID = "ses_main"
-    const getMainSessionIDSpy = spyOn(sessionState, "getMainSessionID").mockReturnValue(mainSessionID)
+    const getMainSessionIDSpy = spyOn(
+      sessionState,
+      "getMainSessionID",
+    ).mockReturnValue(mainSessionID)
 
     let capturedSessionID: string | undefined
     const hooks = {
@@ -22,7 +25,11 @@ describe("createToolExecuteBeforeHandler session notification sessionID", () => 
 
     await handler(
       { tool: "question", sessionID: "", callID: "call_q" },
-      { args: { questions: [{ question: "Continue?", options: [{ label: "Yes" }] }] } },
+      {
+        args: {
+          questions: [{ question: "Continue?", options: [{ label: "Yes" }] }],
+        },
+      },
     )
 
     expect(getMainSessionIDSpy).toHaveBeenCalled()

@@ -1,5 +1,9 @@
 import { dedupeEdits } from "./edit-deduplication"
-import { collectLineRefs, detectOverlappingRanges, getEditLineNumber } from "./edit-ordering"
+import {
+  collectLineRefs,
+  detectOverlappingRanges,
+  getEditLineNumber,
+} from "./edit-ordering"
 import type { HashlineEdit } from "./types"
 import {
   applyAppend,
@@ -25,7 +29,10 @@ export interface HashlineApplyReport {
   deduplicatedEdits: number
 }
 
-export function applyHashlineEditsWithReport(content: string, edits: HashlineEdit[]): HashlineApplyReport {
+export function applyHashlineEditsWithReport(
+  content: string,
+  edits: HashlineEdit[],
+): HashlineApplyReport {
   if (edits.length === 0) {
     return {
       content,
@@ -35,7 +42,11 @@ export function applyHashlineEditsWithReport(content: string, edits: HashlineEdi
   }
 
   const dedupeResult = dedupeEdits(edits)
-  const EDIT_PRECEDENCE: Record<string, number> = { replace: 0, append: 1, prepend: 2 }
+  const EDIT_PRECEDENCE: Record<string, number> = {
+    replace: 0,
+    append: 1,
+    prepend: 2,
+  }
   const sortedEdits = [...dedupeResult.edits].sort((a, b) => {
     const lineA = getEditLineNumber(a)
     const lineB = getEditLineNumber(b)
@@ -57,7 +68,9 @@ export function applyHashlineEditsWithReport(content: string, edits: HashlineEdi
     switch (edit.op) {
       case "replace": {
         const next = edit.end
-          ? applyReplaceLines(lines, edit.pos, edit.end, edit.lines, { skipValidation: true })
+          ? applyReplaceLines(lines, edit.pos, edit.end, edit.lines, {
+              skipValidation: true,
+            })
           : applySetLine(lines, edit.pos, edit.lines, { skipValidation: true })
         if (arraysEqual(next, lines)) {
           noopEdits += 1
@@ -68,7 +81,9 @@ export function applyHashlineEditsWithReport(content: string, edits: HashlineEdi
       }
       case "append": {
         const next = edit.pos
-          ? applyInsertAfter(lines, edit.pos, edit.lines, { skipValidation: true })
+          ? applyInsertAfter(lines, edit.pos, edit.lines, {
+              skipValidation: true,
+            })
           : applyAppend(lines, edit.lines)
         if (arraysEqual(next, lines)) {
           noopEdits += 1
@@ -79,7 +94,9 @@ export function applyHashlineEditsWithReport(content: string, edits: HashlineEdi
       }
       case "prepend": {
         const next = edit.pos
-          ? applyInsertBefore(lines, edit.pos, edit.lines, { skipValidation: true })
+          ? applyInsertBefore(lines, edit.pos, edit.lines, {
+              skipValidation: true,
+            })
           : applyPrepend(lines, edit.lines)
         if (arraysEqual(next, lines)) {
           noopEdits += 1
@@ -98,6 +115,9 @@ export function applyHashlineEditsWithReport(content: string, edits: HashlineEdi
   }
 }
 
-export function applyHashlineEdits(content: string, edits: HashlineEdit[]): string {
+export function applyHashlineEdits(
+  content: string,
+  edits: HashlineEdit[],
+): string {
   return applyHashlineEditsWithReport(content, edits).content
 }

@@ -100,7 +100,10 @@ describe("tool-metadata-store", () => {
       storeToolMetadata("ses_1", "call_a", { title: "Old" })
 
       //#when
-      storeToolMetadata("ses_1", "call_a", { title: "New", metadata: { updated: true } })
+      storeToolMetadata("ses_1", "call_a", {
+        title: "New",
+        metadata: { updated: true },
+      })
 
       //#then
       const result = consumeToolMetadata("ses_1", "call_a")

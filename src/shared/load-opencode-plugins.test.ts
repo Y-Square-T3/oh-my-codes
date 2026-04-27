@@ -9,9 +9,11 @@ type LoadOpencodePluginsModule = {
 }
 
 const existsSyncMock = mock((_path: string) => true)
-const readFileSyncMock = mock((_path: string, _encoding?: string) => `{
+const readFileSyncMock = mock(
+  (_path: string, _encoding?: string) => `{
   "plugin": ["plugin-a", "plugin-b"]
-}`)
+}`,
+)
 
 async function importFreshLoadOpencodePluginsModule(): Promise<LoadOpencodePluginsModule> {
   const modulePath = `${new URL("./load-opencode-plugins.ts", import.meta.url).pathname}?test=${Date.now()}-${Math.random()}`
@@ -23,9 +25,11 @@ describe("loadOpencodePlugins", () => {
     existsSyncMock.mockReset()
     existsSyncMock.mockImplementation((_path: string) => true)
     readFileSyncMock.mockReset()
-    readFileSyncMock.mockImplementation((_path: string, _encoding?: string) => `{
+    readFileSyncMock.mockImplementation(
+      (_path: string, _encoding?: string) => `{
   "plugin": ["plugin-a", "plugin-b"]
-}`)
+}`,
+    )
 
     mock.module("node:fs", () => ({
       ...fs,
@@ -42,7 +46,8 @@ describe("loadOpencodePlugins", () => {
     describe("#when loading plugins repeatedly", () => {
       it("#then does not call readFileSync on the second load", async () => {
         // given
-        const { loadOpencodePlugins } = await importFreshLoadOpencodePluginsModule()
+        const { loadOpencodePlugins } =
+          await importFreshLoadOpencodePluginsModule()
 
         // when
         const firstResult = loadOpencodePlugins("/some/fake/dir")
@@ -63,7 +68,8 @@ describe("loadOpencodePlugins", () => {
     describe("#when loading the same directory again", () => {
       it("#then re-reads plugin config files from disk", async () => {
         // given
-        const { loadOpencodePlugins, clearOpencodePluginsCache } = await importFreshLoadOpencodePluginsModule()
+        const { loadOpencodePlugins, clearOpencodePluginsCache } =
+          await importFreshLoadOpencodePluginsModule()
 
         if (typeof clearOpencodePluginsCache !== "function") {
           throw new Error("clearOpencodePluginsCache export is missing")
@@ -82,7 +88,9 @@ describe("loadOpencodePlugins", () => {
         expect(firstResult).toEqual(["plugin-a", "plugin-b"])
         expect(thirdResult).toEqual(["plugin-a", "plugin-b"])
         expect(readCountAfterSecondLoad - readCountAfterFirstLoad).toBe(0)
-        expect(readCountAfterThirdLoad - readCountAfterSecondLoad).toBeGreaterThan(0)
+        expect(
+          readCountAfterThirdLoad - readCountAfterSecondLoad,
+        ).toBeGreaterThan(0)
       })
     })
   })

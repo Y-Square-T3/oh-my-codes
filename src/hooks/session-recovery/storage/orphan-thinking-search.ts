@@ -24,7 +24,10 @@ export function findMessagesWithOrphanThinking(sessionID: string): string[] {
   return result
 }
 
-export function findMessageByIndexNeedingThinking(sessionID: string, targetIndex: number): string | null {
+export function findMessageByIndexNeedingThinking(
+  sessionID: string,
+  targetIndex: number,
+): string | null {
   const messages = readMessages(sessionID)
 
   if (targetIndex < 0 || targetIndex >= messages.length) return null

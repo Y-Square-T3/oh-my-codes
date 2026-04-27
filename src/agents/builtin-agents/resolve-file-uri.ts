@@ -4,7 +4,10 @@ import { isAbsolute, resolve } from "node:path"
 import { isWithinProject } from "../../shared/contains-path"
 import { log } from "../../shared/logger"
 
-export function resolvePromptAppend(promptAppend: string, configDir?: string): string {
+export function resolvePromptAppend(
+  promptAppend: string,
+  configDir?: string,
+): string {
   if (!promptAppend.startsWith("file://")) return promptAppend
 
   const encoded = promptAppend.slice(7)
@@ -12,7 +15,9 @@ export function resolvePromptAppend(promptAppend: string, configDir?: string): s
   let filePath: string
   try {
     const decoded = decodeURIComponent(encoded)
-    const expanded = decoded.startsWith("~/") ? decoded.replace(/^~\//, `${homedir()}/`) : decoded
+    const expanded = decoded.startsWith("~/")
+      ? decoded.replace(/^~\//, `${homedir()}/`)
+      : decoded
     filePath = isAbsolute(expanded)
       ? expanded
       : resolve(configDir ?? process.cwd(), expanded)

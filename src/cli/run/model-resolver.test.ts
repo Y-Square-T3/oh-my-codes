@@ -34,7 +34,10 @@ describe("resolveRunModel", () => {
     const result = resolveRunModel(modelString)
 
     // then
-    expect(result).toEqual({ providerID: "anthropic", modelID: "claude-sonnet-4" })
+    expect(result).toEqual({
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4",
+    })
   })
 
   it("given nested slashes 'openai/gpt-5.3/preview', when resolved, then modelID is 'gpt-5.3/preview'", () => {

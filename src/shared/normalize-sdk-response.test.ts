@@ -41,7 +41,11 @@ describe("normalizeSDKResponse", () => {
     const response = { value: "legacy" }
 
     //#when
-    const result = normalizeSDKResponse(response, { value: "fallback" }, { preferResponseOnMissingData: true })
+    const result = normalizeSDKResponse(
+      response,
+      { value: "fallback" },
+      { preferResponseOnMissingData: true },
+    )
 
     //#then
     expect(result).toEqual({ value: "legacy" })

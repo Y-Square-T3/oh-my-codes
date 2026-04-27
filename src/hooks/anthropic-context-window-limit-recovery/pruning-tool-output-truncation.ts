@@ -109,7 +109,9 @@ async function truncateToolOutputsByCallIdFromSDK(
 ): Promise<{ truncatedCount: number }> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    })
     let truncatedCount = 0
 
     for (const msg of messages) {
@@ -121,7 +123,13 @@ async function truncateToolOutputsByCallIdFromSDK(
         if (!callIds.has(part.callID)) continue
         if (!part.state?.output || part.state?.time?.compacted) continue
 
-        const result = await truncateToolResultAsync(client, sessionID, messageID, part.id, part)
+        const result = await truncateToolResultAsync(
+          client,
+          sessionID,
+          messageID,
+          part.id,
+          part,
+        )
         if (result.success) {
           truncatedCount++
         }

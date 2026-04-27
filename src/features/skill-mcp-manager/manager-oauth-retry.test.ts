@@ -24,7 +24,12 @@ async function importFreshManagerModule(): Promise<ManagerModule> {
     McpOAuthProvider: class MockMcpOAuthProvider {},
   }))
 
-  return await import(new URL(`./manager.ts?oauth-retry-test=${Date.now()}-${Math.random()}`, import.meta.url).href)
+  return await import(
+    new URL(
+      `./manager.ts?oauth-retry-test=${Date.now()}-${Math.random()}`,
+      import.meta.url,
+    ).href
+  )
 }
 
 function createInfo(): SkillMcpClientInfo {
@@ -59,11 +64,18 @@ describe("SkillMcpManager post-request OAuth retry", () => {
   it("retries the operation after a 401 refresh succeeds", async () => {
     // given
     const { SkillMcpManager } = await importFreshManagerModule()
-    const refresh = mock(async () => ({ accessToken: "refreshed-token" } satisfies OAuthTokenData))
+    const refresh = mock(
+      async () => ({ accessToken: "refreshed-token" }) satisfies OAuthTokenData,
+    )
     const manager = new SkillMcpManager({
       createOAuthProvider: () => ({
-        tokens: () => ({ accessToken: "stale-token", refreshToken: "refresh-token" }),
-        login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+        tokens: () => ({
+          accessToken: "stale-token",
+          refreshToken: "refresh-token",
+        }),
+        login: mock(
+          async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+        ),
         refresh,
       }),
     })
@@ -74,10 +86,18 @@ describe("SkillMcpManager post-request OAuth retry", () => {
 
       return { content: [{ type: "text", text: "success" }] }
     })
-    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({ callTool, close: mock(async () => {}) })
+    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({
+      callTool,
+      close: mock(async () => {}),
+    })
 
     // when
-    const result = await manager.callTool(createInfo(), createContext(), "test-tool", {})
+    const result = await manager.callTool(
+      createInfo(),
+      createContext(),
+      "test-tool",
+      {},
+    )
 
     // then
     expect(result).toEqual([{ type: "text", text: "success" }])
@@ -88,11 +108,18 @@ describe("SkillMcpManager post-request OAuth retry", () => {
   it("retries the operation after a 403 refresh succeeds without step-up scope", async () => {
     // given
     const { SkillMcpManager } = await importFreshManagerModule()
-    const refresh = mock(async () => ({ accessToken: "refreshed-token" } satisfies OAuthTokenData))
+    const refresh = mock(
+      async () => ({ accessToken: "refreshed-token" }) satisfies OAuthTokenData,
+    )
     const manager = new SkillMcpManager({
       createOAuthProvider: () => ({
-        tokens: () => ({ accessToken: "stale-token", refreshToken: "refresh-token" }),
-        login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+        tokens: () => ({
+          accessToken: "stale-token",
+          refreshToken: "refresh-token",
+        }),
+        login: mock(
+          async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+        ),
         refresh,
       }),
     })
@@ -103,10 +130,18 @@ describe("SkillMcpManager post-request OAuth retry", () => {
 
       return { content: [{ type: "text", text: "success" }] }
     })
-    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({ callTool, close: mock(async () => {}) })
+    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({
+      callTool,
+      close: mock(async () => {}),
+    })
 
     // when
-    const result = await manager.callTool(createInfo(), createContext(), "test-tool", {})
+    const result = await manager.callTool(
+      createInfo(),
+      createContext(),
+      "test-tool",
+      {},
+    )
 
     // then
     expect(result).toEqual([{ type: "text", text: "success" }])
@@ -122,18 +157,28 @@ describe("SkillMcpManager post-request OAuth retry", () => {
     })
     const manager = new SkillMcpManager({
       createOAuthProvider: () => ({
-        tokens: () => ({ accessToken: "stale-token", refreshToken: "refresh-token" }),
-        login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+        tokens: () => ({
+          accessToken: "stale-token",
+          refreshToken: "refresh-token",
+        }),
+        login: mock(
+          async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+        ),
         refresh,
       }),
     })
     const callTool = mock(async () => {
       throw new Error("401 Unauthorized")
     })
-    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({ callTool, close: mock(async () => {}) })
+    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({
+      callTool,
+      close: mock(async () => {}),
+    })
 
     // when / then
-    await expect(manager.callTool(createInfo(), createContext(), "test-tool", {})).rejects.toThrow("401 Unauthorized")
+    await expect(
+      manager.callTool(createInfo(), createContext(), "test-tool", {}),
+    ).rejects.toThrow("401 Unauthorized")
     expect(refresh).toHaveBeenCalledTimes(1)
     expect(callTool).toHaveBeenCalledTimes(1)
   })
@@ -141,21 +186,33 @@ describe("SkillMcpManager post-request OAuth retry", () => {
   it("only attempts one refresh when the retried operation returns 401 again", async () => {
     // given
     const { SkillMcpManager } = await importFreshManagerModule()
-    const refresh = mock(async () => ({ accessToken: "refreshed-token" } satisfies OAuthTokenData))
+    const refresh = mock(
+      async () => ({ accessToken: "refreshed-token" }) satisfies OAuthTokenData,
+    )
     const manager = new SkillMcpManager({
       createOAuthProvider: () => ({
-        tokens: () => ({ accessToken: "stale-token", refreshToken: "refresh-token" }),
-        login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+        tokens: () => ({
+          accessToken: "stale-token",
+          refreshToken: "refresh-token",
+        }),
+        login: mock(
+          async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+        ),
         refresh,
       }),
     })
     const callTool = mock(async () => {
       throw new Error("401 Unauthorized")
     })
-    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({ callTool, close: mock(async () => {}) })
+    mockGetOrCreateClientWithRetryImpl.mockResolvedValue({
+      callTool,
+      close: mock(async () => {}),
+    })
 
     // when / then
-    await expect(manager.callTool(createInfo(), createContext(), "test-tool", {})).rejects.toThrow("401 Unauthorized")
+    await expect(
+      manager.callTool(createInfo(), createContext(), "test-tool", {}),
+    ).rejects.toThrow("401 Unauthorized")
     expect(refresh).toHaveBeenCalledTimes(1)
     expect(callTool).toHaveBeenCalledTimes(2)
   })

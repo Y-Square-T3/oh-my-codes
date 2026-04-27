@@ -9,7 +9,9 @@ type SchemaWithJsonSchemaOverride = ToolArgSchema & {
   }
 }
 
-function stripRootJsonSchemaFields(jsonSchema: Record<string, unknown>): Record<string, unknown> {
+function stripRootJsonSchemaFields(
+  jsonSchema: Record<string, unknown>,
+): Record<string, unknown> {
   const { $schema: _schema, ...rest } = jsonSchema
   return rest
 }
@@ -31,9 +33,9 @@ function attachJsonSchemaOverride(schema: SchemaWithJsonSchemaOverride): void {
   }
 }
 
-export function normalizeToolArgSchemas<TDefinition extends Pick<ToolDefinition, "args">>(
-  toolDefinition: TDefinition,
-): TDefinition {
+export function normalizeToolArgSchemas<
+  TDefinition extends Pick<ToolDefinition, "args">,
+>(toolDefinition: TDefinition): TDefinition {
   for (const schema of Object.values(toolDefinition.args)) {
     attachJsonSchemaOverride(schema)
   }
@@ -41,13 +43,20 @@ export function normalizeToolArgSchemas<TDefinition extends Pick<ToolDefinition,
   return toolDefinition
 }
 
-const UNSUPPORTED_SCHEMA_KEYWORDS = new Set(["contentEncoding", "contentMediaType"])
+const UNSUPPORTED_SCHEMA_KEYWORDS = new Set([
+  "contentEncoding",
+  "contentMediaType",
+])
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-export function sanitizeJsonSchema(value: unknown, depth = 0, isPropertyName = false): unknown {
+export function sanitizeJsonSchema(
+  value: unknown,
+  depth = 0,
+  isPropertyName = false,
+): unknown {
   if (Array.isArray(value)) {
     return value.map((item) => sanitizeJsonSchema(item, depth + 1, false))
   }
@@ -68,7 +77,11 @@ export function sanitizeJsonSchema(value: unknown, depth = 0, isPropertyName = f
     }
 
     const childIsPropertyName = key === "properties" && !isPropertyName
-    sanitized[key] = sanitizeJsonSchema(nestedValue, depth + 1, childIsPropertyName)
+    sanitized[key] = sanitizeJsonSchema(
+      nestedValue,
+      depth + 1,
+      childIsPropertyName,
+    )
   }
 
   return sanitized

@@ -1,8 +1,16 @@
 import { join } from "node:path"
 
 import { getOpenCodeCacheDir } from "../../../shared"
-import type { AvailableModelsInfo, ModelResolutionInfo, OmoConfig } from "./model-resolution-types"
-import { formatModelWithVariant, getCategoryEffectiveVariant, getEffectiveVariant } from "./model-resolution-variant"
+import type {
+  AvailableModelsInfo,
+  ModelResolutionInfo,
+  OmoConfig,
+} from "./model-resolution-types"
+import {
+  formatModelWithVariant,
+  getCategoryEffectiveVariant,
+  getEffectiveVariant,
+} from "./model-resolution-variant"
 
 function formatCapabilityResolutionLabel(mode: string | undefined): string {
   return mode ?? "unknown"
@@ -21,7 +29,7 @@ export function buildModelResolutionDetails(options: {
   if (options.available.cacheExists) {
     details.push(`  Providers in cache: ${options.available.providers.length}`)
     details.push(
-      `  Sample: ${options.available.providers.slice(0, 6).join(", ")}${options.available.providers.length > 6 ? "..." : ""}`
+      `  Sample: ${options.available.providers.slice(0, 6).join(", ")}${options.available.providers.length > 6 ? "..." : ""}`,
     )
     details.push(`  Total models: ${options.available.modelCount}`)
     details.push(`  Cache: ${cacheFile}`)
@@ -39,9 +47,11 @@ export function buildModelResolutionDetails(options: {
     const marker = agent.userOverride ? "●" : "○"
     const display = formatModelWithVariant(
       agent.effectiveModel,
-      getEffectiveVariant(agent.name, agent.requirement, options.config)
+      getEffectiveVariant(agent.name, agent.requirement, options.config),
     )
-    details.push(`  ${marker} ${agent.name}: ${display} [capabilities: ${formatCapabilityResolutionLabel(agent.capabilityDiagnostics?.resolutionMode)}]`)
+    details.push(
+      `  ${marker} ${agent.name}: ${display} [capabilities: ${formatCapabilityResolutionLabel(agent.capabilityDiagnostics?.resolutionMode)}]`,
+    )
   }
   details.push("")
   details.push("Categories:")
@@ -49,9 +59,15 @@ export function buildModelResolutionDetails(options: {
     const marker = category.userOverride ? "●" : "○"
     const display = formatModelWithVariant(
       category.effectiveModel,
-      getCategoryEffectiveVariant(category.name, category.requirement, options.config)
+      getCategoryEffectiveVariant(
+        category.name,
+        category.requirement,
+        options.config,
+      ),
     )
-    details.push(`  ${marker} ${category.name}: ${display} [capabilities: ${formatCapabilityResolutionLabel(category.capabilityDiagnostics?.resolutionMode)}]`)
+    details.push(
+      `  ${marker} ${category.name}: ${display} [capabilities: ${formatCapabilityResolutionLabel(category.capabilityDiagnostics?.resolutionMode)}]`,
+    )
   }
   details.push("")
   details.push("● = user override, ○ = provider fallback")

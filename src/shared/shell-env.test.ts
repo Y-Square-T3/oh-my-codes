@@ -265,7 +265,10 @@ describe("shell-env", () => {
       })
 
       test("#given multiple environment variables #when buildEnvPrefix is called with powershell #then builds multiple assignments", () => {
-        const result = buildEnvPrefix({ VAR1: "val1", VAR2: "val2" }, "powershell")
+        const result = buildEnvPrefix(
+          { VAR1: "val1", VAR2: "val2" },
+          "powershell",
+        )
         expect(result).toBe("$env:VAR1='val1'; $env:VAR2='val2';")
       })
 

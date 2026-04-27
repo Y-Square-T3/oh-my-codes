@@ -8,14 +8,14 @@
 
 ## TOOL EXPOSURE
 
-| Tool | File | What It Does |
-|------|------|--------------|
-| `lsp_goto_definition` | `goto-definition-tool.ts` | Jump to symbol definition |
-| `lsp_find_references` | `find-references-tool.ts` | All usages of a symbol |
-| `lsp_symbols` | `symbols-tool.ts` | Document outline or workspace symbol search |
-| `lsp_diagnostics` | `diagnostics-tool.ts` | Errors/warnings from language server |
-| `lsp_prepare_rename` | `rename-tools.ts` | Validate rename before applying |
-| `lsp_rename` | `rename-tools.ts` | Apply safe rename across workspace |
+| Tool                  | File                      | What It Does                                |
+| --------------------- | ------------------------- | ------------------------------------------- |
+| `lsp_goto_definition` | `goto-definition-tool.ts` | Jump to symbol definition                   |
+| `lsp_find_references` | `find-references-tool.ts` | All usages of a symbol                      |
+| `lsp_symbols`         | `symbols-tool.ts`         | Document outline or workspace symbol search |
+| `lsp_diagnostics`     | `diagnostics-tool.ts`     | Errors/warnings from language server        |
+| `lsp_prepare_rename`  | `rename-tools.ts`         | Validate rename before applying             |
+| `lsp_rename`          | `rename-tools.ts`         | Apply safe rename across workspace          |
 
 All 6 are direct `ToolDefinition` objects (not factory functions) — registered directly in `tool-registry.ts`.
 
@@ -35,23 +35,23 @@ LSPProcess (lsp-process.ts) — spawns server binary
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `lsp-client-wrapper.ts` | High-level entry: resolves server, opens file, runs request |
-| `lsp-client.ts` | `LSPClient` — file tracking, document sync (`didOpen`/`didChange`) |
-| `lsp-client-connection.ts` | JSON-RPC request/response/notification layer |
-| `lsp-client-transport.ts` | stdin/stdout byte-stream framing |
-| `lsp-process.ts` | Spawn + cleanup of LSP server process |
-| `lsp-manager-process-cleanup.ts` | Reap orphan LSP processes on exit |
-| `lsp-manager-temp-directory-cleanup.ts` | Clean temp dirs used by some servers |
-| `server-definitions.ts` | 40+ builtin servers synced from OpenCode's `server.ts` |
-| `server-config-loader.ts` | Load custom server config from `.opencode/lsp.json` |
-| `server-resolution.ts` | Resolve which server handles a file extension |
-| `server-installation.ts` | Detect missing binaries, surface install hints |
-| `language-mappings.ts` | Extension → language ID mapping |
-| `lsp-formatters.ts` | Format LSP responses into human-readable strings |
-| `workspace-edit.ts` | Apply `WorkspaceEdit` results to disk (for rename) |
-| `types.ts` | `LSPServerConfig`, `Position`, `Range`, `Location`, `Diagnostic` etc. |
+| File                                    | Purpose                                                               |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| `lsp-client-wrapper.ts`                 | High-level entry: resolves server, opens file, runs request           |
+| `lsp-client.ts`                         | `LSPClient` — file tracking, document sync (`didOpen`/`didChange`)    |
+| `lsp-client-connection.ts`              | JSON-RPC request/response/notification layer                          |
+| `lsp-client-transport.ts`               | stdin/stdout byte-stream framing                                      |
+| `lsp-process.ts`                        | Spawn + cleanup of LSP server process                                 |
+| `lsp-manager-process-cleanup.ts`        | Reap orphan LSP processes on exit                                     |
+| `lsp-manager-temp-directory-cleanup.ts` | Clean temp dirs used by some servers                                  |
+| `server-definitions.ts`                 | 40+ builtin servers synced from OpenCode's `server.ts`                |
+| `server-config-loader.ts`               | Load custom server config from `.opencode/lsp.json`                   |
+| `server-resolution.ts`                  | Resolve which server handles a file extension                         |
+| `server-installation.ts`                | Detect missing binaries, surface install hints                        |
+| `language-mappings.ts`                  | Extension → language ID mapping                                       |
+| `lsp-formatters.ts`                     | Format LSP responses into human-readable strings                      |
+| `workspace-edit.ts`                     | Apply `WorkspaceEdit` results to disk (for rename)                    |
+| `types.ts`                              | `LSPServerConfig`, `Position`, `Range`, `Location`, `Diagnostic` etc. |
 
 ## SERVER RESOLUTION
 

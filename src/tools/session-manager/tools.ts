@@ -6,7 +6,15 @@ import {
   SESSION_SEARCH_DESCRIPTION,
   SESSION_INFO_DESCRIPTION,
 } from "./constants"
-import { getAllSessions, getMainSessions, getSessionInfo, readSessionMessages, readSessionTodos, sessionExists, setStorageClient } from "./storage"
+import {
+  getAllSessions,
+  getMainSessions,
+  getSessionInfo,
+  readSessionMessages,
+  readSessionTodos,
+  sessionExists,
+  setStorageClient,
+} from "./storage"
 import {
   filterSessionsByDate,
   formatSessionInfo,
@@ -15,15 +23,30 @@ import {
   formatSearchResults,
   searchInSession,
 } from "./session-formatter"
-import type { SessionListArgs, SessionReadArgs, SessionSearchArgs, SessionInfoArgs, SearchResult } from "./types"
+import type {
+  SessionListArgs,
+  SessionReadArgs,
+  SessionSearchArgs,
+  SessionInfoArgs,
+  SearchResult,
+} from "./types"
 
 const SEARCH_TIMEOUT_MS = 60_000
 const MAX_SESSIONS_TO_SCAN = 50
 
-function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  operation: string,
+): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms)),
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${operation} timed out after ${ms}ms`)),
+        ms,
+      ),
+    ),
   ])
 }
 
@@ -73,10 +96,24 @@ export function createSessionManagerTools(
   const session_list: ToolDefinition = tool({
     description: SESSION_LIST_DESCRIPTION,
     args: {
-      limit: tool.schema.number().optional().describe("Maximum number of sessions to return"),
-      from_date: tool.schema.string().optional().describe("Filter sessions from this date (ISO 8601 format)"),
-      to_date: tool.schema.string().optional().describe("Filter sessions until this date (ISO 8601 format)"),
-      project_path: tool.schema.string().optional().describe("Filter sessions by project path (default: current working directory)"),
+      limit: tool.schema
+        .number()
+        .optional()
+        .describe("Maximum number of sessions to return"),
+      from_date: tool.schema
+        .string()
+        .optional()
+        .describe("Filter sessions from this date (ISO 8601 format)"),
+      to_date: tool.schema
+        .string()
+        .optional()
+        .describe("Filter sessions until this date (ISO 8601 format)"),
+      project_path: tool.schema
+        .string()
+        .optional()
+        .describe(
+          "Filter sessions by project path (default: current working directory)",
+        ),
     },
     execute: async (args: SessionListArgs, _context) => {
       try {
@@ -85,7 +122,11 @@ export function createSessionManagerTools(
         let sessionIDs = sessions.map((s) => s.id)
 
         if (args.from_date || args.to_date) {
-          sessionIDs = await resolvedDeps.filterSessionsByDate(sessionIDs, args.from_date, args.to_date)
+          sessionIDs = await resolvedDeps.filterSessionsByDate(
+            sessionIDs,
+            args.from_date,
+            args.to_date,
+          )
         }
 
         if (args.limit && args.limit > 0) {
@@ -103,9 +144,18 @@ export function createSessionManagerTools(
     description: SESSION_READ_DESCRIPTION,
     args: {
       session_id: tool.schema.string().describe("Session ID to read"),
-      include_todos: tool.schema.boolean().optional().describe("Include todo list if available (default: false)"),
-      include_transcript: tool.schema.boolean().optional().describe("Include transcript log if available (default: false)"),
-      limit: tool.schema.number().optional().describe("Maximum number of messages to return (default: all)"),
+      include_todos: tool.schema
+        .boolean()
+        .optional()
+        .describe("Include todo list if available (default: false)"),
+      include_transcript: tool.schema
+        .boolean()
+        .optional()
+        .describe("Include transcript log if available (default: false)"),
+      limit: tool.schema
+        .number()
+        .optional()
+        .describe("Maximum number of messages to return (default: all)"),
     },
     execute: async (args: SessionReadArgs, _context) => {
       try {
@@ -123,9 +173,15 @@ export function createSessionManagerTools(
           messages = messages.slice(0, args.limit)
         }
 
-        const todos = args.include_todos ? await resolvedDeps.readSessionTodos(args.session_id) : undefined
+        const todos = args.include_todos
+          ? await resolvedDeps.readSessionTodos(args.session_id)
+          : undefined
 
-        return resolvedDeps.formatSessionMessages(messages, args.include_todos, todos)
+        return resolvedDeps.formatSessionMessages(
+          messages,
+          args.include_todos,
+          todos,
+        )
       } catch (e) {
         return `Error: ${e instanceof Error ? e.message : String(e)}`
       }
@@ -136,9 +192,20 @@ export function createSessionManagerTools(
     description: SESSION_SEARCH_DESCRIPTION,
     args: {
       query: tool.schema.string().describe("Search query string"),
-      session_id: tool.schema.string().optional().describe("Search within specific session only (default: all sessions)"),
-      case_sensitive: tool.schema.boolean().optional().describe("Case-sensitive search (default: false)"),
-      limit: tool.schema.number().optional().describe("Maximum number of results to return (default: 20)"),
+      session_id: tool.schema
+        .string()
+        .optional()
+        .describe(
+          "Search within specific session only (default: all sessions)",
+        ),
+      case_sensitive: tool.schema
+        .boolean()
+        .optional()
+        .describe("Case-sensitive search (default: false)"),
+      limit: tool.schema
+        .number()
+        .optional()
+        .describe("Maximum number of results to return (default: 20)"),
     },
     execute: async (args: SessionSearchArgs, _context) => {
       try {
@@ -146,7 +213,12 @@ export function createSessionManagerTools(
 
         const searchOperation = async (): Promise<SearchResult[]> => {
           if (args.session_id) {
-            return resolvedDeps.searchInSession(args.session_id, args.query, args.case_sensitive, resultLimit)
+            return resolvedDeps.searchInSession(
+              args.session_id,
+              args.query,
+              args.case_sensitive,
+              resultLimit,
+            )
           }
 
           const allSessions = await resolvedDeps.getAllSessions()
@@ -157,14 +229,23 @@ export function createSessionManagerTools(
             if (allResults.length >= resultLimit) break
 
             const remaining = resultLimit - allResults.length
-            const sessionResults = await resolvedDeps.searchInSession(sid, args.query, args.case_sensitive, remaining)
+            const sessionResults = await resolvedDeps.searchInSession(
+              sid,
+              args.query,
+              args.case_sensitive,
+              remaining,
+            )
             allResults.push(...sessionResults)
           }
 
           return allResults.slice(0, resultLimit)
         }
 
-        const results = await withTimeout(searchOperation(), SEARCH_TIMEOUT_MS, "Search")
+        const results = await withTimeout(
+          searchOperation(),
+          SEARCH_TIMEOUT_MS,
+          "Search",
+        )
 
         return resolvedDeps.formatSearchResults(results)
       } catch (e) {

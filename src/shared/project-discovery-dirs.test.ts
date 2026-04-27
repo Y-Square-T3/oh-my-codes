@@ -30,7 +30,8 @@ describe("project-discovery-dirs", () => {
       },
     }))
 
-    const { clearWorktreeCache, detectWorktreePath } = await import("./project-discovery-dirs")
+    const { clearWorktreeCache, detectWorktreePath } =
+      await import("./project-discovery-dirs")
 
     clearWorktreeCache()
 
@@ -55,7 +56,8 @@ describe("project-discovery-dirs", () => {
     mkdirSync(join(projectDir, ".opencode", "skills"), { recursive: true })
     mkdirSync(join(TEST_DIR, ".opencode", "skills"), { recursive: true })
 
-    const { findProjectOpencodeSkillDirs } = await import("./project-discovery-dirs")
+    const { findProjectOpencodeSkillDirs } =
+      await import("./project-discovery-dirs")
 
     // when
     const directories = findProjectOpencodeSkillDirs(childDir)
@@ -75,7 +77,8 @@ describe("project-discovery-dirs", () => {
     mkdirSync(join(projectDir, ".opencode", "commands"), { recursive: true })
     mkdirSync(join(TEST_DIR, ".opencode", "command"), { recursive: true })
 
-    const { findProjectOpencodeCommandDirs } = await import("./project-discovery-dirs")
+    const { findProjectOpencodeCommandDirs } =
+      await import("./project-discovery-dirs")
 
     // when
     const directories = findProjectOpencodeCommandDirs(childDir)
@@ -94,15 +97,20 @@ describe("project-discovery-dirs", () => {
     mkdirSync(join(projectDir, ".claude", "skills"), { recursive: true })
     mkdirSync(join(TEST_DIR, ".agents", "skills"), { recursive: true })
 
-    const { findProjectAgentsSkillDirs, findProjectClaudeSkillDirs } = await import("./project-discovery-dirs")
+    const { findProjectAgentsSkillDirs, findProjectClaudeSkillDirs } =
+      await import("./project-discovery-dirs")
 
     // when
     const claudeDirectories = findProjectClaudeSkillDirs(childDir)
     const agentsDirectories = findProjectAgentsSkillDirs(childDir)
 
     // then
-    expect(claudeDirectories).toEqual([canonicalPath(join(projectDir, ".claude", "skills"))])
-    expect(agentsDirectories).toEqual([canonicalPath(join(TEST_DIR, ".agents", "skills"))])
+    expect(claudeDirectories).toEqual([
+      canonicalPath(join(projectDir, ".claude", "skills")),
+    ])
+    expect(agentsDirectories).toEqual([
+      canonicalPath(join(TEST_DIR, ".agents", "skills")),
+    ])
   })
 
   it("#given a stop directory #when finding ancestor dirs #then it does not scan beyond the stop boundary", async () => {
@@ -112,13 +120,15 @@ describe("project-discovery-dirs", () => {
     mkdirSync(join(projectDir, ".opencode", "skills"), { recursive: true })
     mkdirSync(join(TEST_DIR, ".opencode", "skills"), { recursive: true })
 
-    const { findProjectOpencodeSkillDirs } = await import("./project-discovery-dirs")
+    const { findProjectOpencodeSkillDirs } =
+      await import("./project-discovery-dirs")
 
     // when
     const directories = findProjectOpencodeSkillDirs(childDir, projectDir)
 
     // then
-    expect(directories).toEqual([canonicalPath(join(projectDir, ".opencode", "skills"))])
+    expect(directories).toEqual([
+      canonicalPath(join(projectDir, ".opencode", "skills")),
+    ])
   })
-
 })

@@ -22,7 +22,8 @@ export const JSON_ERROR_PATTERNS = [
   /json[^\n]*unexpected eof/i,
 ] as const
 
-const JSON_ERROR_REMINDER_MARKER = "[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]"
+const JSON_ERROR_REMINDER_MARKER =
+  "[JSON PARSE ERROR - IMMEDIATE ACTION REQUIRED]"
 const JSON_ERROR_EXCLUDED_TOOLS = new Set<string>(JSON_ERROR_TOOL_EXCLUDE_LIST)
 
 export const JSON_ERROR_REMINDER = `
@@ -42,13 +43,15 @@ export function createJsonErrorRecoveryHook(_ctx: PluginInput) {
   return {
     "tool.execute.after": async (
       input: { tool: string; sessionID: string; callID: string },
-      output: { title: string; output: string; metadata: unknown }
+      output: { title: string; output: string; metadata: unknown },
     ) => {
       if (JSON_ERROR_EXCLUDED_TOOLS.has(input.tool.toLowerCase())) return
       if (typeof output.output !== "string") return
       if (output.output.includes(JSON_ERROR_REMINDER_MARKER)) return
 
-      const hasJsonError = JSON_ERROR_PATTERNS.some((pattern) => pattern.test(output.output))
+      const hasJsonError = JSON_ERROR_PATTERNS.some((pattern) =>
+        pattern.test(output.output),
+      )
 
       if (hasJsonError) {
         output.output += `\n${JSON_ERROR_REMINDER}`

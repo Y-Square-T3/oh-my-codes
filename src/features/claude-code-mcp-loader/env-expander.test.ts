@@ -11,7 +11,10 @@ async function importFreshEnvExpanderModule(): Promise<EnvExpanderModule> {
   return await import(`./env-expander?test=${Date.now()}-${Math.random()}`)
 }
 
-function hasBlockedExpansionLog(logSpy: ReturnType<typeof spyOn>, varName: string): boolean {
+function hasBlockedExpansionLog(
+  logSpy: ReturnType<typeof spyOn>,
+  varName: string,
+): boolean {
   return logSpy.mock.calls.some(([message, data]) => {
     if (typeof message !== "string") {
       return false
@@ -75,12 +78,12 @@ describe("expandEnvVars", () => {
 
       // when
       const expanded = expandEnvVars(
-        "${TMPDIR}|${TEMP}|${USERPROFILE}|${LANG}|${XDG_CONFIG_HOME}"
+        "${TMPDIR}|${TEMP}|${USERPROFILE}|${LANG}|${XDG_CONFIG_HOME}",
       )
 
       // then
       expect(expanded).toBe(
-        "/tmp/omo|C:\\Temp|C:\\Users\\tester|en_US.UTF-8|/Users/tester/.config"
+        "/tmp/omo|C:\\Temp|C:\\Users\\tester|en_US.UTF-8|/Users/tester/.config",
       )
     })
   })
@@ -165,7 +168,9 @@ describe("expandEnvVars", () => {
       const { expandEnvVars } = await importFreshEnvExpanderModule()
 
       // when
-      const expanded = expandEnvVars("${UNSET_TRUSTED_VAR:-fallback}", { trusted: true })
+      const expanded = expandEnvVars("${UNSET_TRUSTED_VAR:-fallback}", {
+        trusted: true,
+      })
 
       // then
       expect(expanded).toBe("fallback")
@@ -240,7 +245,7 @@ describe("expandEnvVarsInObject", () => {
             HOME_DIR: "${HOME}",
           },
         },
-        { trusted: true }
+        { trusted: true },
       )
 
       // then
@@ -272,7 +277,7 @@ describe("expandEnvVarsInObject", () => {
             Authorization: "Bearer ${SLACK_USER_TOKEN}",
           },
         },
-        { trusted: true }
+        { trusted: true },
       )
 
       // then

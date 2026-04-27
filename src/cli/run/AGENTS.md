@@ -22,21 +22,21 @@ runner.ts
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `runner.ts` | Main orchestration — connects, resolves, runs, completes |
-| `server-connection.ts` | Start OpenCode server process, create SDK client |
-| `agent-resolver.ts` | Resolve agent: `--agent` flag → `OPENCODE_AGENT` env → config → Sisyphus |
-| `session-resolver.ts` | Create new session or resume via `--attach` / `--session-id` |
-| `events.ts` | SSE event stream subscription |
-| `event-handlers.ts` | Route events to handlers (message, tool, error, idle) |
-| `event-stream-processor.ts` | Process event stream with filtering and buffering |
-| `poll-for-completion.ts` | Poll session until todos complete + no background tasks |
-| `completion.ts` | Determine if session is truly done |
-| `continuation-state.ts` | Persist state for `run` continuation across invocations |
-| `output-renderer.ts` | Format session output for terminal |
-| `json-output.ts` | JSON output mode (`--json` flag) |
-| `types.ts` | `RunOptions`, `RunResult`, `RunContext`, event payload types |
+| File                        | Purpose                                                                  |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `runner.ts`                 | Main orchestration — connects, resolves, runs, completes                 |
+| `server-connection.ts`      | Start OpenCode server process, create SDK client                         |
+| `agent-resolver.ts`         | Resolve agent: `--agent` flag → `OPENCODE_AGENT` env → config → Sisyphus |
+| `session-resolver.ts`       | Create new session or resume via `--attach` / `--session-id`             |
+| `events.ts`                 | SSE event stream subscription                                            |
+| `event-handlers.ts`         | Route events to handlers (message, tool, error, idle)                    |
+| `event-stream-processor.ts` | Process event stream with filtering and buffering                        |
+| `poll-for-completion.ts`    | Poll session until todos complete + no background tasks                  |
+| `completion.ts`             | Determine if session is truly done                                       |
+| `continuation-state.ts`     | Persist state for `run` continuation across invocations                  |
+| `output-renderer.ts`        | Format session output for terminal                                       |
+| `json-output.ts`            | JSON output mode (`--json` flag)                                         |
+| `types.ts`                  | `RunOptions`, `RunResult`, `RunContext`, event payload types             |
 
 ## AGENT RESOLUTION PRIORITY
 
@@ -50,6 +50,7 @@ runner.ts
 ## COMPLETION DETECTION
 
 Poll-based with two conditions:
+
 1. All todos marked completed (no pending/in_progress)
 2. No running background tasks
 

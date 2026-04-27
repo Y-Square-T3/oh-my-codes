@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test"
 import type { OhMyCodesConfig } from "../../config"
-import type { HookDeps, RuntimeFallbackInterval, RuntimeFallbackPluginInput } from "./types"
+import type {
+  HookDeps,
+  RuntimeFallbackInterval,
+  RuntimeFallbackPluginInput,
+} from "./types"
 
 type RuntimeFallbackModule = typeof import("./hook")
 
-const loadPluginConfigMock = mock(() => ({} satisfies OhMyCodesConfig))
+const loadPluginConfigMock = mock(() => ({}) satisfies OhMyCodesConfig)
 const createAutoRetryHelpersMock = mock((_deps: HookDeps) => {
   void _deps
 
@@ -80,7 +84,10 @@ describe("createRuntimeFallbackHook initialization", () => {
     createChatMessageHandlerMock.mockClear()
     setIntervalCalls = 0
 
-    globalThis.setInterval = ((callback: Parameters<typeof originalSetInterval>[0], delay?: number) => {
+    globalThis.setInterval = ((
+      callback: Parameters<typeof originalSetInterval>[0],
+      delay?: number,
+    ) => {
       void callback
       void delay
       setIntervalCalls += 1
@@ -88,7 +95,9 @@ describe("createRuntimeFallbackHook initialization", () => {
     }) as typeof globalThis.setInterval
 
     const cacheBuster = `${Date.now()}-${Math.random()}`
-    const runtimeFallbackModule: RuntimeFallbackModule = await import(`./hook?test=${cacheBuster}`)
+    const runtimeFallbackModule: RuntimeFallbackModule = await import(
+      `./hook?test=${cacheBuster}`
+    )
     createRuntimeFallbackHook = runtimeFallbackModule.createRuntimeFallbackHook
   })
 
@@ -110,7 +119,9 @@ describe("createRuntimeFallbackHook initialization", () => {
 
   test("#given a fresh hook #when the first event arrives #then cleanup interval starts only once", async () => {
     // given
-    const hook = createRuntimeFallbackHook(createMockContext(), { pluginConfig: {} })
+    const hook = createRuntimeFallbackHook(createMockContext(), {
+      pluginConfig: {},
+    })
 
     // when
     expect(setIntervalCalls).toBe(0)

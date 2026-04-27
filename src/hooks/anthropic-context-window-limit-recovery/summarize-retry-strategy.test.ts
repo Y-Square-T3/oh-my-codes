@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test"
 import { runSummarizeRetryStrategy } from "./summarize-retry-strategy"
-import type { AutoCompactState, ParsedTokenLimitError, RetryState } from "./types"
+import type {
+  AutoCompactState,
+  ParsedTokenLimitError,
+  RetryState,
+} from "./types"
 import type { OhMyCodesConfig } from "../../config"
 
 type TimeoutCall = {
@@ -94,8 +98,13 @@ describe("runSummarizeRetryStrategy", () => {
   test("caps retry delay by remaining total timeout window", async () => {
     //#given
     const timeoutCalls: TimeoutCall[] = []
-    globalThis.setTimeout = ((_: (...args: unknown[]) => void, delay?: number) => {
-      const handle = timeoutCalls.length + 1 as unknown as ReturnType<typeof setTimeout>
+    globalThis.setTimeout = ((
+      _: (...args: unknown[]) => void,
+      delay?: number,
+    ) => {
+      const handle = (timeoutCalls.length + 1) as unknown as ReturnType<
+        typeof setTimeout
+      >
       timeoutCalls.push({ handle, delay: delay ?? 0 })
       return handle
     }) as typeof setTimeout
@@ -120,7 +129,9 @@ describe("runSummarizeRetryStrategy", () => {
 
     //#then
     const retryTimer = autoCompactState.retryTimerBySession.get(sessionID)
-    const retryTimeoutCall = timeoutCalls.find(({ handle }) => handle === retryTimer)
+    const retryTimeoutCall = timeoutCalls.find(
+      ({ handle }) => handle === retryTimer,
+    )
 
     expect(retryTimeoutCall).toBeDefined()
     expect(retryTimeoutCall?.delay).toBeGreaterThan(0)
@@ -130,7 +141,10 @@ describe("runSummarizeRetryStrategy", () => {
   test("#given pending retry timer after session cleanup #when scheduled callback fires #then it does not recreate retry state", async () => {
     //#given
     let scheduledCallback: (() => void) | undefined
-    globalThis.setTimeout = ((callback: (...args: unknown[]) => void, _delay?: number) => {
+    globalThis.setTimeout = ((
+      callback: (...args: unknown[]) => void,
+      _delay?: number,
+    ) => {
       scheduledCallback = () => callback()
       return 1 as unknown as ReturnType<typeof setTimeout>
     }) as typeof setTimeout
@@ -196,7 +210,9 @@ describe("runSummarizeRetryStrategy", () => {
     expect(autoCompactState.retryStateBySession.has(sessionID)).toBe(false)
     expect(autoCompactState.retryTimerBySession.has(sessionID)).toBe(false)
     expect(autoCompactState.truncateStateBySession.has(sessionID)).toBe(false)
-    expect(autoCompactState.emptyContentAttemptBySession.has(sessionID)).toBe(false)
+    expect(autoCompactState.emptyContentAttemptBySession.has(sessionID)).toBe(
+      false,
+    )
     expect(showToastMock).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({

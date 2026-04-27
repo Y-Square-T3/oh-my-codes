@@ -17,7 +17,8 @@ export function shouldStopForStagnation(args: {
       previousStagnationCount: progressUpdate.previousStagnationCount,
       incompleteCount,
       progressSource: progressUpdate.progressSource,
-      recoveredFromStagnationStop: progressUpdate.previousStagnationCount >= MAX_STAGNATION_COUNT,
+      recoveredFromStagnationStop:
+        progressUpdate.previousStagnationCount >= MAX_STAGNATION_COUNT,
     })
   }
 

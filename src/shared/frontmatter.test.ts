@@ -29,7 +29,9 @@ enabled: false
 Body`
 
     // when
-    const result = parseFrontmatter<{ subtask: boolean; enabled: boolean }>(content)
+    const result = parseFrontmatter<{ subtask: boolean; enabled: boolean }>(
+      content,
+    )
 
     // then
     expect(result.data.subtask).toBe(true)
@@ -55,7 +57,12 @@ Workflow instructions`
 
     interface TestMeta {
       description: string
-      handoffs: Array<{ label: string; agent: string; prompt: string; send?: boolean }>
+      handoffs: Array<{
+        label: string
+        agent: string
+        prompt: string
+        send?: boolean
+      }>
     }
 
     // when
@@ -226,7 +233,10 @@ Body content`
     // @ts-expect-error - accessing extra field not in MinimalMeta
     expect(result.data.extra_field).toBe("should not fail")
     // @ts-expect-error - accessing extra field not in MinimalMeta
-    expect(result.data.another_extra).toEqual({ nested: "value", array: ["item1", "item2"] })
+    expect(result.data.another_extra).toEqual({
+      nested: "value",
+      array: ["item1", "item2"],
+    })
     // @ts-expect-error - accessing extra field not in MinimalMeta
     expect(result.data.custom_boolean).toBe(true)
     // @ts-expect-error - accessing extra field not in MinimalMeta

@@ -16,9 +16,11 @@ export function formatDefault(result: DoctorResult): string {
     const pluginVer = result.systemInfo.pluginVersion ?? "unknown"
     lines.push(
       ` ${color.green(SYMBOLS.check)} ${color.green(
-      `System OK (opencode ${opencodeVer} · oh-my-codes ${pluginVer})`
-        .replace("oh-my-codes", PLUGIN_NAME)
-      )}`
+        `System OK (opencode ${opencodeVer} · oh-my-codes ${pluginVer})`.replace(
+          "oh-my-codes",
+          PLUGIN_NAME,
+        ),
+      )}`,
     )
   } else {
     const issueCount = allIssues.filter((i) => i.severity === "error").length

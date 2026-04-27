@@ -2,7 +2,8 @@ import type { FallbackEntry } from "../../shared/model-requirements"
 import { AGENT_MODEL_REQUIREMENTS } from "../../shared/model-requirements"
 import type { VisionCapableModel } from "../../plugin-state"
 
-const MULTIMODAL_LOOKER_REQUIREMENT = AGENT_MODEL_REQUIREMENTS["multimodal-looker"]
+const MULTIMODAL_LOOKER_REQUIREMENT =
+  AGENT_MODEL_REQUIREMENTS["multimodal-looker"]
 
 function getFullModelKey(providerID: string, modelID: string): string {
   return `${providerID}/${modelID}`
@@ -12,15 +13,19 @@ function findHardcodedFallbackEntry(
   providerID: string,
   modelID: string,
 ): FallbackEntry | undefined {
-  return MULTIMODAL_LOOKER_REQUIREMENT.fallbackChain.find((entry) =>
-    entry.model === modelID && entry.providers.includes(providerID),
+  return MULTIMODAL_LOOKER_REQUIREMENT.fallbackChain.find(
+    (entry) => entry.model === modelID && entry.providers.includes(providerID),
   )
 }
 
-export function isHardcodedMultimodalFallbackModel(model: VisionCapableModel): boolean {
+export function isHardcodedMultimodalFallbackModel(
+  model: VisionCapableModel,
+): boolean {
   return MULTIMODAL_LOOKER_REQUIREMENT.fallbackChain.some((entry) =>
-    entry.providers.some((providerID) =>
-      getFullModelKey(providerID, entry.model) === getFullModelKey(model.providerID, model.modelID),
+    entry.providers.some(
+      (providerID) =>
+        getFullModelKey(providerID, entry.model) ===
+        getFullModelKey(model.providerID, model.modelID),
     ),
   )
 }
@@ -32,7 +37,10 @@ export function buildMultimodalLookerFallbackChain(
   const fallbackChain: FallbackEntry[] = []
 
   for (const visionCapableModel of visionCapableModels) {
-    const key = getFullModelKey(visionCapableModel.providerID, visionCapableModel.modelID)
+    const key = getFullModelKey(
+      visionCapableModel.providerID,
+      visionCapableModel.modelID,
+    )
     if (seen.has(key)) continue
 
     const hardcodedEntry = findHardcodedFallbackEntry(

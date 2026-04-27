@@ -4,10 +4,16 @@ const sharedLogMock = mock(() => {})
 const readConnectedProvidersCacheMock = mock(() => null)
 const readProviderModelsCacheMock = mock(() => null)
 const shouldRetryErrorMock = mock(() => true)
-const getNextFallbackMock = mock((chain: Array<{ model: string }>, attempt: number) => chain[attempt])
-const hasMoreFallbacksMock = mock((chain: Array<{ model: string }>, attempt: number) => attempt < chain.length)
+const getNextFallbackMock = mock(
+  (chain: Array<{ model: string }>, attempt: number) => chain[attempt],
+)
+const hasMoreFallbacksMock = mock(
+  (chain: Array<{ model: string }>, attempt: number) => attempt < chain.length,
+)
 const selectFallbackProviderMock = mock((providers: string[]) => providers[0])
-const transformModelForProviderMock = mock((_provider: string, model: string) => model)
+const transformModelForProviderMock = mock(
+  (_provider: string, model: string) => model,
+)
 
 import type { BackgroundTask } from "./types"
 import type { ConcurrencyManager } from "./concurrency"
@@ -34,7 +40,9 @@ async function importFreshFallbackRetryHandlerModule() {
     transformModelForProvider: transformModelForProviderMock,
   }))
 
-  const retryHandlerModule = await import(`./fallback-retry-handler?test=${Date.now()}-${Math.random()}`)
+  const retryHandlerModule = await import(
+    `./fallback-retry-handler?test=${Date.now()}-${Math.random()}`
+  )
   mock.restore()
 
   return {
@@ -45,8 +53,12 @@ async function importFreshFallbackRetryHandlerModule() {
   }
 }
 
-const { tryFallbackRetry, shouldRetryError, selectFallbackProvider, readProviderModelsCache } =
-  await importFreshFallbackRetryHandlerModule()
+const {
+  tryFallbackRetry,
+  shouldRetryError,
+  selectFallbackProvider,
+  readProviderModelsCache,
+} = await importFreshFallbackRetryHandlerModule()
 
 function createDeferredPromise(): {
   promise: Promise<void>
@@ -62,7 +74,9 @@ function createDeferredPromise(): {
   }
 }
 
-function createMockTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask {
+function createMockTask(
+  overrides: Partial<BackgroundTask> = {},
+): BackgroundTask {
   return {
     id: "test-task-1",
     description: "test task",
@@ -72,8 +86,16 @@ function createMockTask(overrides: Partial<BackgroundTask> = {}): BackgroundTask
     parentSessionID: "parent-session-1",
     parentMessageID: "parent-message-1",
     fallbackChain: [
-      { model: "fallback-model-1", providers: ["provider-a"], variant: undefined },
-      { model: "fallback-model-2", providers: ["provider-b"], variant: undefined },
+      {
+        model: "fallback-model-1",
+        providers: ["provider-a"],
+        variant: undefined,
+      },
+      {
+        model: "fallback-model-2",
+        providers: ["provider-b"],
+        variant: undefined,
+      },
     ],
     attemptCount: 0,
     concurrencyKey: "provider-a/original-model",
@@ -134,7 +156,9 @@ describe("tryFallbackRetry", () => {
 
   beforeEach(() => {
     ;(shouldRetryError as any).mockImplementation(() => true)
-    ;(selectFallbackProvider as any).mockImplementation((providers: string[]) => providers[0])
+    ;(selectFallbackProvider as any).mockImplementation(
+      (providers: string[]) => providers[0],
+    )
     ;(readProviderModelsCache as any).mockReturnValue(null)
   })
 
@@ -205,7 +229,9 @@ describe("tryFallbackRetry", () => {
 
       await tryFallbackRetry(args)
 
-      expect(args.concurrencyManager.release).toHaveBeenCalledWith("provider-a/original-model")
+      expect(args.concurrencyManager.release).toHaveBeenCalledWith(
+        "provider-a/original-model",
+      )
     })
 
     test("clears concurrencyKey after release", async () => {
@@ -345,13 +371,22 @@ describe("tryFallbackRetry", () => {
 
   describe("#given disconnected fallback providers with connected preferred provider", () => {
     test("keeps fallback entry and selects connected preferred provider", async () => {
-      ;(readProviderModelsCache as any).mockReturnValueOnce({ connected: ["provider-a"] })
+      ;(readProviderModelsCache as any).mockReturnValueOnce({
+        connected: ["provider-a"],
+      })
       ;(selectFallbackProvider as any).mockImplementationOnce(
-        (_providers: string[], preferredProviderID?: string) => preferredProviderID ?? "provider-b",
+        (_providers: string[], preferredProviderID?: string) =>
+          preferredProviderID ?? "provider-b",
       )
 
       const args = createDefaultArgs({
-        fallbackChain: [{ model: "fallback-model-1", providers: ["provider-b"], variant: undefined }],
+        fallbackChain: [
+          {
+            model: "fallback-model-1",
+            providers: ["provider-b"],
+            variant: undefined,
+          },
+        ],
         model: { providerID: "provider-a", modelID: "original-model" },
       })
 

@@ -1,5 +1,5 @@
-import type { OhMyCodesConfig } from "../config";
-import type { PluginContext } from "./types";
+import type { OhMyCodesConfig } from "../config"
+import type { PluginContext } from "./types"
 
 import {
   clearSessionAgent,
@@ -9,64 +9,73 @@ import {
   subagentSessions,
   syncSubagentSessions,
   updateSessionAgent,
-} from "../features/claude-code-session-state";
+} from "../features/claude-code-session-state"
 import {
   clearPendingModelFallback,
   clearSessionFallbackChain,
   setSessionFallbackChain,
   setPendingModelFallback,
   type ModelFallbackHook,
-} from "../hooks/model-fallback/hook";
-import { getRawFallbackModels } from "../hooks/runtime-fallback/fallback-models";
+} from "../hooks/model-fallback/hook"
+import { getRawFallbackModels } from "../hooks/runtime-fallback/fallback-models"
 import {
   clearBackgroundOutputConsumptionsForParentSession,
   clearBackgroundOutputConsumptionsForTaskSession,
   restoreBackgroundOutputConsumption,
-} from "../shared/background-output-consumption";
-import { resetMessageCursor } from "../shared";
-import { getAgentConfigKey } from "../shared/agent-display-names";
-import { readConnectedProvidersCache } from "../shared/connected-providers-cache";
-import { log } from "../shared/logger";
-import { shouldRetryError } from "../shared/model-error-classifier";
-import { buildFallbackChainFromModels } from "../shared/fallback-chain-from-models";
-import { extractRetryAttempt, normalizeRetryStatusMessage } from "../shared/retry-status-utils";
-import { clearSessionModel, getSessionModel, setSessionModel } from "../shared/session-model-state";
-import { clearSessionPromptParams } from "../shared/session-prompt-params-state";
-import { deleteSessionTools } from "../shared/session-tools-store";
-import { lspManager } from "../tools";
-import { dispatchOpenClawEvent } from "../openclaw/runtime-dispatch";
+} from "../shared/background-output-consumption"
+import { resetMessageCursor } from "../shared"
+import { getAgentConfigKey } from "../shared/agent-display-names"
+import { readConnectedProvidersCache } from "../shared/connected-providers-cache"
+import { log } from "../shared/logger"
+import { shouldRetryError } from "../shared/model-error-classifier"
+import { buildFallbackChainFromModels } from "../shared/fallback-chain-from-models"
+import {
+  extractRetryAttempt,
+  normalizeRetryStatusMessage,
+} from "../shared/retry-status-utils"
+import {
+  clearSessionModel,
+  getSessionModel,
+  setSessionModel,
+} from "../shared/session-model-state"
+import { clearSessionPromptParams } from "../shared/session-prompt-params-state"
+import { deleteSessionTools } from "../shared/session-tools-store"
+import { lspManager } from "../tools"
+import { dispatchOpenClawEvent } from "../openclaw/runtime-dispatch"
 
-import type { CreatedHooks } from "../create-hooks";
-import type { Managers } from "../create-managers";
-import { pruneRecentSyntheticIdles } from "./recent-synthetic-idles";
-import { normalizeSessionStatusToIdle } from "./session-status-normalizer";
+import type { CreatedHooks } from "../create-hooks"
+import type { Managers } from "../create-managers"
+import { pruneRecentSyntheticIdles } from "./recent-synthetic-idles"
+import { normalizeSessionStatusToIdle } from "./session-status-normalizer"
 
 type FirstMessageVariantGate = {
-  markSessionCreated: (sessionInfo: { id?: string; title?: string; parentID?: string } | undefined) => void;
-  clear: (sessionID: string) => void;
-};
+  markSessionCreated: (
+    sessionInfo: { id?: string; title?: string; parentID?: string } | undefined,
+  ) => void
+  clear: (sessionID: string) => void
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value !== null
 }
 
 function normalizeFallbackModelID(modelID: string): string {
   return modelID
     .replace(/-thinking$/i, "")
     .replace(/-max$/i, "")
-    .replace(/-high$/i, "");
+    .replace(/-high$/i, "")
 }
 
 function extractErrorName(error: unknown): string | undefined {
-  if (isRecord(error) && typeof error.name === "string") return error.name;
-  if (error instanceof Error) return error.name;
-  return undefined;
+  if (isRecord(error) && typeof error.name === "string") return error.name
+  if (error instanceof Error) return error.name
+  return undefined
 }
 
 function extractErrorMessage(error: unknown): string {
-  if (!error) return "";
-  if (typeof error === "string") return error;
-  if (error instanceof Error) return error.message;
+  if (!error) return ""
+  if (typeof error === "string") return error
+  if (error instanceof Error) return error.message
 
   if (isRecord(error)) {
     const candidates: unknown[] = [
@@ -75,242 +84,365 @@ function extractErrorMessage(error: unknown): string {
       error.error,
       isRecord(error.data) ? error.data.error : undefined,
       error.cause,
-    ];
+    ]
 
     for (const candidate of candidates) {
-      if (isRecord(candidate) && typeof candidate.message === "string" && candidate.message.length > 0) {
-        return candidate.message;
+      if (
+        isRecord(candidate) &&
+        typeof candidate.message === "string" &&
+        candidate.message.length > 0
+      ) {
+        return candidate.message
       }
     }
   }
 
   try {
-    return JSON.stringify(error);
+    return JSON.stringify(error)
   } catch {
-    return String(error);
+    return String(error)
   }
 }
 
-function extractProviderModelFromErrorMessage(message: string): { providerID?: string; modelID?: string } {
-  const lower = message.toLowerCase();
+function extractProviderModelFromErrorMessage(message: string): {
+  providerID?: string
+  modelID?: string
+} {
+  const lower = message.toLowerCase()
 
-  const providerModel = lower.match(/model\s+not\s+found:\s*([a-z0-9_-]+)\s*\/\s*([a-z0-9._-]+)/i);
+  const providerModel = lower.match(
+    /model\s+not\s+found:\s*([a-z0-9_-]+)\s*\/\s*([a-z0-9._-]+)/i,
+  )
   if (providerModel) {
     return {
       providerID: providerModel[1],
       modelID: providerModel[2],
-    };
+    }
   }
 
-  const modelOnly = lower.match(/unknown\s+provider\s+for\s+model\s+([a-z0-9._-]+)/i);
+  const modelOnly = lower.match(
+    /unknown\s+provider\s+for\s+model\s+([a-z0-9._-]+)/i,
+  )
   if (modelOnly) {
     return {
       modelID: modelOnly[1],
-    };
+    }
   }
 
-  return {};
+  return {}
 }
 function applyUserConfiguredFallbackChain(
-  modelFallback: Pick<ModelFallbackHook, "setSessionFallbackChain"> | null | undefined,
+  modelFallback:
+    | Pick<ModelFallbackHook, "setSessionFallbackChain">
+    | null
+    | undefined,
   sessionID: string,
   agentName: string,
   currentProviderID: string,
   pluginConfig: OhMyCodesConfig,
 ): void {
-  const agentKey = getAgentConfigKey(agentName);
-  const rawFallbackModels = getRawFallbackModels(sessionID, agentKey, pluginConfig);
-  if (!rawFallbackModels || rawFallbackModels.length === 0) return;
+  const agentKey = getAgentConfigKey(agentName)
+  const rawFallbackModels = getRawFallbackModels(
+    sessionID,
+    agentKey,
+    pluginConfig,
+  )
+  if (!rawFallbackModels || rawFallbackModels.length === 0) return
 
-  const fallbackChain = buildFallbackChainFromModels(rawFallbackModels, currentProviderID);
+  const fallbackChain = buildFallbackChainFromModels(
+    rawFallbackModels,
+    currentProviderID,
+  )
 
   if (fallbackChain && fallbackChain.length > 0) {
     if (modelFallback) {
-      setSessionFallbackChain(modelFallback, sessionID, fallbackChain);
+      setSessionFallbackChain(modelFallback, sessionID, fallbackChain)
     }
   }
 }
 
 function isCompactionAgent(agent: string): boolean {
-  return agent.toLowerCase() === "compaction";
+  return agent.toLowerCase() === "compaction"
 }
 
-type EventInput = Parameters<NonNullable<NonNullable<CreatedHooks["writeExistingFileGuard"]>["event"]>>[0];
+type EventInput = Parameters<
+  NonNullable<NonNullable<CreatedHooks["writeExistingFileGuard"]>["event"]>
+>[0]
 export function createEventHandler(args: {
-  ctx: PluginContext;
-  pluginConfig: OhMyCodesConfig;
-  firstMessageVariantGate: FirstMessageVariantGate;
-  managers: Managers;
-  hooks: CreatedHooks;
+  ctx: PluginContext
+  pluginConfig: OhMyCodesConfig
+  firstMessageVariantGate: FirstMessageVariantGate
+  managers: Managers
+  hooks: CreatedHooks
 }): (input: EventInput) => Promise<void> {
-  const { ctx, pluginConfig, firstMessageVariantGate, managers, hooks } = args;
-  const tmuxIntegrationEnabled = pluginConfig.tmux?.enabled ?? false;
+  const { ctx, pluginConfig, firstMessageVariantGate, managers, hooks } = args
+  const tmuxIntegrationEnabled = pluginConfig.tmux?.enabled ?? false
   const pluginContext = ctx as {
-    directory: string;
+    directory: string
     client: {
       session: {
-        abort: (input: { path: { id: string } }) => Promise<unknown>;
+        abort: (input: { path: { id: string } }) => Promise<unknown>
         promptAsync?: (input: {
-          path: { id: string };
-          body: { parts: Array<{ type: "text"; text: string }> };
-          query: { directory: string };
-        }) => Promise<unknown>;
+          path: { id: string }
+          body: { parts: Array<{ type: "text"; text: string }> }
+          query: { directory: string }
+        }) => Promise<unknown>
         prompt: (input: {
-          path: { id: string };
-          body: { parts: Array<{ type: "text"; text: string }> };
-          query: { directory: string };
-        }) => Promise<unknown>;
+          path: { id: string }
+          body: { parts: Array<{ type: "text"; text: string }> }
+          query: { directory: string }
+        }) => Promise<unknown>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        summarize: (...args: any[]) => Promise<unknown>;
-      };
-    };
-  };
+        summarize: (...args: any[]) => Promise<unknown>
+      }
+    }
+  }
   const isRuntimeFallbackEnabled =
     hooks.runtimeFallback !== null &&
     hooks.runtimeFallback !== undefined &&
     (typeof args.pluginConfig.runtime_fallback === "boolean"
       ? args.pluginConfig.runtime_fallback
-      : (args.pluginConfig.runtime_fallback?.enabled ?? false));
+      : (args.pluginConfig.runtime_fallback?.enabled ?? false))
 
   const isModelFallbackEnabled =
-    hooks.modelFallback !== null && hooks.modelFallback !== undefined;
-  const modelFallback = hooks.modelFallback;
+    hooks.modelFallback !== null && hooks.modelFallback !== undefined
+  const modelFallback = hooks.modelFallback
 
   // Avoid triggering multiple abort+continue cycles for the same failing assistant message.
-  const lastHandledModelErrorMessageID = new Map<string, string>();
-  const lastHandledRetryStatusKey = new Map<string, string>();
-  const lastKnownModelBySession = new Map<string, { providerID: string; modelID: string }>();
+  const lastHandledModelErrorMessageID = new Map<string, string>()
+  const lastHandledRetryStatusKey = new Map<string, string>()
+  const lastKnownModelBySession = new Map<
+    string,
+    { providerID: string; modelID: string }
+  >()
 
-  const resolveFallbackProviderID = (sessionID: string, providerHint?: string): string => {
-    const sessionModel = getSessionModel(sessionID);
+  const resolveFallbackProviderID = (
+    sessionID: string,
+    providerHint?: string,
+  ): string => {
+    const sessionModel = getSessionModel(sessionID)
     if (sessionModel?.providerID) {
-      return sessionModel.providerID;
+      return sessionModel.providerID
     }
 
-    const lastKnownModel = lastKnownModelBySession.get(sessionID);
+    const lastKnownModel = lastKnownModelBySession.get(sessionID)
     if (lastKnownModel?.providerID) {
-      return lastKnownModel.providerID;
+      return lastKnownModel.providerID
     }
 
-    const normalizedProviderHint = providerHint?.trim();
+    const normalizedProviderHint = providerHint?.trim()
     if (normalizedProviderHint) {
-      return normalizedProviderHint;
+      return normalizedProviderHint
     }
 
-    const connectedProvider = readConnectedProvidersCache()?.[0];
+    const connectedProvider = readConnectedProvidersCache()?.[0]
     if (connectedProvider) {
-      return connectedProvider;
+      return connectedProvider
     }
 
-    return "opencode";
-  };
+    return "opencode"
+  }
 
   const getEventSessionID = (input: EventInput): string | undefined => {
-    const properties = input.event.properties;
+    const properties = input.event.properties
     if (
       !properties ||
       typeof properties !== "object" ||
       !("sessionID" in properties) ||
       typeof properties.sessionID !== "string"
     ) {
-      return undefined;
+      return undefined
     }
-    return properties.sessionID;
-  };
+    return properties.sessionID
+  }
 
   const runEventHookSafely = async (
     hookName: string,
-    handler: ((input: EventInput) => unknown | Promise<unknown>) | null | undefined,
+    handler:
+      | ((input: EventInput) => unknown | Promise<unknown>)
+      | null
+      | undefined,
     input: EventInput,
   ): Promise<void> => {
-    if (!handler) return;
+    if (!handler) return
 
     try {
-      await Promise.resolve(handler(input));
+      await Promise.resolve(handler(input))
     } catch (error) {
       log("[event] hook execution failed", {
         hook: hookName,
         eventType: input.event.type,
         sessionID: getEventSessionID(input),
         error,
-      });
+      })
     }
-  };
+  }
 
   const dispatchToHooks = async (input: EventInput): Promise<void> => {
-    await runEventHookSafely("autoUpdateChecker", hooks.autoUpdateChecker?.event, input);
-    await runEventHookSafely("legacyPluginToast", hooks.legacyPluginToast?.event, input);
-    await runEventHookSafely("claudeCodeHooks", hooks.claudeCodeHooks?.event, input);
-    await runEventHookSafely("backgroundNotificationHook", hooks.backgroundNotificationHook?.event, input);
-    await runEventHookSafely("sessionNotification", hooks.sessionNotification, input);
-    await runEventHookSafely("todoContinuationEnforcer", hooks.todoContinuationEnforcer?.handler, input);
-    await runEventHookSafely("unstableAgentBabysitter", hooks.unstableAgentBabysitter?.event, input);
-    await runEventHookSafely("contextWindowMonitor", hooks.contextWindowMonitor?.event, input);
-    await runEventHookSafely("preemptiveCompaction", hooks.preemptiveCompaction?.event, input);
-    await runEventHookSafely("directoryAgentsInjector", hooks.directoryAgentsInjector?.event, input);
-    await runEventHookSafely("directoryReadmeInjector", hooks.directoryReadmeInjector?.event, input);
-    await runEventHookSafely("rulesInjector", hooks.rulesInjector?.event, input);
-    await runEventHookSafely("thinkMode", hooks.thinkMode?.event, input);
+    await runEventHookSafely(
+      "autoUpdateChecker",
+      hooks.autoUpdateChecker?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "legacyPluginToast",
+      hooks.legacyPluginToast?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "claudeCodeHooks",
+      hooks.claudeCodeHooks?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "backgroundNotificationHook",
+      hooks.backgroundNotificationHook?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "sessionNotification",
+      hooks.sessionNotification,
+      input,
+    )
+    await runEventHookSafely(
+      "todoContinuationEnforcer",
+      hooks.todoContinuationEnforcer?.handler,
+      input,
+    )
+    await runEventHookSafely(
+      "unstableAgentBabysitter",
+      hooks.unstableAgentBabysitter?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "contextWindowMonitor",
+      hooks.contextWindowMonitor?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "preemptiveCompaction",
+      hooks.preemptiveCompaction?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "directoryAgentsInjector",
+      hooks.directoryAgentsInjector?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "directoryReadmeInjector",
+      hooks.directoryReadmeInjector?.event,
+      input,
+    )
+    await runEventHookSafely("rulesInjector", hooks.rulesInjector?.event, input)
+    await runEventHookSafely("thinkMode", hooks.thinkMode?.event, input)
     await runEventHookSafely(
       "anthropicContextWindowLimitRecovery",
       hooks.anthropicContextWindowLimitRecovery?.event,
       input,
-    );
-    await runEventHookSafely("runtimeFallback", hooks.runtimeFallback?.event, input);
-    await runEventHookSafely("agentUsageReminder", hooks.agentUsageReminder?.event, input);
-    await runEventHookSafely("categorySkillReminder", hooks.categorySkillReminder?.event, input);
-    await runEventHookSafely("interactiveBashSession", hooks.interactiveBashSession?.event, input as EventInput);
-    await runEventHookSafely("ralphLoop", hooks.ralphLoop?.event, input);
-    await runEventHookSafely("stopContinuationGuard", hooks.stopContinuationGuard?.event, input);
-    await runEventHookSafely("compactionContextInjector", hooks.compactionContextInjector?.event, input);
-    await runEventHookSafely("compactionTodoPreserver", hooks.compactionTodoPreserver?.event, input);
-    await runEventHookSafely("writeExistingFileGuard", hooks.writeExistingFileGuard?.event, input);
-    await runEventHookSafely("atlasHook", hooks.atlasHook?.handler, input);
-    await runEventHookSafely("autoSlashCommand", hooks.autoSlashCommand?.event, input);
-  };
+    )
+    await runEventHookSafely(
+      "runtimeFallback",
+      hooks.runtimeFallback?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "agentUsageReminder",
+      hooks.agentUsageReminder?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "categorySkillReminder",
+      hooks.categorySkillReminder?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "interactiveBashSession",
+      hooks.interactiveBashSession?.event,
+      input as EventInput,
+    )
+    await runEventHookSafely("ralphLoop", hooks.ralphLoop?.event, input)
+    await runEventHookSafely(
+      "stopContinuationGuard",
+      hooks.stopContinuationGuard?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "compactionContextInjector",
+      hooks.compactionContextInjector?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "compactionTodoPreserver",
+      hooks.compactionTodoPreserver?.event,
+      input,
+    )
+    await runEventHookSafely(
+      "writeExistingFileGuard",
+      hooks.writeExistingFileGuard?.event,
+      input,
+    )
+    await runEventHookSafely("atlasHook", hooks.atlasHook?.handler, input)
+    await runEventHookSafely(
+      "autoSlashCommand",
+      hooks.autoSlashCommand?.event,
+      input,
+    )
+  }
 
-  const recentSyntheticIdles = new Map<string, number>();
-  const recentRealIdles = new Map<string, number>();
-  const DEDUP_WINDOW_MS = 500;
+  const recentSyntheticIdles = new Map<string, number>()
+  const recentRealIdles = new Map<string, number>()
+  const DEDUP_WINDOW_MS = 500
   const TMUX_ACTIVITY_EVENT_TYPES = new Set([
     "message.updated",
     "message.part.updated",
     "message.part.delta",
     "message.part.removed",
     "message.removed",
-  ]);
+  ])
 
   const shouldAutoRetrySession = (sessionID: string): boolean => {
-    if (syncSubagentSessions.has(sessionID)) return true;
-    const mainSessionID = getMainSessionID();
-    if (mainSessionID) return sessionID === mainSessionID;
+    if (syncSubagentSessions.has(sessionID)) return true
+    const mainSessionID = getMainSessionID()
+    if (mainSessionID) return sessionID === mainSessionID
     // Headless runs (or resumed sessions) may not emit session.created, so mainSessionID can be unset.
     // In that case, treat any non-subagent session as the "main" interactive session.
-    return !subagentSessions.has(sessionID);
-  };
+    return !subagentSessions.has(sessionID)
+  }
 
-  const autoContinueAfterFallback = async (sessionID: string, source: string): Promise<void> => {
-    await pluginContext.client.session.abort({ path: { id: sessionID } }).catch((error) => {
-      log("[event] model-fallback abort failed", { sessionID, source, error });
-    });
+  const autoContinueAfterFallback = async (
+    sessionID: string,
+    source: string,
+  ): Promise<void> => {
+    await pluginContext.client.session
+      .abort({ path: { id: sessionID } })
+      .catch((error) => {
+        log("[event] model-fallback abort failed", { sessionID, source, error })
+      })
 
     const promptBody = {
       path: { id: sessionID },
       body: { parts: [{ type: "text" as const, text: "continue" }] },
       query: { directory: pluginContext.directory },
-    };
+    }
 
     if (typeof pluginContext.client.session.promptAsync === "function") {
-      await pluginContext.client.session.promptAsync(promptBody).catch((error) => {
-        log("[event] model-fallback promptAsync failed", { sessionID, source, error });
-      });
-      return;
+      await pluginContext.client.session
+        .promptAsync(promptBody)
+        .catch((error) => {
+          log("[event] model-fallback promptAsync failed", {
+            sessionID,
+            source,
+            error,
+          })
+        })
+      return
     }
 
     await pluginContext.client.session.prompt(promptBody).catch((error) => {
-      log("[event] model-fallback prompt failed", { sessionID, source, error });
-    });
-  };
+      log("[event] model-fallback prompt failed", { sessionID, source, error })
+    })
+  }
 
   return async (input): Promise<void> => {
     pruneRecentSyntheticIdles({
@@ -318,33 +450,35 @@ export function createEventHandler(args: {
       recentRealIdles,
       now: Date.now(),
       dedupWindowMs: DEDUP_WINDOW_MS,
-    });
+    })
 
     if (input.event.type === "session.idle") {
-      const sessionID = (input.event.properties as Record<string, unknown> | undefined)?.sessionID as
-        | string
-        | undefined;
+      const sessionID = (
+        input.event.properties as Record<string, unknown> | undefined
+      )?.sessionID as string | undefined
       if (sessionID) {
-        const emittedAt = recentSyntheticIdles.get(sessionID);
+        const emittedAt = recentSyntheticIdles.get(sessionID)
         if (emittedAt && Date.now() - emittedAt < DEDUP_WINDOW_MS) {
-          recentSyntheticIdles.delete(sessionID);
+          recentSyntheticIdles.delete(sessionID)
         }
-        recentRealIdles.set(sessionID, Date.now());
+        recentRealIdles.set(sessionID, Date.now())
       }
     }
 
-    await dispatchToHooks(input);
+    await dispatchToHooks(input)
 
-    const syntheticIdle = normalizeSessionStatusToIdle(input);
+    const syntheticIdle = normalizeSessionStatusToIdle(input)
     if (syntheticIdle) {
-      const sessionID = (syntheticIdle.event.properties as Record<string, unknown>)?.sessionID as string;
-      const emittedAt = recentRealIdles.get(sessionID);
+      const sessionID = (
+        syntheticIdle.event.properties as Record<string, unknown>
+      )?.sessionID as string
+      const emittedAt = recentRealIdles.get(sessionID)
       if (emittedAt && Date.now() - emittedAt < DEDUP_WINDOW_MS) {
-        recentRealIdles.delete(sessionID);
-        return;
+        recentRealIdles.delete(sessionID)
+        return
       }
-      recentSyntheticIdles.set(sessionID, Date.now());
-      await dispatchToHooks(syntheticIdle as EventInput);
+      recentSyntheticIdles.set(sessionID, Date.now())
+      await dispatchToHooks(syntheticIdle as EventInput)
       if (pluginConfig.openclaw) {
         await dispatchOpenClawEvent({
           config: pluginConfig.openclaw,
@@ -352,42 +486,48 @@ export function createEventHandler(args: {
           context: {
             sessionId: sessionID,
             projectPath: pluginContext.directory,
-            tmuxPaneId: managers.tmuxSessionManager.getTrackedPaneId?.(sessionID) ?? process.env.TMUX_PANE,
+            tmuxPaneId:
+              managers.tmuxSessionManager.getTrackedPaneId?.(sessionID) ??
+              process.env.TMUX_PANE,
           },
-        });
+        })
       }
     }
 
-    const { event } = input;
-    const props = event.properties as Record<string, unknown> | undefined;
+    const { event } = input
+    const props = event.properties as Record<string, unknown> | undefined
 
     if (tmuxIntegrationEnabled && TMUX_ACTIVITY_EVENT_TYPES.has(event.type)) {
-      managers.tmuxSessionManager.onEvent?.(event as { type: string; properties?: Record<string, unknown> });
+      managers.tmuxSessionManager.onEvent?.(
+        event as { type: string; properties?: Record<string, unknown> },
+      )
     }
 
     if (event.type === "session.created") {
-      const sessionInfo = props?.info as { id?: string; title?: string; parentID?: string } | undefined;
+      const sessionInfo = props?.info as
+        | { id?: string; title?: string; parentID?: string }
+        | undefined
 
       if (!sessionInfo?.parentID) {
-        setMainSession(sessionInfo?.id);
+        setMainSession(sessionInfo?.id)
       }
 
-      firstMessageVariantGate.markSessionCreated(sessionInfo);
+      firstMessageVariantGate.markSessionCreated(sessionInfo)
 
       if (tmuxIntegrationEnabled) {
         await managers.tmuxSessionManager.onSessionCreated(
           event as {
-            type: string;
+            type: string
             properties?: {
-              info?: { id?: string; parentID?: string; title?: string };
-            };
+              info?: { id?: string; parentID?: string; title?: string }
+            }
           },
-        );
+        )
       }
 
       // Skip subagent sessions — they are dispatched by specialized callbacks
       // in create-managers.ts (async) and tool-registry.ts (sync)
-      const isSubagentSession = !!sessionInfo?.parentID;
+      const isSubagentSession = !!sessionInfo?.parentID
       if (pluginConfig.openclaw && sessionInfo?.id && !isSubagentSession) {
         await dispatchOpenClawEvent({
           config: pluginConfig.openclaw,
@@ -395,35 +535,37 @@ export function createEventHandler(args: {
           context: {
             sessionId: sessionInfo.id,
             projectPath: pluginContext.directory,
-            tmuxPaneId: managers.tmuxSessionManager.getTrackedPaneId?.(sessionInfo.id) ?? process.env.TMUX_PANE,
+            tmuxPaneId:
+              managers.tmuxSessionManager.getTrackedPaneId?.(sessionInfo.id) ??
+              process.env.TMUX_PANE,
           },
-        });
+        })
       }
     }
 
     if (event.type === "session.deleted") {
-      const sessionInfo = props?.info as { id?: string } | undefined;
+      const sessionInfo = props?.info as { id?: string } | undefined
       if (sessionInfo?.id === getMainSessionID()) {
-        setMainSession(undefined);
+        setMainSession(undefined)
       }
 
       if (sessionInfo?.id) {
-        const wasSyncSubagentSession = syncSubagentSessions.has(sessionInfo.id);
-        clearSessionAgent(sessionInfo.id);
-        lastHandledModelErrorMessageID.delete(sessionInfo.id);
-        lastHandledRetryStatusKey.delete(sessionInfo.id);
-        lastKnownModelBySession.delete(sessionInfo.id);
+        const wasSyncSubagentSession = syncSubagentSessions.has(sessionInfo.id)
+        clearSessionAgent(sessionInfo.id)
+        lastHandledModelErrorMessageID.delete(sessionInfo.id)
+        lastHandledRetryStatusKey.delete(sessionInfo.id)
+        lastKnownModelBySession.delete(sessionInfo.id)
         if (modelFallback) {
-          clearPendingModelFallback(modelFallback, sessionInfo.id);
-          clearSessionFallbackChain(modelFallback, sessionInfo.id);
+          clearPendingModelFallback(modelFallback, sessionInfo.id)
+          clearSessionFallbackChain(modelFallback, sessionInfo.id)
         }
-        resetMessageCursor(sessionInfo.id);
-        clearBackgroundOutputConsumptionsForParentSession(sessionInfo.id);
-        clearBackgroundOutputConsumptionsForTaskSession(sessionInfo.id);
-        firstMessageVariantGate.clear(sessionInfo.id);
-        clearSessionModel(sessionInfo.id);
-        clearSessionPromptParams(sessionInfo.id);
-        syncSubagentSessions.delete(sessionInfo.id);
+        resetMessageCursor(sessionInfo.id)
+        clearBackgroundOutputConsumptionsForParentSession(sessionInfo.id)
+        clearBackgroundOutputConsumptionsForTaskSession(sessionInfo.id)
+        firstMessageVariantGate.clear(sessionInfo.id)
+        clearSessionModel(sessionInfo.id)
+        clearSessionPromptParams(sessionInfo.id)
+        syncSubagentSessions.delete(sessionInfo.id)
         if (pluginConfig.openclaw) {
           await dispatchOpenClawEvent({
             config: pluginConfig.openclaw,
@@ -431,32 +573,35 @@ export function createEventHandler(args: {
             context: {
               sessionId: sessionInfo.id,
               projectPath: pluginContext.directory,
-              tmuxPaneId: managers.tmuxSessionManager.getTrackedPaneId?.(sessionInfo.id) ?? process.env.TMUX_PANE,
+              tmuxPaneId:
+                managers.tmuxSessionManager.getTrackedPaneId?.(
+                  sessionInfo.id,
+                ) ?? process.env.TMUX_PANE,
             },
-          });
+          })
         }
         if (wasSyncSubagentSession) {
-          subagentSessions.delete(sessionInfo.id);
+          subagentSessions.delete(sessionInfo.id)
         }
-        deleteSessionTools(sessionInfo.id);
-        await managers.skillMcpManager.disconnectSession(sessionInfo.id);
-        await lspManager.cleanupTempDirectoryClients();
+        deleteSessionTools(sessionInfo.id)
+        await managers.skillMcpManager.disconnectSession(sessionInfo.id)
+        await lspManager.cleanupTempDirectoryClients()
         if (tmuxIntegrationEnabled) {
           await managers.tmuxSessionManager.onSessionDeleted({
             sessionID: sessionInfo.id,
-          });
+          })
         }
       }
     }
 
     if (event.type === "message.removed") {
-      const messageID = props?.messageID as string | undefined;
-      const sessionID = props?.sessionID as string | undefined;
-      restoreBackgroundOutputConsumption(sessionID, messageID);
+      const messageID = props?.messageID as string | undefined
+      const sessionID = props?.sessionID as string | undefined
+      restoreBackgroundOutputConsumption(sessionID, messageID)
     }
 
     if (event.type === "session.idle" && pluginConfig.openclaw) {
-      const sessionID = props?.sessionID as string | undefined;
+      const sessionID = props?.sessionID as string | undefined
       if (sessionID) {
         await dispatchOpenClawEvent({
           config: pluginConfig.openclaw,
@@ -464,56 +609,66 @@ export function createEventHandler(args: {
           context: {
             sessionId: sessionID,
             projectPath: pluginContext.directory,
-            tmuxPaneId: managers.tmuxSessionManager.getTrackedPaneId?.(sessionID) ?? process.env.TMUX_PANE,
+            tmuxPaneId:
+              managers.tmuxSessionManager.getTrackedPaneId?.(sessionID) ??
+              process.env.TMUX_PANE,
           },
-        });
+        })
       }
     }
 
     if (event.type === "message.updated") {
-      const info = props?.info as Record<string, unknown> | undefined;
-      const sessionID = info?.sessionID as string | undefined;
-      const agent = info?.agent as string | undefined;
-      const role = info?.role as string | undefined;
+      const info = props?.info as Record<string, unknown> | undefined
+      const sessionID = info?.sessionID as string | undefined
+      const agent = info?.agent as string | undefined
+      const role = info?.role as string | undefined
       if (sessionID && role === "user") {
-        const isCompactionMessage = agent ? isCompactionAgent(agent) : false;
+        const isCompactionMessage = agent ? isCompactionAgent(agent) : false
         if (agent && !isCompactionMessage) {
-          updateSessionAgent(sessionID, agent);
+          updateSessionAgent(sessionID, agent)
         }
-        const providerID = info?.providerID as string | undefined;
-        const modelID = info?.modelID as string | undefined;
+        const providerID = info?.providerID as string | undefined
+        const modelID = info?.modelID as string | undefined
         if (providerID && modelID && !isCompactionMessage) {
-          lastKnownModelBySession.set(sessionID, { providerID, modelID });
-          setSessionModel(sessionID, { providerID, modelID });
+          lastKnownModelBySession.set(sessionID, { providerID, modelID })
+          setSessionModel(sessionID, { providerID, modelID })
         }
       }
 
       // Model fallback: in practice, API/model failures often surface as assistant message errors.
       // session.error events are not guaranteed for all providers, so we also observe message.updated.
-      if (sessionID && role === "assistant" && !isRuntimeFallbackEnabled && isModelFallbackEnabled) {
+      if (
+        sessionID &&
+        role === "assistant" &&
+        !isRuntimeFallbackEnabled &&
+        isModelFallbackEnabled
+      ) {
         try {
-          const assistantMessageID = info?.id as string | undefined;
-          const assistantError = info?.error;
+          const assistantMessageID = info?.id as string | undefined
+          const assistantError = info?.error
           if (assistantMessageID && assistantError) {
-            const lastHandled = lastHandledModelErrorMessageID.get(sessionID);
+            const lastHandled = lastHandledModelErrorMessageID.get(sessionID)
             if (lastHandled === assistantMessageID) {
-              return;
+              return
             }
 
-            const errorName = extractErrorName(assistantError);
-            const errorMessage = extractErrorMessage(assistantError);
-            const errorInfo = { name: errorName, message: errorMessage };
+            const errorName = extractErrorName(assistantError)
+            const errorMessage = extractErrorMessage(assistantError)
+            const errorInfo = { name: errorName, message: errorMessage }
 
             if (shouldRetryError(errorInfo)) {
               // Prefer the agent/model/provider from the assistant message payload.
-              let agentName = agent ?? getSessionAgent(sessionID);
+              let agentName = agent ?? getSessionAgent(sessionID)
               if (!agentName && sessionID === getMainSessionID()) {
-                if (errorMessage.includes("claude-opus") || errorMessage.includes("opus")) {
-                  agentName = "sisyphus";
+                if (
+                  errorMessage.includes("claude-opus") ||
+                  errorMessage.includes("opus")
+                ) {
+                  agentName = "sisyphus"
                 } else if (errorMessage.includes("gpt-5")) {
-                  agentName = "hephaestus";
+                  agentName = "hephaestus"
                 } else {
-                  agentName = "sisyphus";
+                  agentName = "sisyphus"
                 }
               }
 
@@ -521,103 +676,156 @@ export function createEventHandler(args: {
                 const currentProvider = resolveFallbackProviderID(
                   sessionID,
                   info?.providerID as string | undefined,
-                );
-                const rawModel = (info?.modelID as string | undefined) ?? "claude-opus-4-7";
-                const currentModel = normalizeFallbackModelID(rawModel);
-                applyUserConfiguredFallbackChain(modelFallback, sessionID, agentName, currentProvider, args.pluginConfig);
+                )
+                const rawModel =
+                  (info?.modelID as string | undefined) ?? "claude-opus-4-7"
+                const currentModel = normalizeFallbackModelID(rawModel)
+                applyUserConfiguredFallbackChain(
+                  modelFallback,
+                  sessionID,
+                  agentName,
+                  currentProvider,
+                  args.pluginConfig,
+                )
 
                 const setFallback = modelFallback
-                  ? setPendingModelFallback(modelFallback, sessionID, agentName, currentProvider, currentModel)
-                  : false;
+                  ? setPendingModelFallback(
+                      modelFallback,
+                      sessionID,
+                      agentName,
+                      currentProvider,
+                      currentModel,
+                    )
+                  : false
 
                 if (
                   setFallback &&
                   shouldAutoRetrySession(sessionID) &&
                   !hooks.stopContinuationGuard?.isStopped(sessionID)
                 ) {
-                  lastHandledModelErrorMessageID.set(sessionID, assistantMessageID);
-                  await autoContinueAfterFallback(sessionID, "message.updated");
+                  lastHandledModelErrorMessageID.set(
+                    sessionID,
+                    assistantMessageID,
+                  )
+                  await autoContinueAfterFallback(sessionID, "message.updated")
                 }
               }
             }
           }
         } catch (err) {
-          log("[event] model-fallback error in message.updated:", { sessionID, error: err });
+          log("[event] model-fallback error in message.updated:", {
+            sessionID,
+            error: err,
+          })
         }
       }
     }
 
     if (event.type === "session.status") {
-      const sessionID = props?.sessionID as string | undefined;
-      const status = props?.status as { type?: string; attempt?: number; message?: string; next?: number } | undefined;
+      const sessionID = props?.sessionID as string | undefined
+      const status = props?.status as
+        | { type?: string; attempt?: number; message?: string; next?: number }
+        | undefined
 
       // Retry dedupe lifecycle: set key when a retry status is handled, clear it after recovery
       // (non-retry idle) so future failures with the same key can trigger fallback again.
       if (sessionID && status?.type === "idle") {
-        lastHandledRetryStatusKey.delete(sessionID);
+        lastHandledRetryStatusKey.delete(sessionID)
       }
 
-      if (sessionID && status?.type === "retry" && isModelFallbackEnabled && !isRuntimeFallbackEnabled) {
+      if (
+        sessionID &&
+        status?.type === "retry" &&
+        isModelFallbackEnabled &&
+        !isRuntimeFallbackEnabled
+      ) {
         try {
-          const retryMessage = typeof status.message === "string" ? status.message : "";
-          const parsedForKey = extractProviderModelFromErrorMessage(retryMessage);
-          const retryAttempt = extractRetryAttempt(status.attempt, retryMessage);
+          const retryMessage =
+            typeof status.message === "string" ? status.message : ""
+          const parsedForKey =
+            extractProviderModelFromErrorMessage(retryMessage)
+          const retryAttempt = extractRetryAttempt(status.attempt, retryMessage)
           // Deduplicate countdown updates for the same retry attempt/model.
           // Messages like "retrying in 7m 56s" change every second but should only trigger once.
-          const retryKey = `${retryAttempt}:${parsedForKey.providerID ?? ""}/${parsedForKey.modelID ?? ""}:${normalizeRetryStatusMessage(retryMessage)}`;
+          const retryKey = `${retryAttempt}:${parsedForKey.providerID ?? ""}/${parsedForKey.modelID ?? ""}:${normalizeRetryStatusMessage(retryMessage)}`
           if (lastHandledRetryStatusKey.get(sessionID) === retryKey) {
-            return;
+            return
           }
-          lastHandledRetryStatusKey.set(sessionID, retryKey);
+          lastHandledRetryStatusKey.set(sessionID, retryKey)
 
-          const errorInfo = { name: undefined as string | undefined, message: retryMessage };
+          const errorInfo = {
+            name: undefined as string | undefined,
+            message: retryMessage,
+          }
           if (shouldRetryError(errorInfo)) {
-            let agentName = getSessionAgent(sessionID);
+            let agentName = getSessionAgent(sessionID)
             if (!agentName && sessionID === getMainSessionID()) {
-              if (retryMessage.includes("claude-opus") || retryMessage.includes("opus")) {
-                agentName = "sisyphus";
+              if (
+                retryMessage.includes("claude-opus") ||
+                retryMessage.includes("opus")
+              ) {
+                agentName = "sisyphus"
               } else if (retryMessage.includes("gpt-5")) {
-                agentName = "hephaestus";
+                agentName = "hephaestus"
               } else {
-                agentName = "sisyphus";
+                agentName = "sisyphus"
               }
             }
 
             if (agentName) {
-              const parsed = extractProviderModelFromErrorMessage(retryMessage);
-              const lastKnown = lastKnownModelBySession.get(sessionID);
-              const currentProvider = resolveFallbackProviderID(sessionID, parsed.providerID);
-              let currentModel = parsed.modelID ?? lastKnown?.modelID ?? "claude-opus-4-7";
-              currentModel = normalizeFallbackModelID(currentModel);
-              applyUserConfiguredFallbackChain(modelFallback, sessionID, agentName, currentProvider, args.pluginConfig);
+              const parsed = extractProviderModelFromErrorMessage(retryMessage)
+              const lastKnown = lastKnownModelBySession.get(sessionID)
+              const currentProvider = resolveFallbackProviderID(
+                sessionID,
+                parsed.providerID,
+              )
+              let currentModel =
+                parsed.modelID ?? lastKnown?.modelID ?? "claude-opus-4-7"
+              currentModel = normalizeFallbackModelID(currentModel)
+              applyUserConfiguredFallbackChain(
+                modelFallback,
+                sessionID,
+                agentName,
+                currentProvider,
+                args.pluginConfig,
+              )
 
               const setFallback = modelFallback
-                ? setPendingModelFallback(modelFallback, sessionID, agentName, currentProvider, currentModel)
-                : false;
+                ? setPendingModelFallback(
+                    modelFallback,
+                    sessionID,
+                    agentName,
+                    currentProvider,
+                    currentModel,
+                  )
+                : false
 
               if (
                 setFallback &&
                 shouldAutoRetrySession(sessionID) &&
                 !hooks.stopContinuationGuard?.isStopped(sessionID)
               ) {
-                await autoContinueAfterFallback(sessionID, "session.status");
+                await autoContinueAfterFallback(sessionID, "session.status")
               }
             }
           }
         } catch (err) {
-          log("[event] model-fallback error in session.status:", { sessionID, error: err });
+          log("[event] model-fallback error in session.status:", {
+            sessionID,
+            error: err,
+          })
         }
       }
     }
 
     if (event.type === "session.error") {
       try {
-        const sessionID = props?.sessionID as string | undefined;
-        const error = props?.error;
+        const sessionID = props?.sessionID as string | undefined
+        const error = props?.error
 
-        const errorName = extractErrorName(error);
-        const errorMessage = extractErrorMessage(error);
-        const errorInfo = { name: errorName, message: errorMessage };
+        const errorName = extractErrorName(error)
+        const errorMessage = extractErrorMessage(error)
+        const errorInfo = { name: errorName, message: errorMessage }
 
         // First, try session recovery for internal errors (thinking blocks, tool results, etc.)
         if (hooks.sessionRecovery?.isRecoverableError(error)) {
@@ -626,8 +834,9 @@ export function createEventHandler(args: {
             role: "assistant" as const,
             sessionID,
             error,
-          };
-          const recovered = await hooks.sessionRecovery.handleSessionRecovery(messageInfo);
+          }
+          const recovered =
+            await hooks.sessionRecovery.handleSessionRecovery(messageInfo)
 
           if (
             recovered &&
@@ -643,8 +852,11 @@ export function createEventHandler(args: {
                 query: { directory: pluginContext.directory },
               })
               .catch((err: unknown) => {
-                log("[event] compaction before recovery continue failed:", { sessionID, error: err });
-              });
+                log("[event] compaction before recovery continue failed:", {
+                  sessionID,
+                  error: err,
+                })
+              })
 
             await pluginContext.client.session
               .prompt({
@@ -652,50 +864,74 @@ export function createEventHandler(args: {
                 body: { parts: [{ type: "text", text: "continue" }] },
                 query: { directory: pluginContext.directory },
               })
-              .catch(() => {});
+              .catch(() => {})
           }
         }
         // Second, try model fallback for model errors (rate limit, quota, provider issues, etc.)
-        else if (sessionID && shouldRetryError(errorInfo) && !isRuntimeFallbackEnabled && isModelFallbackEnabled) {
-          let agentName = getSessionAgent(sessionID);
+        else if (
+          sessionID &&
+          shouldRetryError(errorInfo) &&
+          !isRuntimeFallbackEnabled &&
+          isModelFallbackEnabled
+        ) {
+          let agentName = getSessionAgent(sessionID)
 
           if (!agentName && sessionID === getMainSessionID()) {
-            if (errorMessage.includes("claude-opus") || errorMessage.includes("opus")) {
-              agentName = "sisyphus";
+            if (
+              errorMessage.includes("claude-opus") ||
+              errorMessage.includes("opus")
+            ) {
+              agentName = "sisyphus"
             } else if (errorMessage.includes("gpt-5")) {
-              agentName = "hephaestus";
+              agentName = "hephaestus"
             } else {
-              agentName = "sisyphus";
+              agentName = "sisyphus"
             }
           }
 
           if (agentName) {
-            const parsed = extractProviderModelFromErrorMessage(errorMessage);
+            const parsed = extractProviderModelFromErrorMessage(errorMessage)
             const currentProvider = resolveFallbackProviderID(
               sessionID,
               (props?.providerID as string | undefined) || parsed.providerID,
-            );
-            let currentModel = (props?.modelID as string) || parsed.modelID || "claude-opus-4-7";
-            currentModel = normalizeFallbackModelID(currentModel);
-            applyUserConfiguredFallbackChain(modelFallback, sessionID, agentName, currentProvider, args.pluginConfig);
+            )
+            let currentModel =
+              (props?.modelID as string) || parsed.modelID || "claude-opus-4-7"
+            currentModel = normalizeFallbackModelID(currentModel)
+            applyUserConfiguredFallbackChain(
+              modelFallback,
+              sessionID,
+              agentName,
+              currentProvider,
+              args.pluginConfig,
+            )
 
             const setFallback = modelFallback
-              ? setPendingModelFallback(modelFallback, sessionID, agentName, currentProvider, currentModel)
-              : false;
+              ? setPendingModelFallback(
+                  modelFallback,
+                  sessionID,
+                  agentName,
+                  currentProvider,
+                  currentModel,
+                )
+              : false
 
             if (
               setFallback &&
               shouldAutoRetrySession(sessionID) &&
               !hooks.stopContinuationGuard?.isStopped(sessionID)
             ) {
-              await autoContinueAfterFallback(sessionID, "session.error");
+              await autoContinueAfterFallback(sessionID, "session.error")
             }
           }
         }
       } catch (err) {
-        const sessionID = props?.sessionID as string | undefined;
-        log("[event] model-fallback error in session.error:", { sessionID, error: err });
+        const sessionID = props?.sessionID as string | undefined
+        log("[event] model-fallback error in session.error:", {
+          sessionID,
+          error: err,
+        })
       }
     }
-  };
+  }
 }

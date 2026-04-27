@@ -7,7 +7,9 @@ import {
   type FormatterClient,
 } from "./formatter-trigger"
 
-function createMockClient(config: Record<string, unknown> = {}): FormatterClient {
+function createMockClient(
+  config: Record<string, unknown> = {},
+): FormatterClient {
   return {
     config: {
       get: mock(() => Promise.resolve({ data: config })),
@@ -72,8 +74,12 @@ describe("resolveFormatters", () => {
     const result = await resolveFormatters(client, "/project")
 
     //#then
-    expect(result.get(".ts")).toEqual([{ command: ["prettier", "--write", "$FILE"], environment: {} }])
-    expect(result.get(".tsx")).toEqual([{ command: ["prettier", "--write", "$FILE"], environment: {} }])
+    expect(result.get(".ts")).toEqual([
+      { command: ["prettier", "--write", "$FILE"], environment: {} },
+    ])
+    expect(result.get(".tsx")).toEqual([
+      { command: ["prettier", "--write", "$FILE"], environment: {} },
+    ])
   })
 
   it("resolves formatters from experimental.hook.file_edited section", async () => {
@@ -82,7 +88,12 @@ describe("resolveFormatters", () => {
       experimental: {
         hook: {
           file_edited: {
-            ".go": [{ command: ["gofmt", "-w", "$FILE"], environment: { GOPATH: "/go" } }],
+            ".go": [
+              {
+                command: ["gofmt", "-w", "$FILE"],
+                environment: { GOPATH: "/go" },
+              },
+            ],
           },
         },
       },
@@ -92,7 +103,9 @@ describe("resolveFormatters", () => {
     const result = await resolveFormatters(client, "/project")
 
     //#then
-    expect(result.get(".go")).toEqual([{ command: ["gofmt", "-w", "$FILE"], environment: { GOPATH: "/go" } }])
+    expect(result.get(".go")).toEqual([
+      { command: ["gofmt", "-w", "$FILE"], environment: { GOPATH: "/go" } },
+    ])
   })
 
   it("normalizes extensions without leading dot", async () => {
@@ -260,7 +273,11 @@ describe("resolveFormatters", () => {
 
     //#then
     expect(result.get(".ts")).toHaveLength(2)
-    expect(result.get(".ts")![0].command).toEqual(["prettier", "--write", "$FILE"])
+    expect(result.get(".ts")![0].command).toEqual([
+      "prettier",
+      "--write",
+      "$FILE",
+    ])
     expect(result.get(".ts")![1].command).toEqual(["eslint", "--fix", "$FILE"])
   })
 

@@ -8,7 +8,10 @@ import {
   injectTextPart,
   replaceEmptyTextParts,
 } from "../session-recovery/storage"
-import { findMessagesWithEmptyTextPartsFromSDK, replaceEmptyTextPartsAsync } from "../session-recovery/storage/empty-text"
+import {
+  findMessagesWithEmptyTextPartsFromSDK,
+  replaceEmptyTextPartsAsync,
+} from "../session-recovery/storage/empty-text"
 import { injectTextPartAsync } from "../session-recovery/storage/text-part-injector"
 import type { Client } from "./client"
 
@@ -63,7 +66,9 @@ async function findEmptyMessageIdsFromSDK(
     const response = (await client.session.messages({
       path: { id: sessionID },
     })) as { data?: SDKMessage[] }
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    })
 
     const emptyIds: string[] = []
     for (const message of messages) {
@@ -86,7 +91,10 @@ export async function sanitizeEmptyMessagesBeforeSummarize(
 ): Promise<number> {
   if (client && isSqliteBackend()) {
     const emptyMessageIds = await findEmptyMessageIdsFromSDK(client, sessionID)
-    const emptyTextPartIds = await findMessagesWithEmptyTextPartsFromSDK(client, sessionID)
+    const emptyTextPartIds = await findMessagesWithEmptyTextPartsFromSDK(
+      client,
+      sessionID,
+    )
     const allIds = [...new Set([...emptyMessageIds, ...emptyTextPartIds])]
     if (allIds.length === 0) {
       return 0
@@ -94,11 +102,21 @@ export async function sanitizeEmptyMessagesBeforeSummarize(
 
     let fixedCount = 0
     for (const messageID of allIds) {
-      const replaced = await replaceEmptyTextPartsAsync(client, sessionID, messageID, PLACEHOLDER_TEXT)
+      const replaced = await replaceEmptyTextPartsAsync(
+        client,
+        sessionID,
+        messageID,
+        PLACEHOLDER_TEXT,
+      )
       if (replaced) {
         fixedCount++
       } else {
-        const injected = await injectTextPartAsync(client, sessionID, messageID, PLACEHOLDER_TEXT)
+        const injected = await injectTextPartAsync(
+          client,
+          sessionID,
+          messageID,
+          PLACEHOLDER_TEXT,
+        )
         if (injected) {
           fixedCount++
         }

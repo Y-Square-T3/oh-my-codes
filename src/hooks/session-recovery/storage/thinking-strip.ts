@@ -10,7 +10,9 @@ type OpencodeClient = PluginInput["client"]
 
 export function stripThinkingParts(messageID: string): boolean {
   if (isSqliteBackend()) {
-    log("[session-recovery] Disabled on SQLite backend: stripThinkingParts (use async variant)")
+    log(
+      "[session-recovery] Disabled on SQLite backend: stripThinkingParts (use async variant)",
+    )
     return false
   }
 
@@ -39,14 +41,20 @@ export function stripThinkingParts(messageID: string): boolean {
 export async function stripThinkingPartsAsync(
   client: OpencodeClient,
   sessionID: string,
-  messageID: string
+  messageID: string,
 ): Promise<boolean> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as Array<{ parts?: Array<{ type: string; id: string }> }>, { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(
+      response,
+      [] as Array<{ parts?: Array<{ type: string; id: string }> }>,
+      { preferResponseOnMissingData: true },
+    )
 
     const targetMsg = messages.find((m) => {
-      const info = (m as Record<string, unknown>)["info"] as Record<string, unknown> | undefined
+      const info = (m as Record<string, unknown>)["info"] as
+        | Record<string, unknown>
+        | undefined
       return info?.["id"] === messageID
     })
     if (!targetMsg?.parts) return false
@@ -61,7 +69,9 @@ export async function stripThinkingPartsAsync(
 
     return anyRemoved
   } catch (error) {
-    log("[session-recovery] stripThinkingPartsAsync failed", { error: String(error) })
+    log("[session-recovery] stripThinkingPartsAsync failed", {
+      error: String(error),
+    })
     return false
   }
 }

@@ -6,9 +6,9 @@ export async function formatSessionList(sessionIDs: string[]): Promise<string> {
     return "No sessions found."
   }
 
-  const infos = (await Promise.all(sessionIDs.map((id) => getSessionInfo(id)))).filter(
-    (info): info is SessionInfo => info !== null
-  )
+  const infos = (
+    await Promise.all(sessionIDs.map((id) => getSessionInfo(id)))
+  ).filter((info): info is SessionInfo => info !== null)
 
   if (infos.length === 0) {
     return "No valid sessions found."
@@ -23,7 +23,9 @@ export async function formatSessionList(sessionIDs: string[]): Promise<string> {
     info.agents_used.join(", ") || "none",
   ])
 
-  const colWidths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)))
+  const colWidths = headers.map((h, i) =>
+    Math.max(h.length, ...rows.map((r) => r[i].length)),
+  )
 
   const formatRow = (cells: string[]): string => {
     return (
@@ -36,7 +38,8 @@ export async function formatSessionList(sessionIDs: string[]): Promise<string> {
     )
   }
 
-  const separator = "|" + colWidths.map((w) => "-".repeat(w + 2)).join("|") + "|"
+  const separator =
+    "|" + colWidths.map((w) => "-".repeat(w + 2)).join("|") + "|"
 
   return [formatRow(headers), separator, ...rows.map(formatRow)].join("\n")
 }
@@ -44,7 +47,7 @@ export async function formatSessionList(sessionIDs: string[]): Promise<string> {
 export function formatSessionMessages(
   messages: SessionMessage[],
   includeTodos?: boolean,
-  todos?: Array<{ id?: string; content: string; status: string }>
+  todos?: Array<{ id?: string; content: string; status: string }>,
 ): string {
   if (messages.length === 0) {
     return "No messages found in this session."
@@ -53,7 +56,9 @@ export function formatSessionMessages(
   const lines: string[] = []
 
   for (const msg of messages) {
-    const timestamp = msg.time?.created ? new Date(msg.time.created).toISOString() : "Unknown time"
+    const timestamp = msg.time?.created
+      ? new Date(msg.time.created).toISOString()
+      : "Unknown time"
     const agent = msg.agent ? ` (${msg.agent})` : ""
     lines.push(`\n[${msg.role}${agent}] ${timestamp}`)
 
@@ -62,8 +67,13 @@ export function formatSessionMessages(
         lines.push(part.text.trim())
       } else if (part.type === "thinking" && part.thinking) {
         lines.push(`[thinking] ${part.thinking.substring(0, 200)}...`)
-      } else if ((part.type === "tool_use" || part.type === "tool") && part.tool) {
-        const input = part.input ? JSON.stringify(part.input).substring(0, 100) : ""
+      } else if (
+        (part.type === "tool_use" || part.type === "tool") &&
+        part.tool
+      ) {
+        const input = part.input
+          ? JSON.stringify(part.input).substring(0, 100)
+          : ""
         lines.push(`[tool: ${part.tool}] ${input}`)
       } else if (part.type === "tool_result") {
         const output = part.output ? part.output.substring(0, 200) : ""
@@ -75,7 +85,12 @@ export function formatSessionMessages(
   if (includeTodos && todos && todos.length > 0) {
     lines.push("\n\n=== Todos ===")
     for (const todo of todos) {
-      const status = todo.status === "completed" ? "[x]" : todo.status === "in_progress" ? "[-]" : "[ ]"
+      const status =
+        todo.status === "completed"
+          ? "[x]"
+          : todo.status === "in_progress"
+            ? "[-]"
+            : "[ ]"
       lines.push(`${status} [${todo.status}] ${todo.content}`)
     }
   }
@@ -96,7 +111,9 @@ export function formatSessionInfo(info: SessionInfo): string {
   if (info.first_message && info.last_message) {
     const duration = info.last_message.getTime() - info.first_message.getTime()
     const days = Math.floor(duration / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const hours = Math.floor(
+      (duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+    )
     if (days > 0 || hours > 0) {
       lines.push(`Duration: ${days} days, ${hours} hours`)
     }
@@ -113,8 +130,12 @@ export function formatSearchResults(results: SearchResult[]): string {
   const lines: string[] = [`Found ${results.length} matches:\n`]
 
   for (const result of results) {
-    const timestamp = result.timestamp ? new Date(result.timestamp).toISOString() : ""
-    lines.push(`[${result.session_id}] ${result.message_id} (${result.role}) ${timestamp}`)
+    const timestamp = result.timestamp
+      ? new Date(result.timestamp).toISOString()
+      : ""
+    lines.push(
+      `[${result.session_id}] ${result.message_id} (${result.role}) ${timestamp}`,
+    )
     lines.push(`  ${result.excerpt}`)
     lines.push(`  Matches: ${result.match_count}\n`)
   }
@@ -125,7 +146,7 @@ export function formatSearchResults(results: SearchResult[]): string {
 export async function filterSessionsByDate(
   sessionIDs: string[],
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
 ): Promise<string[]> {
   if (!fromDate && !toDate) return sessionIDs
 
@@ -150,7 +171,7 @@ export async function searchInSession(
   sessionID: string,
   query: string,
   caseSensitive = false,
-  maxResults?: number
+  maxResults?: number,
 ): Promise<SearchResult[]> {
   const messages = await readSessionMessages(sessionID)
   const results: SearchResult[] = []

@@ -1,6 +1,9 @@
 export const READ_ENABLED = false
 
-export function buildLookAtPrompt(goal: string, isBase64Input: boolean): string {
+export function buildLookAtPrompt(
+  goal: string,
+  isBase64Input: boolean,
+): string {
   const subjectNoun = isBase64Input ? "image" : "file"
   const sourceClause = READ_ENABLED
     ? "Use the Read tool on the provided file path to load its contents, then analyze it."

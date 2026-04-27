@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
@@ -28,7 +35,10 @@ describe("createWriteExistingFileGuardHook", () => {
   let hook: Hook
   let callCounter = 0
 
-  const createFile = (relativePath: string, content = "existing content"): string => {
+  const createFile = (
+    relativePath: string,
+    content = "existing content",
+  ): string => {
     const absolutePath = join(tempDir, relativePath)
     mkdirSync(dirname(absolutePath), { recursive: true })
     writeFileSync(absolutePath, content)
@@ -49,14 +59,19 @@ describe("createWriteExistingFileGuardHook", () => {
         sessionID: args.sessionID ?? "ses_default",
         callID: `call_${callCounter}`,
       } as never,
-      output as never
+      output as never,
     )
 
     return output
   }
 
   const emitSessionDeleted = async (sessionID: string): Promise<void> => {
-    await hook.event?.({ event: { type: "session.deleted", properties: { info: { id: sessionID } } } })
+    await hook.event?.({
+      event: {
+        type: "session.deleted",
+        properties: { info: { id: sessionID } },
+      },
+    })
   }
 
   beforeEach(() => {
@@ -73,8 +88,11 @@ describe("createWriteExistingFileGuardHook", () => {
     await expect(
       invoke({
         tool: "write",
-        outputArgs: { filePath: join(tempDir, "new-file.txt"), content: "new content" },
-      })
+        outputArgs: {
+          filePath: join(tempDir, "new-file.txt"),
+          content: "new content",
+        },
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -85,7 +103,7 @@ describe("createWriteExistingFileGuardHook", () => {
       invoke({
         tool: "write",
         outputArgs: { filePath: existingFile, content: "new content" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -104,7 +122,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: existingFile, content: "first overwrite" },
-      })
+      }),
     ).resolves.toBeDefined()
 
     await expect(
@@ -112,7 +130,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: existingFile, content: "second overwrite" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -139,9 +157,11 @@ describe("createWriteExistingFileGuardHook", () => {
       }),
     ])
 
-    const successCount = results.filter((result) => result.status === "fulfilled").length
+    const successCount = results.filter(
+      (result) => result.status === "fulfilled",
+    ).length
     const failures = results.filter(
-      (result): result is PromiseRejectedResult => result.status === "rejected"
+      (result): result is PromiseRejectedResult => result.status === "rejected",
     )
 
     expect(successCount).toBe(1)
@@ -163,7 +183,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID: "ses_writer",
         outputArgs: { filePath: existingFile, content: "new content" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -209,7 +229,7 @@ describe("createWriteExistingFileGuardHook", () => {
             content: "new content",
             overwrite,
           },
-        })
+        }),
       ).rejects.toThrow(BLOCK_MESSAGE)
     }
   })
@@ -233,7 +253,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID: "ses_b",
         outputArgs: { filePath: existingFile, content: "updated by B" },
-      })
+      }),
     ).resolves.toBeDefined()
 
     await expect(
@@ -241,7 +261,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID: "ses_a",
         outputArgs: { filePath: existingFile, content: "updated by A" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -252,7 +272,7 @@ describe("createWriteExistingFileGuardHook", () => {
       invoke({
         tool: "write",
         outputArgs: { filePath: existingFile, content: "new plan" },
-      })
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -276,8 +296,11 @@ describe("createWriteExistingFileGuardHook", () => {
         invoke({
           tool: "write",
           sessionID,
-          outputArgs: { [variant]: existingFile, content: `overwrite via ${variant}` },
-        })
+          outputArgs: {
+            [variant]: existingFile,
+            content: `overwrite via ${variant}`,
+          },
+        }),
       ).resolves.toBeDefined()
     }
   })
@@ -287,14 +310,14 @@ describe("createWriteExistingFileGuardHook", () => {
       invoke({
         tool: "write",
         outputArgs: { content: "no path" },
-      })
+      }),
     ).resolves.toBeDefined()
 
     await expect(
       invoke({
         tool: "read",
         outputArgs: {},
-      })
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -305,7 +328,11 @@ describe("createWriteExistingFileGuardHook", () => {
     await invoke({
       tool: "edit",
       sessionID,
-      outputArgs: { filePath: existingFile, oldString: "old", newString: "new" },
+      outputArgs: {
+        filePath: existingFile,
+        oldString: "old",
+        newString: "new",
+      },
     })
 
     await expect(
@@ -313,7 +340,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: existingFile, content: "should block" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -334,12 +361,14 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: absolutePath, content: "updated" },
-      })
+      }),
     ).resolves.toBeDefined()
   })
 
   test("#given existing file outside session directory #when write executes #then allows", async () => {
-    const outsideDir = mkdtempSync(join(tmpdir(), "write-existing-file-guard-outside-"))
+    const outsideDir = mkdtempSync(
+      join(tmpdir(), "write-existing-file-guard-outside-"),
+    )
 
     try {
       const outsideFile = join(outsideDir, "outside.txt")
@@ -349,7 +378,7 @@ describe("createWriteExistingFileGuardHook", () => {
         invoke({
           tool: "write",
           outputArgs: { filePath: outsideFile, content: "allowed overwrite" },
-        })
+        }),
       ).resolves.toBeDefined()
     } finally {
       rmSync(outsideDir, { recursive: true, force: true })
@@ -373,7 +402,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: existingFile, content: "after cleanup" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 
@@ -425,8 +454,11 @@ describe("createWriteExistingFileGuardHook", () => {
       invoke({
         tool: "write",
         sessionID,
-        outputArgs: { filePath: targetFile, content: "updated via symlink read" },
-      })
+        outputArgs: {
+          filePath: targetFile,
+          content: "updated via symlink read",
+        },
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -455,7 +487,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: oldestFile, content: "stale write" },
-      })
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
 
     await expect(
@@ -463,7 +495,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: newestFile, content: "fresh write" },
-      })
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -504,7 +536,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID: hotSession,
         outputArgs: { filePath: existingFile, content: "hot session write" },
-      })
+      }),
     ).resolves.toBeDefined()
   })
 
@@ -525,7 +557,7 @@ describe("createWriteExistingFileGuardHook", () => {
         tool: "write",
         sessionID,
         outputArgs: { filePath: existingFile, content: "first write" },
-      })
+      }),
     ).resolves.toBeDefined()
 
     // read the file again to re-establish permission after first write consumed it
@@ -543,8 +575,11 @@ describe("createWriteExistingFileGuardHook", () => {
       invoke({
         tool: "write",
         sessionID,
-        outputArgs: { filePath: existingFile, content: "second write after delete" },
-      })
+        outputArgs: {
+          filePath: existingFile,
+          content: "second write after delete",
+        },
+      }),
     ).rejects.toThrow(BLOCK_MESSAGE)
   })
 })

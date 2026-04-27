@@ -6,7 +6,10 @@ import { installModuleMockLifecycle } from "./module-mock-lifecycle"
 describe("installModuleMockLifecycle", () => {
   test("restores the original module exports on mock.restore", () => {
     // given
-    const moduleCalls: Array<{ specifier: string; value: Record<string, unknown> }> = []
+    const moduleCalls: Array<{
+      specifier: string
+      value: Record<string, unknown>
+    }> = []
     const mockApi = {
       module: (specifier: string, factory: () => Record<string, unknown>) => {
         moduleCalls.push({ specifier, value: factory() })
@@ -58,7 +61,10 @@ describe("installModuleMockLifecycle", () => {
 
   test("does not restore unresolved modules to avoid cleanup errors", () => {
     // given
-    const moduleCalls: Array<{ specifier: string; value: Record<string, unknown> }> = []
+    const moduleCalls: Array<{
+      specifier: string
+      value: Record<string, unknown>
+    }> = []
     const mockApi = {
       module: (specifier: string, factory: () => Record<string, unknown>) => {
         moduleCalls.push({ specifier, value: factory() })
@@ -69,7 +75,10 @@ describe("installModuleMockLifecycle", () => {
     installModuleMockLifecycle(mockApi, {
       getCallerUrl: () => "file:///repo/tests/example.test.ts",
       resolveSpecifier: (specifier) => specifier,
-      loadOriginalModule: () => ({ ok: false, error: new Error("Cannot find module") }),
+      loadOriginalModule: () => ({
+        ok: false,
+        error: new Error("Cannot find module"),
+      }),
     })
 
     // when
@@ -77,6 +86,8 @@ describe("installModuleMockLifecycle", () => {
     mockApi.restore()
 
     // then - only the original mock call, no restore call for unresolved module
-    expect(moduleCalls).toEqual([{ specifier: "virtual:missing", value: { named: "mocked" } }])
+    expect(moduleCalls).toEqual([
+      { specifier: "virtual:missing", value: { named: "mocked" } },
+    ])
   })
 })

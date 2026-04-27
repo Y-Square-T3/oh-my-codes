@@ -10,7 +10,12 @@ async function importFreshOAuthHandlerModule(): Promise<OAuthHandlerModule> {
     McpOAuthProvider: class MockMcpOAuthProvider {},
   }))
 
-  return await import(new URL(`./oauth-handler.ts?oauth-handler-test=${Date.now()}-${Math.random()}`, import.meta.url).href)
+  return await import(
+    new URL(
+      `./oauth-handler.ts?oauth-handler-test=${Date.now()}-${Math.random()}`,
+      import.meta.url,
+    ).href
+  )
 }
 
 type Deferred<TValue> = {
@@ -52,21 +57,35 @@ describe("oauth-handler refresh mutex wiring", () => {
         refreshToken: "refresh-token",
         expiresAt: Math.floor(Date.now() / 1000) - 60,
       }),
-      login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+      login: mock(
+        async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+      ),
       refresh,
     }
     const authProviders = new Map<string, OAuthProviderLike>()
     const createOAuthProvider: OAuthProviderFactory = () => provider
 
     // when
-    const firstRequest = buildHttpRequestInit(createConfig("https://same.example.com/mcp"), authProviders, createOAuthProvider)
-    const secondRequest = buildHttpRequestInit(createConfig("https://same.example.com/mcp"), authProviders, createOAuthProvider)
+    const firstRequest = buildHttpRequestInit(
+      createConfig("https://same.example.com/mcp"),
+      authProviders,
+      createOAuthProvider,
+    )
+    const secondRequest = buildHttpRequestInit(
+      createConfig("https://same.example.com/mcp"),
+      authProviders,
+      createOAuthProvider,
+    )
 
     // then
     expect(refresh).toHaveBeenCalledTimes(1)
     deferred.resolve({ accessToken: "refreshed-token" })
-    await expect(firstRequest).resolves.toEqual({ headers: { Authorization: "Bearer refreshed-token" } })
-    await expect(secondRequest).resolves.toEqual({ headers: { Authorization: "Bearer refreshed-token" } })
+    await expect(firstRequest).resolves.toEqual({
+      headers: { Authorization: "Bearer refreshed-token" },
+    })
+    await expect(secondRequest).resolves.toEqual({
+      headers: { Authorization: "Bearer refreshed-token" },
+    })
   })
 
   it("allows different servers to refresh independently after request auth errors", async () => {
@@ -76,12 +95,16 @@ describe("oauth-handler refresh mutex wiring", () => {
     const secondDeferred = createDeferred<OAuthTokenData>()
     const firstProvider: OAuthProviderLike = {
       tokens: () => ({ accessToken: "expired-a", refreshToken: "refresh-a" }),
-      login: mock(async () => ({ accessToken: "login-a" } satisfies OAuthTokenData)),
+      login: mock(
+        async () => ({ accessToken: "login-a" }) satisfies OAuthTokenData,
+      ),
       refresh: mock(() => firstDeferred.promise),
     }
     const secondProvider: OAuthProviderLike = {
       tokens: () => ({ accessToken: "expired-b", refreshToken: "refresh-b" }),
-      login: mock(async () => ({ accessToken: "login-b" } satisfies OAuthTokenData)),
+      login: mock(
+        async () => ({ accessToken: "login-b" }) satisfies OAuthTokenData,
+      ),
       refresh: mock(() => secondDeferred.promise),
     }
     const providers = new Map([
@@ -113,13 +136,25 @@ describe("oauth-handler refresh mutex wiring", () => {
   it("allows a new refresh after the previous same-server refresh completes", async () => {
     // given
     const { handlePostRequestAuthError } = await importFreshOAuthHandlerModule()
-    const refresh = mock(async () => ({ accessToken: `refreshed-${refresh.mock.calls.length + 1}` } satisfies OAuthTokenData))
+    const refresh = mock(
+      async () =>
+        ({
+          accessToken: `refreshed-${refresh.mock.calls.length + 1}`,
+        }) satisfies OAuthTokenData,
+    )
     const provider: OAuthProviderLike = {
-      tokens: () => ({ accessToken: "expired-token", refreshToken: "refresh-token" }),
-      login: mock(async () => ({ accessToken: "login-token" } satisfies OAuthTokenData)),
+      tokens: () => ({
+        accessToken: "expired-token",
+        refreshToken: "refresh-token",
+      }),
+      login: mock(
+        async () => ({ accessToken: "login-token" }) satisfies OAuthTokenData,
+      ),
       refresh,
     }
-    const authProviders = new Map<string, OAuthProviderLike>([["https://same.example.com/mcp", provider]])
+    const authProviders = new Map<string, OAuthProviderLike>([
+      ["https://same.example.com/mcp", provider],
+    ])
 
     // when
     const firstResult = await handlePostRequestAuthError({

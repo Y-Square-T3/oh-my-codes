@@ -2,9 +2,17 @@ import { existsSync, readFileSync } from "fs"
 import { parseJsoncSafe } from "../../shared/jsonc-parser"
 import { parseToolsConfig } from "../../shared/parse-tools-config"
 import { mapClaudeModelToOpenCode } from "./claude-model-mapper"
-import type { AgentScope, AgentJsonDefinition, ClaudeCodeAgentConfig, LoadedAgent } from "./types"
+import type {
+  AgentScope,
+  AgentJsonDefinition,
+  ClaudeCodeAgentConfig,
+  LoadedAgent,
+} from "./types"
 
-export function parseJsonAgentFile(filePath: string, scope: AgentScope): LoadedAgent | null {
+export function parseJsonAgentFile(
+  filePath: string,
+  scope: AgentScope,
+): LoadedAgent | null {
   try {
     if (!existsSync(filePath)) {
       return null

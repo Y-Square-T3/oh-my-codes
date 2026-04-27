@@ -1,8 +1,4 @@
-type MessageTime =
-  | { created?: number | string }
-  | number
-  | string
-  | undefined
+type MessageTime = { created?: number | string } | number | string | undefined
 
 type MessageInfo = {
   id?: string
@@ -20,7 +16,9 @@ export interface CursorState {
 
 const sessionCursors = new Map<string, CursorState>()
 
-function cloneCursorState(state: CursorState | undefined): CursorState | undefined {
+function cloneCursorState(
+  state: CursorState | undefined,
+): CursorState | undefined {
   if (!state) return undefined
   return {
     lastKey: state.lastKey,
@@ -50,7 +48,7 @@ function buildMessageKey(message: CursorMessage, index: number): string {
 
 export function consumeNewMessages<T extends CursorMessage>(
   sessionID: string | undefined,
-  messages: T[]
+  messages: T[],
 ): T[] {
   if (!sessionID) return messages
 
@@ -92,12 +90,17 @@ export function resetMessageCursor(sessionID?: string): void {
   sessionCursors.clear()
 }
 
-export function getMessageCursor(sessionID: string | undefined): CursorState | undefined {
+export function getMessageCursor(
+  sessionID: string | undefined,
+): CursorState | undefined {
   if (!sessionID) return undefined
   return cloneCursorState(sessionCursors.get(sessionID))
 }
 
-export function restoreMessageCursor(sessionID: string | undefined, cursor: CursorState | undefined): void {
+export function restoreMessageCursor(
+  sessionID: string | undefined,
+  cursor: CursorState | undefined,
+): void {
   if (!sessionID) return
   if (!cursor) {
     sessionCursors.delete(sessionID)

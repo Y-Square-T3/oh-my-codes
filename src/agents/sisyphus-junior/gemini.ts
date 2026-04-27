@@ -13,7 +13,7 @@ import { buildAntiDuplicationSection } from "../dynamic-agent-prompt-builder"
 
 export function buildGeminiSisyphusJuniorPrompt(
   useTaskSystem: boolean,
-  promptAppend?: string
+  promptAppend?: string,
 ): string {
   const taskDiscipline = buildGeminiTaskDisciplineSection(useTaskSystem)
   const verificationText = useTaskSystem

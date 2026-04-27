@@ -20,7 +20,7 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 9; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-${i}` },
-        output
+        output,
       )
     }
 
@@ -37,7 +37,7 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 10; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-${i}` },
-        output
+        output,
       )
     }
 
@@ -54,17 +54,17 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 5; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-${i}` },
-        output
+        output,
       )
     }
     await hook["tool.execute.after"]?.(
       { tool: "task", sessionID, callID: "call-task" },
-      output
+      output,
     )
     for (let i = 0; i < 9; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-after-${i}` },
-        output
+        output,
       )
     }
 
@@ -82,13 +82,13 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 10; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-1-${i}` },
-        output1
+        output1,
       )
     }
     for (let i = 0; i < 9; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-2-${i}` },
-        output2
+        output2,
       )
     }
 
@@ -108,13 +108,13 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 10; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID: session1, callID: `call-${i}` },
-        output1
+        output1,
       )
     }
     for (let i = 0; i < 5; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID: session2, callID: `call-${i}` },
-        output2
+        output2,
       )
     }
 
@@ -132,19 +132,26 @@ describe("TaskReminderHook", () => {
     for (let i = 0; i < 10; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-${i}` },
-        output
+        output,
       )
     }
-    await hook.event?.({ event: { type: "session.deleted", properties: { info: { id: sessionID } } } })
+    await hook.event?.({
+      event: {
+        type: "session.deleted",
+        properties: { info: { id: sessionID } },
+      },
+    })
     const outputAfterDelete = { output: "Result" }
     for (let i = 0; i < 9; i++) {
       await hook["tool.execute.after"]?.(
         { tool: "bash", sessionID, callID: `call-after-${i}` },
-        outputAfterDelete
+        outputAfterDelete,
       )
     }
 
     //#then
-    expect(outputAfterDelete.output).not.toContain("task tools haven't been used")
+    expect(outputAfterDelete.output).not.toContain(
+      "task tools haven't been used",
+    )
   })
 })

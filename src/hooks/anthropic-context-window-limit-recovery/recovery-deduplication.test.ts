@@ -18,12 +18,18 @@ function createImmediateTimeouts(): () => void {
   const originalSetTimeout = globalThis.setTimeout
   const originalClearTimeout = globalThis.clearTimeout
 
-  globalThis.setTimeout = ((callback: (...args: unknown[]) => void, _delay?: number, ...args: unknown[]) => {
+  globalThis.setTimeout = ((
+    callback: (...args: unknown[]) => void,
+    _delay?: number,
+    ...args: unknown[]
+  ) => {
     callback(...args)
     return 0 as unknown as ReturnType<typeof setTimeout>
   }) as typeof setTimeout
 
-  globalThis.clearTimeout = ((_: ReturnType<typeof setTimeout>) => {}) as typeof clearTimeout
+  globalThis.clearTimeout = ((
+    _: ReturnType<typeof setTimeout>,
+  ) => {}) as typeof clearTimeout
 
   return () => {
     globalThis.setTimeout = originalSetTimeout
@@ -67,9 +73,12 @@ describe("createAnthropicContextWindowLimitRecoveryHook", () => {
     }
 
     try {
-      const { createAnthropicContextWindowLimitRecoveryHook } = await import("./recovery-hook")
+      const { createAnthropicContextWindowLimitRecoveryHook } =
+        await import("./recovery-hook")
       const ctx = { client: mockClient, directory: "/tmp" } as PluginInput
-      const hook = createAnthropicContextWindowLimitRecoveryHook(ctx, { experimental })
+      const hook = createAnthropicContextWindowLimitRecoveryHook(ctx, {
+        experimental,
+      })
 
       // first error triggers compaction (setTimeout runs immediately due to mock)
       await hook.event({
@@ -89,7 +98,9 @@ describe("createAnthropicContextWindowLimitRecoveryHook", () => {
 
       //#then - deduplication recovery was called for the second error
       expect(attemptDeduplicationRecoveryMock).toHaveBeenCalledTimes(1)
-      expect(attemptDeduplicationRecoveryMock.mock.calls[0]![0]).toBe("session-96")
+      expect(attemptDeduplicationRecoveryMock.mock.calls[0]![0]).toBe(
+        "session-96",
+      )
     } finally {
       if (resolveSummarize) resolveSummarize()
       restoreTimeouts()
@@ -110,7 +121,8 @@ describe("createAnthropicContextWindowLimitRecoveryHook", () => {
       },
     }
 
-    const { createAnthropicContextWindowLimitRecoveryHook } = await import("./recovery-hook")
+    const { createAnthropicContextWindowLimitRecoveryHook } =
+      await import("./recovery-hook")
     const ctx = { client: mockClient, directory: "/tmp" } as PluginInput
     const hook = createAnthropicContextWindowLimitRecoveryHook(ctx)
 
@@ -118,7 +130,10 @@ describe("createAnthropicContextWindowLimitRecoveryHook", () => {
     await hook.event({
       event: {
         type: "session.error",
-        properties: { sessionID: "session-no-dedup", error: "some other error" },
+        properties: {
+          sessionID: "session-no-dedup",
+          error: "some other error",
+        },
       },
     })
 

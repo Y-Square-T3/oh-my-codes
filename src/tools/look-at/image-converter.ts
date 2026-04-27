@@ -1,5 +1,12 @@
 import * as childProcess from "node:child_process"
-import { existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { log } from "../../shared"
@@ -38,15 +45,18 @@ export function needsConversion(mimeType: string): boolean {
   if (SUPPORTED_FORMATS.has(mimeType)) {
     return false
   }
-  
+
   if (UNSUPPORTED_FORMATS.has(mimeType)) {
     return true
   }
-  
+
   return mimeType.startsWith("image/")
 }
 
-export function convertImageToJpeg(inputPath: string, mimeType: string): string {
+export function convertImageToJpeg(
+  inputPath: string,
+  mimeType: string,
+): string {
   if (!existsSync(inputPath)) {
     throw new Error(`File not found: ${inputPath}`)
   }
@@ -59,12 +69,16 @@ export function convertImageToJpeg(inputPath: string, mimeType: string): string 
   try {
     if (process.platform === "darwin") {
       try {
-        childProcess.execFileSync("sips", ["-s", "format", "jpeg", "--", inputPath, "--out", outputPath], {
-          stdio: "pipe",
-          encoding: "utf-8",
-          timeout: CONVERSION_TIMEOUT_MS,
-        })
-        
+        childProcess.execFileSync(
+          "sips",
+          ["-s", "format", "jpeg", "--", inputPath, "--out", outputPath],
+          {
+            stdio: "pipe",
+            encoding: "utf-8",
+            timeout: CONVERSION_TIMEOUT_MS,
+          },
+        )
+
         if (existsSync(outputPath)) {
           log(`[image-converter] Converted using sips: ${outputPath}`)
           return outputPath
@@ -75,13 +89,18 @@ export function convertImageToJpeg(inputPath: string, mimeType: string): string 
     }
 
     try {
-      const imagemagickCommand = process.platform === "darwin" ? "convert" : "magick"
-      childProcess.execFileSync(imagemagickCommand, ["--", inputPath, outputPath], {
-        stdio: "pipe",
-        encoding: "utf-8",
-        timeout: CONVERSION_TIMEOUT_MS,
-      })
-      
+      const imagemagickCommand =
+        process.platform === "darwin" ? "convert" : "magick"
+      childProcess.execFileSync(
+        imagemagickCommand,
+        ["--", inputPath, outputPath],
+        {
+          stdio: "pipe",
+          encoding: "utf-8",
+          timeout: CONVERSION_TIMEOUT_MS,
+        },
+      )
+
       if (existsSync(outputPath)) {
         log(`[image-converter] Converted using ImageMagick: ${outputPath}`)
         return outputPath
@@ -92,9 +111,9 @@ export function convertImageToJpeg(inputPath: string, mimeType: string): string 
 
     throw new Error(
       `No image conversion tool available. Please install ImageMagick:\n` +
-      `  macOS: brew install imagemagick\n` +
-      `  Ubuntu/Debian: sudo apt install imagemagick\n` +
-      `  RHEL/CentOS: sudo yum install ImageMagick`
+        `  macOS: brew install imagemagick\n` +
+        `  Ubuntu/Debian: sudo apt install imagemagick\n` +
+        `  RHEL/CentOS: sudo yum install ImageMagick`,
     )
   } catch (error) {
     try {
@@ -107,7 +126,7 @@ export function convertImageToJpeg(inputPath: string, mimeType: string): string 
       const conversionError = error as Error & { temporaryOutputPath?: string }
       conversionError.temporaryOutputPath = outputPath
     }
-    
+
     throw error
   }
 }
@@ -130,7 +149,7 @@ export function cleanupConvertedImage(filePath: string): void {
 
 export function convertBase64ImageToJpeg(
   base64Data: string,
-  mimeType: string
+  mimeType: string,
 ): { base64: string; tempFiles: string[] } {
   const tempDir = mkdtempSync(join(tmpdir(), "opencode-b64-"))
   const inputExt = mimeType.split("/")[1] || "bin"
@@ -143,7 +162,7 @@ export function convertBase64ImageToJpeg(
     writeFileSync(inputPath, buffer)
 
     log(`[image-converter] Converting Base64 ${mimeType} to JPEG`)
-    
+
     const outputPath = convertImageToJpeg(inputPath, mimeType)
     tempFiles.push(outputPath)
 
@@ -151,10 +170,10 @@ export function convertBase64ImageToJpeg(
     const convertedBase64 = convertedBuffer.toString("base64")
 
     log(`[image-converter] Base64 conversion successful`)
-    
+
     return { base64: convertedBase64, tempFiles }
   } catch (error) {
-    tempFiles.forEach(file => {
+    tempFiles.forEach((file) => {
       try {
         if (existsSync(file)) unlinkSync(file)
       } catch {}

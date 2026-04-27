@@ -6,7 +6,10 @@ import { parseAnthropicTokenLimitError } from "./parser"
 import { executeCompact, getLastAssistant } from "./executor"
 import { attemptDeduplicationRecovery } from "./deduplication-recovery"
 import { clearSessionState } from "./state"
-import { clearAllSessionTimeouts, clearSessionTimeout } from "./session-timeout-map"
+import {
+  clearAllSessionTimeouts,
+  clearSessionTimeout,
+} from "./session-timeout-map"
 import { log } from "../../shared/logger"
 
 export interface AnthropicContextWindowLimitRecoveryOptions {
@@ -32,14 +35,13 @@ function createRecoveryState(): AutoCompactState {
   }
 }
 
-
 export function createAnthropicContextWindowLimitRecoveryHook(
   ctx: PluginInput,
   options?: AnthropicContextWindowLimitRecoveryOptions,
 ) {
   const autoCompactState = createRecoveryState()
   const experimental = options?.experimental
-  const pluginConfig = options?.pluginConfig ?? {} as OhMyCodesConfig
+  const pluginConfig = options?.pluginConfig ?? ({} as OhMyCodesConfig)
   const dependencies = {
     executeCompact,
     getLastAssistant,
@@ -47,9 +49,16 @@ export function createAnthropicContextWindowLimitRecoveryHook(
     parseAnthropicTokenLimitError,
     ...options?.dependencies,
   }
-  const pendingCompactionTimeoutBySession = new Map<string, ReturnType<typeof setTimeout>>()
+  const pendingCompactionTimeoutBySession = new Map<
+    string,
+    ReturnType<typeof setTimeout>
+  >()
 
-  const eventHandler = async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  const eventHandler = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {
@@ -64,17 +73,28 @@ export function createAnthropicContextWindowLimitRecoveryHook(
 
     if (event.type === "session.error") {
       const sessionID = props?.sessionID as string | undefined
-      dependencies.log("[auto-compact] session.error received", { sessionID, error: props?.error })
+      dependencies.log("[auto-compact] session.error received", {
+        sessionID,
+        error: props?.error,
+      })
       if (!sessionID) return
 
       const parsed = dependencies.parseAnthropicTokenLimitError(props?.error)
-      dependencies.log("[auto-compact] parsed result", { parsed, hasError: !!props?.error })
+      dependencies.log("[auto-compact] parsed result", {
+        parsed,
+        hasError: !!props?.error,
+      })
       if (parsed) {
         autoCompactState.pendingCompact.add(sessionID)
         autoCompactState.errorDataBySession.set(sessionID, parsed)
 
         if (autoCompactState.compactionInProgress.has(sessionID)) {
-          await attemptDeduplicationRecovery(sessionID, parsed, experimental, ctx.client)
+          await attemptDeduplicationRecovery(
+            sessionID,
+            parsed,
+            experimental,
+            ctx.client,
+          )
           return
         }
 
@@ -84,8 +104,11 @@ export function createAnthropicContextWindowLimitRecoveryHook(
           ctx.directory,
         )
         const lastAssistantInfo = lastAssistant?.info
-        const providerID = parsed.providerID ?? (lastAssistantInfo?.providerID as string | undefined)
-        const modelID = parsed.modelID ?? (lastAssistantInfo?.modelID as string | undefined)
+        const providerID =
+          parsed.providerID ??
+          (lastAssistantInfo?.providerID as string | undefined)
+        const modelID =
+          parsed.modelID ?? (lastAssistantInfo?.modelID as string | undefined)
 
         await ctx.client.tui
           .showToast({
@@ -123,9 +146,14 @@ export function createAnthropicContextWindowLimitRecoveryHook(
       const sessionID = info?.sessionID as string | undefined
 
       if (sessionID && info?.role === "assistant" && info.error) {
-        dependencies.log("[auto-compact] message.updated with error", { sessionID, error: info.error })
+        dependencies.log("[auto-compact] message.updated with error", {
+          sessionID,
+          error: info.error,
+        })
         const parsed = dependencies.parseAnthropicTokenLimitError(info.error)
-        dependencies.log("[auto-compact] message.updated parsed result", { parsed })
+        dependencies.log("[auto-compact] message.updated parsed result", {
+          parsed,
+        })
         if (parsed) {
           parsed.providerID = info.providerID as string | undefined
           parsed.modelID = info.modelID as string | undefined
@@ -157,8 +185,11 @@ export function createAnthropicContextWindowLimitRecoveryHook(
         return
       }
 
-      const providerID = errorData?.providerID ?? (lastAssistantInfo?.providerID as string | undefined)
-      const modelID = errorData?.modelID ?? (lastAssistantInfo?.modelID as string | undefined)
+      const providerID =
+        errorData?.providerID ??
+        (lastAssistantInfo?.providerID as string | undefined)
+      const modelID =
+        errorData?.modelID ?? (lastAssistantInfo?.modelID as string | undefined)
 
       await ctx.client.tui
         .showToast({

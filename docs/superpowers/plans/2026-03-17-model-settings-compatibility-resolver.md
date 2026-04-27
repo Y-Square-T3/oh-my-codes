@@ -13,6 +13,7 @@
 ### Task 1: Create the pure compatibility resolver
 
 **Files:**
+
 - Create: `src/shared/model-settings-compatibility.ts`
 - Create: `src/shared/model-settings-compatibility.test.ts`
 - Modify: `src/shared/index.ts`
@@ -29,6 +30,7 @@
 ### Task 2: Integrate resolver into chat.params
 
 **Files:**
+
 - Modify: `src/plugin/chat-params.ts`
 - Modify: `src/plugin/chat-params.test.ts`
 
@@ -42,6 +44,7 @@
 ### Task 3: Re-scope anthropic-effort around the resolver
 
 **Files:**
+
 - Modify: `src/hooks/anthropic-effort/hook.ts`
 - Modify: `src/hooks/anthropic-effort/index.test.ts`
 
@@ -54,6 +57,7 @@
 ### Task 4: Add integration/regression coverage across real request paths
 
 **Files:**
+
 - Modify: `src/plugin/chat-params.test.ts`
 - Modify: `src/hooks/anthropic-effort/index.test.ts`
 - Add tests only where needed in nearby suites
@@ -67,6 +71,7 @@
 ### Task 5: Verify full quality bar
 
 **Files:**
+
 - No intended code changes
 
 - [ ] **Step 1: Run `bun run typecheck`**
@@ -78,6 +83,7 @@
 ### Task 6: Prepare PR metadata
 
 **Files:**
+
 - No repo file change required unless docs are updated further
 
 - [ ] **Step 1: Write a human summary explaining this is settings compatibility, not model fallback**

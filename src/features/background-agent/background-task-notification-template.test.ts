@@ -142,8 +142,16 @@ Use \`background_output(task_id="<id>")\` to retrieve each result.
         allComplete: true,
         remainingCount: 0,
         completedTasks: [
-          { id: "bg_abc123", description: undefined as unknown as string, status: "completed" },
-          { id: "bg_def456", description: undefined as unknown as string, status: "completed" },
+          {
+            id: "bg_abc123",
+            description: undefined as unknown as string,
+            status: "completed",
+          },
+          {
+            id: "bg_def456",
+            description: undefined as unknown as string,
+            status: "completed",
+          },
         ],
       })
 

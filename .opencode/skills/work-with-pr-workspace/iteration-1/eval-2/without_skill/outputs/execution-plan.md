@@ -10,7 +10,7 @@
 const parsed = JSON.parse(content)
 if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null
 if (!Array.isArray(parsed.session_ids)) parsed.session_ids = []
-return parsed as BoulderState  // <-- unsafe cast, no field validation
+return parsed as BoulderState // <-- unsafe cast, no field validation
 ```
 
 It validates `session_ids` but NOT `active_plan`, `plan_name`, or `worktree_path`. This means a malformed `boulder.json` (e.g., `{}` or missing key fields) passes through and downstream code crashes.
@@ -28,17 +28,19 @@ It validates `session_ids` but NOT `active_plan`, `plan_name`, or `worktree_path
 ### worktree_path-Specific Issues
 
 When `worktree_path` field is missing from `boulder.json`:
+
 - The `idle-event.ts` `scheduleRetry` setTimeout callback (lines 62-88) has NO try/catch. An unhandled promise rejection from the async callback crashes the process.
 - `readBoulderState()` returns `worktree_path: undefined` which itself is handled in `boulder-continuation-injector.ts` (line 42 uses truthiness check), but the surrounding code in the setTimeout lacks error protection.
 
 ### Secondary Issue: Unhandled Promise in setTimeout
 
 In `idle-event.ts` lines 62-88:
+
 ```typescript
 sessionState.pendingRetryTimer = setTimeout(async () => {
   // ... no try/catch wrapper
   const currentBoulder = readBoulderState(ctx.directory)
-  const currentProgress = getPlanProgress(currentBoulder.active_plan)  // CRASH if active_plan undefined
+  const currentProgress = getPlanProgress(currentBoulder.active_plan) // CRASH if active_plan undefined
   // ...
 }, RETRY_DELAY_MS)
 ```
@@ -50,6 +52,7 @@ The async callback creates a floating promise. Any thrown error becomes an unhan
 ## Step-by-Step Plan
 
 ### Step 1: Harden `readBoulderState()` validation
+
 **File:** `src/features/boulder-state/storage.ts`
 
 - After the `session_ids` fix, add validation for `active_plan` and `plan_name` (required fields)
@@ -57,22 +60,27 @@ The async callback creates a floating promise. Any thrown error becomes an unhan
 - Return `null` for boulder states with missing required fields
 
 ### Step 2: Add try/catch in setTimeout callback
+
 **File:** `src/hooks/atlas/idle-event.ts`
 
 - Wrap the `setTimeout` async callback body in try/catch
 - Log errors with the atlas hook logger
 
 ### Step 3: Add defensive guard in `getPlanProgress`
+
 **File:** `src/features/boulder-state/storage.ts`
 
 - Add early return for non-string `planPath` argument
 
 ### Step 4: Add tests
+
 **Files:**
+
 - `src/features/boulder-state/storage.test.ts` - test missing/malformed fields
 - `src/hooks/atlas/index.test.ts` - test atlas hook with boulder missing worktree_path
 
 ### Step 5: Run CI checks
+
 ```bash
 bun run typecheck
 bun test src/features/boulder-state/storage.test.ts
@@ -81,6 +89,7 @@ bun test  # full suite
 ```
 
 ### Step 6: Create PR
+
 - Branch: `fix/atlas-hook-missing-worktree-path`
 - Target: `dev`
 - Run CI and verify passes

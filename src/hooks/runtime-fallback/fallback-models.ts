@@ -4,7 +4,10 @@ import { agentPattern } from "./agent-resolver"
 import { HOOK_NAME } from "./constants"
 import { log } from "../../shared/logger"
 import { SessionCategoryRegistry } from "../../shared/session-category-registry"
-import { normalizeFallbackModels, flattenToFallbackModelStrings } from "../../shared/model-resolver"
+import {
+  normalizeFallbackModels,
+  flattenToFallbackModelStrings,
+} from "../../shared/model-resolver"
 
 /**
  * Returns fallback model strings for the runtime-fallback system.
@@ -14,7 +17,7 @@ import { normalizeFallbackModels, flattenToFallbackModelStrings } from "../../sh
 export function getFallbackModelsForSession(
   sessionID: string,
   agent: string | undefined,
-  pluginConfig: OhMyCodesConfig | undefined
+  pluginConfig: OhMyCodesConfig | undefined,
 ): string[] {
   if (!pluginConfig) return []
 
@@ -49,8 +52,11 @@ function getRawFallbackModelsForSession(
     }
   }
 
-  const tryGetFallbackFromAgent = (agentName: string): (string | FallbackModelObject)[] | undefined => {
-    const agentConfig = pluginConfig.agents?.[agentName as keyof typeof pluginConfig.agents]
+  const tryGetFallbackFromAgent = (
+    agentName: string,
+  ): (string | FallbackModelObject)[] | undefined => {
+    const agentConfig =
+      pluginConfig.agents?.[agentName as keyof typeof pluginConfig.agents]
     if (!agentConfig) return undefined
 
     if (agentConfig?.fallback_models) {
@@ -80,7 +86,10 @@ function getRawFallbackModelsForSession(
     if (result) return result
   }
 
-  log(`[${HOOK_NAME}] No category/agent fallback models resolved for session`, { sessionID, agent })
+  log(`[${HOOK_NAME}] No category/agent fallback models resolved for session`, {
+    sessionID,
+    agent,
+  })
 
   return undefined
 }

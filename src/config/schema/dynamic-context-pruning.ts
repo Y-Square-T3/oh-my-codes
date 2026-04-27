@@ -11,15 +11,17 @@ export const DynamicContextPruningConfigSchema = z.object({
     })
     .optional(),
   /** Tools that should never be pruned */
-  protected_tools: z.array(z.string()).default([
-    "task",
-    "todowrite",
-    "todoread",
-    "lsp_rename",
-    "session_read",
-    "session_write",
-    "session_search",
-  ]),
+  protected_tools: z
+    .array(z.string())
+    .default([
+      "task",
+      "todowrite",
+      "todoread",
+      "lsp_rename",
+      "session_read",
+      "session_write",
+      "session_search",
+    ]),
   /** Pruning strategies configuration */
   strategies: z
     .object({

@@ -27,7 +27,8 @@ describe("internal-initiator-marker", () => {
       const part = createInternalAgentTextPart(text)
 
       // then
-      const markerCount = part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
+      const markerCount =
+        part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
       expect(markerCount).toBe(1)
       expect(part.text).toBe(`Already marked\n${OMO_INTERNAL_INITIATOR_MARKER}`)
     })
@@ -40,7 +41,8 @@ describe("internal-initiator-marker", () => {
       const part = createInternalAgentTextPart(text)
 
       // then
-      const markerCount = part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
+      const markerCount =
+        part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
       expect(markerCount).toBe(1)
       expect(part.text.endsWith(OMO_INTERNAL_INITIATOR_MARKER)).toBe(true)
     })
@@ -55,7 +57,8 @@ describe("internal-initiator-marker", () => {
       // then
       expect(part.text).toContain("Line one")
       expect(part.text).toContain("Line two")
-      const markerCount = part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
+      const markerCount =
+        part.text.split(OMO_INTERNAL_INITIATOR_MARKER).length - 1
       expect(markerCount).toBe(1)
     })
 

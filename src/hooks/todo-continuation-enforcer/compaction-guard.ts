@@ -12,7 +12,7 @@ export function armCompactionGuard(state: SessionState, now: number): number {
 
 export function acknowledgeCompactionGuard(
   state: SessionState,
-  compactionEpoch: number | undefined
+  compactionEpoch: number | undefined,
 ): boolean {
   if (compactionEpoch === undefined) {
     return false
@@ -26,8 +26,14 @@ export function acknowledgeCompactionGuard(
   return true
 }
 
-export function isCompactionGuardActive(state: SessionState, now: number): boolean {
-  if (state.recentCompactionAt === undefined || state.recentCompactionEpoch === undefined) {
+export function isCompactionGuardActive(
+  state: SessionState,
+  now: number,
+): boolean {
+  if (
+    state.recentCompactionAt === undefined ||
+    state.recentCompactionEpoch === undefined
+  ) {
     return false
   }
 

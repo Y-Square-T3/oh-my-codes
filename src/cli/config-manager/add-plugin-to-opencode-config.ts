@@ -6,11 +6,19 @@ import { getConfigDir } from "./config-context"
 import { ensureConfigDirectoryExists } from "./ensure-config-directory-exists"
 import { formatErrorWithSuggestion } from "./format-error-with-suggestion"
 import { detectConfigFormat } from "./opencode-config-format"
-import { parseOpenCodeConfigFileWithError, type OpenCodeConfig } from "./parse-opencode-config-file"
+import {
+  parseOpenCodeConfigFileWithError,
+  type OpenCodeConfig,
+} from "./parse-opencode-config-file"
 import { getPluginNameWithVersion } from "./plugin-name-with-version"
-import { checkVersionCompatibility, extractVersionFromPluginEntry } from "./version-compatibility"
+import {
+  checkVersionCompatibility,
+  extractVersionFromPluginEntry,
+} from "./version-compatibility"
 
-export async function addPluginToOpenCodeConfig(currentVersion: string): Promise<ConfigMergeResult> {
+export async function addPluginToOpenCodeConfig(
+  currentVersion: string,
+): Promise<ConfigMergeResult> {
   try {
     ensureConfigDirectoryExists()
   } catch (err) {
@@ -22,7 +30,10 @@ export async function addPluginToOpenCodeConfig(currentVersion: string): Promise
   }
 
   const { format, path } = detectConfigFormat()
-  const pluginEntry = await getPluginNameWithVersion(currentVersion, PLUGIN_NAME)
+  const pluginEntry = await getPluginNameWithVersion(
+    currentVersion,
+    PLUGIN_NAME,
+  )
 
   try {
     if (format === "none") {
@@ -44,17 +55,25 @@ export async function addPluginToOpenCodeConfig(currentVersion: string): Promise
     const plugins = config.plugin ?? []
 
     const canonicalEntries = plugins.filter(
-      (plugin) => plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`)
+      (plugin) =>
+        plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`),
     )
     const otherPlugins = plugins.filter(
-      (plugin) => !(plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`))
-        && !(plugin === LEGACY_PLUGIN_NAME || plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`))
+      (plugin) =>
+        !(plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`)) &&
+        !(
+          plugin === LEGACY_PLUGIN_NAME ||
+          plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+        ),
     )
 
     const existingEntry = canonicalEntries[0]
     if (existingEntry) {
       const installedVersion = extractVersionFromPluginEntry(existingEntry)
-      const compatibility = checkVersionCompatibility(installedVersion, currentVersion)
+      const compatibility = checkVersionCompatibility(
+        installedVersion,
+        currentVersion,
+      )
 
       if (!compatibility.canUpgrade) {
         return {
@@ -86,11 +105,19 @@ export async function addPluginToOpenCodeConfig(currentVersion: string): Promise
       const match = content.match(pluginArrayRegex)
 
       if (match) {
-        const formattedPlugins = normalizedPlugins.map((p) => `"${p}"`).join(",\n    ")
-        const newContent = content.replace(pluginArrayRegex, `$1[\n    ${formattedPlugins}\n  ]`)
+        const formattedPlugins = normalizedPlugins
+          .map((p) => `"${p}"`)
+          .join(",\n    ")
+        const newContent = content.replace(
+          pluginArrayRegex,
+          `$1[\n    ${formattedPlugins}\n  ]`,
+        )
         writeFileSync(path, newContent)
       } else {
-        const newContent = content.replace(/(\{)/, `$1\n  "plugin": ["${pluginEntry}"],`)
+        const newContent = content.replace(
+          /(\{)/,
+          `$1\n  "plugin": ["${pluginEntry}"],`,
+        )
         writeFileSync(path, newContent)
       }
     } else {

@@ -1,9 +1,16 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import { subagentSessions, getMainSessionID } from "../features/claude-code-session-state"
+import {
+  subagentSessions,
+  getMainSessionID,
+} from "../features/claude-code-session-state"
 import { buildReadyNotificationContent } from "./session-notification-content"
 import { type Platform } from "./session-notification-sender"
 import * as sessionNotificationSender from "./session-notification-sender"
-import { getEventToolName, getQuestionText, getSessionID } from "./session-notification-event-properties"
+import {
+  getEventToolName,
+  getQuestionText,
+  getSessionID,
+} from "./session-notification-event-properties"
 import { hasIncompleteTodos } from "./session-todo-status"
 import { createIdleNotificationScheduler } from "./session-notification-scheduler"
 import { createSessionNotificationInit } from "./session-notification-init"
@@ -26,7 +33,10 @@ interface SessionNotificationConfig {
   activityGracePeriodMs?: number
 }
 
-export function createSessionNotification(ctx: PluginInput, config: SessionNotificationConfig = {}) {
+export function createSessionNotification(
+  ctx: PluginInput,
+  config: SessionNotificationConfig = {},
+) {
   const mergedConfig = {
     title: "OpenCode",
     message: "Agent is ready for input",
@@ -51,8 +61,16 @@ export function createSessionNotification(ctx: PluginInput, config: SessionNotif
     config: mergedConfig,
     hasIncompleteTodos,
     send: async (hookCtx, platform, sessionID) => {
-      if (typeof hookCtx.client.session.get !== "function" && typeof hookCtx.client.session.messages !== "function") {
-        await sessionNotificationSender.sendSessionNotification(hookCtx, platform, mergedConfig.title, mergedConfig.message)
+      if (
+        typeof hookCtx.client.session.get !== "function" &&
+        typeof hookCtx.client.session.messages !== "function"
+      ) {
+        await sessionNotificationSender.sendSessionNotification(
+          hookCtx,
+          platform,
+          mergedConfig.title,
+          mergedConfig.message,
+        )
         return
       }
 
@@ -62,14 +80,29 @@ export function createSessionNotification(ctx: PluginInput, config: SessionNotif
         baseMessage: mergedConfig.message,
       })
 
-      await sessionNotificationSender.sendSessionNotification(hookCtx, platform, content.title, content.message)
+      await sessionNotificationSender.sendSessionNotification(
+        hookCtx,
+        platform,
+        content.title,
+        content.message,
+      )
     },
     playSound: sessionNotificationSender.playSessionNotificationSound,
   })
 
-  const QUESTION_TOOLS = new Set(["question", "ask_user_question", "askuserquestion"])
-  const PERMISSION_EVENTS = new Set(["permission.ask", "permission.asked", "permission.updated", "permission.requested"])
-  const PERMISSION_HINT_PATTERN = /\b(permission|approve|approval|allow|deny|consent)\b/i
+  const QUESTION_TOOLS = new Set([
+    "question",
+    "ask_user_question",
+    "askuserquestion",
+  ])
+  const PERMISSION_EVENTS = new Set([
+    "permission.ask",
+    "permission.asked",
+    "permission.updated",
+    "permission.requested",
+  ])
+  const PERMISSION_HINT_PATTERN =
+    /\b(permission|approve|approval|allow|deny|consent)\b/i
 
   const ensureNotificationPlatform = (): Platform => {
     if (currentPlatform) return currentPlatform
@@ -91,7 +124,11 @@ export function createSessionNotification(ctx: PluginInput, config: SessionNotif
     return true
   }
 
-  return async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  return async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.created") {
@@ -129,14 +166,26 @@ export function createSessionNotification(ctx: PluginInput, config: SessionNotif
       if (!shouldNotifyForSession(sessionID)) return
 
       scheduler.markSessionActivity(sessionID)
-      await sessionNotificationSender.sendSessionNotification(ctx, platform, mergedConfig.title, mergedConfig.permissionMessage)
+      await sessionNotificationSender.sendSessionNotification(
+        ctx,
+        platform,
+        mergedConfig.title,
+        mergedConfig.permissionMessage,
+      )
       if (mergedConfig.playSound && defaultSoundPath) {
-        await sessionNotificationSender.playSessionNotificationSound(ctx, platform, defaultSoundPath)
+        await sessionNotificationSender.playSessionNotificationSound(
+          ctx,
+          platform,
+          defaultSoundPath,
+        )
       }
       return
     }
 
-    if (event.type === "tool.execute.before" || event.type === "tool.execute.after") {
+    if (
+      event.type === "tool.execute.before" ||
+      event.type === "tool.execute.after"
+    ) {
       const sessionID = getSessionID(props)
       if (sessionID) {
         scheduler.markSessionActivity(sessionID)
@@ -149,11 +198,22 @@ export function createSessionNotification(ctx: PluginInput, config: SessionNotif
             if (!shouldNotifyForSession(sessionID)) return
 
             const questionText = getQuestionText(props)
-            const message = PERMISSION_HINT_PATTERN.test(questionText) ? mergedConfig.permissionMessage : mergedConfig.questionMessage
+            const message = PERMISSION_HINT_PATTERN.test(questionText)
+              ? mergedConfig.permissionMessage
+              : mergedConfig.questionMessage
 
-            await sessionNotificationSender.sendSessionNotification(ctx, platform, mergedConfig.title, message)
+            await sessionNotificationSender.sendSessionNotification(
+              ctx,
+              platform,
+              mergedConfig.title,
+              message,
+            )
             if (mergedConfig.playSound && defaultSoundPath) {
-              await sessionNotificationSender.playSessionNotificationSound(ctx, platform, defaultSoundPath)
+              await sessionNotificationSender.playSessionNotificationSound(
+                ctx,
+                platform,
+                defaultSoundPath,
+              )
             }
           }
         }

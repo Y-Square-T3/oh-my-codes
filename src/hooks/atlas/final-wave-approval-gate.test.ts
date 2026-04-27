@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, mock, test, afterAll } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} from "bun:test"
 import { randomUUID } from "node:crypto"
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -6,9 +14,15 @@ import { join } from "node:path"
 import { createOpencodeClient } from "@opencode-ai/sdk"
 import type { AssistantMessage, Session } from "@opencode-ai/sdk"
 import type { BoulderState } from "../../features/boulder-state"
-import { clearBoulderState, writeBoulderState } from "../../features/boulder-state"
+import {
+  clearBoulderState,
+  writeBoulderState,
+} from "../../features/boulder-state"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-final-wave-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `atlas-final-wave-storage-${randomUUID()}`,
+)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -29,7 +43,9 @@ mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => false,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createAtlasHook } = await import("./index")
 const { MESSAGE_STORAGE } = await import("../../features/hook-message-injector")
@@ -40,7 +56,9 @@ type PromptMock = ReturnType<typeof mock>
 describe("Atlas final verification approval gate", () => {
   let testDirectory = ""
 
-  function createMockPluginInput(): AtlasHookContext & { _promptMock: PromptMock } {
+  function createMockPluginInput(): AtlasHookContext & {
+    _promptMock: PromptMock
+  } {
     const client = createOpencodeClient({ baseUrl: "http://localhost" })
     const promptMock = mock((input: unknown) => input)
 
@@ -62,21 +80,26 @@ describe("Atlas final verification approval gate", () => {
       }
     })
 
-    Reflect.set(client.session, "get", async ({ path }: { path: { id: string } }) => {
-      const parentID = path.id === "ses_final_wave_review"
-        ? "atlas-final-wave-session"
-        : path.id === "ses_feature_task"
-          ? "atlas-non-final-session"
-          : "main-session-123"
-      return {
-        data: {
-          id: path.id,
-          parentID,
-        } as Session,
-        request: new Request(`http://localhost/session/${path.id}`),
-        response: new Response(),
-      }
-    })
+    Reflect.set(
+      client.session,
+      "get",
+      async ({ path }: { path: { id: string } }) => {
+        const parentID =
+          path.id === "ses_final_wave_review"
+            ? "atlas-final-wave-session"
+            : path.id === "ses_feature_task"
+              ? "atlas-non-final-session"
+              : "main-session-123"
+        return {
+          data: {
+            id: path.id,
+            parentID,
+          } as Session,
+          request: new Request(`http://localhost/session/${path.id}`),
+          response: new Response(),
+        }
+      },
+    )
 
     return {
       directory: testDirectory,
@@ -168,7 +191,9 @@ session_id: ses_final_wave_review
 
     // when
     await hook["tool.execute.after"]({ tool: "task", sessionID }, toolOutput)
-    await hook.handler({ event: { type: "session.idle", properties: { sessionID } } })
+    await hook.handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
 
     // then
     expect(toolOutput.output).toContain("FINAL WAVE APPROVAL GATE")

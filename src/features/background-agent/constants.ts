@@ -38,10 +38,10 @@ export interface BackgroundEvent {
 }
 
 export interface Todo {
-  content: string;
-  status: string;
-  priority: string;
-  id?: string;
+  content: string
+  status: string
+  priority: string
+  id?: string
 }
 
 export interface QueueItem {
@@ -55,4 +55,6 @@ export interface SubagentSessionCreatedEvent {
   title: string
 }
 
-export type OnSubagentSessionCreated = (event: SubagentSessionCreatedEvent) => Promise<void>
+export type OnSubagentSessionCreated = (
+  event: SubagentSessionCreatedEvent,
+) => Promise<void>

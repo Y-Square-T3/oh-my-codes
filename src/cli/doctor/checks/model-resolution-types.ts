@@ -27,7 +27,10 @@ export interface ModelResolutionInfo {
 }
 
 export interface OmoConfig {
-  agents?: Record<string, { model?: string; variant?: string; category?: string }>
+  agents?: Record<
+    string,
+    { model?: string; variant?: string; category?: string }
+  >
   categories?: Record<string, { model?: string; variant?: string }>
 }
 

@@ -37,7 +37,10 @@ export function formatSeverity(severity: number | undefined): string {
   return SEVERITY_MAP[severity] || `unknown(${severity})`
 }
 
-export function formatDocumentSymbol(symbol: DocumentSymbol, indent = 0): string {
+export function formatDocumentSymbol(
+  symbol: DocumentSymbol,
+  indent = 0,
+): string {
   const prefix = "  ".repeat(indent)
   const kind = formatSymbolKind(symbol.kind)
   const line = symbol.range.start.line + 1
@@ -70,7 +73,7 @@ export function formatDiagnostic(diag: Diagnostic): string {
 
 export function filterDiagnosticsBySeverity(
   diagnostics: Diagnostic[],
-  severityFilter?: "error" | "warning" | "information" | "hint" | "all"
+  severityFilter?: "error" | "warning" | "information" | "hint" | "all",
 ): Diagnostic[] {
   if (!severityFilter || severityFilter === "all") {
     return diagnostics
@@ -88,13 +91,15 @@ export function filterDiagnosticsBySeverity(
 }
 
 export function formatPrepareRenameResult(
-  result: PrepareRenameResult | PrepareRenameDefaultBehavior | Range | null
+  result: PrepareRenameResult | PrepareRenameDefaultBehavior | Range | null,
 ): string {
   if (!result) return "Cannot rename at this position"
 
   // Case 1: { defaultBehavior: boolean }
   if ("defaultBehavior" in result) {
-    return result.defaultBehavior ? "Rename supported (using default behavior)" : "Cannot rename at this position"
+    return result.defaultBehavior
+      ? "Rename supported (using default behavior)"
+      : "Cannot rename at this position"
   }
 
   // Case 2: { range: Range, placeholder?: string }
@@ -103,7 +108,9 @@ export function formatPrepareRenameResult(
     const startChar = result.range.start.character
     const endLine = result.range.end.line + 1
     const endChar = result.range.end.character
-    const placeholder = result.placeholder ? ` (current: "${result.placeholder}")` : ""
+    const placeholder = result.placeholder
+      ? ` (current: "${result.placeholder}")`
+      : ""
     return `Rename available at ${startLine}:${startChar}-${endLine}:${endChar}${placeholder}`
   }
 
@@ -126,7 +133,10 @@ export function formatTextEdit(edit: TextEdit): string {
   const endChar = edit.range.end.character
 
   const rangeStr = `${startLine}:${startChar}-${endLine}:${endChar}`
-  const preview = edit.newText.length > 50 ? edit.newText.substring(0, 50) + "..." : edit.newText
+  const preview =
+    edit.newText.length > 50
+      ? edit.newText.substring(0, 50) + "..."
+      : edit.newText
 
   return `  ${rangeStr}: "${preview}"`
 }
@@ -175,7 +185,9 @@ export function formatApplyResult(result: ApplyResult): string {
   const lines: string[] = []
 
   if (result.success) {
-    lines.push(`Applied ${result.totalEdits} edit(s) to ${result.filesModified.length} file(s):`)
+    lines.push(
+      `Applied ${result.totalEdits} edit(s) to ${result.filesModified.length} file(s):`,
+    )
     for (const file of result.filesModified) {
       lines.push(`  - ${file}`)
     }

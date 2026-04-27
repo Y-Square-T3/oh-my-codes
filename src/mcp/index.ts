@@ -13,7 +13,10 @@ type RemoteMcpConfig = {
   oauth?: false
 }
 
-export function createBuiltinMcps(disabledMcps: string[] = [], config?: OhMyCodesConfig) {
+export function createBuiltinMcps(
+  disabledMcps: string[] = [],
+  config?: OhMyCodesConfig,
+) {
   const mcps: Record<string, RemoteMcpConfig> = {}
 
   if (!disabledMcps.includes("websearch")) {

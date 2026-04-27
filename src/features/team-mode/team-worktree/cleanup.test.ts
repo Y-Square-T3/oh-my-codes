@@ -17,11 +17,18 @@ afterAll(async () => {
 
 test("given runtime mismatch when findOrphanWorktrees then returns orphan paths", async () => {
   // given
-  const baseDir = await fs.mkdtemp(path.join(os.tmpdir(), "team-worktree-orphans-"))
+  const baseDir = await fs.mkdtemp(
+    path.join(os.tmpdir(), "team-worktree-orphans-"),
+  )
   temporaryDirectories.push(baseDir)
-  await fs.mkdir(path.join(baseDir, "worktrees", "t1", "m1"), { recursive: true })
+  await fs.mkdir(path.join(baseDir, "worktrees", "t1", "m1"), {
+    recursive: true,
+  })
   await fs.mkdir(path.join(baseDir, "runtime", "t1"), { recursive: true })
-  await fs.writeFile(path.join(baseDir, "runtime", "t1", "state.json"), JSON.stringify({ status: "deleted" }))
+  await fs.writeFile(
+    path.join(baseDir, "runtime", "t1", "state.json"),
+    JSON.stringify({ status: "deleted" }),
+  )
 
   // when
   const result = await findOrphanWorktrees(baseDir, {})

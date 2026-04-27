@@ -10,9 +10,14 @@ import { normalizeSDKResponse } from "../../../shared"
 
 type OpencodeClient = PluginInput["client"]
 
-export function replaceEmptyTextParts(messageID: string, replacementText: string): boolean {
+export function replaceEmptyTextParts(
+  messageID: string,
+  replacementText: string,
+): boolean {
   if (isSqliteBackend()) {
-    log("[session-recovery] Disabled on SQLite backend: replaceEmptyTextParts (use async variant)")
+    log(
+      "[session-recovery] Disabled on SQLite backend: replaceEmptyTextParts (use async variant)",
+    )
     return false
   }
 
@@ -48,11 +53,13 @@ export async function replaceEmptyTextPartsAsync(
   client: OpencodeClient,
   sessionID: string,
   messageID: string,
-  replacementText: string
+  replacementText: string,
 ): Promise<boolean> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
 
     const targetMsg = messages.find((m) => m.info?.id === messageID)
     if (!targetMsg?.parts) return false
@@ -71,7 +78,9 @@ export async function replaceEmptyTextPartsAsync(
 
     return anyReplaced
   } catch (error) {
-    log("[session-recovery] replaceEmptyTextPartsAsync failed", { error: String(error) })
+    log("[session-recovery] replaceEmptyTextPartsAsync failed", {
+      error: String(error),
+    })
     return false
   }
 }
@@ -98,16 +107,20 @@ export function findMessagesWithEmptyTextParts(sessionID: string): string[] {
 
 export async function findMessagesWithEmptyTextPartsFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<string[]> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as MessageData[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as MessageData[], {
+      preferResponseOnMissingData: true,
+    })
     const result: string[] = []
 
     for (const msg of messages) {
       if (!msg.parts || !msg.info?.id) continue
-      const hasEmpty = msg.parts.some((p) => p.type === "text" && !p.text?.trim())
+      const hasEmpty = msg.parts.some(
+        (p) => p.type === "text" && !p.text?.trim(),
+      )
       if (hasEmpty) result.push(msg.info.id)
     }
 

@@ -4,7 +4,11 @@ import { join } from "path"
 import { BUILTIN_SERVERS } from "./constants"
 import type { ResolvedServer } from "./types"
 import { getOpenCodeConfigDir } from "../../shared"
-import { parseJsonc, detectConfigFile, detectPluginConfigFile } from "../../shared/jsonc-parser"
+import {
+  parseJsonc,
+  detectConfigFile,
+  detectPluginConfigFile,
+} from "../../shared/jsonc-parser"
 
 interface LspEntry {
   disabled?: boolean
@@ -34,7 +38,11 @@ export function loadJsonFile<T>(path: string): T | null {
   }
 }
 
-export function getConfigPaths(): { project: string; user: string; opencode: string } {
+export function getConfigPaths(): {
+  project: string
+  user: string
+  opencode: string
+} {
   const cwd = process.cwd()
   const configDir = getOpenCodeConfigDir({ binary: "opencode" })
   return {
@@ -108,7 +116,11 @@ export function getMergedServers(): ServerWithSource[] {
 
   return servers.sort((a, b) => {
     if (a.source !== b.source) {
-      const order: Record<ConfigSource, number> = { project: 0, user: 1, opencode: 2 }
+      const order: Record<ConfigSource, number> = {
+        project: 0,
+        user: 1,
+        opencode: 2,
+      }
       return order[a.source] - order[b.source]
     }
     return b.priority - a.priority

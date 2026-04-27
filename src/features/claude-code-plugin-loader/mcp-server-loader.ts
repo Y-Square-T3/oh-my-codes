@@ -28,16 +28,21 @@ export async function loadPluginMcpServers(
 
       for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
         if (!shouldLoadMcpServer(serverConfig, cwd)) {
-          log(`Skipping local plugin MCP server "${name}" outside current cwd`, {
-            path: plugin.mcpPath,
-            projectPath: serverConfig.projectPath,
-            cwd,
-          })
+          log(
+            `Skipping local plugin MCP server "${name}" outside current cwd`,
+            {
+              path: plugin.mcpPath,
+              projectPath: serverConfig.projectPath,
+              cwd,
+            },
+          )
           continue
         }
 
         if (serverConfig.disabled) {
-          log(`Skipping disabled MCP server "${name}" from plugin ${plugin.name}`)
+          log(
+            `Skipping disabled MCP server "${name}" from plugin ${plugin.name}`,
+          )
           continue
         }
 
@@ -45,7 +50,9 @@ export async function loadPluginMcpServers(
           const transformed = transformMcpServer(name, serverConfig)
           const namespacedName = `${plugin.name}:${name}`
           servers[namespacedName] = transformed
-          log(`Loaded plugin MCP server: ${namespacedName}`, { path: plugin.mcpPath })
+          log(`Loaded plugin MCP server: ${namespacedName}`, {
+            path: plugin.mcpPath,
+          })
         } catch (error) {
           log(`Failed to transform plugin MCP server "${name}"`, error)
         }

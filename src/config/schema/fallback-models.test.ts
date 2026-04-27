@@ -67,7 +67,9 @@ describe("OhMyCodesConfigSchema fallback_models", () => {
     // then
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.agents?.explore?.fallback_models).toEqual(config.agents.explore.fallback_models)
+      expect(result.data.agents?.explore?.fallback_models).toEqual(
+        config.agents.explore.fallback_models,
+      )
     }
   })
 
@@ -94,7 +96,9 @@ describe("OhMyCodesConfigSchema fallback_models", () => {
     // then
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.categories?.deep?.fallback_models).toEqual(config.categories.deep.fallback_models)
+      expect(result.data.categories?.deep?.fallback_models).toEqual(
+        config.categories.deep.fallback_models,
+      )
     }
   })
 })

@@ -21,7 +21,10 @@ export function handleNonIdleEvent(args: {
       if (state?.countdownStartedAt) {
         const elapsed = Date.now() - state.countdownStartedAt
         if (elapsed < COUNTDOWN_GRACE_PERIOD_MS) {
-          log(`[${HOOK_NAME}] Ignoring user message in grace period`, { sessionID, elapsed })
+          log(`[${HOOK_NAME}] Ignoring user message in grace period`, {
+            sessionID,
+            elapsed,
+          })
           return
         }
       }
@@ -50,9 +53,10 @@ export function handleNonIdleEvent(args: {
   }
 
   if (eventType === "message.part.updated") {
-    const sessionID = typeof properties?.sessionID === "string"
-      ? properties.sessionID
-      : undefined
+    const sessionID =
+      typeof properties?.sessionID === "string"
+        ? properties.sessionID
+        : undefined
     const legacyInfo = properties?.info as Record<string, unknown> | undefined
     const legacySessionID = legacyInfo?.sessionID as string | undefined
     const targetSessionID = sessionID ?? legacySessionID
@@ -82,7 +86,10 @@ export function handleNonIdleEvent(args: {
     return
   }
 
-  if (eventType === "tool.execute.before" || eventType === "tool.execute.after") {
+  if (
+    eventType === "tool.execute.before" ||
+    eventType === "tool.execute.after"
+  ) {
     const sessionID = properties?.sessionID as string | undefined
     if (sessionID) {
       const state = sessionStateStore.getExistingState(sessionID)
@@ -100,7 +107,9 @@ export function handleNonIdleEvent(args: {
     const sessionInfo = properties?.info as { id?: string } | undefined
     if (sessionInfo?.id) {
       sessionStateStore.cleanup(sessionInfo.id)
-      log(`[${HOOK_NAME}] Session deleted: cleaned up`, { sessionID: sessionInfo.id })
+      log(`[${HOOK_NAME}] Session deleted: cleaned up`, {
+        sessionID: sessionInfo.id,
+      })
     }
     return
   }

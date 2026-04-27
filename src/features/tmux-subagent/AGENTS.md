@@ -18,16 +18,16 @@ TmuxSessionManager (manager.ts)
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `manager.ts` | `TmuxSessionManager` — main class, session tracking, event routing |
-| `decision-engine.ts` | Evaluate window state → produce `SpawnDecision` with actions |
-| `action-executor.ts` | Execute `PaneAction[]` (close, spawn, replace) |
-| `grid-planning.ts` | Calculate pane layout given window dimensions |
-| `spawn-action-decider.ts` | Decide spawn vs replace vs skip |
-| `spawn-target-finder.ts` | Find best pane to split or replace |
-| `polling-manager.ts` | Health polling for tracked sessions |
-| `types.ts` | `TrackedSession`, `WindowState`, `PaneAction`, `SpawnDecision` |
+| File                      | Purpose                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `manager.ts`              | `TmuxSessionManager` — main class, session tracking, event routing |
+| `decision-engine.ts`      | Evaluate window state → produce `SpawnDecision` with actions       |
+| `action-executor.ts`      | Execute `PaneAction[]` (close, spawn, replace)                     |
+| `grid-planning.ts`        | Calculate pane layout given window dimensions                      |
+| `spawn-action-decider.ts` | Decide spawn vs replace vs skip                                    |
+| `spawn-target-finder.ts`  | Find best pane to split or replace                                 |
+| `polling-manager.ts`      | Health polling for tracked sessions                                |
+| `types.ts`                | `TrackedSession`, `WindowState`, `PaneAction`, `SpawnDecision`     |
 
 ## PANE LIFECYCLE
 
@@ -45,8 +45,8 @@ session.deleted → cleanup tracked session → close pane if empty
 
 ## EVENT HANDLERS
 
-| File | Event |
-|------|-------|
+| File                         | Event                               |
+| ---------------------------- | ----------------------------------- |
 | `session-created-handler.ts` | New background session → spawn pane |
-| `session-deleted-handler.ts` | Session ended → close pane |
-| `session-created-event.ts` | Event type definition |
+| `session-deleted-handler.ts` | Session ended → close pane          |
+| `session-created-event.ts`   | Event type definition               |

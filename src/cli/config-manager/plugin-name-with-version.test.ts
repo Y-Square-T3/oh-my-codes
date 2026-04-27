@@ -16,8 +16,9 @@ describe("getPluginNameWithVersion", () => {
     globalThis.fetch = mock(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ latest: "3.13.1", beta: "3.14.0-beta.1" }),
-      } as Response)
+        json: () =>
+          Promise.resolve({ latest: "3.13.1", beta: "3.14.0-beta.1" }),
+      } as Response),
     ) as unknown as typeof fetch
 
     //#when
@@ -29,7 +30,9 @@ describe("getPluginNameWithVersion", () => {
 
   test("preserves the canonical prerelease channel when fetch fails", async () => {
     //#given
-    globalThis.fetch = mock(() => Promise.reject(new Error("Network error"))) as unknown as typeof fetch
+    globalThis.fetch = mock(() =>
+      Promise.reject(new Error("Network error")),
+    ) as unknown as typeof fetch
 
     //#when
     const result = await getPluginNameWithVersion("3.14.0-beta.1")
@@ -44,7 +47,7 @@ describe("getPluginNameWithVersion", () => {
       Promise.resolve({
         ok: false,
         status: 404,
-      } as Response)
+      } as Response),
     ) as unknown as typeof fetch
 
     //#when

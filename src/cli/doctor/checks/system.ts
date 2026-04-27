@@ -2,11 +2,23 @@ import { existsSync, readFileSync } from "node:fs"
 
 import { MIN_OPENCODE_VERSION, CHECK_IDS, CHECK_NAMES } from "../constants"
 import type { CheckResult, DoctorIssue, SystemInfo } from "../types"
-import { findOpenCodeBinary, getOpenCodeVersion, compareVersions } from "./system-binary"
+import {
+  findOpenCodeBinary,
+  getOpenCodeVersion,
+  compareVersions,
+} from "./system-binary"
 import { getPluginInfo } from "./system-plugin"
-import { getLatestPluginVersion, getLoadedPluginVersion, getSuggestedInstallTag } from "./system-loaded-version"
+import {
+  getLatestPluginVersion,
+  getLoadedPluginVersion,
+  getSuggestedInstallTag,
+} from "./system-loaded-version"
 import { parseJsonc } from "../../../shared"
-import { PUBLISHED_PACKAGE_NAME, PLUGIN_NAME, LEGACY_PLUGIN_NAME } from "../../../shared/plugin-identity"
+import {
+  PUBLISHED_PACKAGE_NAME,
+  PLUGIN_NAME,
+  LEGACY_PLUGIN_NAME,
+} from "../../../shared/plugin-identity"
 
 interface SystemCheckDeps {
   findOpenCodeBinary: typeof findOpenCodeBinary
@@ -46,21 +58,31 @@ function getResultStatus(issues: DoctorIssue[]): CheckResult["status"] {
   return "pass"
 }
 
-function buildMessage(status: CheckResult["status"], issues: DoctorIssue[]): string {
+function buildMessage(
+  status: CheckResult["status"],
+  issues: DoctorIssue[],
+): string {
   if (status === "pass") return "System checks passed"
   if (status === "fail") return `${issues.length} system issue(s) detected`
   return `${issues.length} system warning(s) detected`
 }
 
-export async function gatherSystemInfo(deps: SystemCheckDeps = defaultDeps): Promise<SystemInfo> {
+export async function gatherSystemInfo(
+  deps: SystemCheckDeps = defaultDeps,
+): Promise<SystemInfo> {
   const [binaryInfo, pluginInfo] = await Promise.all([
     deps.findOpenCodeBinary(),
     Promise.resolve(deps.getPluginInfo()),
   ])
   const loadedInfo = deps.getLoadedPluginVersion()
 
-  const opencodeVersion = binaryInfo ? await deps.getOpenCodeVersion(binaryInfo.path) : null
-  const pluginVersion = pluginInfo.pinnedVersion ?? loadedInfo.expectedVersion ?? loadedInfo.loadedVersion
+  const opencodeVersion = binaryInfo
+    ? await deps.getOpenCodeVersion(binaryInfo.path)
+    : null
+  const pluginVersion =
+    pluginInfo.pinnedVersion ??
+    loadedInfo.expectedVersion ??
+    loadedInfo.loadedVersion
 
   return {
     opencodeVersion,
@@ -74,20 +96,25 @@ export async function gatherSystemInfo(deps: SystemCheckDeps = defaultDeps): Pro
   }
 }
 
-export async function checkSystem(deps: SystemCheckDeps = defaultDeps): Promise<CheckResult> {
+export async function checkSystem(
+  deps: SystemCheckDeps = defaultDeps,
+): Promise<CheckResult> {
   const [systemInfo, pluginInfo] = await Promise.all([
     gatherSystemInfo(deps),
     Promise.resolve(deps.getPluginInfo()),
   ])
   const loadedInfo = deps.getLoadedPluginVersion()
-  const latestVersion = await deps.getLatestPluginVersion(systemInfo.loadedVersion)
+  const latestVersion = await deps.getLatestPluginVersion(
+    systemInfo.loadedVersion,
+  )
   const installTag = deps.getSuggestedInstallTag(systemInfo.loadedVersion)
   const issues: DoctorIssue[] = []
 
   if (!systemInfo.opencodePath) {
     issues.push({
       title: "OpenCode binary not found",
-      description: "Install OpenCode CLI or desktop and ensure the binary is available.",
+      description:
+        "Install OpenCode CLI or desktop and ensure the binary is available.",
       fix: "Install from https://opencode.ai/docs",
       severity: "error",
       affects: ["doctor", "run"],
@@ -118,11 +145,15 @@ export async function checkSystem(deps: SystemCheckDeps = defaultDeps): Promise<
   }
 
   if (pluginInfo.entry && !pluginInfo.isLocalDev) {
-    const isLegacyName = pluginInfo.entry === LEGACY_PLUGIN_NAME
-      || pluginInfo.entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+    const isLegacyName =
+      pluginInfo.entry === LEGACY_PLUGIN_NAME ||
+      pluginInfo.entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
 
     if (isLegacyName) {
-      const suggestedEntry = pluginInfo.entry.replace(LEGACY_PLUGIN_NAME, PLUGIN_NAME)
+      const suggestedEntry = pluginInfo.entry.replace(
+        LEGACY_PLUGIN_NAME,
+        PLUGIN_NAME,
+      )
       issues.push({
         title: "Using legacy package name",
         description: `Your opencode.json references "${LEGACY_PLUGIN_NAME}" which has been renamed to "${PLUGIN_NAME}". The old name may stop working in a future release.`,
@@ -133,7 +164,11 @@ export async function checkSystem(deps: SystemCheckDeps = defaultDeps): Promise<
     }
   }
 
-  if (loadedInfo.expectedVersion && loadedInfo.loadedVersion && loadedInfo.expectedVersion !== loadedInfo.loadedVersion) {
+  if (
+    loadedInfo.expectedVersion &&
+    loadedInfo.loadedVersion &&
+    loadedInfo.expectedVersion !== loadedInfo.loadedVersion
+  ) {
     issues.push({
       title: "Loaded plugin version mismatch",
       description: `Cache expects ${loadedInfo.expectedVersion} but loaded ${loadedInfo.loadedVersion}.`,
@@ -151,7 +186,7 @@ export async function checkSystem(deps: SystemCheckDeps = defaultDeps): Promise<
     issues.push({
       title: "Loaded plugin is outdated",
       description: `Loaded ${systemInfo.loadedVersion}, latest ${latestVersion}.`,
-        fix: `Update: cd "${loadedInfo.cacheDir}" && bun add ${PUBLISHED_PACKAGE_NAME}@${installTag}`,
+      fix: `Update: cd "${loadedInfo.cacheDir}" && bun add ${PUBLISHED_PACKAGE_NAME}@${installTag}`,
       severity: "warning",
       affects: ["plugin features"],
     })
@@ -163,7 +198,9 @@ export async function checkSystem(deps: SystemCheckDeps = defaultDeps): Promise<
     status,
     message: buildMessage(status, issues),
     details: [
-      systemInfo.opencodeVersion ? `OpenCode: ${systemInfo.opencodeVersion}` : "OpenCode: not detected",
+      systemInfo.opencodeVersion
+        ? `OpenCode: ${systemInfo.opencodeVersion}`
+        : "OpenCode: not detected",
       `Plugin expected: ${systemInfo.pluginVersion ?? "unknown"}`,
       `Plugin loaded: ${systemInfo.loadedVersion ?? "unknown"}`,
       `Bun: ${systemInfo.bunVersion ?? "unknown"}`,

@@ -1,4 +1,8 @@
-import type { DelegateTaskArgs, OpencodeClient, DelegatedModelConfig } from "./types"
+import type {
+  DelegateTaskArgs,
+  OpencodeClient,
+  DelegatedModelConfig,
+} from "./types"
 import type { SisyphusAgentConfig } from "../../config/schema"
 import { isPlanFamily } from "./constants"
 import { buildTaskPrompt } from "./prompt-builder"
@@ -23,21 +27,31 @@ const sendSyncPromptDeps: SendSyncPromptDeps = {
   promptSyncWithModelSuggestionRetry,
 }
 
-function buildPromptGenerationParams(model: DelegatedModelConfig | undefined): Record<string, unknown> {
+function buildPromptGenerationParams(
+  model: DelegatedModelConfig | undefined,
+): Record<string, unknown> {
   if (!model) {
     return {}
   }
 
   const promptOptions: Record<string, unknown> = {
-    ...(model.reasoningEffort ? { reasoningEffort: model.reasoningEffort } : {}),
+    ...(model.reasoningEffort
+      ? { reasoningEffort: model.reasoningEffort }
+      : {}),
     ...(model.thinking ? { thinking: model.thinking } : {}),
   }
 
   return {
-    ...(model.temperature !== undefined ? { temperature: model.temperature } : {}),
+    ...(model.temperature !== undefined
+      ? { temperature: model.temperature }
+      : {}),
     ...(model.top_p !== undefined ? { topP: model.top_p } : {}),
-    ...(model.maxTokens !== undefined ? { maxOutputTokens: model.maxTokens } : {}),
-    ...(Object.keys(promptOptions).length > 0 ? { options: promptOptions } : {}),
+    ...(model.maxTokens !== undefined
+      ? { maxOutputTokens: model.maxTokens }
+      : {}),
+    ...(Object.keys(promptOptions).length > 0
+      ? { options: promptOptions }
+      : {}),
   }
 }
 
@@ -48,7 +62,9 @@ function isOracleAgent(agentToUse: string): boolean {
 function isUnexpectedEofError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
   const lowered = message.toLowerCase()
-  return lowered.includes("unexpected eof") || lowered.includes("json parse error")
+  return (
+    lowered.includes("unexpected eof") || lowered.includes("json parse error")
+  )
 }
 
 export async function sendSyncPrompt(
@@ -63,11 +79,15 @@ export async function sendSyncPrompt(
     taskId: string | undefined
     sisyphusAgentConfig?: SisyphusAgentConfig
   },
-  deps: SendSyncPromptDeps = sendSyncPromptDeps
+  deps: SendSyncPromptDeps = sendSyncPromptDeps,
 ): Promise<string | null> {
   const allowTask = isPlanFamily(input.agentToUse)
   const tddEnabled = input.sisyphusAgentConfig?.tdd
-  const effectivePrompt = buildTaskPrompt(input.args.prompt, input.agentToUse, tddEnabled)
+  const effectivePrompt = buildTaskPrompt(
+    input.args.prompt,
+    input.agentToUse,
+    tddEnabled,
+  )
   const tools = {
     task: allowTask,
     call_omo_agent: true,
@@ -93,7 +113,9 @@ export async function sendSyncPrompt(
             },
           }
         : {}),
-      ...(input.categoryModel?.variant ? { variant: input.categoryModel.variant } : {}),
+      ...(input.categoryModel?.variant
+        ? { variant: input.categoryModel.variant }
+        : {}),
       ...buildPromptGenerationParams(input.categoryModel),
     },
   }
@@ -113,15 +135,24 @@ export async function sendSyncPrompt(
     if (input.toastManager && input.taskId !== undefined) {
       input.toastManager.removeTask(input.taskId)
     }
-    const errorMessage = promptError instanceof Error ? promptError.message : String(promptError)
-    if (errorMessage.includes("agent.name") || errorMessage.includes("undefined")) {
-      return formatDetailedError(new Error(`Agent "${input.agentToUse}" not found. Make sure the agent is registered in your opencode.json or provided by a plugin.`), {
-        operation: "Send prompt to agent",
-        args: input.args,
-        sessionID: input.sessionID,
-        agent: input.agentToUse,
-        category: input.args.category,
-      })
+    const errorMessage =
+      promptError instanceof Error ? promptError.message : String(promptError)
+    if (
+      errorMessage.includes("agent.name") ||
+      errorMessage.includes("undefined")
+    ) {
+      return formatDetailedError(
+        new Error(
+          `Agent "${input.agentToUse}" not found. Make sure the agent is registered in your opencode.json or provided by a plugin.`,
+        ),
+        {
+          operation: "Send prompt to agent",
+          args: input.args,
+          sessionID: input.sessionID,
+          agent: input.agentToUse,
+          category: input.args.category,
+        },
+      )
     }
     return formatDetailedError(promptError, {
       operation: "Send prompt",

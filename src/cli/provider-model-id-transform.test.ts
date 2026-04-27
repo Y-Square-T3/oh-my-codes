@@ -269,7 +269,10 @@ describe("transformModelForProvider", () => {
     test("delegates to sub-provider when model already has sub-provider prefix", () => {
       // #given vercel provider and anthropic/claude-opus-4-7 (already prefixed)
       // #when transformModelForProvider is called
-      const result = transformModelForProvider("vercel", "anthropic/claude-opus-4-7")
+      const result = transformModelForProvider(
+        "vercel",
+        "anthropic/claude-opus-4-7",
+      )
 
       // #then should apply anthropic transform within the prefix
       expect(result).toBe("anthropic/claude-opus-4.7")
@@ -341,7 +344,10 @@ describe("transformModelForProvider", () => {
   test("uses a CLI-local transform implementation distinct from the shared runtime transform", () => {
     // #given the CLI transform (used by the installer) and the shared runtime transform
     const cliResult = transformModelForProvider("anthropic", "claude-opus-4-7")
-    const sharedResult = transformSharedModelForProvider("anthropic", "claude-opus-4-7")
+    const sharedResult = transformSharedModelForProvider(
+      "anthropic",
+      "claude-opus-4-7",
+    )
 
     // #when both are called with the same anthropic claude input
     // #then the CLI preserves hyphenated form for config output,

@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+} from "bun:test"
 import type { HookDeps, RuntimeFallbackPluginInput } from "./types"
 
 let capturedDeps: HookDeps | undefined
@@ -63,7 +71,8 @@ describe("createRuntimeFallbackHook dispose", () => {
   const originalClearInterval = globalThis.clearInterval
   const originalClearTimeout = globalThis.clearTimeout
   const createdIntervals: Array<ReturnType<typeof originalSetInterval>> = []
-  const clearedIntervals: Array<Parameters<typeof originalClearInterval>[0]> = []
+  const clearedIntervals: Array<Parameters<typeof originalClearInterval>[0]> =
+    []
   const clearedTimeouts: Array<Parameters<typeof originalClearTimeout>[0]> = []
   const timeoutMapSizesDuringClear: number[] = []
 
@@ -85,13 +94,19 @@ describe("createRuntimeFallbackHook dispose", () => {
       return interval
     }) as typeof globalThis.setInterval
 
-    const wrappedClearInterval = ((interval?: Parameters<typeof clearInterval>[0]) => {
+    const wrappedClearInterval = ((
+      interval?: Parameters<typeof clearInterval>[0],
+    ) => {
       clearedIntervals.push(interval)
       return originalClearInterval(interval)
     }) as typeof globalThis.clearInterval
 
-    const wrappedClearTimeout = ((timeout?: Parameters<typeof clearTimeout>[0]) => {
-      timeoutMapSizesDuringClear.push(capturedDeps?.sessionFallbackTimeouts.size ?? -1)
+    const wrappedClearTimeout = ((
+      timeout?: Parameters<typeof clearTimeout>[0],
+    ) => {
+      timeoutMapSizesDuringClear.push(
+        capturedDeps?.sessionFallbackTimeouts.size ?? -1,
+      )
       clearedTimeouts.push(timeout)
       return originalClearTimeout(timeout)
     }) as typeof globalThis.clearTimeout
@@ -109,7 +124,9 @@ describe("createRuntimeFallbackHook dispose", () => {
 
   test("#given runtime-fallback hook handles its first event #when dispose() is called #then cleanup interval is cleared", async () => {
     // given
-    const hook = createRuntimeFallbackHook(createMockContext(), { pluginConfig: {} })
+    const hook = createRuntimeFallbackHook(createMockContext(), {
+      pluginConfig: {},
+    })
     await hook.event({ event: { type: "session.created", properties: {} } })
 
     // when
@@ -122,7 +139,9 @@ describe("createRuntimeFallbackHook dispose", () => {
 
   test("#given hook with session state data #when dispose() is called #then all Maps and Sets are empty", () => {
     // given
-    const hook = createRuntimeFallbackHook(createMockContext(), { pluginConfig: {} })
+    const hook = createRuntimeFallbackHook(createMockContext(), {
+      pluginConfig: {},
+    })
     const fallbackTimeout = setTimeout(() => {}, 60_000)
 
     capturedDeps?.sessionStates.set("session-1", {
@@ -150,7 +169,9 @@ describe("createRuntimeFallbackHook dispose", () => {
 
   test("#given hook with pending fallback timeouts #when dispose() is called #then timeouts are cleared before Map is emptied", () => {
     // given
-    const hook = createRuntimeFallbackHook(createMockContext(), { pluginConfig: {} })
+    const hook = createRuntimeFallbackHook(createMockContext(), {
+      pluginConfig: {},
+    })
     const fallbackTimeout = setTimeout(() => {}, 60_000)
     capturedDeps?.sessionFallbackTimeouts.set("session-1", fallbackTimeout)
 

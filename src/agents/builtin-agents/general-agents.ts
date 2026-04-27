@@ -1,5 +1,9 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
-import type { BuiltinAgentName, AgentOverrides, AgentPromptMetadata } from "../types"
+import type {
+  BuiltinAgentName,
+  AgentOverrides,
+  AgentPromptMetadata,
+} from "../types"
 import type { CategoryConfig, GitMasterConfig } from "../../config/schema"
 import type { BrowserAutomationProvider } from "../../config/schema"
 import type { AvailableAgent } from "../dynamic-agent-prompt-builder"
@@ -26,7 +30,10 @@ export function collectPendingBuiltinAgents(input: {
   disabledSkills?: Set<string>
   useTaskSystem?: boolean
   disableOmoEnv?: boolean
-}): { pendingAgentConfigs: Map<string, AgentConfig>; availableAgents: AvailableAgent[] } {
+}): {
+  pendingAgentConfigs: Map<string, AgentConfig>
+  availableAgents: AvailableAgent[]
+} {
   const {
     agentSources,
     agentMetadata,
@@ -54,10 +61,18 @@ export function collectPendingBuiltinAgents(input: {
     if (agentName === "hephaestus") continue
     if (agentName === "atlas") continue
     if (agentName === "sisyphus-junior") continue
-    if (disabledAgents.some((name) => name.toLowerCase() === agentName.toLowerCase())) continue
+    if (
+      disabledAgents.some(
+        (name) => name.toLowerCase() === agentName.toLowerCase(),
+      )
+    )
+      continue
 
-    const override = agentOverrides[agentName]
-      ?? Object.entries(agentOverrides).find(([key]) => key.toLowerCase() === agentName.toLowerCase())?.[1]
+    const override =
+      agentOverrides[agentName] ??
+      Object.entries(agentOverrides).find(
+        ([key]) => key.toLowerCase() === agentName.toLowerCase(),
+      )?.[1]
     const requirement = AGENT_MODEL_REQUIREMENTS[agentName]
 
     // Check if agent requires a specific model
@@ -70,7 +85,10 @@ export function collectPendingBuiltinAgents(input: {
     const isPrimaryAgent = isFactory(source) && source.mode === "primary"
 
     let resolution = applyModelResolution({
-      uiSelectedModel: (isPrimaryAgent && override?.model === undefined) ? uiSelectedModel : undefined,
+      uiSelectedModel:
+        isPrimaryAgent && override?.model === undefined
+          ? uiSelectedModel
+          : undefined,
       userModel: override?.model,
       requirement,
       availableModels,
@@ -80,10 +98,13 @@ export function collectPendingBuiltinAgents(input: {
       if (override?.model) {
         // User explicitly configured a model but resolution failed (e.g., cold cache).
         // Honor the user's choice directly instead of falling back to hardcoded chain.
-        log("[agent-registration] User-configured model not resolved, using as-is", {
-          agent: agentName,
-          configuredModel: override.model,
-        })
+        log(
+          "[agent-registration] User-configured model not resolved, using as-is",
+          {
+            agent: agentName,
+            configuredModel: override.model,
+          },
+        )
         resolution = { model: override.model, provenance: "override" as const }
       } else {
         resolution = getFirstFallbackModel(requirement)
@@ -92,7 +113,14 @@ export function collectPendingBuiltinAgents(input: {
     if (!resolution) continue
     const { model, variant: resolvedVariant } = resolution
 
-    let config = buildAgent(source, model, mergedCategories, gitMasterConfig, browserProvider, disabledSkills)
+    let config = buildAgent(
+      source,
+      model,
+      mergedCategories,
+      gitMasterConfig,
+      browserProvider,
+      disabledSkills,
+    )
 
     // Apply resolved variant from model fallback chain
     if (resolvedVariant) {

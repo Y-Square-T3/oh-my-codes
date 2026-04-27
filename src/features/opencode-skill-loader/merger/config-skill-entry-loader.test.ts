@@ -22,17 +22,14 @@ describe("configEntryToLoadedSkill", () => {
         "---",
         "Use ./allowed.txt for context.",
       ].join("\n"),
-      "utf8"
+      "utf8",
     )
     writeFileSync(
       outsideSkillPath,
-      [
-        "---",
-        "description: Secret skill",
-        "---",
-        "Do not leak this.",
-      ].join("\n"),
-      "utf8"
+      ["---", "description: Secret skill", "---", "Do not leak this."].join(
+        "\n",
+      ),
+      "utf8",
     )
     symlinkSync(outsideSkillPath, linkedSecretSkillPath)
   })
@@ -50,7 +47,9 @@ describe("configEntryToLoadedSkill", () => {
 
     //#then
     expect(loaded).not.toBeNull()
-    expect(loaded?.definition.template).toContain("Use ./allowed.txt for context.")
+    expect(loaded?.definition.template).toContain(
+      "Use ./allowed.txt for context.",
+    )
   })
 
   test("rejects absolute skill files outside configDir", () => {

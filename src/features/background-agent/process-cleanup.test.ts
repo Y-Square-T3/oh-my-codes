@@ -1,6 +1,14 @@
 /// <reference types="bun-types" />
 
-import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from "bun:test"
 
 import {
   _resetForTesting,
@@ -43,10 +51,18 @@ describe("#given process cleanup registration", () => {
 
       registerManagerForCleanup(manager)
 
-      expect(process.listeners("SIGINT")).toHaveLength(sigintListenersBefore.length + 1)
-      expect(process.listeners("SIGTERM")).toHaveLength(sigtermListenersBefore.length + 1)
-      expect(process.listeners("beforeExit")).toHaveLength(beforeExitListenersBefore.length + 1)
-      expect(process.listeners("exit")).toHaveLength(exitListenersBefore.length + 1)
+      expect(process.listeners("SIGINT")).toHaveLength(
+        sigintListenersBefore.length + 1,
+      )
+      expect(process.listeners("SIGTERM")).toHaveLength(
+        sigtermListenersBefore.length + 1,
+      )
+      expect(process.listeners("beforeExit")).toHaveLength(
+        beforeExitListenersBefore.length + 1,
+      )
+      expect(process.listeners("exit")).toHaveLength(
+        exitListenersBefore.length + 1,
+      )
 
       if (process.platform === "win32") {
         expect(process.listeners("SIGBREAK").length).toBeGreaterThan(0)
@@ -127,17 +143,22 @@ describe("#given process cleanup registration", () => {
       registeredManagers.push(managerOne, managerTwo)
 
       registerManagerForCleanup(managerOne)
-      const sigintListenersAfterFirstRegistration = process.listeners("SIGINT").length
+      const sigintListenersAfterFirstRegistration =
+        process.listeners("SIGINT").length
 
       registerManagerForCleanup(managerTwo)
 
-      expect(process.listeners("SIGINT")).toHaveLength(sigintListenersAfterFirstRegistration)
+      expect(process.listeners("SIGINT")).toHaveLength(
+        sigintListenersAfterFirstRegistration,
+      )
     })
 
     test("#given two managers registered #when uncaughtException fires #then both shutdowns called", async () => {
-      const exitSpy = spyOn(process, "exit").mockImplementation((code?: number): never => {
-        throw new Error(`Unexpected process.exit(${String(code)})`)
-      })
+      const exitSpy = spyOn(process, "exit").mockImplementation(
+        (code?: number): never => {
+          throw new Error(`Unexpected process.exit(${String(code)})`)
+        },
+      )
       const shutdownOne = mock(() => {})
       const shutdownTwo = mock(() => {})
       const managerOne = { shutdown: shutdownOne }
@@ -174,9 +195,15 @@ describe("#given process cleanup registration", () => {
       unregisterManagerForCleanup(manager)
       registeredManagers.length = 0
 
-      expect(process.listeners("SIGINT")).toHaveLength(sigintListenersBefore.length)
-      expect(process.listeners("SIGTERM")).toHaveLength(sigtermListenersBefore.length)
-      expect(process.listeners("beforeExit")).toHaveLength(beforeExitListenersBefore.length)
+      expect(process.listeners("SIGINT")).toHaveLength(
+        sigintListenersBefore.length,
+      )
+      expect(process.listeners("SIGTERM")).toHaveLength(
+        sigtermListenersBefore.length,
+      )
+      expect(process.listeners("beforeExit")).toHaveLength(
+        beforeExitListenersBefore.length,
+      )
       expect(process.listeners("exit")).toHaveLength(exitListenersBefore.length)
     })
 
@@ -200,7 +227,8 @@ describe("#given process cleanup registration", () => {
     })
 
     test("#given uncaughtException handler registered #when manager is unregistered via unregisterManagerForCleanup #then subsequent events do not invoke that manager", () => {
-      const uncaughtExceptionListenersBefore = process.listeners("uncaughtException")
+      const uncaughtExceptionListenersBefore =
+        process.listeners("uncaughtException")
       const shutdown = mock(() => {})
       const manager = { shutdown }
       registeredManagers.push(manager)
@@ -220,9 +248,11 @@ describe("#given process cleanup registration", () => {
 
   describe("#given uncaught exception and rejection cleanup", () => {
     test("#given manager registered AND process emits uncaughtException #when event fires #then manager.shutdown() called AND process.exitCode set to 1", async () => {
-      const exitSpy = spyOn(process, "exit").mockImplementation((code?: number): never => {
-        throw new Error(`Unexpected process.exit(${String(code)})`)
-      })
+      const exitSpy = spyOn(process, "exit").mockImplementation(
+        (code?: number): never => {
+          throw new Error(`Unexpected process.exit(${String(code)})`)
+        },
+      )
       const shutdown = mock(() => {})
       const manager = { shutdown }
       registeredManagers.push(manager)
@@ -242,9 +272,11 @@ describe("#given process cleanup registration", () => {
     })
 
     test("#given manager registered AND process emits unhandledRejection #when event fires #then manager.shutdown() called AND process.exitCode set to 1", async () => {
-      const exitSpy = spyOn(process, "exit").mockImplementation((code?: number): never => {
-        throw new Error(`Unexpected process.exit(${String(code)})`)
-      })
+      const exitSpy = spyOn(process, "exit").mockImplementation(
+        (code?: number): never => {
+          throw new Error(`Unexpected process.exit(${String(code)})`)
+        },
+      )
       const shutdown = mock(() => {})
       const manager = { shutdown }
       registeredManagers.push(manager)
@@ -264,7 +296,8 @@ describe("#given process cleanup registration", () => {
     })
 
     test("#given _resetForTesting() called #when event fires #then no cleanup runs", () => {
-      const uncaughtExceptionListenersBefore = process.listeners("uncaughtException")
+      const uncaughtExceptionListenersBefore =
+        process.listeners("uncaughtException")
       const shutdown = mock(() => {})
       const manager = { shutdown }
 

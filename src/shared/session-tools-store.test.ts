@@ -1,5 +1,9 @@
 import { describe, test, expect, beforeEach } from "bun:test"
-import { setSessionTools, getSessionTools, clearSessionTools } from "./session-tools-store"
+import {
+  setSessionTools,
+  getSessionTools,
+  clearSessionTools,
+} from "./session-tools-store"
 
 describe("session-tools-store", () => {
   beforeEach(() => {
@@ -27,7 +31,11 @@ describe("session-tools-store", () => {
     const result = getSessionTools(sessionID)
 
     //#then
-    expect(result).toEqual({ question: false, task: true, call_omo_agent: true })
+    expect(result).toEqual({
+      question: false,
+      task: true,
+      call_omo_agent: true,
+    })
   })
 
   test("overwrites existing tools for same session", () => {

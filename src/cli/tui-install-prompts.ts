@@ -1,13 +1,11 @@
 import * as p from "@clack/prompts"
 import type { Option } from "@clack/prompts"
-import type {
-  ClaudeSubscription,
-  DetectedConfig,
-  InstallConfig,
-} from "./types"
+import type { ClaudeSubscription, DetectedConfig, InstallConfig } from "./types"
 import { detectedToInitialValues } from "./install-validators"
 
-async function selectOrCancel<TValue extends Readonly<string | boolean | number>>(params: {
+async function selectOrCancel<
+  TValue extends Readonly<string | boolean | number>,
+>(params: {
   message: string
   options: Option<TValue>[]
   initialValue: TValue
@@ -26,15 +24,29 @@ async function selectOrCancel<TValue extends Readonly<string | boolean | number>
   return value as TValue
 }
 
-export async function promptInstallConfig(detected: DetectedConfig): Promise<InstallConfig | null> {
+export async function promptInstallConfig(
+  detected: DetectedConfig,
+): Promise<InstallConfig | null> {
   const initial = detectedToInitialValues(detected)
 
   const claude = await selectOrCancel<ClaudeSubscription>({
     message: "Do you have a Claude Pro/Max subscription?",
     options: [
-      { value: "no", label: "No", hint: "Will use opencode/big-pickle as fallback" },
-      { value: "yes", label: "Yes (standard)", hint: "Claude Opus 4.5 for orchestration" },
-      { value: "max20", label: "Yes (max20 mode)", hint: "Full power with Claude Sonnet 4.6 for Librarian" },
+      {
+        value: "no",
+        label: "No",
+        hint: "Will use opencode/big-pickle as fallback",
+      },
+      {
+        value: "yes",
+        label: "Yes (standard)",
+        hint: "Claude Opus 4.5 for orchestration",
+      },
+      {
+        value: "max20",
+        label: "Yes (max20 mode)",
+        hint: "Full power with Claude Sonnet 4.6 for Librarian",
+      },
     ],
     initialValue: initial.claude,
   })
@@ -44,7 +56,11 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have an OpenAI/ChatGPT Plus subscription?",
     options: [
       { value: "no", label: "No", hint: "Oracle will use fallback models" },
-      { value: "yes", label: "Yes", hint: "GPT-5.4 for Oracle (high-IQ debugging)" },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "GPT-5.4 for Oracle (high-IQ debugging)",
+      },
     ],
     initialValue: initial.openai,
   })
@@ -53,8 +69,16 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
   const gemini = await selectOrCancel({
     message: "Will you integrate Google Gemini?",
     options: [
-      { value: "no", label: "No", hint: "Frontend/docs agents will use fallback" },
-      { value: "yes", label: "Yes", hint: "Beautiful UI generation with Gemini 3.1 Pro" },
+      {
+        value: "no",
+        label: "No",
+        hint: "Frontend/docs agents will use fallback",
+      },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "Beautiful UI generation with Gemini 3.1 Pro",
+      },
     ],
     initialValue: initial.gemini,
   })
@@ -64,7 +88,11 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have a GitHub Copilot subscription?",
     options: [
       { value: "no", label: "No", hint: "Only native providers will be used" },
-      { value: "yes", label: "Yes", hint: "Fallback option when native providers unavailable" },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "Fallback option when native providers unavailable",
+      },
     ],
     initialValue: initial.copilot,
   })
@@ -74,7 +102,11 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have access to OpenCode Zen (opencode/ models)?",
     options: [
       { value: "no", label: "No", hint: "Will use other configured providers" },
-      { value: "yes", label: "Yes", hint: "opencode/claude-opus-4-7, opencode/gpt-5.4, etc." },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "opencode/claude-opus-4-7, opencode/gpt-5.4, etc.",
+      },
     ],
     initialValue: initial.opencodeZen,
   })
@@ -84,7 +116,11 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have a Z.ai Coding Plan subscription?",
     options: [
       { value: "no", label: "No", hint: "Will use other configured providers" },
-      { value: "yes", label: "Yes", hint: "Fallback for Librarian and Multimodal Looker" },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "Fallback for Librarian and Multimodal Looker",
+      },
     ],
     initialValue: initial.zaiCodingPlan,
   })
@@ -94,10 +130,14 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have a Kimi For Coding subscription?",
     options: [
       { value: "no", label: "No", hint: "Will use other configured providers" },
-      { value: "yes", label: "Yes", hint: "Kimi K2.5 for Sisyphus/Prometheus fallback" },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "Kimi K2.5 for Sisyphus/Prometheus fallback",
+      },
     ],
     initialValue: initial.kimiForCoding,
-})
+  })
   if (!kimiForCoding) return null
 
   const opencodeGo = await selectOrCancel({
@@ -114,7 +154,11 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     message: "Do you have a Vercel AI Gateway API key?",
     options: [
       { value: "no", label: "No", hint: "Will use other configured providers" },
-      { value: "yes", label: "Yes", hint: "Universal proxy for OpenAI, Anthropic, Google, etc." },
+      {
+        value: "yes",
+        label: "Yes",
+        hint: "Universal proxy for OpenAI, Anthropic, Google, etc.",
+      },
     ],
     initialValue: initial.vercelAiGateway,
   })

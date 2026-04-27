@@ -1,5 +1,13 @@
 /// <reference types="bun-types" />
-import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  spyOn,
+  test,
+} from "bun:test"
 import { OhMyCodesConfigSchema } from "../../config"
 import { executeCompact } from "./executor"
 import type { AutoCompactState } from "./types"
@@ -21,7 +29,10 @@ const TRUE_ORIGINAL_CLEAR_TIMEOUT = globalThis.clearTimeout
 function createFakeTimeouts(): FakeTimeouts {
   let now = 0
   let nextId = 1
-  const timers = new Map<number, { id: number; time: number; callback: TimerCallback; args: any[] }>()
+  const timers = new Map<
+    number,
+    { id: number; time: number; callback: TimerCallback; args: any[] }
+  >()
   const cleared = new Set<number>()
 
   const normalizeDelay = (delay?: number) => {
@@ -29,7 +40,11 @@ function createFakeTimeouts(): FakeTimeouts {
     return delay < 0 ? 0 : delay
   }
 
-  globalThis.setTimeout = ((callback: TimerCallback, delay?: number, ...args: any[]) => {
+  globalThis.setTimeout = ((
+    callback: TimerCallback,
+    delay?: number,
+    ...args: any[]
+  ) => {
     const id = nextId++
     timers.set(id, {
       id,
@@ -49,7 +64,9 @@ function createFakeTimeouts(): FakeTimeouts {
   const advanceBy = async (ms: number) => {
     const target = now + Math.max(0, ms)
     while (true) {
-      let next: { id: number; time: number; callback: TimerCallback; args: any[] } | undefined
+      let next:
+        | { id: number; time: number; callback: TimerCallback; args: any[] }
+        | undefined
       for (const timer of timers.values()) {
         if (timer.time <= target && (!next || timer.time < next.time)) {
           next = timer
@@ -127,12 +144,23 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction successfully
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     expect(mockClient.session.summarize).toHaveBeenCalledWith(
       expect.objectContaining({
         path: { id: sessionID },
-        body: { providerID: "anthropic", modelID: "claude-opus-4-7", auto: true },
+        body: {
+          providerID: "anthropic",
+          modelID: "claude-opus-4-7",
+          auto: true,
+        },
       }),
     )
 
@@ -152,12 +180,23 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     expect(mockClient.session.summarize).toHaveBeenCalledWith(
       expect.objectContaining({
         path: { id: sessionID },
-        body: { providerID: "anthropic", modelID: "claude-opus-4-7", auto: true },
+        body: {
+          providerID: "anthropic",
+          modelID: "claude-opus-4-7",
+          auto: true,
+        },
       }),
     )
 
@@ -170,7 +209,14 @@ describe("executeCompact lock management", () => {
     autoCompactState.compactionInProgress.add(sessionID)
 
     // when: Try to execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // then: Toast should be shown with warning message
     expect(mockClient.tui.showToast).toHaveBeenCalledWith(
@@ -189,7 +235,10 @@ describe("executeCompact lock management", () => {
 
   test("clears lock when fixEmptyMessages path executes", async () => {
     //#given - Empty content error scenario with no messages in storage
-    const readMessagesSpy = spyOn(messagesReader, "readMessages").mockReturnValue([])
+    const readMessagesSpy = spyOn(
+      messagesReader,
+      "readMessages",
+    ).mockReturnValue([])
     autoCompactState.errorDataBySession.set(sessionID, {
       errorType: "non-empty content required",
       messageIndex: 0,
@@ -198,7 +247,14 @@ describe("executeCompact lock management", () => {
     })
 
     //#when - Execute compaction (fixEmptyMessages will be called)
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     //#then - Lock should be cleared
     expect(autoCompactState.compactionInProgress.has(sessionID)).toBe(false)
@@ -207,7 +263,10 @@ describe("executeCompact lock management", () => {
 
   test("clears lock when truncation is sufficient", async () => {
     //#given - Aggressive truncation scenario with no messages in storage
-    const readMessagesSpy = spyOn(messagesReader, "readMessages").mockReturnValue([])
+    const readMessagesSpy = spyOn(
+      messagesReader,
+      "readMessages",
+    ).mockReturnValue([])
     autoCompactState.errorDataBySession.set(sessionID, {
       errorType: "token_limit",
       currentTokens: 250000,
@@ -240,7 +299,14 @@ describe("executeCompact lock management", () => {
     autoCompactState.compactionInProgress.add(sessionID)
 
     // when: Try to execute compaction while lock is held
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // then: Toast should be shown
     const toastCalls = (mockClient.tui.showToast as any).mock.calls
@@ -273,7 +339,14 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // then: Should show failure toast
     const toastCalls = (mockClient.tui.showToast as any).mock.calls
@@ -298,7 +371,14 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // then: Lock should be cleared even if toast fails
     expect(autoCompactState.compactionInProgress.has(sessionID)).toBe(false)
@@ -316,7 +396,14 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // Wait for setTimeout callback
     await fakeTimeouts.advanceBy(600)
@@ -343,7 +430,14 @@ describe("executeCompact lock management", () => {
     }))
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // then: Truncation was attempted
     expect(truncateSpy).toHaveBeenCalled()
@@ -352,7 +446,11 @@ describe("executeCompact lock management", () => {
     expect(mockClient.session.summarize).toHaveBeenCalledWith(
       expect.objectContaining({
         path: { id: sessionID },
-        body: { providerID: "anthropic", modelID: "claude-opus-4-7", auto: true },
+        body: {
+          providerID: "anthropic",
+          modelID: "claude-opus-4-7",
+          auto: true,
+        },
       }),
     )
 
@@ -391,7 +489,14 @@ describe("executeCompact lock management", () => {
     })
 
     // when: Execute compaction
-    await executeCompact(sessionID, msg, autoCompactState, mockClient, directory, pluginConfig)
+    await executeCompact(
+      sessionID,
+      msg,
+      autoCompactState,
+      mockClient,
+      directory,
+      pluginConfig,
+    )
 
     // Wait for setTimeout callback
     await fakeTimeouts.advanceBy(600)

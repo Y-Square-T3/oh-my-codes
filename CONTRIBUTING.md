@@ -179,7 +179,7 @@ bun run build:schema
 
 ```typescript
 // src/agents/my-agent.ts
-import type { AgentConfig } from "./types";
+import type { AgentConfig } from "./types"
 
 export const myAgent: AgentConfig = {
   name: "my-agent",
@@ -188,7 +188,7 @@ export const myAgent: AgentConfig = {
   prompt: `Your agent's system prompt here`,
   temperature: 0.1,
   // ... other config
-};
+}
 ```
 
 ### Adding a New Hook
@@ -199,14 +199,14 @@ export const myAgent: AgentConfig = {
 
 ```typescript
 // src/hooks/my-hook/index.ts
-import type { PluginInput } from "@opencode-ai/plugin";
+import type { PluginInput } from "@opencode-ai/plugin"
 
 export function createMyHook(input: PluginInput) {
   return {
     onSessionStart: async () => {
       // Hook logic here
     },
-  };
+  }
 }
 ```
 

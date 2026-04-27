@@ -1,5 +1,11 @@
 import { join } from "path"
-import { mkdirSync, appendFileSync, existsSync, writeFileSync, unlinkSync } from "fs"
+import {
+  mkdirSync,
+  appendFileSync,
+  existsSync,
+  writeFileSync,
+  unlinkSync,
+} from "fs"
 import { tmpdir } from "os"
 import { randomUUID } from "crypto"
 import type { TranscriptEntry } from "./types"
@@ -20,7 +26,7 @@ function ensureTranscriptDir(): void {
 
 export function appendTranscriptEntry(
   sessionId: string,
-  entry: TranscriptEntry
+  entry: TranscriptEntry,
 ): void {
   ensureTranscriptDir()
   const path = getTranscriptPath(sessionId)
@@ -87,7 +93,9 @@ export function clearTranscriptCache(sessionId?: string): void {
         try {
           unlinkSync(entry.tempPath)
         } catch (error) {
-          log("[transcript] failed to clean up cached temp transcript", { error })
+          log("[transcript] failed to clean up cached temp transcript", {
+            error,
+          })
         }
       }
     }
@@ -103,7 +111,10 @@ function isCacheValid(entry: TranscriptCacheEntry): boolean {
   return Date.now() - entry.createdAt < TRANSCRIPT_CACHE_TTL_MS
 }
 
-function buildCurrentEntry(toolName: string, toolInput: Record<string, unknown>): string {
+function buildCurrentEntry(
+  toolName: string,
+  toolInput: Record<string, unknown>,
+): string {
   const entry: DisabledTranscriptEntry = {
     type: "assistant",
     message: {
@@ -136,7 +147,9 @@ function parseMessagesToEntries(messages: OpenCodeMessage[]): string[] {
         type: "assistant",
         message: {
           role: "assistant",
-          content: [{ type: "tool_use", name: toolName, input: part.state.input }],
+          content: [
+            { type: "tool_use", name: toolName, input: part.state.input },
+          ],
         },
       }
       entries.push(JSON.stringify(entry))
@@ -153,13 +166,16 @@ function parseMessagesToEntries(messages: OpenCodeMessage[]): string[] {
 export async function buildTranscriptFromSession(
   client: {
     session: {
-      messages: (opts: { path: { id: string }; query?: { directory: string } }) => Promise<unknown>
+      messages: (opts: {
+        path: { id: string }
+        query?: { directory: string }
+      }) => Promise<unknown>
     }
   },
   sessionId: string,
   directory: string,
   currentToolName: string,
-  currentToolInput: Record<string, unknown>
+  currentToolInput: Record<string, unknown>,
 ): Promise<string | null> {
   try {
     let baseEntries: string[]
@@ -175,9 +191,10 @@ export async function buildTranscriptFromSession(
         query: { directory },
       })
 
-      const messages = (response as { "200"?: unknown[]; data?: unknown[] })["200"]
-        ?? (response as { data?: unknown[] }).data
-        ?? (Array.isArray(response) ? response : [])
+      const messages =
+        (response as { "200"?: unknown[]; data?: unknown[] })["200"] ??
+        (response as { data?: unknown[] }).data ??
+        (Array.isArray(response) ? response : [])
 
       baseEntries = Array.isArray(messages)
         ? parseMessagesToEntries(messages as OpenCodeMessage[])
@@ -187,7 +204,9 @@ export async function buildTranscriptFromSession(
         try {
           unlinkSync(cached.tempPath)
         } catch (error) {
-          log("[transcript] failed to clean up stale temp transcript", { error })
+          log("[transcript] failed to clean up stale temp transcript", {
+            error,
+          })
         }
       }
 
@@ -198,19 +217,24 @@ export async function buildTranscriptFromSession(
       })
     }
 
-    const allEntries = [...baseEntries, buildCurrentEntry(currentToolName, currentToolInput)]
+    const allEntries = [
+      ...baseEntries,
+      buildCurrentEntry(currentToolName, currentToolInput),
+    ]
 
     if (previousTempPath) {
       try {
         unlinkSync(previousTempPath)
       } catch (error) {
-        log("[transcript] failed to clean up previous temp transcript", { error })
+        log("[transcript] failed to clean up previous temp transcript", {
+          error,
+        })
       }
     }
 
     const tempPath = join(
       tmpdir(),
-      `opencode-transcript-${sessionId}-${randomUUID()}.jsonl`
+      `opencode-transcript-${sessionId}-${randomUUID()}.jsonl`,
     )
     writeFileSync(tempPath, allEntries.join("\n") + "\n")
 
@@ -227,12 +251,17 @@ export async function buildTranscriptFromSession(
     try {
       const tempPath = join(
         tmpdir(),
-        `opencode-transcript-${sessionId}-${randomUUID()}.jsonl`
+        `opencode-transcript-${sessionId}-${randomUUID()}.jsonl`,
       )
-      writeFileSync(tempPath, buildCurrentEntry(currentToolName, currentToolInput) + "\n")
+      writeFileSync(
+        tempPath,
+        buildCurrentEntry(currentToolName, currentToolInput) + "\n",
+      )
       return tempPath
     } catch (fallbackError) {
-      log("[transcript] failed to write fallback transcript", { error: fallbackError })
+      log("[transcript] failed to write fallback transcript", {
+        error: fallbackError,
+      })
       return null
     }
   }

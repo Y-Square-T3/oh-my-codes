@@ -8,7 +8,9 @@ export interface ParsedUserRequest {
 }
 
 export function parseUserRequest(promptText: string): ParsedUserRequest {
-  const match = promptText.match(/<user-request>\s*([\s\S]*?)\s*<\/user-request>/i)
+  const match = promptText.match(
+    /<user-request>\s*([\s\S]*?)\s*<\/user-request>/i,
+  )
   if (!match) return { planName: null, explicitWorktreePath: null }
 
   let rawArg = match[1].trim()
@@ -23,7 +25,9 @@ export function parseUserRequest(promptText: string): ParsedUserRequest {
 
   const cleanedArg = rawArg.replace(KEYWORD_PATTERN, "").trim()
   const quotedPlanMatch = cleanedArg.match(WRAPPING_QUOTES_PATTERN)
-  const normalizedPlanName = quotedPlanMatch ? quotedPlanMatch[2].trim() : cleanedArg
+  const normalizedPlanName = quotedPlanMatch
+    ? quotedPlanMatch[2].trim()
+    : cleanedArg
 
   return {
     planName: normalizedPlanName || null,

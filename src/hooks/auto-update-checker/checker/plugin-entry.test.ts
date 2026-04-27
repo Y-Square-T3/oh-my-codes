@@ -4,7 +4,10 @@ import * as fs from "node:fs"
 import * as os from "node:os"
 import * as path from "node:path"
 import { PACKAGE_NAME } from "../constants"
-import { LEGACY_PLUGIN_NAME, PLUGIN_NAME } from "../../../shared/plugin-identity"
+import {
+  LEGACY_PLUGIN_NAME,
+  PLUGIN_NAME,
+} from "../../../shared/plugin-identity"
 
 type PluginEntryResult = {
   entry: string
@@ -46,7 +49,9 @@ describe("findPluginEntry", () => {
 
   beforeEach(() => {
     originalConfigDir = process.env.OPENCODE_CONFIG_DIR
-    temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "omo-plugin-entry-test-"))
+    temporaryDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "omo-plugin-entry-test-"),
+    )
     const opencodeDirectory = path.join(temporaryDirectory, ".opencode")
     fs.mkdirSync(opencodeDirectory, { recursive: true })
     configPath = path.join(opencodeDirectory, "opencode.json")
@@ -78,7 +83,10 @@ describe("findPluginEntry", () => {
 
   test("returns unpinned for latest dist-tag", async () => {
     // #given plugin is configured with latest dist-tag
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: [`${PACKAGE_NAME}@latest`] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: [`${PACKAGE_NAME}@latest`] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -93,7 +101,10 @@ describe("findPluginEntry", () => {
 
   test("returns unpinned for beta dist-tag", async () => {
     // #given plugin is configured with beta dist-tag
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: [`${PACKAGE_NAME}@beta`] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: [`${PACKAGE_NAME}@beta`] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -108,7 +119,10 @@ describe("findPluginEntry", () => {
 
   test("returns pinned for explicit semver", async () => {
     // #given plugin is configured with explicit version
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: [`${PACKAGE_NAME}@3.5.2`] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: [`${PACKAGE_NAME}@3.5.2`] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -138,7 +152,10 @@ describe("findPluginEntry", () => {
 
   test("finds legacy plugin entry", async () => {
     // #given legacy plugin entry is configured
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: [LEGACY_PLUGIN_NAME] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: [LEGACY_PLUGIN_NAME] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -153,7 +170,10 @@ describe("findPluginEntry", () => {
 
   test("finds preferred plugin entry with pinned version", async () => {
     // #given preferred plugin entry includes semver version
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: [`${PLUGIN_NAME}@3.15.0`] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: [`${PLUGIN_NAME}@3.15.0`] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -168,7 +188,10 @@ describe("findPluginEntry", () => {
 
   test("returns null for unrelated plugin entry", async () => {
     // #given unrelated plugin entry is configured
-    fs.writeFileSync(configPath, JSON.stringify({ plugin: ["some-other-plugin"] }))
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({ plugin: ["some-other-plugin"] }),
+    )
 
     // #when plugin entry is detected
     const execution = runFindPluginEntry(temporaryDirectory)
@@ -189,9 +212,12 @@ describe("findPluginEntry", () => {
     )
 
     // #when plugin entry is detected
-    const execution = runFindPluginEntry(path.join(temporaryDirectory, "workspace"), {
-      OPENCODE_CONFIG_DIR: profileConfigDir,
-    })
+    const execution = runFindPluginEntry(
+      path.join(temporaryDirectory, "workspace"),
+      {
+        OPENCODE_CONFIG_DIR: profileConfigDir,
+      },
+    )
 
     // #then profile dir is respected
     expect(execution.status).toBe(0)

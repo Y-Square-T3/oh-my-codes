@@ -146,8 +146,12 @@ describe("claude-code-session-state", () => {
       registerAgentName("\u200B\u200B\u200B\u200BAtlas - Plan Executor")
 
       // when / then
-      expect(resolveRegisteredAgentName("atlas")).toBe("\u200B\u200B\u200B\u200BAtlas - Plan Executor")
-      expect(resolveRegisteredAgentName("Atlas - Plan Executor")).toBe("\u200B\u200B\u200B\u200BAtlas - Plan Executor")
+      expect(resolveRegisteredAgentName("atlas")).toBe(
+        "\u200B\u200B\u200B\u200BAtlas - Plan Executor",
+      )
+      expect(resolveRegisteredAgentName("Atlas - Plan Executor")).toBe(
+        "\u200B\u200B\u200B\u200BAtlas - Plan Executor",
+      )
     })
 
     test("should resolve legacy parenthesized names to registered agent", () => {

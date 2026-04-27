@@ -16,7 +16,10 @@ export async function executeBackground(
     messageID: string
     agent: string
     abort: AbortSignal
-    metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void
+    metadata?: (input: {
+      title?: string
+      metadata?: Record<string, unknown>
+    }) => void
   },
   manager: BackgroundManager,
   client: PluginInput["client"],
@@ -28,12 +31,16 @@ export async function executeBackground(
     const { prevMessage, firstMessageAgent } = await resolveMessageContext(
       toolContext.sessionID,
       client,
-      messageDir
+      messageDir,
     )
 
     const sessionAgent = getSessionAgent(toolContext.sessionID)
-    const parentAgent = toolContext.agent ?? sessionAgent ?? firstMessageAgent ?? prevMessage?.agent
-    
+    const parentAgent =
+      toolContext.agent ??
+      sessionAgent ??
+      firstMessageAgent ??
+      prevMessage?.agent
+
     log("[call_omo_agent] parentAgent resolution", {
       sessionID: toolContext.sessionID,
       messageDir,
@@ -62,7 +69,11 @@ export async function executeBackground(
     let sessionId = task.sessionID
     while (!sessionId && Date.now() - waitStart < WAIT_FOR_SESSION_TIMEOUT_MS) {
       const updated = manager.getTask(task.id)
-      if (updated?.status === "error" || updated?.status === "cancelled" || updated?.status === "interrupt") {
+      if (
+        updated?.status === "error" ||
+        updated?.status === "cancelled" ||
+        updated?.status === "interrupt"
+      ) {
         return `Task failed to start (status: ${updated.status}).\n\nTask ID: ${task.id}`
       }
       sessionId = updated?.sessionID
@@ -72,7 +83,9 @@ export async function executeBackground(
       if (toolContext.abort?.aborted) {
         break
       }
-      await new Promise(resolve => setTimeout(resolve, WAIT_FOR_SESSION_INTERVAL_MS))
+      await new Promise((resolve) =>
+        setTimeout(resolve, WAIT_FOR_SESSION_INTERVAL_MS),
+      )
     }
 
     await toolContext.metadata?.({

@@ -43,7 +43,20 @@ jobs:
       fail-fast: false
       max-parallel: 11
       matrix:
-        platform: [darwin-arm64, darwin-x64, darwin-x64-baseline, linux-x64, linux-x64-baseline, linux-arm64, linux-x64-musl, linux-x64-musl-baseline, linux-arm64-musl, windows-x64, windows-x64-baseline]
+        platform:
+          [
+            darwin-arm64,
+            darwin-x64,
+            darwin-x64-baseline,
+            linux-x64,
+            linux-x64-baseline,
+            linux-arm64,
+            linux-x64-musl,
+            linux-x64-musl-baseline,
+            linux-arm64-musl,
+            windows-x64,
+            windows-x64-baseline,
+          ]
     steps:
       - uses: actions/checkout@v4
 
@@ -85,12 +98,12 @@ jobs:
         run: |
           PLATFORM_KEY="${{ matrix.platform }}"
           PLATFORM_KEY="${PLATFORM_KEY//-/_}"
-          
+
           # Check oh-my-codes
           OC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-codes-${{ matrix.platform }}/${VERSION}")
-          
+
           echo "oh-my-codes-${{ matrix.platform }}@${VERSION}: ${OC_STATUS}"
-          
+
           if [ "$OC_STATUS" = "200" ]; then
             echo "skip_codes=true" >> $GITHUB_OUTPUT
             echo "✓ oh-my-codes-${{ matrix.platform }}@${VERSION} already published"
@@ -98,7 +111,7 @@ jobs:
             echo "skip_codes=false" >> $GITHUB_OUTPUT
             echo "→ oh-my-codes-${{ matrix.platform }}@${VERSION} needs publishing"
           fi
-          
+
           # Skip build only if BOTH are already published
           if [ "$OC_STATUS" = "200" ] && [ "$OA_STATUS" = "200" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
@@ -130,28 +143,28 @@ jobs:
           PKG_NAME="bun-${PLATFORM}"
           CACHE_DIR=$(bun pm cache)
           CACHE_DEST="${CACHE_DIR}/${PKG_NAME}-v${BUN_VERSION}"
-          
+
           if [[ -f "$CACHE_DEST" ]]; then
             echo "✓ Compile target already cached at ${CACHE_DEST}"
             exit 0
           fi
-          
+
           echo "Pre-downloading ${PKG_NAME} v${BUN_VERSION} to ${CACHE_DEST}"
           TARBALL_URL="https://registry.npmjs.org/@oven/bun-${PLATFORM}/-/bun-${PLATFORM}-${BUN_VERSION}.tgz"
           echo "URL: ${TARBALL_URL}"
-          
+
           mkdir -p "$(dirname "$CACHE_DEST")"
           TMP_DIR=$(mktemp -d)
-          
+
           # Download and extract the bun binary from npm tarball
           curl -fsSL --retry 5 --retry-delay 5 "${TARBALL_URL}" | tar -xzf - -C "${TMP_DIR}"
-          
+
           if [[ "$PLATFORM" == windows-* ]]; then
             BIN_NAME="bun.exe"
           else
             BIN_NAME="bun"
           fi
-          
+
           # npm tarball has package/bin/bun structure
           if [[ -f "${TMP_DIR}/package/bin/${BIN_NAME}" ]]; then
             cp "${TMP_DIR}/package/bin/${BIN_NAME}" "${CACHE_DEST}"
@@ -162,7 +175,7 @@ jobs:
             find "${TMP_DIR}" -type f
             exit 1
           fi
-          
+
           chmod +x "${CACHE_DEST}" 2>/dev/null || true
           echo "✓ Pre-downloaded to ${CACHE_DEST}"
           ls -lh "${CACHE_DEST}"
@@ -190,15 +203,15 @@ jobs:
               windows-x64) TARGET="bun-windows-x64" ;;
               windows-x64-baseline) TARGET="bun-windows-x64-baseline" ;;
             esac
-            
+
             if [[ "$PLATFORM" == windows-* ]]; then
               OUTPUT="packages/${PLATFORM}/bin/oh-my-codes.exe"
             else
               OUTPUT="packages/${PLATFORM}/bin/oh-my-codes"
             fi
-            
+
             bun build src/cli/index.ts --compile --minify --target=$TARGET --outfile=$OUTPUT
-            
+
             echo "Built binary:"
             ls -lh "$OUTPUT"
 
@@ -207,7 +220,7 @@ jobs:
         run: |
           PLATFORM="${{ matrix.platform }}"
           cd packages/${PLATFORM}
-          
+
           if [[ "$PLATFORM" == windows-* ]]; then
             # Windows: use 7z (pre-installed on windows-latest)
             7z a -tzip ../../binary-${PLATFORM}.zip bin/ package.json
@@ -215,7 +228,7 @@ jobs:
             # Unix: use tar.gz
             tar -czvf ../../binary-${PLATFORM}.tar.gz bin/ package.json
           fi
-          
+
           cd ../..
           echo "Compressed artifact:"
           ls -lh binary-${PLATFORM}.*

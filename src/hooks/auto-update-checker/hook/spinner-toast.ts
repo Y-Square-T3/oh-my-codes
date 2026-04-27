@@ -2,7 +2,11 @@ import type { PluginInput } from "@opencode-ai/plugin"
 
 const SISYPHUS_SPINNER = ["·", "•", "●", "○", "◌", "◦", " "]
 
-export async function showSpinnerToast(ctx: PluginInput, version: string, message: string): Promise<void> {
+export async function showSpinnerToast(
+  ctx: PluginInput,
+  version: string,
+  message: string,
+): Promise<void> {
   const totalDuration = 5000
   const frameInterval = 100
   const totalFrames = Math.floor(totalDuration / frameInterval)

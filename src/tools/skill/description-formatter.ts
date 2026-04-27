@@ -1,4 +1,7 @@
-import { TOOL_DESCRIPTION_NO_SKILLS, TOOL_DESCRIPTION_PREFIX } from "./constants"
+import {
+  TOOL_DESCRIPTION_NO_SKILLS,
+  TOOL_DESCRIPTION_PREFIX,
+} from "./constants"
 import { sortByScopePriority } from "./scope-priority"
 import type { SkillInfo } from "./types"
 import type { CommandInfo } from "../slashcommand/types"
@@ -20,9 +23,10 @@ function formatSkillCommand(skill: SkillInfo): string {
 }
 
 function formatSlashCommand(command: CommandInfo): string {
-  const argumentHint = typeof command.metadata.argumentHint === "string"
-    ? command.metadata.argumentHint.trim()
-    : undefined
+  const argumentHint =
+    typeof command.metadata.argumentHint === "string"
+      ? command.metadata.argumentHint.trim()
+      : undefined
   const lines = [
     "  <command>",
     `    <name>/${command.name}</name>`,
@@ -38,7 +42,10 @@ function formatSlashCommand(command: CommandInfo): string {
   return lines.join("\n")
 }
 
-export function formatCombinedDescription(skills?: SkillInfo[], commands?: CommandInfo[]): string {
+export function formatCombinedDescription(
+  skills?: SkillInfo[],
+  commands?: CommandInfo[],
+): string {
   const availableSkills = skills ?? []
   const availableCommands = commands ?? []
 

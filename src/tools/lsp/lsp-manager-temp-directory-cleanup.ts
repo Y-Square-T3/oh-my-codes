@@ -6,7 +6,7 @@ type ManagedClientForTempDirectoryCleanup = {
 }
 
 export async function cleanupTempDirectoryLspClients(
-  clients: Map<string, ManagedClientForTempDirectoryCleanup>
+  clients: Map<string, ManagedClientForTempDirectoryCleanup>,
 ): Promise<void> {
   const keysToRemove: string[] = []
   for (const [key, managed] of clients.entries()) {

@@ -1,8 +1,19 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { getSidecarPath, readAppliedMigrations, writeAppliedMigrations } from "./migrations-sidecar"
+import {
+  getSidecarPath,
+  readAppliedMigrations,
+  writeAppliedMigrations,
+} from "./migrations-sidecar"
 
 describe("migrations sidecar", () => {
   let workdir: string
@@ -17,9 +28,9 @@ describe("migrations sidecar", () => {
 
   describe("getSidecarPath", () => {
     test("appends .migrations.json to the config path", () => {
-      expect(getSidecarPath("/home/user/.config/opencode/oh-my-openagent.json")).toBe(
-        "/home/user/.config/opencode/oh-my-openagent.json.migrations.json",
-      )
+      expect(
+        getSidecarPath("/home/user/.config/opencode/oh-my-openagent.json"),
+      ).toBe("/home/user/.config/opencode/oh-my-openagent.json.migrations.json")
     })
 
     test("works for jsonc configs too", () => {
@@ -50,8 +61,14 @@ describe("migrations sidecar", () => {
       const applied = readAppliedMigrations(configPath)
 
       expect(applied.size).toBe(2)
-      expect(applied.has("model-version:openai/gpt-5.3-codex->openai/gpt-5.4")).toBe(true)
-      expect(applied.has("model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-7")).toBe(true)
+      expect(
+        applied.has("model-version:openai/gpt-5.3-codex->openai/gpt-5.4"),
+      ).toBe(true)
+      expect(
+        applied.has(
+          "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-7",
+        ),
+      ).toBe(true)
     })
 
     test("returns an empty set on malformed JSON instead of throwing", () => {
@@ -63,7 +80,10 @@ describe("migrations sidecar", () => {
 
     test("returns an empty set when the sidecar payload has the wrong shape", () => {
       const configPath = join(workdir, "oh-my-openagent.json")
-      writeFileSync(getSidecarPath(configPath), JSON.stringify({ appliedMigrations: "not-an-array" }))
+      writeFileSync(
+        getSidecarPath(configPath),
+        JSON.stringify({ appliedMigrations: "not-an-array" }),
+      )
 
       expect(readAppliedMigrations(configPath).size).toBe(0)
     })
@@ -73,7 +93,12 @@ describe("migrations sidecar", () => {
       writeFileSync(
         getSidecarPath(configPath),
         JSON.stringify({
-          appliedMigrations: ["model-version:a->b", 42, null, "model-version:c->d"],
+          appliedMigrations: [
+            "model-version:a->b",
+            42,
+            null,
+            "model-version:c->d",
+          ],
         }),
       )
 
@@ -98,7 +123,9 @@ describe("migrations sidecar", () => {
       expect(existsSync(getSidecarPath(configPath))).toBe(true)
 
       const body = JSON.parse(readFileSync(getSidecarPath(configPath), "utf-8"))
-      expect(body.appliedMigrations).toEqual(["model-version:openai/gpt-5.3-codex->openai/gpt-5.4"])
+      expect(body.appliedMigrations).toEqual([
+        "model-version:openai/gpt-5.3-codex->openai/gpt-5.4",
+      ])
     })
 
     test("writes entries in sorted order for stable diffs", () => {
@@ -120,11 +147,22 @@ describe("migrations sidecar", () => {
     })
 
     test("creates parent directories if they do not exist yet", () => {
-      const nested = join(workdir, "nested", "dir", "that", "does", "not", "exist")
+      const nested = join(
+        workdir,
+        "nested",
+        "dir",
+        "that",
+        "does",
+        "not",
+        "exist",
+      )
       const configPath = join(nested, "oh-my-openagent.json")
       // Parent chain intentionally not created.
 
-      const ok = writeAppliedMigrations(configPath, new Set(["model-version:a->b"]))
+      const ok = writeAppliedMigrations(
+        configPath,
+        new Set(["model-version:a->b"]),
+      )
 
       expect(ok).toBe(true)
       expect(existsSync(getSidecarPath(configPath))).toBe(true)

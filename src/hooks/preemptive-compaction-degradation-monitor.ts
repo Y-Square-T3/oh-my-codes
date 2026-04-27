@@ -70,7 +70,8 @@ export function createPostCompactionDegradationMonitor(args: {
   tokenCache: Map<string, CompactionTargetState>
   compactionInProgress: Set<string>
 }) {
-  const { client, directory, pluginConfig, tokenCache, compactionInProgress } = args
+  const { client, directory, pluginConfig, tokenCache, compactionInProgress } =
+    args
   const postCompactionRemaining = new Map<string, number>()
   const postCompactionNoTextStreak = new Map<string, number>()
   const postCompactionRecoveryTriggered = new Set<string>()
@@ -103,7 +104,11 @@ export function createPostCompactionDegradationMonitor(args: {
   }
 
   const triggerRecovery = async (sessionID: string): Promise<void> => {
-    if (postCompactionRecoveryTriggered.has(sessionID) || compactionInProgress.has(sessionID)) return
+    if (
+      postCompactionRecoveryTriggered.has(sessionID) ||
+      compactionInProgress.has(sessionID)
+    )
+      return
 
     const recoveryCount = postCompactionRecoveryCount.get(sessionID) ?? 0
     if (recoveryCount >= MAX_RECOVERY_ATTEMPTS) {
@@ -117,28 +122,36 @@ export function createPostCompactionDegradationMonitor(args: {
 
     const cached = tokenCache.get(sessionID)
     if (!cached?.modelID) {
-      log("[preemptive-compaction] No-text tail detected but compaction model is unavailable", { sessionID })
+      log(
+        "[preemptive-compaction] No-text tail detected but compaction model is unavailable",
+        { sessionID },
+      )
       return
     }
 
     postCompactionRecoveryTriggered.add(sessionID)
     compactionInProgress.add(sessionID)
     const recoveryEpoch = postCompactionEpoch.get(sessionID) ?? 0
-    suppressRecoveryCompactionUntil.set(sessionID, Date.now() + RECOVERY_COMPACTION_SUPPRESSION_MS)
+    suppressRecoveryCompactionUntil.set(
+      sessionID,
+      Date.now() + RECOVERY_COMPACTION_SUPPRESSION_MS,
+    )
 
     try {
-      const { providerID: targetProviderID, modelID: targetModelID } = resolveCompactionModel(
-        pluginConfig,
-        sessionID,
-        cached.providerID,
-        cached.modelID,
-      )
+      const { providerID: targetProviderID, modelID: targetModelID } =
+        resolveCompactionModel(
+          pluginConfig,
+          sessionID,
+          cached.providerID,
+          cached.modelID,
+        )
 
       await client.tui
         .showToast({
           body: {
             title: "Session Degradation Detected",
-            message: "Detected repeated no-text assistant responses after compaction. Retrying compaction recovery.",
+            message:
+              "Detected repeated no-text assistant responses after compaction. Retrying compaction recovery.",
             variant: "warning",
             duration: 5000,
           },
@@ -155,13 +168,19 @@ export function createPostCompactionDegradationMonitor(args: {
         `Compaction recovery summarize timed out after ${PREEMPTIVE_COMPACTION_TIMEOUT_MS}ms`,
       )
 
-      log("[preemptive-compaction] Triggered recovery after post-compaction no-text tail", { sessionID })
+      log(
+        "[preemptive-compaction] Triggered recovery after post-compaction no-text tail",
+        { sessionID },
+      )
     } catch (error) {
       suppressRecoveryCompactionUntil.delete(sessionID)
-      log("[preemptive-compaction] Failed to recover post-compaction no-text tail", {
-        sessionID,
-        error: String(error),
-      })
+      log(
+        "[preemptive-compaction] Failed to recover post-compaction no-text tail",
+        {
+          sessionID,
+          error: String(error),
+        },
+      )
     } finally {
       compactionInProgress.delete(sessionID)
       if ((postCompactionEpoch.get(sessionID) ?? 0) === recoveryEpoch) {
@@ -170,7 +189,9 @@ export function createPostCompactionDegradationMonitor(args: {
     }
   }
 
-  const onAssistantMessageUpdated = async (info: AssistantCompactionMessageInfo): Promise<void> => {
+  const onAssistantMessageUpdated = async (
+    info: AssistantCompactionMessageInfo,
+  ): Promise<void> => {
     const remaining = postCompactionRemaining.get(info.sessionID)
     if (!remaining || remaining <= 0) return
 
@@ -196,10 +217,13 @@ export function createPostCompactionDegradationMonitor(args: {
     postCompactionNoTextStreak.set(info.sessionID, nextStreak)
 
     if (nextStreak >= POST_COMPACTION_NO_TEXT_THRESHOLD) {
-      log("[preemptive-compaction] Detected post-compaction no-text tail pattern", {
-        sessionID: info.sessionID,
-        streak: nextStreak,
-      })
+      log(
+        "[preemptive-compaction] Detected post-compaction no-text tail pattern",
+        {
+          sessionID: info.sessionID,
+          streak: nextStreak,
+        },
+      )
       await triggerRecovery(info.sessionID)
     }
   }

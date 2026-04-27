@@ -14,7 +14,11 @@ interface SharpMetadata {
 }
 
 interface SharpInstance {
-  resize(width: number, height: number, options: { fit: "inside" }): SharpInstance
+  resize(
+    width: number,
+    height: number,
+    options: { fit: "inside" },
+  ): SharpInstance
   toFormat(format: SharpFormat, options?: { quality?: number }): SharpInstance
   toBuffer(): Promise<Buffer>
   metadata(): Promise<SharpMetadata>
@@ -32,7 +36,9 @@ function resolveSharpFactory(sharpModule: unknown): SharpFactory | null {
   }
 
   const defaultExport = Reflect.get(sharpModule, "default")
-  return typeof defaultExport === "function" ? (defaultExport as SharpFactory) : null
+  return typeof defaultExport === "function"
+    ? (defaultExport as SharpFactory)
+    : null
 }
 
 function resolveSharpFormat(mimeType: string): SharpFormat {
@@ -80,7 +86,9 @@ function getErrorMessage(error: unknown): string {
 }
 
 function loadSharpModule(): Promise<unknown | null> {
-  return Function('return import("sharp").catch(() => null)')() as Promise<unknown | null>
+  return Function('return import("sharp").catch(() => null)')() as Promise<
+    unknown | null
+  >
 }
 
 export function calculateTargetDimensions(
@@ -127,7 +135,9 @@ export async function resizeImage(
 
     const sharpFactory = resolveSharpFactory(sharpModule)
     if (!sharpFactory) {
-      log("[read-image-resizer] sharp import has unexpected shape, attempting pure-JS fallback")
+      log(
+        "[read-image-resizer] sharp import has unexpected shape, attempting pure-JS fallback",
+      )
       return resizeImageFallback(base64DataUrl, mimeType, target)
     }
 
@@ -154,7 +164,10 @@ export async function resizeImage(
       format,
     })
 
-    if (resizedBuffer.length > ANTHROPIC_MAX_FILE_SIZE && canAdjustQuality(format)) {
+    if (
+      resizedBuffer.length > ANTHROPIC_MAX_FILE_SIZE &&
+      canAdjustQuality(format)
+    ) {
       for (const quality of [80, 60, 40]) {
         resizedBuffer = await renderResizedBuffer({
           sharpFactory,

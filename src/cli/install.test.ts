@@ -1,5 +1,19 @@
-import { describe, expect, test, mock, beforeEach, afterEach, spyOn } from "bun:test"
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import {
+  describe,
+  expect,
+  test,
+  mock,
+  beforeEach,
+  afterEach,
+  spyOn,
+} from "bun:test"
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { install } from "./install"
@@ -19,7 +33,10 @@ describe("install CLI - binary check behavior", () => {
 
   beforeEach(() => {
     // given temporary config directory
-    tempDir = join(tmpdir(), `omo-test-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    tempDir = join(
+      tmpdir(),
+      `omo-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     mkdirSync(tempDir, { recursive: true })
     originalFetch = globalThis.fetch
 
@@ -53,15 +70,21 @@ describe("install CLI - binary check behavior", () => {
 
   test("non-TUI mode: should show warning but continue when OpenCode binary not found", async () => {
     // given OpenCode binary is NOT installed
-    isOpenCodeInstalledSpy = spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(false)
-    getOpenCodeVersionSpy = spyOn(configManager, "getOpenCodeVersion").mockResolvedValue(null)
+    isOpenCodeInstalledSpy = spyOn(
+      configManager,
+      "isOpenCodeInstalled",
+    ).mockResolvedValue(false)
+    getOpenCodeVersionSpy = spyOn(
+      configManager,
+      "getOpenCodeVersion",
+    ).mockResolvedValue(null)
 
     // given mock npm fetch
     globalThis.fetch = mock(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ latest: "3.0.0" }),
-      } as Response)
+      } as Response),
     ) as unknown as typeof fetch
 
     const args: InstallArgs = {
@@ -88,15 +111,21 @@ describe("install CLI - binary check behavior", () => {
 
   test("non-TUI mode: should create opencode.json with plugin even when binary not found", async () => {
     // given OpenCode binary is NOT installed
-    isOpenCodeInstalledSpy = spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(false)
-    getOpenCodeVersionSpy = spyOn(configManager, "getOpenCodeVersion").mockResolvedValue(null)
+    isOpenCodeInstalledSpy = spyOn(
+      configManager,
+      "isOpenCodeInstalled",
+    ).mockResolvedValue(false)
+    getOpenCodeVersionSpy = spyOn(
+      configManager,
+      "getOpenCodeVersion",
+    ).mockResolvedValue(null)
 
     // given mock npm fetch
     globalThis.fetch = mock(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ latest: "3.0.0" }),
-      } as Response)
+      } as Response),
     ) as unknown as typeof fetch
 
     const args: InstallArgs = {
@@ -118,8 +147,12 @@ describe("install CLI - binary check behavior", () => {
 
     const config = JSON.parse(readFileSync(configPath, "utf-8"))
     expect(config.plugin).toBeDefined()
-    expect(config.plugin.some((p: string) => p.includes("oh-my-openagent"))).toBe(true)
-    expect(config.plugin.some((p: string) => p.includes("oh-my-codes"))).toBe(false)
+    expect(
+      config.plugin.some((p: string) => p.includes("oh-my-openagent")),
+    ).toBe(true)
+    expect(config.plugin.some((p: string) => p.includes("oh-my-codes"))).toBe(
+      false,
+    )
 
     // then exit code should be 0 (success)
     expect(exitCode).toBe(0)
@@ -127,15 +160,21 @@ describe("install CLI - binary check behavior", () => {
 
   test("non-TUI mode: should still succeed and complete all steps when binary exists", async () => {
     // given OpenCode binary IS installed
-    isOpenCodeInstalledSpy = spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(true)
-    getOpenCodeVersionSpy = spyOn(configManager, "getOpenCodeVersion").mockResolvedValue("1.4.0")
+    isOpenCodeInstalledSpy = spyOn(
+      configManager,
+      "isOpenCodeInstalled",
+    ).mockResolvedValue(true)
+    getOpenCodeVersionSpy = spyOn(
+      configManager,
+      "getOpenCodeVersion",
+    ).mockResolvedValue("1.4.0")
 
     // given mock npm fetch
     globalThis.fetch = mock(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ latest: "3.0.0" }),
-      } as Response)
+      } as Response),
     ) as unknown as typeof fetch
 
     const args: InstallArgs = {

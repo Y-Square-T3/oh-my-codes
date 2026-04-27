@@ -49,30 +49,32 @@ describe("startCallbackServer", () => {
     }
 
     activeServer = null
-    serveSpy = spyOn(Bun, "serve").mockImplementation((options: {
-      port: number
-      hostname?: string
-      fetch: (request: Request) => Response | Promise<Response>
-    }) => {
-      const state: MockServerState = {
-        port: options.port === 0 ? 19877 : options.port,
-        stopped: false,
-        fetch: options.fetch,
-      }
+    serveSpy = spyOn(Bun, "serve").mockImplementation(
+      (options: {
+        port: number
+        hostname?: string
+        fetch: (request: Request) => Response | Promise<Response>
+      }) => {
+        const state: MockServerState = {
+          port: options.port === 0 ? 19877 : options.port,
+          stopped: false,
+          fetch: options.fetch,
+        }
 
-      const handle = {
-        port: state.port,
-        stop: (_force?: boolean) => {
-          state.stopped = true
-          if (activeServer === state) {
-            activeServer = null
-          }
-        },
-      }
+        const handle = {
+          port: state.port,
+          stop: (_force?: boolean) => {
+            state.stopped = true
+            if (activeServer === state) {
+              activeServer = null
+            }
+          },
+        }
 
-      activeServer = state
-      return handle as ReturnType<typeof Bun.serve>
-    })
+        activeServer = state
+        return handle as ReturnType<typeof Bun.serve>
+      },
+    )
   })
 
   afterEach(async () => {
@@ -123,9 +125,13 @@ describe("startCallbackServer", () => {
 
   it("returns 400 and rejects when code is missing", async () => {
     server = await startCallbackServer()
-    const callbackRejection = server.waitForCallback().catch((error: Error) => error)
+    const callbackRejection = server
+      .waitForCallback()
+      .catch((error: Error) => error)
 
-    const response = await request(`http://${HOSTNAME}:${server.port}/oauth/callback?state=s`)
+    const response = await request(
+      `http://${HOSTNAME}:${server.port}/oauth/callback?state=s`,
+    )
 
     expect(response.status).toBe(400)
     const error = await callbackRejection
@@ -135,9 +141,13 @@ describe("startCallbackServer", () => {
 
   it("returns 400 and rejects when state is missing", async () => {
     server = await startCallbackServer()
-    const callbackRejection = server.waitForCallback().catch((error: Error) => error)
+    const callbackRejection = server
+      .waitForCallback()
+      .catch((error: Error) => error)
 
-    const response = await request(`http://${HOSTNAME}:${server.port}/oauth/callback?code=c`)
+    const response = await request(
+      `http://${HOSTNAME}:${server.port}/oauth/callback?code=c`,
+    )
 
     expect(response.status).toBe(400)
     const error = await callbackRejection

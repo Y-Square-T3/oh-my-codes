@@ -25,7 +25,15 @@ export function findWorkspaceRoot(filePath: string): string {
     dir = require("path").dirname(dir)
   }
 
-  const markers = [".git", "package.json", "pyproject.toml", "Cargo.toml", "go.mod", "pom.xml", "build.gradle"]
+  const markers = [
+    ".git",
+    "package.json",
+    "pyproject.toml",
+    "Cargo.toml",
+    "go.mod",
+    "pom.xml",
+    "build.gradle",
+  ]
 
   let prevDir = ""
   while (dir !== prevDir) {
@@ -41,7 +49,9 @@ export function findWorkspaceRoot(filePath: string): string {
   return require("path").dirname(resolve(filePath))
 }
 
-export function formatServerLookupError(result: Exclude<ServerLookupResult, { status: "found" }>): string {
+export function formatServerLookupError(
+  result: Exclude<ServerLookupResult, { status: "found" }>,
+): string {
   if (result.status === "not_installed") {
     const { server, installHint } = result
     return [
@@ -76,13 +86,16 @@ export function formatServerLookupError(result: Exclude<ServerLookupResult, { st
   ].join("\n")
 }
 
-export async function withLspClient<T>(filePath: string, fn: (client: LSPClient) => Promise<T>): Promise<T> {
+export async function withLspClient<T>(
+  filePath: string,
+  fn: (client: LSPClient) => Promise<T>,
+): Promise<T> {
   const absPath = resolve(filePath)
 
   if (isDirectoryPath(absPath)) {
     throw new Error(
       `Directory paths are not supported by this LSP tool. ` +
-        `Use lsp_diagnostics with the 'extension' parameter for directory diagnostics.`
+        `Use lsp_diagnostics with the 'extension' parameter for directory diagnostics.`,
     )
   }
 
@@ -105,7 +118,7 @@ export async function withLspClient<T>(filePath: string, fn: (client: LSPClient)
       if (isInitializing) {
         throw new Error(
           `LSP server is still initializing. Please retry in a few seconds. ` +
-            `Original error: ${e.message}`
+            `Original error: ${e.message}`,
         )
       }
     }

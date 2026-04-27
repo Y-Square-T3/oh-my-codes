@@ -1,4 +1,8 @@
-import { checkAstGrepCli, checkAstGrepNapi, checkCommentChecker } from "./dependencies"
+import {
+  checkAstGrepCli,
+  checkAstGrepNapi,
+  checkCommentChecker,
+} from "./dependencies"
 import { getGhCliInfo } from "./tools-gh"
 import { getInstalledLspServers } from "./tools-lsp"
 import { getBuiltinMcpInfo, getUserMcpInfo } from "./tools-mcp"
@@ -6,12 +10,13 @@ import { CHECK_IDS, CHECK_NAMES } from "../constants"
 import type { CheckResult, DoctorIssue, ToolsSummary } from "../types"
 
 export async function gatherToolsSummary(): Promise<ToolsSummary> {
-  const [astGrepCliInfo, astGrepNapiInfo, commentCheckerInfo, ghInfo] = await Promise.all([
-    checkAstGrepCli(),
-    checkAstGrepNapi(),
-    checkCommentChecker(),
-    getGhCliInfo(),
-  ])
+  const [astGrepCliInfo, astGrepNapiInfo, commentCheckerInfo, ghInfo] =
+    await Promise.all([
+      checkAstGrepCli(),
+      checkAstGrepNapi(),
+      checkCommentChecker(),
+      getGhCliInfo(),
+    ])
 
   const lspServers = getInstalledLspServers()
   const builtinMcp = getBuiltinMcpInfo()
@@ -58,7 +63,8 @@ function buildToolIssues(summary: ToolsSummary): DoctorIssue[] {
   if (summary.lspServers.length === 0) {
     issues.push({
       title: "No LSP servers detected",
-      description: "LSP-dependent tools will be limited until at least one server is installed.",
+      description:
+        "LSP-dependent tools will be limited until at least one server is installed.",
       severity: "warning",
       affects: ["lsp diagnostics", "rename", "references"],
     })
@@ -103,7 +109,10 @@ export async function checkTools(): Promise<CheckResult> {
   return {
     name: CHECK_NAMES[CHECK_IDS.TOOLS],
     status: issues.length === 0 ? "pass" : "warn",
-    message: issues.length === 0 ? "All tools checks passed" : `${issues.length} tools issue(s) detected`,
+    message:
+      issues.length === 0
+        ? "All tools checks passed"
+        : `${issues.length} tools issue(s) detected`,
     details: [
       `AST-Grep: cli=${summary.astGrepCli ? "yes" : "no"}, napi=${summary.astGrepNapi ? "yes" : "no"}`,
       `Comment checker: ${summary.commentChecker ? "yes" : "no"}`,

@@ -8,7 +8,8 @@ function createParams(overrides: {
   agents?: string[]
   disabledTools?: string[]
 }) {
-  const agentResult: Record<string, { permission?: Record<string, unknown> }> = {}
+  const agentResult: Record<string, { permission?: Record<string, unknown> }> =
+    {}
   for (const agent of overrides.agents ?? []) {
     agentResult[agent] = { permission: {} }
   }
@@ -16,7 +17,10 @@ function createParams(overrides: {
   return {
     config: { tools: {}, permission: {} } as Record<string, unknown>,
     pluginConfig: {
-      experimental: overrides.taskSystem === undefined ? undefined : { task_system: overrides.taskSystem },
+      experimental:
+        overrides.taskSystem === undefined
+          ? undefined
+          : { task_system: overrides.taskSystem },
       disabled_tools: overrides.disabledTools,
     } as OhMyCodesConfig,
     agentResult: agentResult as Record<string, unknown>,
@@ -235,19 +239,22 @@ describe("applyToolConfig", () => {
         "hephaestus",
         "prometheus",
         "sisyphus-junior",
-      ])("#then should NOT deny todo tools for %s agent by default", (agentName) => {
-        const params = createParams({
-          agents: [agentName],
-        })
+      ])(
+        "#then should NOT deny todo tools for %s agent by default",
+        (agentName) => {
+          const params = createParams({
+            agents: [agentName],
+          })
 
-        applyToolConfig(params)
+          applyToolConfig(params)
 
-        const agent = params.agentResult[agentName] as {
-          permission: Record<string, unknown>
-        }
-        expect(agent.permission.todowrite).toBeUndefined()
-        expect(agent.permission.todoread).toBeUndefined()
-      })
+          const agent = params.agentResult[agentName] as {
+            permission: Record<string, unknown>
+          }
+          expect(agent.permission.todowrite).toBeUndefined()
+          expect(agent.permission.todoread).toBeUndefined()
+        },
+      )
     })
   })
 

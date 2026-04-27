@@ -5,7 +5,10 @@ import { loadBuiltinCommands } from "./commands"
 import { HANDOFF_TEMPLATE } from "./templates/handoff"
 import { REMOVE_AI_SLOPS_TEMPLATE } from "./templates/remove-ai-slops"
 import type { BuiltinCommandName } from "./types"
-import { _resetForTesting, registerAgentName } from "../claude-code-session-state"
+import {
+  _resetForTesting,
+  registerAgentName,
+} from "../claude-code-session-state"
 
 beforeEach(() => {
   _resetForTesting()
@@ -85,7 +88,9 @@ describe("loadBuiltinCommands", () => {
     //#given - no atlas registration
 
     //#when
-    const commands = loadBuiltinCommands(undefined, { useRegisteredAgents: true })
+    const commands = loadBuiltinCommands(undefined, {
+      useRegisteredAgents: true,
+    })
 
     //#then
     expect(commands["start-work"].agent).toBe("sisyphus")
@@ -96,7 +101,9 @@ describe("loadBuiltinCommands", () => {
     registerAgentName("atlas")
 
     //#when
-    const commands = loadBuiltinCommands(undefined, { useRegisteredAgents: true })
+    const commands = loadBuiltinCommands(undefined, {
+      useRegisteredAgents: true,
+    })
 
     //#then
     expect(commands["start-work"].agent).toBe("atlas")
@@ -134,7 +141,9 @@ describe("loadBuiltinCommands - remove-ai-slops", () => {
     const commands = loadBuiltinCommands()
 
     //#then
-    expect(commands["remove-ai-slops"].template).toContain(REMOVE_AI_SLOPS_TEMPLATE)
+    expect(commands["remove-ai-slops"].template).toContain(
+      REMOVE_AI_SLOPS_TEMPLATE,
+    )
   })
 
   test("should have correct description for remove-ai-slops", () => {
@@ -144,7 +153,9 @@ describe("loadBuiltinCommands - remove-ai-slops", () => {
     const commands = loadBuiltinCommands()
 
     //#then
-    expect(commands["remove-ai-slops"].description).toContain("AI-generated code smells")
+    expect(commands["remove-ai-slops"].description).toContain(
+      "AI-generated code smells",
+    )
   })
 })
 
@@ -177,8 +188,12 @@ describe("REMOVE_AI_SLOPS_TEMPLATE", () => {
     //#given - the template string
 
     //#when / #then
-    expect(REMOVE_AI_SLOPS_TEMPLATE).toContain("git symbolic-ref refs/remotes/origin/HEAD")
-    expect(REMOVE_AI_SLOPS_TEMPLATE).toContain('git merge-base "$BASE_BRANCH" HEAD')
+    expect(REMOVE_AI_SLOPS_TEMPLATE).toContain(
+      "git symbolic-ref refs/remotes/origin/HEAD",
+    )
+    expect(REMOVE_AI_SLOPS_TEMPLATE).toContain(
+      'git merge-base "$BASE_BRANCH" HEAD',
+    )
     expect(REMOVE_AI_SLOPS_TEMPLATE).not.toContain("git merge-base main HEAD")
   })
 })
@@ -255,7 +270,8 @@ describe("HANDOFF_TEMPLATE", () => {
     //#given - the template string
 
     //#when / #then
-    const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2702}-\u{27B0}\u{24C2}-\u{1F251}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u
+    const emojiRegex =
+      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2702}-\u{27B0}\u{24C2}-\u{1F251}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u
     expect(emojiRegex.test(HANDOFF_TEMPLATE)).toBe(false)
   })
 })

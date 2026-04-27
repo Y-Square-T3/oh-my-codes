@@ -17,7 +17,12 @@ import {
   getCommandLoaderCacheKey,
   setCachedCommands,
 } from "./loader-cache"
-import type { CommandScope, CommandDefinition, CommandFrontmatter, LoadedCommand } from "./types"
+import type {
+  CommandScope,
+  CommandDefinition,
+  CommandFrontmatter,
+  LoadedCommand,
+} from "./types"
 
 export { clearCommandLoaderCache }
 
@@ -25,7 +30,7 @@ async function loadCommandsFromDir(
   commandsDir: string,
   scope: CommandScope,
   visited: Set<string> = new Set(),
-  prefix: string = ""
+  prefix: string = "",
 ): Promise<LoadedCommand[]> {
   try {
     await fs.access(commandsDir)
@@ -62,7 +67,12 @@ async function loadCommandsFromDir(
       if (entry.name.startsWith(".")) continue
       const subDirPath = join(commandsDir, entry.name)
       const subPrefix = prefix ? `${prefix}/${entry.name}` : entry.name
-      const subCommands = await loadCommandsFromDir(subDirPath, scope, visited, subPrefix)
+      const subCommands = await loadCommandsFromDir(
+        subDirPath,
+        scope,
+        visited,
+        subPrefix,
+      )
       commands.push(...subCommands)
       continue
     }
@@ -71,7 +81,9 @@ async function loadCommandsFromDir(
 
     const commandPath = join(commandsDir, entry.name)
     const baseCommandName = basename(entry.name, ".md")
-    const commandName = prefix ? `${prefix}/${baseCommandName}` : baseCommandName
+    const commandName = prefix
+      ? `${prefix}/${baseCommandName}`
+      : baseCommandName
 
     try {
       const content = await fs.readFile(commandPath, "utf-8")
@@ -87,13 +99,17 @@ $ARGUMENTS
 
       const formattedDescription = `(${scope}) ${data.description || ""}`
 
-      const isOpencodeSource = scope === "opencode" || scope === "opencode-project"
+      const isOpencodeSource =
+        scope === "opencode" || scope === "opencode-project"
       const definition: CommandDefinition = {
         name: commandName,
         description: formattedDescription,
         template: wrappedTemplate,
         agent: data.agent,
-        model: sanitizeModelField(data.model, isOpencodeSource ? "opencode" : "claude-code"),
+        model: sanitizeModelField(
+          data.model,
+          isOpencodeSource ? "opencode" : "claude-code",
+        ),
         subtask: data.subtask,
         argumentHint: data["argument-hint"],
         handoffs: data.handoffs,
@@ -114,7 +130,9 @@ $ARGUMENTS
   return commands
 }
 
-function deduplicateLoadedCommandsByName(commands: LoadedCommand[]): LoadedCommand[] {
+function deduplicateLoadedCommandsByName(
+  commands: LoadedCommand[],
+): LoadedCommand[] {
   const seen = new Set<string>()
   const deduplicatedCommands: LoadedCommand[] = []
 
@@ -130,37 +148,59 @@ function deduplicateLoadedCommandsByName(commands: LoadedCommand[]): LoadedComma
   return deduplicatedCommands
 }
 
-function commandsToRecord(commands: LoadedCommand[]): Record<string, CommandDefinition> {
+function commandsToRecord(
+  commands: LoadedCommand[],
+): Record<string, CommandDefinition> {
   const result: Record<string, CommandDefinition> = {}
   for (const cmd of deduplicateLoadedCommandsByName(commands)) {
-    const { name: _name, argumentHint: _argumentHint, ...openCodeCompatible } = cmd.definition
+    const {
+      name: _name,
+      argumentHint: _argumentHint,
+      ...openCodeCompatible
+    } = cmd.definition
     result[cmd.name] = openCodeCompatible as CommandDefinition
   }
   return result
 }
 
-export async function loadUserCommands(): Promise<Record<string, CommandDefinition>> {
+export async function loadUserCommands(): Promise<
+  Record<string, CommandDefinition>
+> {
   const userCommandsDir = join(getClaudeConfigDir(), "commands")
   const commands = await loadCommandsFromDir(userCommandsDir, "user")
   return commandsToRecord(commands)
 }
 
-export async function loadProjectCommands(directory?: string): Promise<Record<string, CommandDefinition>> {
-  const projectCommandsDir = join(directory ?? process.cwd(), ".claude", "commands")
+export async function loadProjectCommands(
+  directory?: string,
+): Promise<Record<string, CommandDefinition>> {
+  const projectCommandsDir = join(
+    directory ?? process.cwd(),
+    ".claude",
+    "commands",
+  )
   const commands = await loadCommandsFromDir(projectCommandsDir, "project")
   return commandsToRecord(commands)
 }
 
-export async function loadOpencodeGlobalCommands(): Promise<Record<string, CommandDefinition>> {
+export async function loadOpencodeGlobalCommands(): Promise<
+  Record<string, CommandDefinition>
+> {
   const opencodeCommandDirs = getOpenCodeCommandDirs({ binary: "opencode" })
   const allCommands = await Promise.all(
-    opencodeCommandDirs.map((commandsDir) => loadCommandsFromDir(commandsDir, "opencode")),
+    opencodeCommandDirs.map((commandsDir) =>
+      loadCommandsFromDir(commandsDir, "opencode"),
+    ),
   )
   return commandsToRecord(allCommands.flat())
 }
 
-export async function loadOpencodeProjectCommands(directory?: string): Promise<Record<string, CommandDefinition>> {
-  const opencodeProjectDirs = findProjectOpencodeCommandDirs(directory ?? process.cwd())
+export async function loadOpencodeProjectCommands(
+  directory?: string,
+): Promise<Record<string, CommandDefinition>> {
+  const opencodeProjectDirs = findProjectOpencodeCommandDirs(
+    directory ?? process.cwd(),
+  )
   const allCommands = await Promise.all(
     opencodeProjectDirs.map((commandsDir) =>
       loadCommandsFromDir(commandsDir, "opencode-project"),
@@ -169,7 +209,9 @@ export async function loadOpencodeProjectCommands(directory?: string): Promise<R
   return commandsToRecord(allCommands.flat())
 }
 
-export async function loadAllCommands(directory?: string): Promise<Record<string, CommandDefinition>> {
+export async function loadAllCommands(
+  directory?: string,
+): Promise<Record<string, CommandDefinition>> {
   const cacheKey = await getCommandLoaderCacheKey(directory)
   const cachedCommands = getCachedCommands(cacheKey)
   if (cachedCommands) {

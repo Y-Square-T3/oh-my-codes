@@ -1,5 +1,8 @@
 import type { FallbackEntry } from "../../shared/model-requirements"
-import type { ChatMessageInput, ChatMessageHandlerOutput } from "../../plugin/chat-message"
+import type {
+  ChatMessageInput,
+  ChatMessageHandlerOutput,
+} from "../../plugin/chat-message"
 import { applyFallbackToChatMessage } from "./chat-message-fallback-handler"
 import {
   createModelFallbackStateController,
@@ -134,7 +137,9 @@ export function getFallbackState(
 /**
  * Creates a chat.message hook that applies model fallbacks when pending.
  */
-export function createModelFallbackHook(args?: ModelFallbackHookArgs): ModelFallbackHook {
+export function createModelFallbackHook(
+  args?: ModelFallbackHookArgs,
+): ModelFallbackHook {
   const pendingModelFallbacks = new Map<string, ModelFallbackState>()
   const lastToastKey = new Map<string, string>()
   const sessionFallbackChains = new Map<string, FallbackEntry[]>()
@@ -184,6 +189,8 @@ export function createModelFallbackHook(args?: ModelFallbackHookArgs): ModelFall
 /**
  * Resets hook-owned state for testing.
  */
-export function _resetForTesting(controller?: Pick<ModelFallbackStateController, "reset">): void {
+export function _resetForTesting(
+  controller?: Pick<ModelFallbackStateController, "reset">,
+): void {
   controller?.reset()
 }

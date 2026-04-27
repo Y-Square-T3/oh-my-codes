@@ -4,7 +4,9 @@ import { log } from "../../shared/logger"
 import { isSessionInBoulderLineage } from "./boulder-session-lineage"
 import { HOOK_NAME } from "./hook-name"
 
-export function extractSessionIdFromMetadata(metadata: unknown): string | undefined {
+export function extractSessionIdFromMetadata(
+  metadata: unknown,
+): string | undefined {
   const sessionId = extractTaskLink(metadata, "").sessionId
   if (typeof sessionId === "string" && sessionId.startsWith("ses_")) {
     return sessionId

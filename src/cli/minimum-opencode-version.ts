@@ -1,7 +1,9 @@
 import { MIN_OPENCODE_VERSION } from "./doctor/constants"
 import { compareVersions } from "../shared/opencode-version"
 
-export function getUnsupportedOpenCodeVersionMessage(openCodeVersion: string | null): string | null {
+export function getUnsupportedOpenCodeVersionMessage(
+  openCodeVersion: string | null,
+): string | null {
   if (!openCodeVersion) {
     return null
   }

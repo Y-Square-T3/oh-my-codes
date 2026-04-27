@@ -31,7 +31,7 @@ export function readParts(messageID: string): StoredPart[] {
 export async function readPartsFromSDK(
   client: OpencodeClient,
   sessionID: string,
-  messageID: string
+  messageID: string,
 ): Promise<StoredPart[]> {
   try {
     const response = await client.session.message({
@@ -46,7 +46,12 @@ export async function readPartsFromSDK(
 
     return rawParts
       .map((part: unknown) => {
-        if (!isRecord(part) || typeof part.id !== "string" || typeof part.type !== "string") return null
+        if (
+          !isRecord(part) ||
+          typeof part.id !== "string" ||
+          typeof part.type !== "string"
+        )
+          return null
         return { ...part, sessionID, messageID } as StoredPart
       })
       .filter((part): part is StoredPart => part !== null)

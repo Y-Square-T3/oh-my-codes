@@ -19,6 +19,8 @@ export async function resolveParentDirectory(options: {
     parentDirectory: parentSession?.data?.directory,
     fallbackDirectory: defaultDirectory,
   })
-  log(`[background-agent] Parent dir: ${parentSession?.data?.directory}, using: ${parentDirectory}`)
+  log(
+    `[background-agent] Parent dir: ${parentSession?.data?.directory}, using: ${parentDirectory}`,
+  )
   return parentDirectory
 }

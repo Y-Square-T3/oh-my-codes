@@ -5,7 +5,10 @@ import { join } from "node:path"
 import { describe, expect, it, mock } from "bun:test"
 import { detectErrorType } from "./index"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `session-recovery-thinking-prepend-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `session-recovery-thinking-prepend-${randomUUID()}`,
+)
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
 mock.module("../../shared", () => ({
@@ -15,10 +18,12 @@ mock.module("../../shared", () => ({
   log: () => {},
   isSqliteBackend: () => false,
   patchPart: async () => true,
-  normalizeSDKResponse: <TData>(response: { data?: TData }, fallback: TData) => response.data ?? fallback,
+  normalizeSDKResponse: <TData>(response: { data?: TData }, fallback: TData) =>
+    response.data ?? fallback,
 }))
 
-const { prependThinkingPart, prependThinkingPartAsync } = await import("./storage/thinking-prepend")
+const { prependThinkingPart, prependThinkingPartAsync } =
+  await import("./storage/thinking-prepend")
 
 describe("detectErrorType", () => {
   describe("thinking_block_order errors", () => {
@@ -152,7 +157,8 @@ describe("detectErrorType", () => {
     it("should detect assistant message prefill error from direct message", () => {
       //#given an error about assistant message prefill not being supported
       const error = {
-        message: "This model does not support assistant message prefill. The conversation must end with a user message.",
+        message:
+          "This model does not support assistant message prefill. The conversation must end with a user message.",
       }
 
       //#when detectErrorType is called
@@ -167,7 +173,8 @@ describe("detectErrorType", () => {
       const error = {
         error: {
           type: "invalid_request_error",
-          message: "This model does not support assistant message prefill. The conversation must end with a user message.",
+          message:
+            "This model does not support assistant message prefill. The conversation must end with a user message.",
         },
       }
 
@@ -336,7 +343,11 @@ describe("thinking-prepend", () => {
     })
 
     expect(result).toBe(true)
-    const writtenPath = join(TEST_PART_STORAGE, targetMessageID, `${originalPart.id}.json`)
+    const writtenPath = join(
+      TEST_PART_STORAGE,
+      targetMessageID,
+      `${originalPart.id}.json`,
+    )
     expect(existsSync(writtenPath)).toBe(true)
     expect(JSON.parse(readFileSync(writtenPath, "utf-8"))).toEqual(originalPart)
 
@@ -406,7 +417,7 @@ describe("thinking-prepend", () => {
   it("patches the original signed thinking part verbatim for sdk-backed recovery", async () => {
     const prependThinkingPartAsyncUntyped = Reflect.get(
       { prependThinkingPartAsync },
-      "prependThinkingPartAsync"
+      "prependThinkingPartAsync",
     )
     const sessionID = "ses_thinking_prepend_async"
     const targetMessageID = "msg_target_async"
@@ -427,27 +438,33 @@ describe("thinking-prepend", () => {
             },
             {
               info: { id: targetMessageID, role: "assistant" },
-              parts: [{ id: "prt_target_text", type: "text", text: "tool result" }],
+              parts: [
+                { id: "prt_target_text", type: "text", text: "tool result" },
+              ],
             },
           ],
         }),
       },
     }
 
-    const result = await Reflect.apply(prependThinkingPartAsyncUntyped, undefined, [
-      client,
-      sessionID,
-      targetMessageID,
-      {
-        isSqliteBackend: () => false,
-        patchPart: patchPartMock,
-        log: mock(() => {}),
-        findLastThinkingPart: () => null,
-        findLastThinkingPartFromSDK: async () => originalPart,
-        readTargetPartIDs: () => [],
-        readTargetPartIDsFromSDK: async () => ["prt_target_text"],
-      },
-    ])
+    const result = await Reflect.apply(
+      prependThinkingPartAsyncUntyped,
+      undefined,
+      [
+        client,
+        sessionID,
+        targetMessageID,
+        {
+          isSqliteBackend: () => false,
+          patchPart: patchPartMock,
+          log: mock(() => {}),
+          findLastThinkingPart: () => null,
+          findLastThinkingPartFromSDK: async () => originalPart,
+          readTargetPartIDs: () => [],
+          readTargetPartIDsFromSDK: async () => ["prt_target_text"],
+        },
+      ],
+    )
 
     expect(result).toBe(true)
     expect(patchPartMock).toHaveBeenCalledTimes(1)
@@ -463,7 +480,7 @@ describe("thinking-prepend", () => {
   it("returns false without patching when sdk history has no signed thinking part", async () => {
     const prependThinkingPartAsyncUntyped = Reflect.get(
       { prependThinkingPartAsync },
-      "prependThinkingPartAsync"
+      "prependThinkingPartAsync",
     )
     const sessionID = "ses_thinking_prepend_async_missing"
     const targetMessageID = "msg_target_async_missing"
@@ -474,31 +491,43 @@ describe("thinking-prepend", () => {
           data: [
             {
               info: { id: "msg_prev_async", role: "assistant" },
-              parts: [{ id: "prt_prev_reasoning", type: "reasoning", text: "unsigned reasoning" }],
+              parts: [
+                {
+                  id: "prt_prev_reasoning",
+                  type: "reasoning",
+                  text: "unsigned reasoning",
+                },
+              ],
             },
             {
               info: { id: targetMessageID, role: "assistant" },
-              parts: [{ id: "prt_target_text", type: "text", text: "tool result" }],
+              parts: [
+                { id: "prt_target_text", type: "text", text: "tool result" },
+              ],
             },
           ],
         }),
       },
     }
 
-    const result = await Reflect.apply(prependThinkingPartAsyncUntyped, undefined, [
-      client,
-      sessionID,
-      targetMessageID,
-      {
-        isSqliteBackend: () => false,
-        patchPart: patchPartMock,
-        log: mock(() => {}),
-        findLastThinkingPart: () => null,
-        findLastThinkingPartFromSDK: async () => null,
-        readTargetPartIDs: () => [],
-        readTargetPartIDsFromSDK: async () => ["prt_target_text"],
-      },
-    ])
+    const result = await Reflect.apply(
+      prependThinkingPartAsyncUntyped,
+      undefined,
+      [
+        client,
+        sessionID,
+        targetMessageID,
+        {
+          isSqliteBackend: () => false,
+          patchPart: patchPartMock,
+          log: mock(() => {}),
+          findLastThinkingPart: () => null,
+          findLastThinkingPartFromSDK: async () => null,
+          readTargetPartIDs: () => [],
+          readTargetPartIDsFromSDK: async () => ["prt_target_text"],
+        },
+      ],
+    )
 
     expect(result).toBe(false)
     expect(patchPartMock).toHaveBeenCalledTimes(0)
@@ -507,7 +536,7 @@ describe("thinking-prepend", () => {
   it("returns false when the sdk reused signed thinking part would not sort before target parts", async () => {
     const prependThinkingPartAsyncUntyped = Reflect.get(
       { prependThinkingPartAsync },
-      "prependThinkingPartAsync"
+      "prependThinkingPartAsync",
     )
     const sessionID = "ses_thinking_prepend_async_out_of_order"
     const targetMessageID = "msg_target_async_out_of_order"
@@ -524,20 +553,24 @@ describe("thinking-prepend", () => {
       },
     }
 
-    const result = await Reflect.apply(prependThinkingPartAsyncUntyped, undefined, [
-      client,
-      sessionID,
-      targetMessageID,
-      {
-        isSqliteBackend: () => false,
-        patchPart: patchPartMock,
-        log: mock(() => {}),
-        findLastThinkingPart: () => null,
-        findLastThinkingPartFromSDK: async () => originalPart,
-        readTargetPartIDs: () => [],
-        readTargetPartIDsFromSDK: async () => ["prt_a_target"],
-      },
-    ])
+    const result = await Reflect.apply(
+      prependThinkingPartAsyncUntyped,
+      undefined,
+      [
+        client,
+        sessionID,
+        targetMessageID,
+        {
+          isSqliteBackend: () => false,
+          patchPart: patchPartMock,
+          log: mock(() => {}),
+          findLastThinkingPart: () => null,
+          findLastThinkingPartFromSDK: async () => originalPart,
+          readTargetPartIDs: () => [],
+          readTargetPartIDsFromSDK: async () => ["prt_a_target"],
+        },
+      ],
+    )
 
     expect(result).toBe(false)
     expect(patchPartMock).toHaveBeenCalledTimes(0)

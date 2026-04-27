@@ -13,19 +13,30 @@ export function formatStatus(result: DoctorResult): string {
   const opencodeVer = systemInfo.opencodeVersion ?? "unknown"
   const pluginVer = systemInfo.pluginVersion ?? "unknown"
   const bunVer = systemInfo.bunVersion ?? "unknown"
-  lines.push(` ${padding}System     ${opencodeVer} · ${pluginVer} · Bun ${bunVer}`)
+  lines.push(
+    ` ${padding}System     ${opencodeVer} · ${pluginVer} · Bun ${bunVer}`,
+  )
 
   const configPath = systemInfo.configPath ?? "unknown"
-  const configStatus = systemInfo.configValid ? color.green("(valid)") : color.red("(invalid)")
+  const configStatus = systemInfo.configValid
+    ? color.green("(valid)")
+    : color.red("(invalid)")
   lines.push(` ${padding}Config     ${configPath} ${configStatus}`)
 
   const serverCount = tools.lspServers.length
   const lspMark = formatStatusMark(serverCount > 0)
-  const lspText = serverCount > 0 ? `${serverCount} server${serverCount === 1 ? "" : "s"}` : "none"
+  const lspText =
+    serverCount > 0
+      ? `${serverCount} server${serverCount === 1 ? "" : "s"}`
+      : "none"
   const astGrepMark = formatStatusMark(tools.astGrepCli)
-  const ghMark = formatStatusMark(tools.ghCli.installed && tools.ghCli.authenticated)
+  const ghMark = formatStatusMark(
+    tools.ghCli.installed && tools.ghCli.authenticated,
+  )
   const ghUser = tools.ghCli.username ?? ""
-  lines.push(` ${padding}Tools      LSP ${lspMark} ${lspText} · AST-Grep ${astGrepMark} · gh ${ghMark}${ghUser ? ` (${ghUser})` : ""}`)
+  lines.push(
+    ` ${padding}Tools      LSP ${lspMark} ${lspText} · AST-Grep ${astGrepMark} · gh ${ghMark}${ghUser ? ` (${ghUser})` : ""}`,
+  )
 
   const builtinCount = tools.mcpBuiltin.length
   const userCount = tools.mcpUser.length

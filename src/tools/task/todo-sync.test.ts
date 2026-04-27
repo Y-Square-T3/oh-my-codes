@@ -1,11 +1,11 @@
 /// <reference types="bun-types/test-globals" />
-import type { Task } from "../../features/claude-tasks/types";
+import type { Task } from "../../features/claude-tasks/types"
 import {
   syncTaskToTodo,
   syncAllTasksToTodos,
   syncTaskTodoUpdate,
   type TodoInfo,
-} from "./todo-sync";
+} from "./todo-sync"
 
 describe("syncTaskToTodo", () => {
   it("converts pending task to pending todo", () => {
@@ -17,10 +17,10 @@ describe("syncTaskToTodo", () => {
       status: "pending",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
     expect(result).toEqual({
@@ -28,8 +28,8 @@ describe("syncTaskToTodo", () => {
       content: "Fix bug",
       status: "pending",
       priority: "medium",
-    });
-  });
+    })
+  })
 
   it("converts in_progress task to in_progress todo", () => {
     // given
@@ -40,15 +40,15 @@ describe("syncTaskToTodo", () => {
       status: "in_progress",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.status).toBe("in_progress");
-    expect(result?.content).toBe("Implement feature");
-  });
+    expect(result?.status).toBe("in_progress")
+    expect(result?.content).toBe("Implement feature")
+  })
 
   it("converts completed task to completed todo", () => {
     // given
@@ -59,14 +59,14 @@ describe("syncTaskToTodo", () => {
       status: "completed",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.status).toBe("completed");
-  });
+    expect(result?.status).toBe("completed")
+  })
 
   it("returns null for deleted task", () => {
     // given
@@ -77,14 +77,14 @@ describe("syncTaskToTodo", () => {
       status: "deleted",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result).toBeNull();
-  });
+    expect(result).toBeNull()
+  })
 
   it("extracts priority from metadata", () => {
     // given
@@ -96,14 +96,14 @@ describe("syncTaskToTodo", () => {
       blocks: [],
       blockedBy: [],
       metadata: { priority: "high" },
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.priority).toBe("high");
-  });
+    expect(result?.priority).toBe("high")
+  })
 
   it("handles medium priority", () => {
     // given
@@ -115,14 +115,14 @@ describe("syncTaskToTodo", () => {
       blocks: [],
       blockedBy: [],
       metadata: { priority: "medium" },
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.priority).toBe("medium");
-  });
+    expect(result?.priority).toBe("medium")
+  })
 
   it("handles low priority", () => {
     // given
@@ -134,14 +134,14 @@ describe("syncTaskToTodo", () => {
       blocks: [],
       blockedBy: [],
       metadata: { priority: "low" },
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.priority).toBe("low");
-  });
+    expect(result?.priority).toBe("low")
+  })
 
   it("ignores invalid priority values", () => {
     // given
@@ -153,14 +153,14 @@ describe("syncTaskToTodo", () => {
       blocks: [],
       blockedBy: [],
       metadata: { priority: "urgent" },
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.priority).toBe("medium");
-  });
+    expect(result?.priority).toBe("medium")
+  })
 
   it("handles missing metadata", () => {
     // given
@@ -171,14 +171,14 @@ describe("syncTaskToTodo", () => {
       status: "pending",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.priority).toBe("medium");
-  });
+    expect(result?.priority).toBe("medium")
+  })
 
   it("uses subject as todo content", () => {
     // given
@@ -189,18 +189,18 @@ describe("syncTaskToTodo", () => {
       status: "pending",
       blocks: [],
       blockedBy: [],
-    };
+    }
 
     // when
-    const result = syncTaskToTodo(task);
+    const result = syncTaskToTodo(task)
 
     // then
-    expect(result?.content).toBe("This is the subject");
-  });
-});
+    expect(result?.content).toBe("This is the subject")
+  })
+})
 
 describe("syncTaskTodoUpdate", () => {
-  let mockCtx: any;
+  let mockCtx: any
 
   beforeEach(() => {
     mockCtx = {
@@ -209,8 +209,8 @@ describe("syncTaskTodoUpdate", () => {
           todo: vi.fn(),
         },
       },
-    };
-  });
+    }
+  })
 
   it("writes updated todo and preserves existing items", async () => {
     // given
@@ -221,31 +221,29 @@ describe("syncTaskTodoUpdate", () => {
       status: "in_progress",
       blocks: [],
       blockedBy: [],
-    };
+    }
     const currentTodos: TodoInfo[] = [
       { id: "T-1", content: "Old task", status: "pending" },
       { id: "T-2", content: "Keep task", status: "pending" },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue({ data: currentTodos });
-    let called = false;
+    ]
+    mockCtx.client.session.todo.mockResolvedValue({ data: currentTodos })
+    let called = false
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      called = true;
-      expect(input.sessionID).toBe("session-1");
-      expect(input.todos.length).toBe(2);
+      called = true
+      expect(input.sessionID).toBe("session-1")
+      expect(input.todos.length).toBe(2)
       expect(
         input.todos.find((todo: TodoInfo) => todo.id === "T-1")?.content,
-      ).toBe("Updated task");
-      expect(input.todos.some((todo: TodoInfo) => todo.id === "T-2")).toBe(
-        true,
-      );
-    };
+      ).toBe("Updated task")
+      expect(input.todos.some((todo: TodoInfo) => todo.id === "T-2")).toBe(true)
+    }
 
     // when
-    await syncTaskTodoUpdate(mockCtx, task, "session-1", writer);
+    await syncTaskTodoUpdate(mockCtx, task, "session-1", writer)
 
     // then
-    expect(called).toBe(true);
-  });
+    expect(called).toBe(true)
+  })
 
   it("removes deleted task from todos", async () => {
     // given
@@ -256,34 +254,32 @@ describe("syncTaskTodoUpdate", () => {
       status: "deleted",
       blocks: [],
       blockedBy: [],
-    };
+    }
     const currentTodos: TodoInfo[] = [
       { id: "T-1", content: "Old task", status: "pending" },
       { id: "T-2", content: "Keep task", status: "pending" },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
-    let called = false;
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
+    let called = false
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      called = true;
-      expect(input.todos.length).toBe(1);
+      called = true
+      expect(input.todos.length).toBe(1)
       expect(input.todos.some((todo: TodoInfo) => todo.id === "T-1")).toBe(
         false,
-      );
-      expect(input.todos.some((todo: TodoInfo) => todo.id === "T-2")).toBe(
-        true,
-      );
-    };
+      )
+      expect(input.todos.some((todo: TodoInfo) => todo.id === "T-2")).toBe(true)
+    }
 
     // when
-    await syncTaskTodoUpdate(mockCtx, task, "session-1", writer);
+    await syncTaskTodoUpdate(mockCtx, task, "session-1", writer)
 
     // then
-    expect(called).toBe(true);
-  });
-});
+    expect(called).toBe(true)
+  })
+})
 
 describe("syncAllTasksToTodos", () => {
-  let mockCtx: any;
+  let mockCtx: any
 
   beforeEach(() => {
     mockCtx = {
@@ -292,8 +288,8 @@ describe("syncAllTasksToTodos", () => {
           todo: vi.fn(),
         },
       },
-    };
-  });
+    }
+  })
 
   it("fetches current todos from OpenCode", async () => {
     // given
@@ -306,45 +302,45 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
+    ]
     const currentTodos: TodoInfo[] = [
       {
         id: "T-existing",
         content: "Existing todo",
         status: "pending",
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
     expect(mockCtx.client.session.todo).toHaveBeenCalledWith({
       path: { id: "session-1" },
-    });
-  });
+    })
+  })
 
   it("handles API response with data property", async () => {
     // given
-    const tasks: Task[] = [];
+    const tasks: Task[] = []
     const currentTodos: TodoInfo[] = [
       {
         id: "T-1",
         content: "Todo 1",
         status: "pending",
       },
-    ];
+    ]
     mockCtx.client.session.todo.mockResolvedValue({
       data: currentTodos,
-    });
+    })
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
-    expect(mockCtx.client.session.todo).toHaveBeenCalled();
-  });
+    expect(mockCtx.client.session.todo).toHaveBeenCalled()
+  })
 
   it("gracefully handles fetch failure", async () => {
     // given
@@ -357,15 +353,15 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
-    mockCtx.client.session.todo.mockRejectedValue(new Error("API error"));
+    ]
+    mockCtx.client.session.todo.mockRejectedValue(new Error("API error"))
 
     // when
-    const result = await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    const result = await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
-    expect(result).toBeUndefined();
-  });
+    expect(result).toBeUndefined()
+  })
 
   it("converts multiple tasks to todos", async () => {
     // given
@@ -388,15 +384,15 @@ describe("syncAllTasksToTodos", () => {
         blockedBy: [],
         metadata: { priority: "low" },
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue([]);
+    ]
+    mockCtx.client.session.todo.mockResolvedValue([])
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
-    expect(mockCtx.client.session.todo).toHaveBeenCalled();
-  });
+    expect(mockCtx.client.session.todo).toHaveBeenCalled()
+  })
 
   it("removes deleted tasks from todo list", async () => {
     // given
@@ -409,26 +405,26 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
+    ]
     const currentTodos: TodoInfo[] = [
       {
         id: "T-1",
         content: "Task 1",
         status: "pending",
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
-    let writtenTodos: TodoInfo[] = [];
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
+    let writtenTodos: TodoInfo[] = []
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      writtenTodos = input.todos;
-    };
+      writtenTodos = input.todos
+    }
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer);
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer)
 
     // then
-    expect(writtenTodos.some((t: TodoInfo) => t.id === "T-1")).toBe(false);
-  });
+    expect(writtenTodos.some((t: TodoInfo) => t.id === "T-1")).toBe(false)
+  })
 
   it("preserves existing todos not in task list", async () => {
     // given
@@ -441,7 +437,7 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
+    ]
     const currentTodos: TodoInfo[] = [
       {
         id: "T-1",
@@ -453,32 +449,34 @@ describe("syncAllTasksToTodos", () => {
         content: "Existing todo",
         status: "pending",
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
-    let writtenTodos: TodoInfo[] = [];
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
+    let writtenTodos: TodoInfo[] = []
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      writtenTodos = input.todos;
-    };
+      writtenTodos = input.todos
+    }
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer);
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer)
 
     // then
-    expect(writtenTodos.some((t: TodoInfo) => t.id === "T-existing")).toBe(true);
-    expect(writtenTodos.some((t: TodoInfo) => t.content === "Task 1")).toBe(true);
-  });
+    expect(writtenTodos.some((t: TodoInfo) => t.id === "T-existing")).toBe(true)
+    expect(writtenTodos.some((t: TodoInfo) => t.content === "Task 1")).toBe(
+      true,
+    )
+  })
 
   it("handles empty task list", async () => {
     // given
-    const tasks: Task[] = [];
-    mockCtx.client.session.todo.mockResolvedValue([]);
+    const tasks: Task[] = []
+    mockCtx.client.session.todo.mockResolvedValue([])
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
-    expect(mockCtx.client.session.todo).toHaveBeenCalled();
-  });
+    expect(mockCtx.client.session.todo).toHaveBeenCalled()
+  })
 
   it("calls writer with final todos", async () => {
     // given
@@ -491,22 +489,22 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue([]);
-    let writerCalled = false;
+    ]
+    mockCtx.client.session.todo.mockResolvedValue([])
+    let writerCalled = false
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      writerCalled = true;
-      expect(input.sessionID).toBe("session-1");
-      expect(input.todos.length).toBe(1);
-      expect(input.todos[0].content).toBe("Task 1");
-    };
+      writerCalled = true
+      expect(input.sessionID).toBe("session-1")
+      expect(input.todos.length).toBe(1)
+      expect(input.todos[0].content).toBe("Task 1")
+    }
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer);
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer)
 
     // then
-    expect(writerCalled).toBe(true);
-  });
+    expect(writerCalled).toBe(true)
+  })
 
   it("deduplicates no-id todos when task replaces existing content", async () => {
     // given
@@ -519,27 +517,29 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
+    ]
     const currentTodos: TodoInfo[] = [
       {
         content: "Task 1 (updated)",
         status: "pending",
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
-    let writtenTodos: TodoInfo[] = [];
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
+    let writtenTodos: TodoInfo[] = []
     const writer = async (input: { sessionID: string; todos: TodoInfo[] }) => {
-      writtenTodos = input.todos;
-    };
+      writtenTodos = input.todos
+    }
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer);
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1", writer)
 
-      // then, no duplicates
-    const matching = writtenTodos.filter((t: TodoInfo) => t.content === "Task 1 (updated)");
-    expect(matching.length).toBe(1);
-    expect(matching[0].status).toBe("in_progress");
-  });
+    // then, no duplicates
+    const matching = writtenTodos.filter(
+      (t: TodoInfo) => t.content === "Task 1 (updated)",
+    )
+    expect(matching.length).toBe(1)
+    expect(matching[0].status).toBe("in_progress")
+  })
 
   it("preserves todos without id field", async () => {
     // given
@@ -552,7 +552,7 @@ describe("syncAllTasksToTodos", () => {
         blocks: [],
         blockedBy: [],
       },
-    ];
+    ]
     const currentTodos: TodoInfo[] = [
       {
         id: "T-1",
@@ -563,13 +563,13 @@ describe("syncAllTasksToTodos", () => {
         content: "Todo without id",
         status: "pending",
       },
-    ];
-    mockCtx.client.session.todo.mockResolvedValue(currentTodos);
+    ]
+    mockCtx.client.session.todo.mockResolvedValue(currentTodos)
 
     // when
-    await syncAllTasksToTodos(mockCtx, tasks, "session-1");
+    await syncAllTasksToTodos(mockCtx, tasks, "session-1")
 
     // then
-    expect(mockCtx.client.session.todo).toHaveBeenCalled();
-  });
-});
+    expect(mockCtx.client.session.todo).toHaveBeenCalled()
+  })
+})

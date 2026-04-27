@@ -22,7 +22,9 @@ describe("collectCandidateBinaryPaths", () => {
     // then
     expect(candidates[0]).toBe("/bad/opencode")
     expect(candidates).toContain("/good/opencode")
-    expect(candidates.filter((candidate) => candidate === "/bad/opencode")).toHaveLength(1)
+    expect(
+      candidates.filter((candidate) => candidate === "/bad/opencode"),
+    ).toHaveLength(1)
   })
 })
 
@@ -38,7 +40,12 @@ describe("findWorkingOpencodeBinary", () => {
       binaryPath === "/good/opencode"
 
     // when
-    const resolved = await findWorkingOpencodeBinary(pathEnv, probe, which, "darwin")
+    const resolved = await findWorkingOpencodeBinary(
+      pathEnv,
+      probe,
+      which,
+      "darwin",
+    )
 
     // then
     expect(resolved).toBe("/good/opencode")
@@ -68,12 +75,9 @@ describe("withWorkingOpencodePath", () => {
     let observedPath = ""
 
     // when
-    await withWorkingOpencodePath(
-      async () => {
-        observedPath = process.env.PATH ?? ""
-      },
-      finder,
-    )
+    await withWorkingOpencodePath(async () => {
+      observedPath = process.env.PATH ?? ""
+    }, finder)
 
     // then
     expect(observedPath).toBe(["/good", "/bad", "/other"].join(delimiter))
@@ -89,12 +93,9 @@ describe("withWorkingOpencodePath", () => {
 
     // when & then
     await expect(
-      withWorkingOpencodePath(
-        async () => {
-          throw new Error("boom")
-        },
-        finder,
-      ),
+      withWorkingOpencodePath(async () => {
+        throw new Error("boom")
+      }, finder),
     ).rejects.toThrow("boom")
     expect(process.env.PATH).toBe(["/bad", "/other"].join(delimiter))
     process.env.PATH = originalPath

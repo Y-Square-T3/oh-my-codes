@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { clearPluginConfigFileDetectionCache, detectConfigFile, detectPluginConfigFile, parseJsonc, parseJsoncSafe, readJsoncFile } from "./jsonc-parser"
+import {
+  clearPluginConfigFileDetectionCache,
+  detectConfigFile,
+  detectPluginConfigFile,
+  parseJsonc,
+  parseJsoncSafe,
+  readJsoncFile,
+} from "./jsonc-parser"
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
@@ -268,7 +275,9 @@ describe("readJsoncFile", () => {
     writeFileSync(testFile, Buffer.concat([bomBytes, jsonBytes]))
 
     // when
-    const result = readJsoncFile<{ $schema: string; plugin: string[] }>(testFile)
+    const result = readJsoncFile<{ $schema: string; plugin: string[] }>(
+      testFile,
+    )
 
     // then
     expect(result).not.toBeNull()

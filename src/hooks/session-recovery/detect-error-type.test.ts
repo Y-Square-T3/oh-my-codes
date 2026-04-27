@@ -1,6 +1,10 @@
 /// <reference types="bun-types" />
 import { describe, expect, it } from "bun:test"
-import { detectErrorType, extractMessageIndex, extractUnavailableToolName } from "./detect-error-type"
+import {
+  detectErrorType,
+  extractMessageIndex,
+  extractUnavailableToolName,
+} from "./detect-error-type"
 
 describe("detectErrorType", () => {
   it("#given a tool_use/tool_result error #when detecting #then returns tool_result_missing", () => {
@@ -16,7 +20,9 @@ describe("detectErrorType", () => {
 
   it("#given a thinking block order error #when detecting #then returns thinking_block_order", () => {
     //#given
-    const error = { message: "thinking must be the first block in the response" }
+    const error = {
+      message: "thinking must be the first block in the response",
+    }
 
     //#when
     const result = detectErrorType(error)
@@ -27,7 +33,9 @@ describe("detectErrorType", () => {
 
   it("#given a thinking disabled violation #when detecting #then returns thinking_disabled_violation", () => {
     //#given
-    const error = { message: "thinking is disabled and cannot contain thinking blocks" }
+    const error = {
+      message: "thinking is disabled and cannot contain thinking blocks",
+    }
 
     //#when
     const result = detectErrorType(error)
@@ -156,7 +164,9 @@ describe("detectErrorType", () => {
 describe("extractMessageIndex", () => {
   it("#given an error referencing messages.5 #when extracting #then returns 5", () => {
     //#given
-    const error = { message: "Invalid value at messages.5: tool_result is required" }
+    const error = {
+      message: "Invalid value at messages.5: tool_result is required",
+    }
 
     //#when
     const result = extractMessageIndex(error)

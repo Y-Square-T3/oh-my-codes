@@ -42,7 +42,11 @@ function createDeps(): HookDeps {
   }
 }
 
-function createHelpers(deps: HookDeps, abortCalls: string[], clearCalls: string[]): AutoRetryHelpers {
+function createHelpers(
+  deps: HookDeps,
+  abortCalls: string[],
+  clearCalls: string[],
+): AutoRetryHelpers {
   return {
     abortSessionRequest: async (sessionID: string) => {
       abortCalls.push(sessionID)
@@ -70,10 +74,15 @@ describe("createEventHandler", () => {
     deps.sessionStates.set(sessionID, state)
     deps.sessionRetryInFlight.add(sessionID)
     deps.sessionStatusRetryKeys.set(sessionID, "retry:1")
-    const handler = createEventHandler(deps, createHelpers(deps, abortCalls, clearCalls))
+    const handler = createEventHandler(
+      deps,
+      createHelpers(deps, abortCalls, clearCalls),
+    )
 
     // when
-    await handler({ event: { type: "session.stop", properties: { sessionID } } })
+    await handler({
+      event: { type: "session.stop", properties: { sessionID } },
+    })
 
     // then
     expect(deps.sessionStatusRetryKeys.has(sessionID)).toBe(false)
@@ -93,10 +102,15 @@ describe("createEventHandler", () => {
     deps.sessionRetryInFlight.add(sessionID)
     deps.sessionFallbackTimeouts.set(sessionID, 1)
     deps.sessionStatusRetryKeys.set(sessionID, "retry:1")
-    const handler = createEventHandler(deps, createHelpers(deps, abortCalls, clearCalls))
+    const handler = createEventHandler(
+      deps,
+      createHelpers(deps, abortCalls, clearCalls),
+    )
 
     // when
-    await handler({ event: { type: "session.idle", properties: { sessionID } } })
+    await handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
 
     // then
     expect(deps.sessionStatusRetryKeys.has(sessionID)).toBe(false)
@@ -120,9 +134,17 @@ describe("createEventHandler", () => {
     deps.sessionRetryInFlight.add(sessionID)
     deps.sessionAwaitingFallbackResult.add(sessionID)
     deps.sessionStatusRetryKeys.set(sessionID, "retry:2")
-    const handler = createEventHandler(deps, createHelpers(deps, abortCalls, clearCalls))
+    const handler = createEventHandler(
+      deps,
+      createHelpers(deps, abortCalls, clearCalls),
+    )
 
-    await handler({ event: { type: "session.error", properties: { sessionID, error: { name: "AbortError" } } } })
+    await handler({
+      event: {
+        type: "session.error",
+        properties: { sessionID, error: { name: "AbortError" } },
+      },
+    })
 
     const resetState = deps.sessionStates.get(sessionID)
     expect(resetState?.originalModel).toBe("google/gemini-2.5-pro")
@@ -149,12 +171,22 @@ describe("createEventHandler", () => {
     state.attemptCount = 2
     state.pendingFallbackModel = "openai/gpt-5.4"
     deps.sessionStates.set(sessionID, state)
-    const handler = createEventHandler(deps, createHelpers(deps, abortCalls, clearCalls))
+    const handler = createEventHandler(
+      deps,
+      createHelpers(deps, abortCalls, clearCalls),
+    )
 
-    await handler({ event: { type: "session.error", properties: { sessionID, error: { name: "MessageAbortedError" } } } })
+    await handler({
+      event: {
+        type: "session.error",
+        properties: { sessionID, error: { name: "MessageAbortedError" } },
+      },
+    })
     clearCalls.length = 0
 
-    await handler({ event: { type: "session.idle", properties: { sessionID } } })
+    await handler({
+      event: { type: "session.idle", properties: { sessionID } },
+    })
 
     const resetState = deps.sessionStates.get(sessionID)
     expect(resetState?.currentModel).toBe("google/gemini-2.5-pro")

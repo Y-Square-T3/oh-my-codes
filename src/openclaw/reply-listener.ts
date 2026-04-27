@@ -46,19 +46,25 @@ async function terminateReplyListenerProcess(pid: number): Promise<void> {
 
   try {
     process.kill(pid, "SIGTERM")
-  } catch {
-  }
+  } catch {}
 }
 
 function hasReplyListenerCredentials(config: OpenClawConfig): boolean {
-  return Boolean(config.replyListener?.discordBotToken || config.replyListener?.telegramBotToken)
+  return Boolean(
+    config.replyListener?.discordBotToken ||
+    config.replyListener?.telegramBotToken,
+  )
 }
 
-function getNormalizedReplyListenerConfig(config: OpenClawConfig): OpenClawConfig {
+function getNormalizedReplyListenerConfig(
+  config: OpenClawConfig,
+): OpenClawConfig {
   return normalizeReplyListenerConfig(config)
 }
 
-function getReplyListenerRuntimeSignature(config: Pick<OpenClawConfig, "replyListener"> | null): string {
+function getReplyListenerRuntimeSignature(
+  config: Pick<OpenClawConfig, "replyListener"> | null,
+): string {
   return JSON.stringify(config?.replyListener ?? null)
 }
 
@@ -100,13 +106,17 @@ export async function pollLoop(): Promise<void> {
   }
 
   const startupToken = getReplyListenerStartupTokenFromEnv()
-  const state = readReplyListenerDaemonState() ?? createPendingReplyListenerState(startupToken ?? "")
+  const state =
+    readReplyListenerDaemonState() ??
+    createPendingReplyListenerState(startupToken ?? "")
   state.configSignature = getReplyListenerRuntimeSignature(config)
   if (startupToken) {
     state.startupToken = startupToken
   }
 
-  const rateLimiter = new ReplyListenerRateLimiter(config.replyListener?.rateLimitPerMinute || 10)
+  const rateLimiter = new ReplyListenerRateLimiter(
+    config.replyListener?.rateLimitPerMinute || 10,
+  )
   let lastPruneAt = Date.now()
 
   const shutdown = (): void => {
@@ -172,22 +182,30 @@ function createStartFailureResult(
   }
 }
 
-export async function startReplyListener(
-  config: OpenClawConfig,
-): Promise<{ success: boolean; message: string; state?: ReplyListenerDaemonState; error?: string }> {
+export async function startReplyListener(config: OpenClawConfig): Promise<{
+  success: boolean
+  message: string
+  state?: ReplyListenerDaemonState
+  error?: string
+}> {
   const normalizedConfig = getNormalizedReplyListenerConfig(config)
   const replyListener = normalizedConfig.replyListener
   if (!replyListener?.discordBotToken && !replyListener?.telegramBotToken) {
     return {
       success: false,
-      message: "No enabled reply listener platforms configured (missing bot tokens/channels)",
+      message:
+        "No enabled reply listener platforms configured (missing bot tokens/channels)",
     }
   }
 
   if (await isDaemonRunning()) {
     const state = readReplyListenerDaemonState()
-    const runtimeSignature = state?.configSignature ?? getReplyListenerRuntimeSignature(readReplyListenerDaemonConfig())
-    if (runtimeSignature === getReplyListenerRuntimeSignature(normalizedConfig)) {
+    const runtimeSignature =
+      state?.configSignature ??
+      getReplyListenerRuntimeSignature(readReplyListenerDaemonConfig())
+    if (
+      runtimeSignature === getReplyListenerRuntimeSignature(normalizedConfig)
+    ) {
       return {
         success: true,
         message: "Reply listener daemon is already running",
@@ -208,7 +226,8 @@ export async function startReplyListener(
     if (!(await waitForDaemonToStop(REPLY_LISTENER_STOP_TIMEOUT_MS))) {
       return {
         success: false,
-        message: "Timed out waiting for reply listener daemon to stop before restart",
+        message:
+          "Timed out waiting for reply listener daemon to stop before restart",
         state: readReplyListenerDaemonState() || undefined,
       }
     }
@@ -226,7 +245,8 @@ export async function startReplyListener(
 
   const startupToken = createReplyListenerStartupToken()
   const pendingState = createPendingReplyListenerState(startupToken)
-  pendingState.configSignature = getReplyListenerRuntimeSignature(normalizedConfig)
+  pendingState.configSignature =
+    getReplyListenerRuntimeSignature(normalizedConfig)
   writeReplyListenerDaemonState(pendingState)
 
   const currentFile = import.meta.url
@@ -240,9 +260,15 @@ export async function startReplyListener(
     processInfo.unref()
 
     if (!processInfo.pid) {
-      const stoppedState = markReplyListenerStopped(pendingState, "Failed to start daemon process")
+      const stoppedState = markReplyListenerStopped(
+        pendingState,
+        "Failed to start daemon process",
+      )
       writeReplyListenerDaemonState(stoppedState)
-      return createStartFailureResult("Failed to start daemon process", stoppedState)
+      return createStartFailureResult(
+        "Failed to start daemon process",
+        stoppedState,
+      )
     }
 
     writeReplyListenerPid(processInfo.pid)
@@ -270,7 +296,9 @@ export async function startReplyListener(
     }
 
     writeReplyListenerDaemonState(readyState)
-    logReplyListenerMessage(`Reply listener daemon started with PID ${processInfo.pid}`)
+    logReplyListenerMessage(
+      `Reply listener daemon started with PID ${processInfo.pid}`,
+    )
     return {
       success: true,
       message: `Reply listener daemon started with PID ${processInfo.pid}`,
@@ -310,7 +338,8 @@ export async function stopReplyListener(): Promise<{
     removeReplyListenerPid()
     return {
       success: true,
-      message: "Reply listener daemon was not running (cleaned up stale PID file)",
+      message:
+        "Reply listener daemon was not running (cleaned up stale PID file)",
     }
   }
 

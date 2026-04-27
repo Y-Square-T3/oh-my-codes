@@ -35,7 +35,12 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(sisyphus.requiresAnyModel).toBe(true)
 
     const primary = sisyphus.fallbackChain[0]
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode", "vercel"])
+    expect(primary.providers).toEqual([
+      "anthropic",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
     expect(primary.model).toBe("claude-opus-4-7")
     expect(primary.variant).toBe("max")
 
@@ -148,7 +153,12 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(tertiary.model).toBe("glm-4.6v")
 
     const last = multimodalLooker.fallbackChain[3]
-    expect(last.providers).toEqual(["openai", "github-copilot", "opencode", "vercel"])
+    expect(last.providers).toEqual([
+      "openai",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
     expect(last.model).toBe("gpt-5-nano")
   })
 
@@ -164,7 +174,12 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
 
     const primary = prometheus.fallbackChain[0]
     expect(primary.model).toBe("claude-opus-4-7")
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode", "vercel"])
+    expect(primary.providers).toEqual([
+      "anthropic",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
     expect(primary.variant).toBe("max")
   })
 
@@ -180,10 +195,17 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
 
     const primary = metis.fallbackChain[0]
     expect(primary.model).toBe("claude-opus-4-7")
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode", "vercel"])
+    expect(primary.providers).toEqual([
+      "anthropic",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
     expect(primary.variant).toBe("max")
 
-    const openAiFallback = metis.fallbackChain.find((entry) => entry.providers.includes("openai"))
+    const openAiFallback = metis.fallbackChain.find((entry) =>
+      entry.providers.includes("openai"),
+    )
     expect(openAiFallback).toEqual({
       providers: ["openai", "github-copilot", "opencode", "vercel"],
       model: "gpt-5.4",
@@ -242,10 +264,18 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     const sisyphusJunior = AGENT_MODEL_REQUIREMENTS["sisyphus-junior"]
 
     // when - locating the OpenAI fallback entry
-    const openAiFallback = sisyphusJunior.fallbackChain.find((entry) => entry.providers.includes("openai"))
-    const openAiFallbackIndex = sisyphusJunior.fallbackChain.findIndex((entry) => entry.providers.includes("openai"))
-    const minimaxIndex = sisyphusJunior.fallbackChain.findIndex((entry) => entry.model === "minimax-m2.7")
-    const bigPickleIndex = sisyphusJunior.fallbackChain.findIndex((entry) => entry.model === "big-pickle")
+    const openAiFallback = sisyphusJunior.fallbackChain.find((entry) =>
+      entry.providers.includes("openai"),
+    )
+    const openAiFallbackIndex = sisyphusJunior.fallbackChain.findIndex(
+      (entry) => entry.providers.includes("openai"),
+    )
+    const minimaxIndex = sisyphusJunior.fallbackChain.findIndex(
+      (entry) => entry.model === "minimax-m2.7",
+    )
+    const bigPickleIndex = sisyphusJunior.fallbackChain.findIndex(
+      (entry) => entry.model === "big-pickle",
+    )
 
     // then
     expect(openAiFallback).toEqual({
@@ -265,7 +295,13 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     // #when - accessing hephaestus requirement
     // #then - requiresProvider includes openai, github-copilot, venice, and opencode
     expect(hephaestus).toBeDefined()
-    expect(hephaestus.requiresProvider).toEqual(["openai", "github-copilot", "venice", "opencode", "vercel"])
+    expect(hephaestus.requiresProvider).toEqual([
+      "openai",
+      "github-copilot",
+      "venice",
+      "opencode",
+      "vercel",
+    ])
     expect(hephaestus.requiresModel).toBeUndefined()
   })
 
@@ -419,12 +455,22 @@ describe("CATEGORY_MODEL_REQUIREMENTS", () => {
     const primary = unspecifiedHigh.fallbackChain[0]
     expect(primary.model).toBe("claude-opus-4-7")
     expect(primary.variant).toBe("max")
-    expect(primary.providers).toEqual(["anthropic", "github-copilot", "opencode", "vercel"])
+    expect(primary.providers).toEqual([
+      "anthropic",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
 
     const secondary = unspecifiedHigh.fallbackChain[1]
     expect(secondary.model).toBe("gpt-5.4")
     expect(secondary.variant).toBe("high")
-    expect(secondary.providers).toEqual(["openai", "github-copilot", "opencode", "vercel"])
+    expect(secondary.providers).toEqual([
+      "openai",
+      "github-copilot",
+      "opencode",
+      "vercel",
+    ])
   })
 
   test("artistry has valid fallbackChain with gemini-3.1-pro as primary", () => {
@@ -538,8 +584,16 @@ describe("ModelRequirement type", () => {
     // given - a valid ModelRequirement object
     const requirement: ModelRequirement = {
       fallbackChain: [
-        { providers: ["anthropic", "github-copilot"], model: "claude-opus-4-7", variant: "max" },
-        { providers: ["openai", "github-copilot"], model: "gpt-5.4", variant: "high" },
+        {
+          providers: ["anthropic", "github-copilot"],
+          model: "claude-opus-4-7",
+          variant: "max",
+        },
+        {
+          providers: ["openai", "github-copilot"],
+          model: "gpt-5.4",
+          variant: "high",
+        },
       ],
     }
 
@@ -578,22 +632,22 @@ describe("ModelRequirement type", () => {
     }
   })
 
-   test("all fallbackChain entries have non-empty providers array", () => {
-     // given - all agent and category requirements
-     const allRequirements = [
-       ...Object.values(AGENT_MODEL_REQUIREMENTS),
-       ...Object.values(CATEGORY_MODEL_REQUIREMENTS),
-     ]
+  test("all fallbackChain entries have non-empty providers array", () => {
+    // given - all agent and category requirements
+    const allRequirements = [
+      ...Object.values(AGENT_MODEL_REQUIREMENTS),
+      ...Object.values(CATEGORY_MODEL_REQUIREMENTS),
+    ]
 
-     // when - checking each entry in fallbackChain
-     // then - all have non-empty providers array
-     for (const req of allRequirements) {
-       for (const entry of req.fallbackChain) {
-         expect(entry.providers).toBeArray()
-         expect(entry.providers.length).toBeGreaterThan(0)
-       }
-     }
-   })
+    // when - checking each entry in fallbackChain
+    // then - all have non-empty providers array
+    for (const req of allRequirements) {
+      for (const entry of req.fallbackChain) {
+        expect(entry.providers).toBeArray()
+        expect(entry.providers.length).toBeGreaterThan(0)
+      }
+    }
+  })
 })
 
 describe("requiresModel field in categories", () => {
@@ -618,11 +672,13 @@ describe("gpt-5.3-codex provider restrictions", () => {
   test("no gpt-5.3-codex entry in AGENT_MODEL_REQUIREMENTS includes github-copilot as provider", () => {
     // given - all agent requirements
     const allAgentEntries = Object.values(AGENT_MODEL_REQUIREMENTS).flatMap(
-      (req) => req.fallbackChain
+      (req) => req.fallbackChain,
     )
 
     // when - filtering entries with gpt-5.3-codex model
-    const codexEntries = allAgentEntries.filter((entry) => entry.model === "gpt-5.3-codex")
+    const codexEntries = allAgentEntries.filter(
+      (entry) => entry.model === "gpt-5.3-codex",
+    )
 
     // then - none of them include github-copilot as a provider
     for (const entry of codexEntries) {
@@ -632,12 +688,14 @@ describe("gpt-5.3-codex provider restrictions", () => {
 
   test("no gpt-5.3-codex entry in CATEGORY_MODEL_REQUIREMENTS includes github-copilot as provider", () => {
     // given - all category requirements
-    const allCategoryEntries = Object.values(CATEGORY_MODEL_REQUIREMENTS).flatMap(
-      (req) => req.fallbackChain
-    )
+    const allCategoryEntries = Object.values(
+      CATEGORY_MODEL_REQUIREMENTS,
+    ).flatMap((req) => req.fallbackChain)
 
     // when - filtering entries with gpt-5.3-codex model
-    const codexEntries = allCategoryEntries.filter((entry) => entry.model === "gpt-5.3-codex")
+    const codexEntries = allCategoryEntries.filter(
+      (entry) => entry.model === "gpt-5.3-codex",
+    )
 
     // then - none of them include github-copilot as a provider
     for (const entry of codexEntries) {

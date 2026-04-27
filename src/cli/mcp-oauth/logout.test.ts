@@ -52,7 +52,9 @@ describe("logout command", () => {
     const serverName = "non-existent-server"
 
     // when
-    const exitCode = await logout(serverName, { serverUrl: "https://nonexistent.example.com" })
+    const exitCode = await logout(serverName, {
+      serverUrl: "https://nonexistent.example.com",
+    })
 
     // then
     expect(exitCode).toBe(0)

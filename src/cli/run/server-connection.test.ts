@@ -1,4 +1,12 @@
-import { describe, it, expect, mock, beforeEach, afterEach, afterAll } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  mock,
+  beforeEach,
+  afterEach,
+  afterAll,
+} from "bun:test"
 
 import * as originalSdk from "@opencode-ai/sdk"
 import * as originalPortUtils from "../../shared/port-utils"
@@ -12,16 +20,20 @@ const mockCreateOpencode = mock(() =>
   Promise.resolve({
     client: { session: {} },
     server: { url: "http://127.0.0.1:4096", close: mockServerClose },
-  })
+  }),
 )
 const mockCreateOpencodeClient = mock((options?: { baseUrl?: string }) => ({
   session: {},
   baseUrl: options?.baseUrl,
 }))
 const mockIsPortAvailable = mock(() => Promise.resolve(true))
-const mockGetAvailableServerPort = mock(() => Promise.resolve({ port: 4096, wasAutoSelected: false }))
+const mockGetAvailableServerPort = mock(() =>
+  Promise.resolve({ port: 4096, wasAutoSelected: false }),
+)
 const mockConsoleLog = mock(() => {})
-const mockWithWorkingOpencodePath = mock((startServer: () => Promise<unknown>) => startServer())
+const mockWithWorkingOpencodePath = mock(
+  (startServer: () => Promise<unknown>) => startServer(),
+)
 const mockInjectServerAuthIntoClient = mock(() => {})
 
 mock.module("@opencode-ai/sdk", () => ({
@@ -75,21 +87,52 @@ describe("createServerConnection", () => {
     const signal = new AbortController().signal
 
     // when
-    const localhostResult = await createServerConnection({ attach: "http://localhost:8080", signal })
-    const loopbackResult = await createServerConnection({ attach: "http://127.0.0.1:8080", signal })
-    const anyBindResult = await createServerConnection({ attach: "http://0.0.0.0:8080", signal })
-    const remoteResult = await createServerConnection({ attach: "https://example.com", signal })
+    const localhostResult = await createServerConnection({
+      attach: "http://localhost:8080",
+      signal,
+    })
+    const loopbackResult = await createServerConnection({
+      attach: "http://127.0.0.1:8080",
+      signal,
+    })
+    const anyBindResult = await createServerConnection({
+      attach: "http://0.0.0.0:8080",
+      signal,
+    })
+    const remoteResult = await createServerConnection({
+      attach: "https://example.com",
+      signal,
+    })
 
     // then
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "http://localhost:8080" })
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "http://127.0.0.1:8080" })
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "http://0.0.0.0:8080" })
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "https://example.com" })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "http://localhost:8080",
+    })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "http://127.0.0.1:8080",
+    })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "http://0.0.0.0:8080",
+    })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "https://example.com",
+    })
     expect(mockInjectServerAuthIntoClient).toHaveBeenCalledTimes(3)
-    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(1, localhostResult.client)
-    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(2, loopbackResult.client)
-    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(3, anyBindResult.client)
-    expect(mockInjectServerAuthIntoClient).not.toHaveBeenCalledWith(remoteResult.client)
+    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(
+      1,
+      localhostResult.client,
+    )
+    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(
+      2,
+      loopbackResult.client,
+    )
+    expect(mockInjectServerAuthIntoClient).toHaveBeenNthCalledWith(
+      3,
+      anyBindResult.client,
+    )
+    expect(mockInjectServerAuthIntoClient).not.toHaveBeenCalledWith(
+      remoteResult.client,
+    )
     expect(mockWithWorkingOpencodePath).not.toHaveBeenCalled()
     localhostResult.cleanup()
     loopbackResult.cleanup()
@@ -107,7 +150,9 @@ describe("createServerConnection", () => {
     const result = await createServerConnection({ attach: attachUrl, signal })
 
     // then
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: attachUrl })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: attachUrl,
+    })
     expect(mockInjectServerAuthIntoClient).not.toHaveBeenCalled()
     result.cleanup()
     expect(mockServerClose).not.toHaveBeenCalled()
@@ -140,7 +185,11 @@ describe("createServerConnection", () => {
     // then
     expect(mockIsPortAvailable).toHaveBeenCalledWith(8080, "127.0.0.1")
     expect(mockWithWorkingOpencodePath).toHaveBeenCalledTimes(1)
-    expect(mockCreateOpencode).toHaveBeenCalledWith({ signal, port: 8080, hostname: "127.0.0.1" })
+    expect(mockCreateOpencode).toHaveBeenCalledWith({
+      signal,
+      port: 8080,
+      hostname: "127.0.0.1",
+    })
     expect(mockCreateOpencodeClient).not.toHaveBeenCalled()
     expect(result.client).toBeDefined()
     expect(result.cleanup).toBeDefined()
@@ -153,7 +202,9 @@ describe("createServerConnection", () => {
     const signal = new AbortController().signal
     const port = 8080
     mockIsPortAvailable.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
-    mockCreateOpencode.mockRejectedValueOnce(new Error("Failed to start server on port 8080"))
+    mockCreateOpencode.mockRejectedValueOnce(
+      new Error("Failed to start server on port 8080"),
+    )
 
     // when
     const result = await createServerConnection({ port, signal })
@@ -161,7 +212,9 @@ describe("createServerConnection", () => {
     // then
     expect(mockIsPortAvailable).toHaveBeenNthCalledWith(1, 8080, "127.0.0.1")
     expect(mockIsPortAvailable).toHaveBeenNthCalledWith(2, 8080, "127.0.0.1")
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "http://127.0.0.1:8080" })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "http://127.0.0.1:8080",
+    })
     result.cleanup()
     expect(mockServerClose).not.toHaveBeenCalled()
   })
@@ -178,7 +231,9 @@ describe("createServerConnection", () => {
     // then
     expect(mockIsPortAvailable).toHaveBeenCalledWith(8080, "127.0.0.1")
     expect(mockCreateOpencode).not.toHaveBeenCalled()
-    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({ baseUrl: "http://127.0.0.1:8080" })
+    expect(mockCreateOpencodeClient).toHaveBeenCalledWith({
+      baseUrl: "http://127.0.0.1:8080",
+    })
     expect(result.client).toBeDefined()
     expect(result.cleanup).toBeDefined()
     result.cleanup()
@@ -188,7 +243,10 @@ describe("createServerConnection", () => {
   it("auto mode uses getAvailableServerPort", async () => {
     // given
     const signal = new AbortController().signal
-    mockGetAvailableServerPort.mockResolvedValueOnce({ port: 4100, wasAutoSelected: true })
+    mockGetAvailableServerPort.mockResolvedValueOnce({
+      port: 4100,
+      wasAutoSelected: true,
+    })
 
     // when
     const result = await createServerConnection({ signal })
@@ -196,7 +254,11 @@ describe("createServerConnection", () => {
     // then
     expect(mockGetAvailableServerPort).toHaveBeenCalledWith(4096, "127.0.0.1")
     expect(mockWithWorkingOpencodePath).toHaveBeenCalledTimes(1)
-    expect(mockCreateOpencode).toHaveBeenCalledWith({ signal, port: 4100, hostname: "127.0.0.1" })
+    expect(mockCreateOpencode).toHaveBeenCalledWith({
+      signal,
+      port: 4100,
+      hostname: "127.0.0.1",
+    })
     expect(mockCreateOpencodeClient).not.toHaveBeenCalled()
     expect(result.client).toBeDefined()
     expect(result.cleanup).toBeDefined()
@@ -222,10 +284,26 @@ describe("createServerConnection", () => {
     const result = await createServerConnection({ signal })
 
     // then
-    expect(mockGetAvailableServerPort).toHaveBeenNthCalledWith(1, 4096, "127.0.0.1")
-    expect(mockGetAvailableServerPort).toHaveBeenNthCalledWith(2, 4097, "127.0.0.1")
-    expect(mockCreateOpencode).toHaveBeenNthCalledWith(1, { signal, port: 4096, hostname: "127.0.0.1" })
-    expect(mockCreateOpencode).toHaveBeenNthCalledWith(2, { signal, port: 4097, hostname: "127.0.0.1" })
+    expect(mockGetAvailableServerPort).toHaveBeenNthCalledWith(
+      1,
+      4096,
+      "127.0.0.1",
+    )
+    expect(mockGetAvailableServerPort).toHaveBeenNthCalledWith(
+      2,
+      4097,
+      "127.0.0.1",
+    )
+    expect(mockCreateOpencode).toHaveBeenNthCalledWith(1, {
+      signal,
+      port: 4096,
+      hostname: "127.0.0.1",
+    })
+    expect(mockCreateOpencode).toHaveBeenNthCalledWith(2, {
+      signal,
+      port: 4097,
+      hostname: "127.0.0.1",
+    })
     result.cleanup()
     expect(mockServerClose).toHaveBeenCalledTimes(1)
   })
@@ -257,9 +335,15 @@ describe("createServerConnection", () => {
     const signal = new AbortController().signal
 
     // when & then
-    await expect(createServerConnection({ port: 0, signal })).rejects.toThrow("Port must be between 1 and 65535")
-    await expect(createServerConnection({ port: -1, signal })).rejects.toThrow("Port must be between 1 and 65535")
-    await expect(createServerConnection({ port: 99999, signal })).rejects.toThrow("Port must be between 1 and 65535")
+    await expect(createServerConnection({ port: 0, signal })).rejects.toThrow(
+      "Port must be between 1 and 65535",
+    )
+    await expect(createServerConnection({ port: -1, signal })).rejects.toThrow(
+      "Port must be between 1 and 65535",
+    )
+    await expect(
+      createServerConnection({ port: 99999, signal }),
+    ).rejects.toThrow("Port must be between 1 and 65535")
   })
 
   it("cleanup calls server.close for owned server", async () => {

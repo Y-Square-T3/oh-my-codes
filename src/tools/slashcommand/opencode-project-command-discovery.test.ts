@@ -11,8 +11,12 @@ function requireFresh<T>(modulePath: string): T {
   return require(modulePath) as T
 }
 
-function discoverCommandsSync(...args: Parameters<typeof import("./command-discovery").discoverCommandsSync>): ReturnType<typeof import("./command-discovery").discoverCommandsSync> {
-  return requireFresh<typeof import("./command-discovery")>("./command-discovery").discoverCommandsSync(...args)
+function discoverCommandsSync(
+  ...args: Parameters<typeof import("./command-discovery").discoverCommandsSync>
+): ReturnType<typeof import("./command-discovery").discoverCommandsSync> {
+  return requireFresh<typeof import("./command-discovery")>(
+    "./command-discovery",
+  ).discoverCommandsSync(...args)
 }
 
 function writeCommand(path: string, description: string, body: string): void {
@@ -24,7 +28,9 @@ describe("opencode project command discovery", () => {
   let tempDir = ""
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), "omo-opencode-project-command-discovery-"))
+    tempDir = mkdtempSync(
+      join(tmpdir(), "omo-opencode-project-command-discovery-"),
+    )
   })
 
   afterEach(() => {
@@ -62,7 +68,9 @@ describe("opencode project command discovery", () => {
     )
 
     // when
-    const names = discoverCommandsSync(nestedDirectory).map(command => command.name)
+    const names = discoverCommandsSync(nestedDirectory).map(
+      (command) => command.name,
+    )
 
     // then
     expect(names).toContain("deploy/staging")

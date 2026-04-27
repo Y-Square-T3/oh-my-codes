@@ -17,7 +17,6 @@ import { log } from "../../shared/logger"
 
 const SUMMARIZE_RETRY_TOTAL_TIMEOUT_MS = 120_000
 
-
 async function showToastSafely(
   client: Client,
   body: {
@@ -53,7 +52,10 @@ export async function runSummarizeRetryStrategy(params: {
     return
   }
 
-  const retryState = getOrCreateRetryState(params.autoCompactState, params.sessionID)
+  const retryState = getOrCreateRetryState(
+    params.autoCompactState,
+    params.sessionID,
+  )
   const now = Date.now()
 
   if (retryState.firstAttemptTime === 0) {
@@ -67,7 +69,8 @@ export async function runSummarizeRetryStrategy(params: {
       params.client,
       {
         title: "Auto Compact Timed Out",
-        message: "Compaction retries exceeded the timeout window. Please start a new session.",
+        message:
+          "Compaction retries exceeded the timeout window. Please start a new session.",
         variant: "error",
         duration: 5000,
       },
@@ -79,7 +82,10 @@ export async function runSummarizeRetryStrategy(params: {
   clearRetryTimer(params.autoCompactState, params.sessionID)
 
   if (params.errorType?.includes("non-empty content")) {
-    const attempt = getEmptyContentAttempt(params.autoCompactState, params.sessionID)
+    const attempt = getEmptyContentAttempt(
+      params.autoCompactState,
+      params.sessionID,
+    )
     if (attempt < 3) {
       const fixed = await fixEmptyMessages({
         sessionID: params.sessionID,
@@ -127,7 +133,10 @@ export async function runSummarizeRetryStrategy(params: {
 
     if (providerID && modelID) {
       try {
-        await sanitizeEmptyMessagesBeforeSummarize(params.sessionID, params.client)
+        await sanitizeEmptyMessagesBeforeSummarize(
+          params.sessionID,
+          params.client,
+        )
 
         await showToastSafely(
           params.client,
@@ -140,14 +149,19 @@ export async function runSummarizeRetryStrategy(params: {
           "summarize retry attempt",
         )
 
-        const { providerID: targetProviderID, modelID: targetModelID } = resolveCompactionModel(
-          params.pluginConfig,
-          params.sessionID,
-          providerID,
-          modelID
-        )
+        const { providerID: targetProviderID, modelID: targetModelID } =
+          resolveCompactionModel(
+            params.pluginConfig,
+            params.sessionID,
+            providerID,
+            modelID,
+          )
 
-        const summarizeBody = { providerID: targetProviderID, modelID: targetModelID, auto: true }
+        const summarizeBody = {
+          providerID: targetProviderID,
+          modelID: targetModelID,
+          auto: true,
+        }
         await params.client.session.summarize({
           path: { id: params.sessionID },
           body: summarizeBody as never,
@@ -162,14 +176,17 @@ export async function runSummarizeRetryStrategy(params: {
           error: error instanceof Error ? error.message : String(error),
         })
 
-        const remainingTimeMs = SUMMARIZE_RETRY_TOTAL_TIMEOUT_MS - (Date.now() - retryState.firstAttemptTime)
+        const remainingTimeMs =
+          SUMMARIZE_RETRY_TOTAL_TIMEOUT_MS -
+          (Date.now() - retryState.firstAttemptTime)
         if (remainingTimeMs <= 0) {
           clearSessionState(params.autoCompactState, params.sessionID)
           await showToastSafely(
             params.client,
             {
               title: "Auto Compact Timed Out",
-              message: "Compaction retries exceeded the timeout window. Please start a new session.",
+              message:
+                "Compaction retries exceeded the timeout window. Please start a new session.",
               variant: "error",
               duration: 5000,
             },
@@ -181,7 +198,11 @@ export async function runSummarizeRetryStrategy(params: {
         const delay =
           RETRY_CONFIG.initialDelayMs *
           Math.pow(RETRY_CONFIG.backoffFactor, retryState.attempt - 1)
-        const cappedDelay = Math.min(delay, RETRY_CONFIG.maxDelayMs, remainingTimeMs)
+        const cappedDelay = Math.min(
+          delay,
+          RETRY_CONFIG.maxDelayMs,
+          remainingTimeMs,
+        )
 
         const timeout = setTimeout(() => {
           params.autoCompactState.retryTimerBySession.delete(params.sessionID)

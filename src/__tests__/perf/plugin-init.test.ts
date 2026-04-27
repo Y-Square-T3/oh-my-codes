@@ -34,7 +34,9 @@ function createPluginInput(directory: string): PluginInput {
   }
 }
 
-async function importFreshPluginModule(): Promise<(typeof import("../../index"))["default"]> {
+async function importFreshPluginModule(): Promise<
+  (typeof import("../../index"))["default"]
+> {
   const token = `${Date.now()}-${Math.random()}`
   return (await import(`../../index?perf=${token}`)).default
 }

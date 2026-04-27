@@ -4,7 +4,13 @@
  * Handles reading/writing boulder.json for active plan tracking.
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs"
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  readdirSync,
+} from "node:fs"
 import { dirname, join, basename } from "node:path"
 import type { BoulderState, PlanProgress, TaskSessionState } from "./types"
 import { BOULDER_DIR, BOULDER_FILE, PROMETHEUS_PLANS_DIR } from "./constants"
@@ -31,20 +37,28 @@ export function readBoulderState(directory: string): BoulderState | null {
     if (!Array.isArray(parsed.session_ids)) {
       parsed.session_ids = []
     }
-    if (!parsed.session_origins || typeof parsed.session_origins !== "object" || Array.isArray(parsed.session_origins)) {
+    if (
+      !parsed.session_origins ||
+      typeof parsed.session_origins !== "object" ||
+      Array.isArray(parsed.session_origins)
+    ) {
       parsed.session_origins = {}
     }
     if (parsed.session_ids.length === 1) {
       const soleSessionId = parsed.session_ids[0]
       if (
-        typeof soleSessionId === "string"
-        && parsed.session_origins[soleSessionId] !== "appended"
-        && parsed.session_origins[soleSessionId] !== "direct"
+        typeof soleSessionId === "string" &&
+        parsed.session_origins[soleSessionId] !== "appended" &&
+        parsed.session_origins[soleSessionId] !== "direct"
       ) {
         parsed.session_origins[soleSessionId] = "direct"
       }
     }
-    if (!parsed.task_sessions || typeof parsed.task_sessions !== "object" || Array.isArray(parsed.task_sessions)) {
+    if (
+      !parsed.task_sessions ||
+      typeof parsed.task_sessions !== "object" ||
+      Array.isArray(parsed.task_sessions)
+    ) {
       parsed.task_sessions = {}
     }
     return parsed as BoulderState
@@ -53,7 +67,10 @@ export function readBoulderState(directory: string): BoulderState | null {
   }
 }
 
-export function writeBoulderState(directory: string, state: BoulderState): boolean {
+export function writeBoulderState(
+  directory: string,
+  state: BoulderState,
+): boolean {
   const filePath = getBoulderFilePath(directory)
 
   try {
@@ -77,7 +94,11 @@ export function appendSessionId(
   const state = readBoulderState(directory)
   if (!state) return null
 
-  if (!state.session_origins || typeof state.session_origins !== "object" || Array.isArray(state.session_origins)) {
+  if (
+    !state.session_origins ||
+    typeof state.session_origins !== "object" ||
+    Array.isArray(state.session_origins)
+  ) {
     state.session_origins = {}
   }
 
@@ -121,7 +142,10 @@ export function clearBoulderState(directory: string): boolean {
   }
 }
 
-export function getTaskSessionState(directory: string, taskKey: string): TaskSessionState | null {
+export function getTaskSessionState(
+  directory: string,
+  taskKey: string,
+): TaskSessionState | null {
   const state = readBoulderState(directory)
   if (!state?.task_sessions) {
     return null
@@ -227,7 +251,9 @@ export function getPlanProgress(planPath: string): PlanProgress {
 
     // Check if the plan has structured sections (## TODOs / ## Final Verification Wave)
     const hasStructuredSections = lines.some(
-      (line) => TODO_HEADING_PATTERN.test(line) || FINAL_VERIFICATION_HEADING_PATTERN.test(line),
+      (line) =>
+        TODO_HEADING_PATTERN.test(line) ||
+        FINAL_VERIFICATION_HEADING_PATTERN.test(line),
     )
 
     if (hasStructuredSections) {
@@ -263,7 +289,9 @@ function getStructuredPlanProgress(lines: string[]): PlanProgress {
     }
 
     const checkedMatch = line.match(CHECKED_CHECKBOX_PATTERN)
-    const uncheckedMatch = checkedMatch ? null : line.match(UNCHECKED_CHECKBOX_PATTERN)
+    const uncheckedMatch = checkedMatch
+      ? null
+      : line.match(UNCHECKED_CHECKBOX_PATTERN)
     const match = checkedMatch ?? uncheckedMatch
     if (!match) {
       continue
@@ -274,7 +302,8 @@ function getStructuredPlanProgress(lines: string[]): PlanProgress {
     }
 
     const taskBody = match[2].trim()
-    const labelPattern = section === "todo" ? TODO_TASK_PATTERN : FINAL_WAVE_TASK_PATTERN
+    const labelPattern =
+      section === "todo" ? TODO_TASK_PATTERN : FINAL_WAVE_TASK_PATTERN
     if (!labelPattern.test(taskBody)) {
       continue
     }

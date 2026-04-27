@@ -1,4 +1,7 @@
-import type { ClaudeHooksConfig, HookMatcher } from "../hooks/claude-code-hooks/types"
+import type {
+  ClaudeHooksConfig,
+  HookMatcher,
+} from "../hooks/claude-code-hooks/types"
 
 /**
  * Escape all regex special characters EXCEPT asterisk (*).
@@ -34,7 +37,7 @@ export function matchesToolMatcher(toolName: string, matcher: string): boolean {
 export function findMatchingHooks(
   config: ClaudeHooksConfig,
   eventName: keyof ClaudeHooksConfig,
-  toolName?: string
+  toolName?: string,
 ): HookMatcher[] {
   const hookMatchers = config[eventName]
   if (!hookMatchers) return []

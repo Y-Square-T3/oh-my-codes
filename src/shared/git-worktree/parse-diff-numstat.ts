@@ -2,7 +2,7 @@ import type { GitFileStat, GitFileStatus } from "./types"
 
 export function parseGitDiffNumstat(
   output: string,
-  statusMap: Map<string, GitFileStatus>
+  statusMap: Map<string, GitFileStatus>,
 ): GitFileStat[] {
   if (!output) return []
 

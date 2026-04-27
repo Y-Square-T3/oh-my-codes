@@ -21,40 +21,40 @@ session.idle
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `handler.ts` | `createTodoContinuationHandler()` — event router, delegates to idle/non-idle handlers |
-| `idle-event.ts` | `handleSessionIdle()` — main decision gate for session.idle |
-| `non-idle-events.ts` | `handleNonIdleEvent()` — handles session.error (abort detection) |
-| `session-state.ts` | `SessionStateStore` — per-session failure/abort/cooldown state |
-| `todo.ts` | Check todo completion status via session store |
-| `countdown.ts` | 2s countdown toast before injection |
-| `abort-detection.ts` | Detect MessageAbortedError / AbortError |
-| `continuation-injection.ts` | Build + inject CONTINUATION_PROMPT into session |
-| `message-directory.ts` | Temp dir for message injection exchange |
-| `constants.ts` | Timing constants, CONTINUATION_PROMPT, skip agents |
-| `types.ts` | `SessionState`, handler argument types |
+| File                        | Purpose                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `handler.ts`                | `createTodoContinuationHandler()` — event router, delegates to idle/non-idle handlers |
+| `idle-event.ts`             | `handleSessionIdle()` — main decision gate for session.idle                           |
+| `non-idle-events.ts`        | `handleNonIdleEvent()` — handles session.error (abort detection)                      |
+| `session-state.ts`          | `SessionStateStore` — per-session failure/abort/cooldown state                        |
+| `todo.ts`                   | Check todo completion status via session store                                        |
+| `countdown.ts`              | 2s countdown toast before injection                                                   |
+| `abort-detection.ts`        | Detect MessageAbortedError / AbortError                                               |
+| `continuation-injection.ts` | Build + inject CONTINUATION_PROMPT into session                                       |
+| `message-directory.ts`      | Temp dir for message injection exchange                                               |
+| `constants.ts`              | Timing constants, CONTINUATION_PROMPT, skip agents                                    |
+| `types.ts`                  | `SessionState`, handler argument types                                                |
 
 ## CONSTANTS
 
 ```typescript
 DEFAULT_SKIP_AGENTS = ["prometheus", "compaction", "plan"]
-CONTINUATION_COOLDOWN_MS = 30_000     // 30s between injections
-MAX_CONSECUTIVE_FAILURES = 5          // Then 5min pause (exponential backoff)
-FAILURE_RESET_WINDOW_MS = 5 * 60_000  // 5min window for failure reset
+CONTINUATION_COOLDOWN_MS = 30_000 // 30s between injections
+MAX_CONSECUTIVE_FAILURES = 5 // Then 5min pause (exponential backoff)
+FAILURE_RESET_WINDOW_MS = 5 * 60_000 // 5min window for failure reset
 COUNTDOWN_SECONDS = 2
-ABORT_WINDOW_MS = 3000                // Grace after abort signal
+ABORT_WINDOW_MS = 3000 // Grace after abort signal
 ```
 
 ## STATE PER SESSION
 
 ```typescript
 interface SessionState {
-  failureCount: number       // Consecutive failures
-  lastFailureAt?: number     // Timestamp
-  abortDetectedAt?: number   // Reset after ABORT_WINDOW_MS
-  cooldownUntil?: number     // Next injection allowed after
-  countdownTimer?: Timer     // Active countdown reference
+  failureCount: number // Consecutive failures
+  lastFailureAt?: number // Timestamp
+  abortDetectedAt?: number // Reset after ABORT_WINDOW_MS
+  cooldownUntil?: number // Next injection allowed after
+  countdownTimer?: Timer // Active countdown reference
 }
 ```
 

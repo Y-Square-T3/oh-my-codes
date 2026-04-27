@@ -72,7 +72,7 @@ export class ConcurrencyManager {
     if (modelLimit !== undefined) {
       return modelLimit === 0 ? Infinity : modelLimit
     }
-    const provider = model.split('/')[0]
+    const provider = model.split("/")[0]
     const providerLimit = this.config?.providerConcurrency?.[provider]
     if (providerLimit !== undefined) {
       return providerLimit === 0 ? Infinity : providerLimit
@@ -180,7 +180,9 @@ export class ConcurrencyManager {
       for (const entry of queue) {
         if (!entry.settled) {
           entry.settled = true
-          entry.rawReject(new Error(`Concurrency queue cancelled for model: ${model}`))
+          entry.rawReject(
+            new Error(`Concurrency queue cancelled for model: ${model}`),
+          )
         }
       }
       this.queues.delete(model)
@@ -199,7 +201,9 @@ export class ConcurrencyManager {
     for (const entry of this.globalQueue) {
       if (!entry.settled) {
         entry.settled = true
-        entry.rawReject(new Error("Concurrency queue cancelled: manager shutdown"))
+        entry.rawReject(
+          new Error("Concurrency queue cancelled: manager shutdown"),
+        )
       }
     }
     this.globalQueue = []
@@ -239,6 +243,7 @@ export class ConcurrencyManager {
 ```
 
 **What changed:**
+
 - Added `globalCount` field to track total active agents across all keys
 - Added `globalQueue` for tasks waiting on the global limit
 - Added `getGlobalLimit()` method to read `maxBackgroundAgents` from config
@@ -360,73 +365,77 @@ This refined approach keeps all waiters in per-model queues (no separate global 
 Add after the `syncPollTimeoutMs` describe block:
 
 ```typescript
-  describe("maxBackgroundAgents", () => {
-    describe("#given valid maxBackgroundAgents (10)", () => {
-      test("#when parsed #then returns correct value", () => {
-        const result = BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 10 })
-
-        expect(result.maxBackgroundAgents).toBe(10)
+describe("maxBackgroundAgents", () => {
+  describe("#given valid maxBackgroundAgents (10)", () => {
+    test("#when parsed #then returns correct value", () => {
+      const result = BackgroundTaskConfigSchema.parse({
+        maxBackgroundAgents: 10,
       })
-    })
 
-    describe("#given maxBackgroundAgents of 1 (minimum)", () => {
-      test("#when parsed #then returns correct value", () => {
-        const result = BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 1 })
-
-        expect(result.maxBackgroundAgents).toBe(1)
-      })
-    })
-
-    describe("#given maxBackgroundAgents below minimum (0)", () => {
-      test("#when parsed #then throws ZodError", () => {
-        let thrownError: unknown
-
-        try {
-          BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 0 })
-        } catch (error) {
-          thrownError = error
-        }
-
-        expect(thrownError).toBeInstanceOf(ZodError)
-      })
-    })
-
-    describe("#given maxBackgroundAgents is negative (-1)", () => {
-      test("#when parsed #then throws ZodError", () => {
-        let thrownError: unknown
-
-        try {
-          BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: -1 })
-        } catch (error) {
-          thrownError = error
-        }
-
-        expect(thrownError).toBeInstanceOf(ZodError)
-      })
-    })
-
-    describe("#given maxBackgroundAgents is non-integer (2.5)", () => {
-      test("#when parsed #then throws ZodError", () => {
-        let thrownError: unknown
-
-        try {
-          BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 2.5 })
-        } catch (error) {
-          thrownError = error
-        }
-
-        expect(thrownError).toBeInstanceOf(ZodError)
-      })
-    })
-
-    describe("#given maxBackgroundAgents not provided", () => {
-      test("#when parsed #then field is undefined", () => {
-        const result = BackgroundTaskConfigSchema.parse({})
-
-        expect(result.maxBackgroundAgents).toBeUndefined()
-      })
+      expect(result.maxBackgroundAgents).toBe(10)
     })
   })
+
+  describe("#given maxBackgroundAgents of 1 (minimum)", () => {
+    test("#when parsed #then returns correct value", () => {
+      const result = BackgroundTaskConfigSchema.parse({
+        maxBackgroundAgents: 1,
+      })
+
+      expect(result.maxBackgroundAgents).toBe(1)
+    })
+  })
+
+  describe("#given maxBackgroundAgents below minimum (0)", () => {
+    test("#when parsed #then throws ZodError", () => {
+      let thrownError: unknown
+
+      try {
+        BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 0 })
+      } catch (error) {
+        thrownError = error
+      }
+
+      expect(thrownError).toBeInstanceOf(ZodError)
+    })
+  })
+
+  describe("#given maxBackgroundAgents is negative (-1)", () => {
+    test("#when parsed #then throws ZodError", () => {
+      let thrownError: unknown
+
+      try {
+        BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: -1 })
+      } catch (error) {
+        thrownError = error
+      }
+
+      expect(thrownError).toBeInstanceOf(ZodError)
+    })
+  })
+
+  describe("#given maxBackgroundAgents is non-integer (2.5)", () => {
+    test("#when parsed #then throws ZodError", () => {
+      let thrownError: unknown
+
+      try {
+        BackgroundTaskConfigSchema.parse({ maxBackgroundAgents: 2.5 })
+      } catch (error) {
+        thrownError = error
+      }
+
+      expect(thrownError).toBeInstanceOf(ZodError)
+    })
+  })
+
+  describe("#given maxBackgroundAgents not provided", () => {
+    test("#when parsed #then field is undefined", () => {
+      const result = BackgroundTaskConfigSchema.parse({})
+
+      expect(result.maxBackgroundAgents).toBeUndefined()
+    })
+  })
+})
 ```
 
 ---
@@ -474,7 +483,9 @@ describe("ConcurrencyManager.globalLimit (maxBackgroundAgents)", () => {
 
     // when
     let resolved = false
-    const waitPromise = manager.acquire("model-c").then(() => { resolved = true })
+    const waitPromise = manager.acquire("model-c").then(() => {
+      resolved = true
+    })
     await Promise.resolve()
 
     // then - should be blocked by global limit even though per-model has capacity
@@ -518,7 +529,9 @@ describe("ConcurrencyManager.globalLimit (maxBackgroundAgents)", () => {
 
     // when - try second acquire on same model
     let resolved = false
-    const waitPromise = manager.acquire("model-a").then(() => { resolved = true })
+    const waitPromise = manager.acquire("model-a").then(() => {
+      resolved = true
+    })
     await Promise.resolve()
 
     // then - blocked by per-model limit, not global
@@ -541,7 +554,9 @@ describe("ConcurrencyManager.globalLimit (maxBackgroundAgents)", () => {
 
     // when
     let resolved = false
-    const waitPromise = manager.acquire("model-b").then(() => { resolved = true })
+    const waitPromise = manager.acquire("model-b").then(() => {
+      resolved = true
+    })
     await Promise.resolve()
     expect(resolved).toBe(false)
 
@@ -603,13 +618,14 @@ User's `.opencode/oh-my-codes.jsonc`:
     // Per-model limits still apply independently
     "defaultConcurrency": 3,
     "providerConcurrency": {
-      "anthropic": 2
-    }
-  }
+      "anthropic": 2,
+    },
+  },
 }
 ```
 
 With this config:
+
 - Max 5 background agents running simultaneously across all models
 - Max 3 per model (default), max 2 for any Anthropic model
 - If 2 Anthropic + 3 OpenAI agents are running (5 total), no more can start regardless of per-model capacity

@@ -30,7 +30,7 @@ body:
       description: What would you like to know or discuss?
       placeholder: |
         Ask your question in detail...
-        
+
         Examples:
         - How do I configure agent X to do Y?
         - What's the best practice for Z?

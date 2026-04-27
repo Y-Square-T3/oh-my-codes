@@ -1,5 +1,8 @@
 import { lookupByMessageId } from "./session-registry"
-import { injectReplyIntoPane, ReplyListenerRateLimiter } from "./reply-listener-injection"
+import {
+  injectReplyIntoPane,
+  ReplyListenerRateLimiter,
+} from "./reply-listener-injection"
 import { logReplyListenerMessage } from "./reply-listener-log"
 import {
   recordSeenDiscordMessage,
@@ -24,7 +27,10 @@ export async function pollDiscordReplies(
 ): Promise<void> {
   const replyListener = config.replyListener
   if (!replyListener?.discordBotToken || !replyListener.discordChannelId) return
-  if (!replyListener.authorizedDiscordUserIds || replyListener.authorizedDiscordUserIds.length === 0) {
+  if (
+    !replyListener.authorizedDiscordUserIds ||
+    replyListener.authorizedDiscordUserIds.length === 0
+  ) {
     return
   }
   if (Date.now() < discordBackoffUntil) return
@@ -48,7 +54,9 @@ export async function pollDiscordReplies(
     const reset = response.headers.get("x-ratelimit-reset")
     if (remaining !== null && Number.parseInt(remaining, 10) < 2) {
       const parsedReset = reset ? Number.parseFloat(reset) : Number.NaN
-      const resetTime = Number.isFinite(parsedReset) ? parsedReset * 1000 : Date.now() + 10000
+      const resetTime = Number.isFinite(parsedReset)
+        ? parsedReset * 1000
+        : Date.now() + 10000
       discordBackoffUntil = resetTime
       logReplyListenerMessage(
         `WARN: Discord rate limit low (remaining: ${remaining}), backing off until ${new Date(resetTime).toISOString()}`,
@@ -66,24 +74,32 @@ export async function pollDiscordReplies(
     const messages = await response.json()
     if (!Array.isArray(messages) || messages.length === 0) return
 
-    for (const message of [...messages as DiscordMessage[]].reverse()) {
+    for (const message of [...(messages as DiscordMessage[])].reverse()) {
       recordSeenDiscordMessage(state, message.id)
       writeReplyListenerDaemonState(state)
 
       const replyToMessageId = message.message_reference?.message_id
       if (!replyToMessageId) continue
-      if (!replyListener.authorizedDiscordUserIds.includes(message.author.id)) continue
+      if (!replyListener.authorizedDiscordUserIds.includes(message.author.id))
+        continue
 
       const mapping = lookupByMessageId("discord-bot", replyToMessageId)
       if (!mapping) continue
 
       if (!rateLimiter.canProceed()) {
-        logReplyListenerMessage(`WARN: Rate limit exceeded, dropping Discord message ${message.id}`)
+        logReplyListenerMessage(
+          `WARN: Rate limit exceeded, dropping Discord message ${message.id}`,
+        )
         state.errors += 1
         continue
       }
 
-      const success = await injectReplyIntoPane(mapping.tmuxPaneId, message.content, "discord", config)
+      const success = await injectReplyIntoPane(
+        mapping.tmuxPaneId,
+        message.content,
+        "discord",
+        config,
+      )
       if (success) {
         state.messagesInjected += 1
         try {
@@ -91,7 +107,9 @@ export async function pollDiscordReplies(
             `https://discord.com/api/v10/channels/${replyListener.discordChannelId}/messages/${message.id}/reactions/%E2%9C%85/@me`,
             {
               method: "PUT",
-              headers: { Authorization: `Bot ${replyListener.discordBotToken}` },
+              headers: {
+                Authorization: `Bot ${replyListener.discordBotToken}`,
+              },
             },
           )
         } catch (error) {

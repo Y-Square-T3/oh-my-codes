@@ -12,7 +12,10 @@ function isFileNotFoundError(err: unknown): boolean {
   return nodeErr?.code === "ENOENT"
 }
 
-export function formatErrorWithSuggestion(err: unknown, context: string): string {
+export function formatErrorWithSuggestion(
+  err: unknown,
+  context: string,
+): string {
   if (isPermissionError(err)) {
     return `Permission denied: Cannot ${context}. Try running with elevated permissions or check file ownership.`
   }

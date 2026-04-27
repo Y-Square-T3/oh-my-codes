@@ -8,7 +8,9 @@ function formatSkillNames(skills: AvailableSkill[], limit: number): string {
   return shown.join(", ") + suffix
 }
 
-export function buildReminderMessage(availableSkills: AvailableSkill[]): string {
+export function buildReminderMessage(
+  availableSkills: AvailableSkill[],
+): string {
   const builtinSkills = availableSkills.filter((s) => s.location === "plugin")
   const customSkills = availableSkills.filter((s) => s.location !== "plugin")
 

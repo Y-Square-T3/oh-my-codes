@@ -33,7 +33,9 @@ function normalizeInteger(
   return numeric
 }
 
-export function normalizeReplyListenerConfig(config: OpenClawConfig): OpenClawConfig {
+export function normalizeReplyListenerConfig(
+  config: OpenClawConfig,
+): OpenClawConfig {
   const replyListener = config.replyListener
   if (!replyListener) return config
 
@@ -61,7 +63,9 @@ export function normalizeReplyListenerConfig(config: OpenClawConfig): OpenClawCo
       MAX_REPLY_MAX_MESSAGE_LENGTH,
     ),
     includePrefix: replyListener.includePrefix !== false,
-    authorizedDiscordUserIds: Array.isArray(replyListener.authorizedDiscordUserIds)
+    authorizedDiscordUserIds: Array.isArray(
+      replyListener.authorizedDiscordUserIds,
+    )
       ? replyListener.authorizedDiscordUserIds.filter(
           (id) => typeof id === "string" && id.trim() !== "",
         )
@@ -77,7 +81,11 @@ export function normalizeReplyListenerConfig(config: OpenClawConfig): OpenClawCo
 export function resolveGateway(
   config: OpenClawConfig,
   event: string,
-): { gatewayName: string; gateway: OpenClawGateway; instruction: string } | null {
+): {
+  gatewayName: string
+  gateway: OpenClawGateway
+  instruction: string
+} | null {
   if (!config.enabled) return null
 
   const mapping = config.hooks[event]
@@ -96,5 +104,9 @@ export function resolveGateway(
     if (!gateway.url) return null
   }
 
-  return { gatewayName: mapping.gateway, gateway, instruction: mapping.instruction }
+  return {
+    gatewayName: mapping.gateway,
+    gateway,
+    instruction: mapping.instruction,
+  }
 }

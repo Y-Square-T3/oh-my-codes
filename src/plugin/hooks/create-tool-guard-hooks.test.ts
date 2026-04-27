@@ -19,7 +19,11 @@ describe("createToolGuardHooks", () => {
   beforeEach(() => {
     capturedOptions = undefined
     spyOn(hooks, "createRulesInjectorHook").mockImplementation(
-      (_ctx: unknown, _state: unknown, options?: { skipClaudeUserRules?: boolean }) => {
+      (
+        _ctx: unknown,
+        _state: unknown,
+        options?: { skipClaudeUserRules?: boolean },
+      ) => {
         capturedOptions = options
         return { name: "rules-injector" } as never
       },

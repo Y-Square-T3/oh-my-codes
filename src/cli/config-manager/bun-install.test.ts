@@ -21,14 +21,22 @@ type CreateProcOptions = {
   }
 }
 
-function createProc(options: CreateProcOptions = {}): ReturnType<typeof spawnHelpers.spawnWithWindowsHide> {
+function createProc(
+  options: CreateProcOptions = {},
+): ReturnType<typeof spawnHelpers.spawnWithWindowsHide> {
   const exitCode = options.exitCode ?? 0
 
   return {
     exited: options.exited ?? Promise.resolve(exitCode),
     exitCode,
-    stdout: options.output?.stdout !== undefined ? new Blob([options.output.stdout]).stream() : undefined,
-    stderr: options.output?.stderr !== undefined ? new Blob([options.output.stderr]).stream() : undefined,
+    stdout:
+      options.output?.stdout !== undefined
+        ? new Blob([options.output.stdout]).stream()
+        : undefined,
+    stderr:
+      options.output?.stderr !== undefined
+        ? new Blob([options.output.stderr]).stream()
+        : undefined,
     kill: options.kill ?? (() => {}),
   } satisfies ReturnType<typeof spawnHelpers.spawnWithWindowsHide>
 }
@@ -41,12 +49,20 @@ describe("runBunInstallWithDetails", () => {
   let runBunInstallWithDetails: BunInstallModule["runBunInstallWithDetails"]
 
   beforeEach(async () => {
-    getOpenCodeCacheDirSpy = spyOn(dataPath, "getOpenCodeCacheDir").mockReturnValue("/tmp/opencode-cache")
+    getOpenCodeCacheDirSpy = spyOn(
+      dataPath,
+      "getOpenCodeCacheDir",
+    ).mockReturnValue("/tmp/opencode-cache")
     logSpy = spyOn(logger, "log").mockImplementation(() => {})
-    spawnWithWindowsHideSpy = spyOn(spawnHelpers, "spawnWithWindowsHide").mockReturnValue(createProc())
+    spawnWithWindowsHideSpy = spyOn(
+      spawnHelpers,
+      "spawnWithWindowsHide",
+    ).mockReturnValue(createProc())
     existsSyncSpy = spyOn(fs, "existsSync").mockReturnValue(true)
 
-    const bunInstallModule = await import(`./bun-install?test=${Date.now()}-${Math.random()}`)
+    const bunInstallModule = await import(
+      `./bun-install?test=${Date.now()}-${Math.random()}`
+    )
     runBunInstallWithDetails = bunInstallModule.runBunInstallWithDetails
   })
 
@@ -68,11 +84,14 @@ describe("runBunInstallWithDetails", () => {
         // then
         expect(result).toEqual({ success: true })
         expect(getOpenCodeCacheDirSpy).toHaveBeenCalledTimes(1)
-        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(["bun", "install"], {
-          cwd: "/tmp/opencode-cache/packages",
-          stdout: "pipe",
-          stderr: "pipe",
-        })
+        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(
+          ["bun", "install"],
+          {
+            cwd: "/tmp/opencode-cache/packages",
+            stdout: "pipe",
+            stderr: "pipe",
+          },
+        )
       })
     })
 
@@ -85,11 +104,14 @@ describe("runBunInstallWithDetails", () => {
 
         // then
         expect(result).toEqual({ success: true })
-        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(["bun", "install"], {
-          cwd: "/tmp/opencode-cache/packages",
-          stdout: "pipe",
-          stderr: "pipe",
-        })
+        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(
+          ["bun", "install"],
+          {
+            cwd: "/tmp/opencode-cache/packages",
+            stdout: "pipe",
+            stderr: "pipe",
+          },
+        )
       })
     })
 
@@ -102,11 +124,14 @@ describe("runBunInstallWithDetails", () => {
 
         // then
         expect(result).toEqual({ success: true })
-        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(["bun", "install"], {
-          cwd: "/tmp/opencode-cache/packages",
-          stdout: "inherit",
-          stderr: "inherit",
-        })
+        expect(spawnWithWindowsHideSpy).toHaveBeenCalledWith(
+          ["bun", "install"],
+          {
+            cwd: "/tmp/opencode-cache/packages",
+            stdout: "inherit",
+            stderr: "inherit",
+          },
+        )
       })
     })
 
@@ -120,7 +145,7 @@ describe("runBunInstallWithDetails", () => {
               stdout: "resolved 10 packages",
               stderr: "network error",
             },
-          })
+          }),
         )
 
         // when
@@ -131,10 +156,13 @@ describe("runBunInstallWithDetails", () => {
           success: false,
           error: "bun install failed with exit code 1",
         })
-        expect(logSpy).toHaveBeenCalledWith("[bun-install] Captured output from failed bun install", {
-          stdout: "resolved 10 packages",
-          stderr: "network error",
-        })
+        expect(logSpy).toHaveBeenCalledWith(
+          "[bun-install] Captured output from failed bun install",
+          {
+            stdout: "resolved 10 packages",
+            stderr: "network error",
+          },
+        )
       })
     })
 
@@ -157,7 +185,7 @@ describe("runBunInstallWithDetails", () => {
             },
             {
               __promisify__: originalSetTimeout.__promisify__,
-            }
+            },
           ),
         })
         Object.defineProperty(globalThis, "clearTimeout", {
@@ -172,19 +200,24 @@ describe("runBunInstallWithDetails", () => {
             kill: () => {
               killCallCount += 1
             },
-          })
+          }),
         )
-        const timeoutAwareModule = await import(`./bun-install?timeout-test=${Date.now()}-${Math.random()}`)
+        const timeoutAwareModule = await import(
+          `./bun-install?timeout-test=${Date.now()}-${Math.random()}`
+        )
 
         try {
           // when
-          const outcome = await timeoutAwareModule.runBunInstallWithDetails({ outputMode: "pipe" })
+          const outcome = await timeoutAwareModule.runBunInstallWithDetails({
+            outputMode: "pipe",
+          })
 
           // then
           expect(outcome).toEqual({
             success: false,
             timedOut: true,
-            error: 'bun install timed out after 60 seconds. Try running manually: cd "/tmp/opencode-cache/packages" && bun i',
+            error:
+              'bun install timed out after 60 seconds. Try running manually: cd "/tmp/opencode-cache/packages" && bun i',
           } satisfies BunInstallResult)
           expect(killCallCount).toBe(1)
         } finally {

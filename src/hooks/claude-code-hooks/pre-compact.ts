@@ -5,7 +5,10 @@ import type {
 } from "./types"
 import { findMatchingHooks, log } from "../../shared"
 import { dispatchHook, getHookIdentifier } from "./dispatch-hook"
-import { isHookCommandDisabled, type PluginExtendedConfig } from "./config-loader"
+import {
+  isHookCommandDisabled,
+  type PluginExtendedConfig,
+} from "./config-loader"
 
 export interface PreCompactContext {
   sessionId: string
@@ -25,7 +28,7 @@ export interface PreCompactResult {
 export async function executePreCompactHooks(
   ctx: PreCompactContext,
   config: ClaudeHooksConfig | null,
-  extendedConfig?: PluginExtendedConfig | null
+  extendedConfig?: PluginExtendedConfig | null,
 ): Promise<PreCompactResult> {
   if (!config) {
     return { context: [] }
@@ -47,20 +50,28 @@ export async function executePreCompactHooks(
   let firstHookName: string | undefined
   const collectedContext: string[] = []
 
-   for (const matcher of matchers) {
-     if (!matcher.hooks || matcher.hooks.length === 0) continue
-     for (const hook of matcher.hooks) {
-       if (hook.type !== "command" && hook.type !== "http") continue
+  for (const matcher of matchers) {
+    if (!matcher.hooks || matcher.hooks.length === 0) continue
+    for (const hook of matcher.hooks) {
+      if (hook.type !== "command" && hook.type !== "http") continue
 
       const hookName = getHookIdentifier(hook)
-      if (isHookCommandDisabled("PreCompact", hookName, extendedConfig ?? null)) {
-        log("PreCompact hook command skipped (disabled by config)", { command: hookName })
+      if (
+        isHookCommandDisabled("PreCompact", hookName, extendedConfig ?? null)
+      ) {
+        log("PreCompact hook command skipped (disabled by config)", {
+          command: hookName,
+        })
         continue
       }
 
       if (!firstHookName) firstHookName = hookName
 
-      const result = await dispatchHook(hook, JSON.stringify(stdinData), ctx.cwd)
+      const result = await dispatchHook(
+        hook,
+        JSON.stringify(stdinData),
+        ctx.cwd,
+      )
 
       if (result.exitCode === 2) {
         log("PreCompact hook blocked", { hookName, stderr: result.stderr })
@@ -72,7 +83,9 @@ export async function executePreCompactHooks(
           const output = JSON.parse(result.stdout || "{}") as PreCompactOutput
 
           if (output.hookSpecificOutput?.additionalContext) {
-            collectedContext.push(...output.hookSpecificOutput.additionalContext)
+            collectedContext.push(
+              ...output.hookSpecificOutput.additionalContext,
+            )
           } else if (output.context) {
             collectedContext.push(...output.context)
           }

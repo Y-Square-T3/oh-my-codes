@@ -7,7 +7,10 @@ export function parseSkillMcpArguments(
   }
 
   try {
-    const jsonString = argsJson.startsWith("'") && argsJson.endsWith("'") ? argsJson.slice(1, -1) : argsJson
+    const jsonString =
+      argsJson.startsWith("'") && argsJson.endsWith("'")
+        ? argsJson.slice(1, -1)
+        : argsJson
     const parsed = JSON.parse(jsonString)
     if (typeof parsed !== "object" || parsed === null) {
       throw new Error("Arguments must be a JSON object")

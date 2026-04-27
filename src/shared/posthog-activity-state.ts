@@ -63,7 +63,10 @@ function writePostHogActivityState(nextState: PostHogActivityState): void {
 
   try {
     mkdirSync(join(getDataDir(), CACHE_DIR_NAME), { recursive: true })
-    writeFileAtomically(stateFilePath, `${JSON.stringify(nextState, null, 2)}\n`)
+    writeFileAtomically(
+      stateFilePath,
+      `${JSON.stringify(nextState, null, 2)}\n`,
+    )
   } catch (error) {
     log("[posthog-activity-state] Failed to write activity state", {
       error: String(error),
@@ -72,7 +75,9 @@ function writePostHogActivityState(nextState: PostHogActivityState): void {
   }
 }
 
-export function getPostHogActivityCaptureState(now: Date = new Date()): PostHogActivityCaptureState {
+export function getPostHogActivityCaptureState(
+  now: Date = new Date(),
+): PostHogActivityCaptureState {
   const state = readPostHogActivityState()
   const dayUTC = getUtcDayString(now)
   const hourUTC = getUtcHourString(now)

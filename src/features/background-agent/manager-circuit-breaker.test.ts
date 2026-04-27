@@ -16,9 +16,15 @@ function createManager(config?: BackgroundTaskConfig): BackgroundManager {
     },
   }
 
-  const manager = new BackgroundManager({ client, directory: tmpdir() } as unknown as PluginInput, config)
+  const manager = new BackgroundManager(
+    { client, directory: tmpdir() } as unknown as PluginInput,
+    config,
+  )
   const testManager = manager as unknown as {
-    enqueueNotificationForParent: (sessionID: string, fn: () => Promise<void>) => Promise<void>
+    enqueueNotificationForParent: (
+      sessionID: string,
+      fn: () => Promise<void>,
+    ) => Promise<void>
     notifyParentSession: (task: BackgroundTask) => Promise<void>
     tasks: Map<string, BackgroundTask>
   }
@@ -36,7 +42,7 @@ function getTaskMap(manager: BackgroundManager): Map<string, BackgroundTask> {
 }
 
 async function flushAsyncWork() {
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 describe("BackgroundManager circuit breaker", () => {
@@ -116,7 +122,11 @@ describe("BackgroundManager circuit breaker", () => {
       ]) {
         manager.handleEvent({
           type: "message.part.updated",
-          properties: { sessionID: task.sessionID, type: "tool", tool: toolName },
+          properties: {
+            sessionID: task.sessionID,
+            type: "tool",
+            tool: toolName,
+          },
         })
       }
 
@@ -246,7 +256,10 @@ describe("BackgroundManager circuit breaker", () => {
               sessionID: task.sessionID,
               type: "tool",
               tool: "read",
-              state: { status: "running", input: { filePath: `/src/file-${i}.ts` } },
+              state: {
+                status: "running",
+                input: { filePath: `/src/file-${i}.ts` },
+              },
             },
           },
         })
@@ -376,7 +389,11 @@ describe("BackgroundManager circuit breaker", () => {
       for (const toolName of ["read", "grep", "edit"]) {
         manager.handleEvent({
           type: "message.part.updated",
-          properties: { sessionID: task.sessionID, type: "tool", tool: toolName },
+          properties: {
+            sessionID: task.sessionID,
+            type: "tool",
+            tool: toolName,
+          },
         })
       }
 

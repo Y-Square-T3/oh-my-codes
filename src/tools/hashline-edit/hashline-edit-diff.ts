@@ -1,6 +1,10 @@
 import { computeLineHash } from "./hash-computation"
 
-export function generateHashlineDiff(oldContent: string, newContent: string, filePath: string): string {
+export function generateHashlineDiff(
+  oldContent: string,
+  newContent: string,
+  filePath: string,
+): string {
   const oldLines = oldContent.split("\n")
   const newLines = newContent.split("\n")
 

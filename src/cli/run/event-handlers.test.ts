@@ -1,11 +1,17 @@
 const { describe, it, expect, spyOn } = require("bun:test")
 import type { RunContext } from "./types"
 import { createEventState } from "./events"
-import { handleSessionStatus, handleMessagePartUpdated, handleMessageUpdated, handleTuiToast } from "./event-handlers"
+import {
+  handleSessionStatus,
+  handleMessagePartUpdated,
+  handleMessageUpdated,
+  handleTuiToast,
+} from "./event-handlers"
 
-const createMockContext = (sessionID: string = "test-session"): RunContext => ({
-  sessionID,
-} as RunContext)
+const createMockContext = (sessionID: string = "test-session"): RunContext =>
+  ({
+    sessionID,
+  }) as RunContext
 
 describe("handleSessionStatus", () => {
   it("recognizes idle from session.status event (not just deprecated session.idle)", () => {
@@ -98,7 +104,9 @@ describe("handleMessagePartUpdated", () => {
     //#given - message.part.updated with sessionID in part, not info
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
 
     const payload = {
       type: "message.part.updated",
@@ -153,7 +161,9 @@ describe("handleMessagePartUpdated", () => {
     //#given - tool part in running state
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
 
     const payload = {
       type: "message.part.updated",
@@ -183,7 +193,9 @@ describe("handleMessagePartUpdated", () => {
     const ctx = createMockContext("ses_main")
     const state = createEventState()
     state.currentTool = "read"
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
 
     const payload = {
       type: "message.part.updated",
@@ -194,7 +206,11 @@ describe("handleMessagePartUpdated", () => {
           messageID: "msg_1",
           type: "tool",
           tool: "read",
-          state: { status: "completed", input: {}, output: "file contents here" },
+          state: {
+            status: "completed",
+            input: {},
+            output: "file contents here",
+          },
         },
       },
     }
@@ -211,7 +227,9 @@ describe("handleMessagePartUpdated", () => {
     //#given - legacy event with sessionID in info
     const ctx = createMockContext("ses_legacy")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
 
     const payload = {
       type: "message.part.updated",
@@ -239,7 +257,9 @@ describe("handleMessagePartUpdated", () => {
 
     const ctx = createMockContext("ses_main")
     const state = createEventState()
-    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(() => true)
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation(
+      () => true,
+    )
 
     handleMessageUpdated(
       ctx,
@@ -297,8 +317,9 @@ describe("handleMessagePartUpdated", () => {
     )
 
     // then
-    const output = stdoutSpy.mock.calls.map(call => String(call[0])).join("")
-    const metaCount = output.split("Sisyphus · claude-sonnet-4-6 · 2.4s").length - 1
+    const output = stdoutSpy.mock.calls.map((call) => String(call[0])).join("")
+    const metaCount =
+      output.split("Sisyphus · claude-sonnet-4-6 · 2.4s").length - 1
     expect(metaCount).toBe(1)
     expect(state.completionMetaPrintedByMessageId["msg_1"]).toBe(true)
 

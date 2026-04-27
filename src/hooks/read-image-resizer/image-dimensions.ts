@@ -5,7 +5,10 @@ import { extractBase64Data } from "../../tools/look-at/mime-type-inference"
 const HEADER_BYTES = 32_768
 const HEADER_BASE64_CHARS = Math.ceil(HEADER_BYTES / 3) * 4
 
-function toImageDimensions(width: number, height: number): ImageDimensions | null {
+function toImageDimensions(
+  width: number,
+  height: number,
+): ImageDimensions | null {
   if (!Number.isFinite(width) || !Number.isFinite(height)) {
     return null
   }
@@ -113,7 +116,10 @@ function parseWebpDimensions(buffer: Buffer): ImageDimensions | null {
     return null
   }
 
-  if (buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WEBP") {
+  if (
+    buffer.toString("ascii", 0, 4) !== "RIFF" ||
+    buffer.toString("ascii", 8, 12) !== "WEBP"
+  ) {
     return null
   }
 
@@ -149,7 +155,10 @@ function parseWebpDimensions(buffer: Buffer): ImageDimensions | null {
   return null
 }
 
-export function parseImageDimensions(base64DataUrl: string, mimeType: string): ImageDimensions | null {
+export function parseImageDimensions(
+  base64DataUrl: string,
+  mimeType: string,
+): ImageDimensions | null {
   try {
     if (!base64DataUrl || !mimeType) {
       return null
@@ -160,7 +169,10 @@ export function parseImageDimensions(base64DataUrl: string, mimeType: string): I
       return null
     }
 
-    const headerBase64 = rawBase64.length > HEADER_BASE64_CHARS ? rawBase64.slice(0, HEADER_BASE64_CHARS) : rawBase64
+    const headerBase64 =
+      rawBase64.length > HEADER_BASE64_CHARS
+        ? rawBase64.slice(0, HEADER_BASE64_CHARS)
+        : rawBase64
     const buffer = Buffer.from(headerBase64, "base64")
     if (buffer.length === 0) {
       return null

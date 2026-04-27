@@ -83,14 +83,21 @@ export async function fixEmptyMessages(params: {
   }
 
   if (params.messageIndex !== undefined) {
-    const targetMessageId = findEmptyMessageByIndex(params.sessionID, params.messageIndex)
+    const targetMessageId = findEmptyMessageByIndex(
+      params.sessionID,
+      params.messageIndex,
+    )
     if (targetMessageId) {
       const replaced = replaceEmptyTextParts(targetMessageId, PLACEHOLDER_TEXT)
       if (replaced) {
         fixed = true
         fixedMessageIds.push(targetMessageId)
       } else {
-        const injected = injectTextPart(params.sessionID, targetMessageId, PLACEHOLDER_TEXT)
+        const injected = injectTextPart(
+          params.sessionID,
+          targetMessageId,
+          PLACEHOLDER_TEXT,
+        )
         if (injected) {
           fixed = true
           fixedMessageIds.push(targetMessageId)
@@ -123,7 +130,11 @@ export async function fixEmptyMessages(params: {
         fixed = true
         fixedMessageIds.push(messageID)
       } else {
-        const injected = injectTextPart(params.sessionID, messageID, PLACEHOLDER_TEXT)
+        const injected = injectTextPart(
+          params.sessionID,
+          messageID,
+          PLACEHOLDER_TEXT,
+        )
         if (injected) {
           fixed = true
           fixedMessageIds.push(messageID)

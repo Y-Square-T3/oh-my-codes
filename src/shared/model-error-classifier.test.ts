@@ -1,14 +1,26 @@
 declare const require: (name: string) => any
-const { describe, expect, test, beforeEach, afterEach, mock, spyOn } = require("bun:test")
+const {
+  describe,
+  expect,
+  test,
+  beforeEach,
+  afterEach,
+  mock,
+  spyOn,
+} = require("bun:test")
 import * as connectedProvidersCache from "./connected-providers-cache"
 
 let readConnectedProvidersCacheSpy: ReturnType<typeof spyOn> | undefined
-const { shouldRetryError, selectFallbackProvider } = await import("./model-error-classifier")
+const { shouldRetryError, selectFallbackProvider } =
+  await import("./model-error-classifier")
 
 describe("model-error-classifier", () => {
   beforeEach(() => {
     readConnectedProvidersCacheSpy?.mockRestore()
-    readConnectedProvidersCacheSpy = spyOn(connectedProvidersCache, "readConnectedProvidersCache").mockReturnValue(null)
+    readConnectedProvidersCacheSpy = spyOn(
+      connectedProvidersCache,
+      "readConnectedProvidersCache",
+    ).mockReturnValue(null)
   })
 
   afterEach(() => {
@@ -218,7 +230,10 @@ describe("model-error-classifier", () => {
 
   test("treats subscription quota message as non-retryable", () => {
     //#given
-    const error = { message: "Subscription quota exceeded. You can continue using free models." }
+    const error = {
+      message:
+        "Subscription quota exceeded. You can continue using free models.",
+    }
 
     //#when
     const result = shouldRetryError(error)

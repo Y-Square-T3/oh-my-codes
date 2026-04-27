@@ -47,7 +47,9 @@ describe("createHashlineEditTool", () => {
     )
 
     //#then
-    expect(fs.readFileSync(filePath, "utf-8")).toBe("line1\nmodified line2\nline3")
+    expect(fs.readFileSync(filePath, "utf-8")).toBe(
+      "line1\nmodified line2\nline3",
+    )
     expect(result).toBe(`Updated ${filePath}`)
   })
 
@@ -81,7 +83,9 @@ describe("createHashlineEditTool", () => {
     )
 
     //#then
-    expect(fs.readFileSync(filePath, "utf-8")).toBe("line1\nreplaced\nline4\ninserted")
+    expect(fs.readFileSync(filePath, "utf-8")).toBe(
+      "line1\nreplaced\nline4\ninserted",
+    )
   })
 
   it("returns mismatch error on stale anchor", async () => {
@@ -140,7 +144,13 @@ describe("createHashlineEditTool", () => {
     await tool.execute(
       {
         filePath,
-        edits: [{ op: "append", pos: `1#${computeLineHash(1, "join(\\n)")}`, lines: ["a", "b"] }],
+        edits: [
+          {
+            op: "append",
+            pos: `1#${computeLineHash(1, "join(\\n)")}`,
+            lines: ["a", "b"],
+          },
+        ],
       },
       createMockContext(),
     )
@@ -169,7 +179,9 @@ describe("createHashlineEditTool", () => {
     )
 
     //#then
-    expect(fs.readFileSync(filePath, "utf-8")).toBe("line1\nbetween\nline2\nbefore3\nline3")
+    expect(fs.readFileSync(filePath, "utf-8")).toBe(
+      "line1\nbetween\nline2\nbefore3\nline3",
+    )
   })
 
   it("returns error when insert text is empty array", async () => {
@@ -267,13 +279,17 @@ describe("createHashlineEditTool", () => {
     const result = await tool.execute(
       {
         filePath,
-        edits: [{ op: "replace", pos: `2#${line2Hash}`, lines: ["line2-updated"] }],
+        edits: [
+          { op: "replace", pos: `2#${line2Hash}`, lines: ["line2-updated"] },
+        ],
       },
       createMockContext(),
     )
 
     //#then
-    expect(fs.readFileSync(filePath, "utf-8")).toBe("line1\nline2-updated\nline3")
+    expect(fs.readFileSync(filePath, "utf-8")).toBe(
+      "line1\nline2-updated\nline3",
+    )
     expect(result).toBe(`Updated ${filePath}`)
   })
 
@@ -307,7 +323,9 @@ describe("createHashlineEditTool", () => {
     await tool.execute(
       {
         filePath,
-        edits: [{ op: "replace", pos: `2#${line2Hash}`, lines: "line2-updated" }],
+        edits: [
+          { op: "replace", pos: `2#${line2Hash}`, lines: "line2-updated" },
+        ],
       },
       createMockContext(),
     )

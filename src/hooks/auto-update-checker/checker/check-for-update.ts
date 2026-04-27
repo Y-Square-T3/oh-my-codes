@@ -6,7 +6,9 @@ import { findPluginEntry } from "./plugin-entry"
 import { getCachedVersion } from "./cached-version"
 import { getLatestVersion } from "./latest-version"
 
-export async function checkForUpdate(directory: string): Promise<UpdateCheckResult> {
+export async function checkForUpdate(
+  directory: string,
+): Promise<UpdateCheckResult> {
   if (isLocalDevMode(directory)) {
     log("[auto-update-checker] Local dev mode detected, skipping update check")
     return {
@@ -45,7 +47,10 @@ export async function checkForUpdate(directory: string): Promise<UpdateCheckResu
   const channel = extractChannel(pluginInfo.pinnedVersion ?? currentVersion)
   const latestVersion = await getLatestVersion(channel)
   if (!latestVersion) {
-    log("[auto-update-checker] Failed to fetch latest version for channel:", channel)
+    log(
+      "[auto-update-checker] Failed to fetch latest version for channel:",
+      channel,
+    )
     return {
       needsUpdate: false,
       currentVersion,
@@ -57,7 +62,7 @@ export async function checkForUpdate(directory: string): Promise<UpdateCheckResu
 
   const needsUpdate = currentVersion !== latestVersion
   log(
-    `[auto-update-checker] Current: ${currentVersion}, Latest (${channel}): ${latestVersion}, NeedsUpdate: ${needsUpdate}`
+    `[auto-update-checker] Current: ${currentVersion}, Latest (${channel}): ${latestVersion}, NeedsUpdate: ${needsUpdate}`,
   )
   return {
     needsUpdate,

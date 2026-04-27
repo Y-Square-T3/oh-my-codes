@@ -8,11 +8,11 @@
 
 ## KEYWORDS
 
-| Keyword | Pattern | Effect |
-|---------|---------|--------|
-| `ultrawork` / `ulw` | `/\b(ultrawork|ulw)\b/i` | Full orchestration mode — parallel agents, deep exploration, relentless execution |
-| Search mode | `SEARCH_PATTERN` (from `search/`) | Web/doc search focus prompt injection |
-| Analyze mode | `ANALYZE_PATTERN` (from `analyze/`) | Deep analysis mode prompt injection |
+| Keyword             | Pattern                             | Effect                                |
+| ------------------- | ----------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| `ultrawork` / `ulw` | `/\b(ultrawork                      | ulw)\b/i`                             | Full orchestration mode — parallel agents, deep exploration, relentless execution |
+| Search mode         | `SEARCH_PATTERN` (from `search/`)   | Web/doc search focus prompt injection |
+| Analyze mode        | `ANALYZE_PATTERN` (from `analyze/`) | Deep analysis mode prompt injection   |
 
 ## STRUCTURE
 

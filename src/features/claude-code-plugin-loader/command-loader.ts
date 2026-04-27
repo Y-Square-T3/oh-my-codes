@@ -4,10 +4,15 @@ import { parseFrontmatter } from "../../shared/frontmatter"
 import { isMarkdownFile } from "../../shared/file-utils"
 import { sanitizeModelField } from "../../shared/model-sanitizer"
 import { log } from "../../shared/logger"
-import type { CommandDefinition, CommandFrontmatter } from "../claude-code-command-loader/types"
+import type {
+  CommandDefinition,
+  CommandFrontmatter,
+} from "../claude-code-command-loader/types"
 import type { LoadedPlugin } from "./types"
 
-export function loadPluginCommands(plugins: LoadedPlugin[]): Record<string, CommandDefinition> {
+export function loadPluginCommands(
+  plugins: LoadedPlugin[],
+): Record<string, CommandDefinition> {
   const commands: Record<string, CommandDefinition> = {}
 
   for (const plugin of plugins) {
@@ -39,7 +44,11 @@ export function loadPluginCommands(plugins: LoadedPlugin[]): Record<string, Comm
           argumentHint: data["argument-hint"],
         }
 
-        const { name: _name, argumentHint: _argumentHint, ...openCodeCompatible } = definition
+        const {
+          name: _name,
+          argumentHint: _argumentHint,
+          ...openCodeCompatible
+        } = definition
         commands[namespacedName] = openCodeCompatible as CommandDefinition
 
         log(`Loaded plugin command: ${namespacedName}`, { path: commandPath })

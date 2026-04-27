@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, test, mock } from "bun:test"
 import type { ToolContext } from "@opencode-ai/plugin/tool"
-import { clearVisionCapableModelsCache, setVisionCapableModelsCache } from "../../shared/vision-capable-models-cache"
+import {
+  clearVisionCapableModelsCache,
+  setVisionCapableModelsCache,
+} from "../../shared/vision-capable-models-cache"
 import { normalizeArgs, validateArgs, createLookAt } from "./tools"
 
 describe("look-at tool", () => {
@@ -32,7 +35,11 @@ describe("look-at tool", () => {
     // when file_path and path are both present
     // then prefer file_path
     test("prefers file_path over path when both provided", () => {
-      const args = { file_path: "/preferred.png", path: "/fallback.png", goal: "test" }
+      const args = {
+        file_path: "/preferred.png",
+        path: "/fallback.png",
+        goal: "test",
+      }
       const normalized = normalizeArgs(args as any)
       expect(normalized.file_path).toBe("/preferred.png")
     })
@@ -41,7 +48,10 @@ describe("look-at tool", () => {
     // when called with base64 image data
     // then preserve image_data in normalized args
     test("preserves image_data when provided", () => {
-      const args = { image_data: "data:image/png;base64,iVBORw0KGgo=", goal: "analyze" }
+      const args = {
+        image_data: "data:image/png;base64,iVBORw0KGgo=",
+        goal: "analyze",
+      }
       const normalized = normalizeArgs(args as any)
       expect(normalized.image_data).toBe("data:image/png;base64,iVBORw0KGgo=")
       expect(normalized.file_path).toBeUndefined()
@@ -61,7 +71,10 @@ describe("look-at tool", () => {
     // when validated
     // then return null (no error)
     test("returns null for valid args with image_data", () => {
-      const args = { image_data: "data:image/png;base64,iVBORw0KGgo=", goal: "analyze" }
+      const args = {
+        image_data: "data:image/png;base64,iVBORw0KGgo=",
+        goal: "analyze",
+      }
       expect(validateArgs(args)).toBeNull()
     })
 
@@ -79,7 +92,11 @@ describe("look-at tool", () => {
     // when validated
     // then return error (mutually exclusive)
     test("returns error when both file_path and image_data provided", () => {
-      const args = { file_path: "/path.png", image_data: "base64data", goal: "analyze" }
+      const args = {
+        file_path: "/path.png",
+        image_data: "base64data",
+        goal: "analyze",
+      }
       const error = validateArgs(args)
       expect(error).toContain("only one")
     })
@@ -118,7 +135,10 @@ describe("look-at tool", () => {
     // when validated
     // then return error about remote URLs not supported
     test("returns error when file_path is an http:// URL", () => {
-      const args = { file_path: "http://example.com/image.png", goal: "analyze" }
+      const args = {
+        file_path: "http://example.com/image.png",
+        goal: "analyze",
+      }
       const error = validateArgs(args)
       expect(error).toContain("Remote URLs are not supported")
     })
@@ -127,7 +147,10 @@ describe("look-at tool", () => {
     // when validated
     // then return error about remote URLs not supported
     test("returns error when file_path is an https:// URL", () => {
-      const args = { file_path: "https://example.com/document.pdf", goal: "extract text" }
+      const args = {
+        file_path: "https://example.com/document.pdf",
+        goal: "extract text",
+      }
       const error = validateArgs(args)
       expect(error).toContain("Remote URLs are not supported")
     })
@@ -136,7 +159,10 @@ describe("look-at tool", () => {
     // when validated
     // then return error (case-insensitive check)
     test("returns error when file_path is a remote URL with mixed case", () => {
-      const args = { file_path: "HTTPS://Example.com/file.png", goal: "analyze" }
+      const args = {
+        file_path: "HTTPS://Example.com/file.png",
+        goal: "analyze",
+      }
       const error = validateArgs(args)
       expect(error).toContain("Remote URLs are not supported")
     })
@@ -151,7 +177,9 @@ describe("look-at tool", () => {
         session: {
           get: async () => ({ data: { directory: "/project" } }),
           create: async () => ({ data: { id: "ses_test_prompt_fail" } }),
-          prompt: async () => { throw new Error("Network connection failed") },
+          prompt: async () => {
+            throw new Error("Network connection failed")
+          },
           messages: async () => ({ data: [] }),
         },
       }
@@ -260,7 +288,14 @@ describe("look-at tool", () => {
     // when LookAt tool executed
     // then model info should be passed to sync prompt
     test("passes multimodal-looker model to sync prompt when available", async () => {
-      setVisionCapableModelsCache(new Map([["google/gemini-3-flash", { providerID: "google", modelID: "gemini-3-flash" }]]))
+      setVisionCapableModelsCache(
+        new Map([
+          [
+            "google/gemini-3-flash",
+            { providerID: "google", modelID: "gemini-3-flash" },
+          ],
+        ]),
+      )
 
       let promptBody: any
 
@@ -285,7 +320,10 @@ describe("look-at tool", () => {
           },
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "done" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "done" }],
+              },
             ],
           }),
         },
@@ -309,7 +347,7 @@ describe("look-at tool", () => {
 
       await tool.execute(
         { file_path: "/test/file.png", goal: "analyze image" },
-        toolContext
+        toolContext,
       )
 
       expect(promptBody.model).toEqual({
@@ -340,7 +378,10 @@ describe("look-at tool", () => {
           status: statusFn,
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "result" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "result" }],
+              },
             ],
           }),
         },
@@ -384,12 +425,17 @@ describe("look-at tool", () => {
         session: {
           get: async () => ({ data: { directory: "/project" } }),
           create: async () => ({ data: { id: "ses_sync_error" } }),
-          prompt: async () => { throw new Error("JSON parse error") },
+          prompt: async () => {
+            throw new Error("JSON parse error")
+          },
           promptAsync: async () => ({}),
           status: async () => ({ data: {} }),
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "result despite error" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "result despite error" }],
+              },
             ],
           }),
         },
@@ -430,7 +476,9 @@ describe("look-at tool", () => {
         session: {
           get: async () => ({ data: { directory: "/project" } }),
           create: async () => ({ data: { id: "ses_sync_no_msg" } }),
-          prompt: async () => { throw new Error("Connection refused") },
+          prompt: async () => {
+            throw new Error("Connection refused")
+          },
           promptAsync: async () => ({}),
           status: async () => ({ data: {} }),
           messages: async () => ({ data: [] }),
@@ -482,7 +530,9 @@ describe("look-at tool", () => {
       const mockClient = {
         session: {
           get: async () => ({ data: { directory: "/project" } }),
-          create: async () => { throw new Error("ECONNREFUSED: connection refused") },
+          create: async () => {
+            throw new Error("ECONNREFUSED: connection refused")
+          },
         },
       }
 
@@ -511,7 +561,9 @@ describe("look-at tool", () => {
           get: async () => ({ data: { directory: "/project" } }),
           create: async () => ({ data: { id: "ses_msg_throw" } }),
           prompt: async () => ({}),
-          messages: async () => { throw new Error("Unexpected server error") },
+          messages: async () => {
+            throw new Error("Unexpected server error")
+          },
         },
       }
 
@@ -535,7 +587,9 @@ describe("look-at tool", () => {
       const mockClient = {
         session: {
           get: async () => ({ data: { directory: "/project" } }),
-          create: async () => { throw "string error thrown" },
+          create: async () => {
+            throw "string error thrown"
+          },
         },
       }
 
@@ -573,7 +627,10 @@ describe("look-at tool", () => {
           },
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "analyzed" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "analyzed" }],
+              },
             ],
           }),
         },
@@ -596,8 +653,11 @@ describe("look-at tool", () => {
       }
 
       await tool.execute(
-        { image_data: "data:image/png;base64,iVBORw0KGgo=", goal: "describe this image" },
-        toolContext
+        {
+          image_data: "data:image/png;base64,iVBORw0KGgo=",
+          goal: "describe this image",
+        },
+        toolContext,
       )
 
       const filePart = promptBody.parts.find((p: any) => p.type === "file")
@@ -626,7 +686,10 @@ describe("look-at tool", () => {
           },
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "analyzed" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "analyzed" }],
+              },
             ],
           }),
         },
@@ -650,7 +713,7 @@ describe("look-at tool", () => {
 
       await tool.execute(
         { image_data: "iVBORw0KGgo=", goal: "analyze" },
-        toolContext
+        toolContext,
       )
 
       const filePart = promptBody.parts.find((p: any) => p.type === "file")
@@ -676,7 +739,10 @@ describe("look-at tool", () => {
           },
           messages: async () => ({
             data: [
-              { info: { role: "assistant", time: { created: 1 } }, parts: [{ type: "text", text: "ok" }] },
+              {
+                info: { role: "assistant", time: { created: 1 } },
+                parts: [{ type: "text", text: "ok" }],
+              },
             ],
           }),
         },
@@ -732,7 +798,10 @@ describe("look-at tool", () => {
       } as any)
 
       await tool.execute(
-        { image_data: "data:image/png;base64,iVBORw0KGgo=", goal: "describe image" },
+        {
+          image_data: "data:image/png;base64,iVBORw0KGgo=",
+          goal: "describe image",
+        },
         buildToolContext(),
       )
 

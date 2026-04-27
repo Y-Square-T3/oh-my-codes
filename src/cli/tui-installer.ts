@@ -9,24 +9,39 @@ import {
   isOpenCodeInstalled,
   writeOmoConfig,
 } from "./config-manager"
-import { detectedToInitialValues, formatConfigSummary, SYMBOLS } from "./install-validators"
+import {
+  detectedToInitialValues,
+  formatConfigSummary,
+  SYMBOLS,
+} from "./install-validators"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 import { promptInstallConfig } from "./tui-install-prompts"
 
-export async function runTuiInstaller(args: InstallArgs, version: string): Promise<number> {
+export async function runTuiInstaller(
+  args: InstallArgs,
+  version: string,
+): Promise<number> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    console.error("Error: Interactive installer requires a TTY. Use --non-interactive or set environment variables directly.")
+    console.error(
+      "Error: Interactive installer requires a TTY. Use --non-interactive or set environment variables directly.",
+    )
     return 1
   }
 
   const detected = detectCurrentConfig()
   const isUpdate = detected.isInstalled
 
-  p.intro(color.bgMagenta(color.white(isUpdate ? " oMoMoMoMo... Update " : " oMoMoMoMo... ")))
+  p.intro(
+    color.bgMagenta(
+      color.white(isUpdate ? " oMoMoMoMo... Update " : " oMoMoMoMo... "),
+    ),
+  )
 
   if (isUpdate) {
     const initial = detectedToInitialValues(detected)
-    p.log.info(`Existing configuration detected: Claude=${initial.claude}, Gemini=${initial.gemini}`)
+    p.log.info(
+      `Existing configuration detected: Claude=${initial.claude}, Gemini=${initial.gemini}`,
+    )
   }
 
   const spinner = p.spinner()
@@ -36,12 +51,20 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
   const openCodeVersion = await getOpenCodeVersion()
   if (!installed) {
     spinner.stop(`OpenCode binary not found ${color.yellow("[!]")}`)
-    p.log.warn("OpenCode binary not found. Plugin will be configured, but you'll need to install OpenCode to use it.")
-    p.note("Visit https://opencode.ai/docs for installation instructions", "Installation Guide")
+    p.log.warn(
+      "OpenCode binary not found. Plugin will be configured, but you'll need to install OpenCode to use it.",
+    )
+    p.note(
+      "Visit https://opencode.ai/docs for installation instructions",
+      "Installation Guide",
+    )
   } else {
-    spinner.stop(`OpenCode ${openCodeVersion ?? "installed"} ${color.green("[OK]")}`)
+    spinner.stop(
+      `OpenCode ${openCodeVersion ?? "installed"} ${color.green("[OK]")}`,
+    )
 
-    const unsupportedVersionMessage = getUnsupportedOpenCodeVersionMessage(openCodeVersion)
+    const unsupportedVersionMessage =
+      getUnsupportedOpenCodeVersionMessage(openCodeVersion)
     if (unsupportedVersionMessage) {
       p.log.warn(unsupportedVersionMessage)
       p.outro(color.red("Installation blocked."))
@@ -77,16 +100,34 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
     )
   }
 
-  if (!config.hasClaude && !config.hasOpenAI && !config.hasGemini && !config.hasCopilot && !config.hasOpencodeZen && !config.hasVercelAiGateway) {
-    p.log.warn("No model providers configured. Using opencode/big-pickle as fallback.")
+  if (
+    !config.hasClaude &&
+    !config.hasOpenAI &&
+    !config.hasGemini &&
+    !config.hasCopilot &&
+    !config.hasOpencodeZen &&
+    !config.hasVercelAiGateway
+  ) {
+    p.log.warn(
+      "No model providers configured. Using opencode/big-pickle as fallback.",
+    )
   }
 
-  p.note(formatConfigSummary(config), isUpdate ? "Updated Configuration" : "Installation Complete")
+  p.note(
+    formatConfigSummary(config),
+    isUpdate ? "Updated Configuration" : "Installation Complete",
+  )
 
-  p.log.success(color.bold(isUpdate ? "Configuration updated!" : "Installation complete!"))
+  p.log.success(
+    color.bold(isUpdate ? "Configuration updated!" : "Installation complete!"),
+  )
   p.log.message(`Run ${color.cyan("opencode")} to start!`)
-  p.log.info("Anonymous telemetry is enabled by default. Disable it with OMO_SEND_ANONYMOUS_TELEMETRY=0 or OMO_DISABLE_POSTHOG=1.")
-  p.log.info("Docs: docs/legal/privacy-policy.md and docs/legal/terms-of-service.md")
+  p.log.info(
+    "Anonymous telemetry is enabled by default. Disable it with OMO_SEND_ANONYMOUS_TELEMETRY=0 or OMO_DISABLE_POSTHOG=1.",
+  )
+  p.log.info(
+    "Docs: docs/legal/privacy-policy.md and docs/legal/terms-of-service.md",
+  )
 
   p.note(
     `Include ${color.cyan("ultrawork")} (or ${color.cyan("ulw")}) in your prompt.\n` +
@@ -95,16 +136,22 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
     "The Magic Word",
   )
 
-  p.log.message(`${color.yellow("★")} If you found this helpful, consider starring the repo!`)
+  p.log.message(
+    `${color.yellow("★")} If you found this helpful, consider starring the repo!`,
+  )
   p.log.message(
     `  ${color.dim("gh api --silent --method PUT /user/starred/code-yeongyu/oh-my-openagent >/dev/null 2>&1 || true")}`,
   )
 
   p.outro(color.green("oMoMoMoMo... Enjoy!"))
 
-  if ((config.hasClaude || config.hasGemini || config.hasCopilot) && !args.skipAuth) {
+  if (
+    (config.hasClaude || config.hasGemini || config.hasCopilot) &&
+    !args.skipAuth
+  ) {
     const providers: string[] = []
-    if (config.hasClaude) providers.push(`Anthropic ${color.gray("→ Claude Pro/Max")}`)
+    if (config.hasClaude)
+      providers.push(`Anthropic ${color.gray("→ Claude Pro/Max")}`)
     if (config.hasGemini) providers.push(`Google ${color.gray("→ Gemini")}`)
     if (config.hasCopilot) providers.push(`GitHub ${color.gray("→ Copilot")}`)
 

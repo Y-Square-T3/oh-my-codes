@@ -258,6 +258,7 @@ done
 ### Iteration discipline
 
 Each iteration through the loop:
+
 1. Fix ONLY the issues identified by the failing gate
 2. Commit atomically (one logical fix per commit)
 3. Push
@@ -348,13 +349,13 @@ git rebase "origin/$BASE_BRANCH"
 
 ## Anti-Patterns
 
-| Violation | Why it fails | Severity |
-|-----------|-------------|----------|
+| Violation                                             | Why it fails                                                    | Severity |
+| ----------------------------------------------------- | --------------------------------------------------------------- | -------- |
 | Working in main worktree instead of isolated worktree | Pollutes user's working directory, may destroy uncommitted work | CRITICAL |
-| Pushing directly to dev/master | Bypasses review entirely | CRITICAL |
-| Skipping CI gate after code changes | review-work and Cubic may pass on stale code | CRITICAL |
-| Fixing unrelated code during verification loop | Scope creep causes new failures | HIGH |
-| Deleting worktree on failure | User loses ability to inspect/resume | HIGH |
-| Ignoring Cubic false positives without justification | Cubic issues should be evaluated, not blindly dismissed | MEDIUM |
-| Giant single commits | Harder to isolate failures, violates git-master principles | MEDIUM |
-| Not running local checks before push | Wastes CI time on obvious failures | MEDIUM |
+| Pushing directly to dev/master                        | Bypasses review entirely                                        | CRITICAL |
+| Skipping CI gate after code changes                   | review-work and Cubic may pass on stale code                    | CRITICAL |
+| Fixing unrelated code during verification loop        | Scope creep causes new failures                                 | HIGH     |
+| Deleting worktree on failure                          | User loses ability to inspect/resume                            | HIGH     |
+| Ignoring Cubic false positives without justification  | Cubic issues should be evaluated, not blindly dismissed         | MEDIUM   |
+| Giant single commits                                  | Harder to isolate failures, violates git-master principles      | MEDIUM   |
+| Not running local checks before push                  | Wastes CI time on obvious failures                              | MEDIUM   |

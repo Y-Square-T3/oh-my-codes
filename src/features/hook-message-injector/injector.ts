@@ -1,13 +1,27 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs"
 import { randomBytes } from "node:crypto"
 import { join } from "node:path"
 import type { PluginInput } from "@opencode-ai/plugin"
 import { MESSAGE_STORAGE, PART_STORAGE } from "./constants"
-import type { MessageMeta, OriginalMessageContext, TextPart, ToolPermission } from "./types"
+import type {
+  MessageMeta,
+  OriginalMessageContext,
+  TextPart,
+  ToolPermission,
+} from "./types"
 import { log } from "../../shared/logger"
 import { isSqliteBackend } from "../../shared/opencode-storage-detection"
 import { createInternalAgentTextPart, normalizeSDKResponse } from "../../shared"
-import { hasCompactionPartInStorage, isCompactionMessage } from "../../shared/compaction-marker"
+import {
+  hasCompactionPartInStorage,
+  isCompactionMessage,
+} from "../../shared/compaction-marker"
 
 export interface StoredMessage {
   agent?: string
@@ -40,7 +54,9 @@ const processPrefix = randomBytes(4).toString("hex")
 let messageCounter = 0
 let partCounter = 0
 
-function convertSDKMessageToStoredMessage(msg: SDKMessage): StoredMessage | null {
+function convertSDKMessageToStoredMessage(
+  msg: SDKMessage,
+): StoredMessage | null {
   if (isCompactionMessage(msg)) {
     return null
   }
@@ -58,9 +74,10 @@ function convertSDKMessageToStoredMessage(msg: SDKMessage): StoredMessage | null
 
   return {
     agent: info.agent,
-    model: providerID && modelID
-      ? { providerID, modelID, ...(variant ? { variant } : {}) }
-      : undefined,
+    model:
+      providerID && modelID
+        ? { providerID, modelID, ...(variant ? { variant } : {}) }
+        : undefined,
     tools: info.tools,
   }
 }
@@ -76,17 +93,22 @@ function convertSDKMessageToStoredMessage(msg: SDKMessage): StoredMessage | null
  */
 export async function findNearestMessageWithFieldsFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<StoredMessage | null> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    })
       .map((message) => ({
         stored: convertSDKMessageToStoredMessage(message),
         createdAt: message.info?.time?.created ?? Number.NEGATIVE_INFINITY,
         id: typeof message.id === "string" ? message.id : "",
       }))
-      .sort((left, right) => right.createdAt - left.createdAt || right.id.localeCompare(left.id))
+      .sort(
+        (left, right) =>
+          right.createdAt - left.createdAt || right.id.localeCompare(left.id),
+      )
 
     for (const message of messages) {
       const stored = message.stored
@@ -97,7 +119,10 @@ export async function findNearestMessageWithFieldsFromSDK(
 
     for (const message of messages) {
       const stored = message.stored
-      if (stored?.agent || (stored?.model?.providerID && stored?.model?.modelID)) {
+      if (
+        stored?.agent ||
+        (stored?.model?.providerID && stored?.model?.modelID)
+      ) {
         return stored
       }
     }
@@ -115,19 +140,20 @@ export async function findNearestMessageWithFieldsFromSDK(
  */
 export async function findFirstMessageWithAgentFromSDK(
   client: OpencodeClient,
-  sessionID: string
+  sessionID: string,
 ): Promise<string | null> {
   try {
     const response = await client.session.messages({ path: { id: sessionID } })
-    const messages = normalizeSDKResponse(response, [] as SDKMessage[], { preferResponseOnMissingData: true })
-      .sort((left, right) => {
-        const leftTime = left.info?.time?.created ?? Number.POSITIVE_INFINITY
-        const rightTime = right.info?.time?.created ?? Number.POSITIVE_INFINITY
-        if (leftTime !== rightTime) return leftTime - rightTime
-        const leftId = typeof left.id === "string" ? left.id : ""
-        const rightId = typeof right.id === "string" ? right.id : ""
-        return leftId.localeCompare(rightId)
-      })
+    const messages = normalizeSDKResponse(response, [] as SDKMessage[], {
+      preferResponseOnMissingData: true,
+    }).sort((left, right) => {
+      const leftTime = left.info?.time?.created ?? Number.POSITIVE_INFINITY
+      const rightTime = right.info?.time?.created ?? Number.POSITIVE_INFINITY
+      if (leftTime !== rightTime) return leftTime - rightTime
+      const leftId = typeof left.id === "string" ? left.id : ""
+      const rightId = typeof right.id === "string" ? right.id : ""
+      return leftId.localeCompare(rightId)
+    })
 
     for (const msg of messages) {
       const stored = convertSDKMessageToStoredMessage(msg)
@@ -154,7 +180,9 @@ export async function findFirstMessageWithAgentFromSDK(
  *
  * @deprecated Use findNearestMessageWithFieldsFromSDK for beta/SQLite backend
  */
-export function findNearestMessageWithFields(messageDir: string): StoredMessage | null {
+export function findNearestMessageWithFields(
+  messageDir: string,
+): StoredMessage | null {
   // On beta SQLite backend, skip JSON file reads entirely
   if (isSqliteBackend()) {
     return null
@@ -166,43 +194,71 @@ export function findNearestMessageWithFields(messageDir: string): StoredMessage 
       .map((fileName) => {
         try {
           const content = readFileSync(join(messageDir, fileName), "utf-8")
-          const msg = JSON.parse(content) as StoredMessage & { time?: { created?: number } }
+          const msg = JSON.parse(content) as StoredMessage & {
+            time?: { created?: number }
+          }
           return {
             fileName,
             msg,
             hasCompactionMarker: hasCompactionPartInStorage(
-              typeof (msg as { id?: unknown }).id === "string" ? (msg as { id?: string }).id : undefined,
+              typeof (msg as { id?: unknown }).id === "string"
+                ? (msg as { id?: string }).id
+                : undefined,
             ),
-            createdAt: typeof msg.time?.created === "number" ? msg.time.created : Number.NEGATIVE_INFINITY,
+            createdAt:
+              typeof msg.time?.created === "number"
+                ? msg.time.created
+                : Number.NEGATIVE_INFINITY,
           }
         } catch {
           return null
         }
       })
-      .filter((entry): entry is {
-        fileName: string
-        msg: StoredMessage & { time?: { created?: number } }
-        hasCompactionMarker: boolean
-        createdAt: number
-      } => entry !== null)
-      .sort((left, right) => right.createdAt - left.createdAt || right.fileName.localeCompare(left.fileName))
+      .filter(
+        (
+          entry,
+        ): entry is {
+          fileName: string
+          msg: StoredMessage & { time?: { created?: number } }
+          hasCompactionMarker: boolean
+          createdAt: number
+        } => entry !== null,
+      )
+      .sort(
+        (left, right) =>
+          right.createdAt - left.createdAt ||
+          right.fileName.localeCompare(left.fileName),
+      )
 
     for (const entry of messages) {
-      if (entry.hasCompactionMarker || isCompactionMessage({ agent: entry.msg.agent })) {
+      if (
+        entry.hasCompactionMarker ||
+        isCompactionMessage({ agent: entry.msg.agent })
+      ) {
         continue
       }
 
-      if (entry.msg.agent && entry.msg.model?.providerID && entry.msg.model?.modelID) {
+      if (
+        entry.msg.agent &&
+        entry.msg.model?.providerID &&
+        entry.msg.model?.modelID
+      ) {
         return entry.msg
       }
     }
 
     for (const entry of messages) {
-      if (entry.hasCompactionMarker || isCompactionMessage({ agent: entry.msg.agent })) {
+      if (
+        entry.hasCompactionMarker ||
+        isCompactionMessage({ agent: entry.msg.agent })
+      ) {
         continue
       }
 
-      if (entry.msg.agent || (entry.msg.model?.providerID && entry.msg.model?.modelID)) {
+      if (
+        entry.msg.agent ||
+        (entry.msg.model?.providerID && entry.msg.model?.modelID)
+      ) {
         return entry.msg
       }
     }
@@ -234,29 +290,47 @@ export function findFirstMessageWithAgent(messageDir: string): string | null {
       .map((fileName) => {
         try {
           const content = readFileSync(join(messageDir, fileName), "utf-8")
-          const msg = JSON.parse(content) as StoredMessage & { time?: { created?: number } }
+          const msg = JSON.parse(content) as StoredMessage & {
+            time?: { created?: number }
+          }
           return {
             fileName,
             msg,
             hasCompactionMarker: hasCompactionPartInStorage(
-              typeof (msg as { id?: unknown }).id === "string" ? (msg as { id?: string }).id : undefined,
+              typeof (msg as { id?: unknown }).id === "string"
+                ? (msg as { id?: string }).id
+                : undefined,
             ),
-            createdAt: typeof msg.time?.created === "number" ? msg.time.created : Number.POSITIVE_INFINITY,
+            createdAt:
+              typeof msg.time?.created === "number"
+                ? msg.time.created
+                : Number.POSITIVE_INFINITY,
           }
         } catch {
           return null
         }
       })
-      .filter((entry): entry is {
-        fileName: string
-        msg: StoredMessage & { time?: { created?: number } }
-        hasCompactionMarker: boolean
-        createdAt: number
-      } => entry !== null)
-      .sort((left, right) => left.createdAt - right.createdAt || left.fileName.localeCompare(right.fileName))
+      .filter(
+        (
+          entry,
+        ): entry is {
+          fileName: string
+          msg: StoredMessage & { time?: { created?: number } }
+          hasCompactionMarker: boolean
+          createdAt: number
+        } => entry !== null,
+      )
+      .sort(
+        (left, right) =>
+          left.createdAt - right.createdAt ||
+          left.fileName.localeCompare(right.fileName),
+      )
 
     for (const entry of messages) {
-      if (entry.hasCompactionMarker || isCompactionMessage({ agent: entry.msg.agent })) {
+      if (
+        entry.hasCompactionMarker ||
+        isCompactionMessage({ agent: entry.msg.agent })
+      ) {
         continue
       }
 
@@ -320,24 +394,32 @@ function getOrCreateMessageDir(sessionID: string): string {
 export function injectHookMessage(
   sessionID: string,
   hookContent: string,
-  originalMessage: OriginalMessageContext
+  originalMessage: OriginalMessageContext,
 ): boolean {
   if (!hookContent || hookContent.trim().length === 0) {
-    log("[hook-message-injector] Attempted to inject empty hook content, skipping injection", {
-      sessionID,
-      hasAgent: !!originalMessage.agent,
-      hasModel: !!(originalMessage.model?.providerID && originalMessage.model?.modelID)
-    })
+    log(
+      "[hook-message-injector] Attempted to inject empty hook content, skipping injection",
+      {
+        sessionID,
+        hasAgent: !!originalMessage.agent,
+        hasModel: !!(
+          originalMessage.model?.providerID && originalMessage.model?.modelID
+        ),
+      },
+    )
     return false
   }
 
   if (isSqliteBackend()) {
-    log("[hook-message-injector] Skipping JSON message injection on SQLite backend. " +
+    log(
+      "[hook-message-injector] Skipping JSON message injection on SQLite backend. " +
         "In-flight injection is handled via experimental.chat.messages.transform hook. " +
-        "JSON write path is not needed when SQLite is the storage backend.", {
-      sessionID,
-      agent: originalMessage.agent,
-    })
+        "JSON write path is not needed when SQLite is the storage backend.",
+      {
+        sessionID,
+        agent: originalMessage.agent,
+      },
+    )
     return false
   }
 
@@ -348,7 +430,9 @@ export function injectHookMessage(
     !originalMessage.model?.providerID ||
     !originalMessage.model?.modelID
 
-  const fallback = needsFallback ? findNearestMessageWithFields(messageDir) : null
+  const fallback = needsFallback
+    ? findNearestMessageWithFields(messageDir)
+    : null
 
   const now = Date.now()
   const messageID = generateMessageId()
@@ -357,16 +441,20 @@ export function injectHookMessage(
   const resolvedAgent = originalMessage.agent ?? fallback?.agent ?? "general"
   const resolvedModel =
     originalMessage.model?.providerID && originalMessage.model?.modelID
-      ? { 
-          providerID: originalMessage.model.providerID, 
+      ? {
+          providerID: originalMessage.model.providerID,
           modelID: originalMessage.model.modelID,
-          ...(originalMessage.model.variant ? { variant: originalMessage.model.variant } : {})
+          ...(originalMessage.model.variant
+            ? { variant: originalMessage.model.variant }
+            : {}),
         }
       : fallback?.model?.providerID && fallback?.model?.modelID
-        ? { 
-            providerID: fallback.model.providerID, 
+        ? {
+            providerID: fallback.model.providerID,
             modelID: fallback.model.modelID,
-            ...(fallback.model.variant ? { variant: fallback.model.variant } : {})
+            ...(fallback.model.variant
+              ? { variant: fallback.model.variant }
+              : {}),
           }
         : undefined
   const resolvedTools = originalMessage.tools ?? fallback?.tools
@@ -380,13 +468,12 @@ export function injectHookMessage(
     },
     agent: resolvedAgent,
     model: resolvedModel,
-    path:
-      originalMessage.path?.cwd
-        ? {
-            cwd: originalMessage.path.cwd,
-            root: originalMessage.path.root ?? "/",
-          }
-        : undefined,
+    path: originalMessage.path?.cwd
+      ? {
+          cwd: originalMessage.path.cwd,
+          root: originalMessage.path.root ?? "/",
+        }
+      : undefined,
     tools: resolvedTools,
   }
 
@@ -404,13 +491,19 @@ export function injectHookMessage(
   }
 
   try {
-    writeFileSync(join(messageDir, `${messageID}.json`), JSON.stringify(messageMeta, null, 2))
+    writeFileSync(
+      join(messageDir, `${messageID}.json`),
+      JSON.stringify(messageMeta, null, 2),
+    )
 
     const partDir = join(PART_STORAGE, messageID)
     if (!existsSync(partDir)) {
       mkdirSync(partDir, { recursive: true })
     }
-    writeFileSync(join(partDir, `${partID}.json`), JSON.stringify(textPart, null, 2))
+    writeFileSync(
+      join(partDir, `${partID}.json`),
+      JSON.stringify(textPart, null, 2),
+    )
 
     return true
   } catch {
@@ -421,8 +514,11 @@ export function injectHookMessage(
 export async function resolveMessageContext(
   sessionID: string,
   client: OpencodeClient,
-  messageDir: string | null
-): Promise<{ prevMessage: StoredMessage | null; firstMessageAgent: string | null }> {
+  messageDir: string | null,
+): Promise<{
+  prevMessage: StoredMessage | null
+  firstMessageAgent: string | null
+}> {
   const [prevMessage, firstMessageAgent] = isSqliteBackend()
     ? await Promise.all([
         findNearestMessageWithFieldsFromSDK(client, sessionID),

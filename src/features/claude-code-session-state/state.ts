@@ -46,7 +46,9 @@ export function isAgentRegistered(name: string): boolean {
   return registeredAgentNames.has(normalizeRegisteredAgentName(name))
 }
 
-export function resolveRegisteredAgentName(name: string | undefined): string | undefined {
+export function resolveRegisteredAgentName(
+  name: string | undefined,
+): string | undefined {
   if (typeof name !== "string") {
     return undefined
   }

@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, afterAll, mock } from "bun:test"
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  afterAll,
+  mock,
+} from "bun:test"
 import { mkdirSync, rmSync } from "node:fs"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
@@ -20,7 +28,9 @@ mock.module("./opencode-storage-detection", () => ({
   resetSqliteBackendCache: () => {},
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { getMessageDir } = await import("./opencode-message-dir")
 
@@ -31,11 +41,15 @@ describe("getMessageDir", () => {
   })
 
   afterEach(() => {
-    try { rmSync(TEST_MESSAGE_STORAGE, { recursive: true, force: true }) } catch {}
+    try {
+      rmSync(TEST_MESSAGE_STORAGE, { recursive: true, force: true })
+    } catch {}
   })
 
   afterAll(() => {
-    try { rmSync(TEST_STORAGE, { recursive: true, force: true }) } catch {}
+    try {
+      rmSync(TEST_STORAGE, { recursive: true, force: true })
+    } catch {}
   })
 
   it("returns null when sessionID does not start with ses_", () => {

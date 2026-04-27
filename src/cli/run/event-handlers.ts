@@ -23,7 +23,10 @@ import {
   writePaddedText,
 } from "./output-renderer"
 
-function getSessionId(props?: { sessionID?: string; sessionId?: string }): string | undefined {
+function getSessionId(props?: {
+  sessionID?: string
+  sessionId?: string
+}): string | undefined {
   return props?.sessionID ?? props?.sessionId
 }
 
@@ -45,9 +48,7 @@ function getPartMessageId(props?: {
   return props?.part?.messageID
 }
 
-function getDeltaMessageId(props?: {
-  messageID?: string
-}): string | undefined {
+function getDeltaMessageId(props?: { messageID?: string }): string | undefined {
   return props?.messageID
 }
 
@@ -55,16 +56,26 @@ function renderCompletionMetaLine(state: EventState, messageID: string): void {
   if (state.completionMetaPrintedByMessageId[messageID]) return
 
   const startedAt = state.messageStartedAtById[messageID]
-  const elapsedSec = startedAt ? ((Date.now() - startedAt) / 1000).toFixed(1) : "0.0"
+  const elapsedSec = startedAt
+    ? ((Date.now() - startedAt) / 1000).toFixed(1)
+    : "0.0"
   const agent = state.currentAgent ?? "assistant"
   const model = state.currentModel ?? "unknown-model"
   const variant = state.currentVariant ? ` (${state.currentVariant})` : ""
 
-  process.stdout.write(pc.dim(`\n  ${displayChars.treeEnd} ${agent} · ${model}${variant} · ${elapsedSec}s  \n`))
+  process.stdout.write(
+    pc.dim(
+      `\n  ${displayChars.treeEnd} ${agent} · ${model}${variant} · ${elapsedSec}s  \n`,
+    ),
+  )
   state.completionMetaPrintedByMessageId[messageID] = true
 }
 
-export function handleSessionIdle(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleSessionIdle(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "session.idle") return
 
   const props = payload.properties as SessionIdleProps | undefined
@@ -73,7 +84,11 @@ export function handleSessionIdle(ctx: RunContext, payload: EventPayload, state:
   }
 }
 
-export function handleSessionStatus(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleSessionStatus(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "session.status") return
 
   const props = payload.properties as SessionStatusProps | undefined
@@ -88,7 +103,11 @@ export function handleSessionStatus(ctx: RunContext, payload: EventPayload, stat
   }
 }
 
-export function handleSessionError(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleSessionError(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "session.error") return
 
   const props = payload.properties as SessionErrorProps | undefined
@@ -99,7 +118,11 @@ export function handleSessionError(ctx: RunContext, payload: EventPayload, state
   }
 }
 
-export function handleMessagePartUpdated(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleMessagePartUpdated(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "message.part.updated") return
 
   const props = payload.properties as MessagePartUpdatedProps | undefined
@@ -159,7 +182,11 @@ export function handleMessagePartUpdated(ctx: RunContext, payload: EventPayload,
   }
 }
 
-export function handleMessagePartDelta(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleMessagePartDelta(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "message.part.delta") return
 
   const props = payload.properties as MessagePartDeltaProps | undefined
@@ -211,7 +238,9 @@ function handleToolPart(
     const header = formatToolHeader(toolName, part.state?.input ?? {})
     const suffix = header.description ? ` ${pc.dim(header.description)}` : ""
     state.hasReceivedMeaningfulWork = true
-    process.stdout.write(`\n  ${pc.cyan(header.icon)} ${pc.bold(header.title)}${suffix}  \n`)
+    process.stdout.write(
+      `\n  ${pc.cyan(header.icon)} ${pc.bold(header.title)}${suffix}  \n`,
+    )
   }
 
   if (status === "completed" || status === "error") {
@@ -220,7 +249,9 @@ function handleToolPart(
     if (output.trim()) {
       process.stdout.write(pc.dim(`  ${displayChars.treeEnd} output  \n`))
       const padded = writePaddedText(output, true)
-      process.stdout.write(pc.dim(padded.output + (padded.atLineStart ? "" : "  ")))
+      process.stdout.write(
+        pc.dim(padded.output + (padded.atLineStart ? "" : "  ")),
+      )
       process.stdout.write("\n")
     }
     state.currentTool = null
@@ -229,7 +260,11 @@ function handleToolPart(
   }
 }
 
-export function handleMessageUpdated(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleMessageUpdated(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "message.updated") return
 
   const props = payload.properties as MessageUpdatedProps | undefined
@@ -266,7 +301,11 @@ export function handleMessageUpdated(ctx: RunContext, payload: EventPayload, sta
   const agent = props?.info?.agent ?? null
   const model = props?.info?.modelID ?? null
   const variant = props?.info?.variant ?? null
-  if (agent !== state.currentAgent || model !== state.currentModel || variant !== state.currentVariant) {
+  if (
+    agent !== state.currentAgent ||
+    model !== state.currentModel ||
+    variant !== state.currentVariant
+  ) {
     state.currentAgent = agent
     state.currentModel = model
     state.currentVariant = variant
@@ -274,7 +313,11 @@ export function handleMessageUpdated(ctx: RunContext, payload: EventPayload, sta
   }
 }
 
-export function handleToolExecute(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleToolExecute(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "tool.execute") return
 
   const props = payload.properties as ToolExecuteProps | undefined
@@ -290,10 +333,16 @@ export function handleToolExecute(ctx: RunContext, payload: EventPayload, state:
   const suffix = header.description ? ` ${pc.dim(header.description)}` : ""
 
   state.hasReceivedMeaningfulWork = true
-  process.stdout.write(`\n  ${pc.cyan(header.icon)} ${pc.bold(header.title)}${suffix}  \n`)
+  process.stdout.write(
+    `\n  ${pc.cyan(header.icon)} ${pc.bold(header.title)}${suffix}  \n`,
+  )
 }
 
-export function handleToolResult(ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleToolResult(
+  ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "tool.result") return
 
   const props = payload.properties as ToolResultProps | undefined
@@ -307,7 +356,9 @@ export function handleToolResult(ctx: RunContext, payload: EventPayload, state: 
   if (output.trim()) {
     process.stdout.write(pc.dim(`  ${displayChars.treeEnd} output  \n`))
     const padded = writePaddedText(output, true)
-    process.stdout.write(pc.dim(padded.output + (padded.atLineStart ? "" : "  ")))
+    process.stdout.write(
+      pc.dim(padded.output + (padded.atLineStart ? "" : "  ")),
+    )
     process.stdout.write("\n")
   }
 
@@ -316,7 +367,11 @@ export function handleToolResult(ctx: RunContext, payload: EventPayload, state: 
   state.textAtLineStart = true
 }
 
-export function handleTuiToast(_ctx: RunContext, payload: EventPayload, state: EventState): void {
+export function handleTuiToast(
+  _ctx: RunContext,
+  payload: EventPayload,
+  state: EventState,
+): void {
   if (payload.type !== "tui.toast.show") return
 
   const props = payload.properties as TuiToastShowProps | undefined

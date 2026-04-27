@@ -36,8 +36,9 @@ function isVisionCapableAgentModel(
     return false
   }
 
-  return visionCapableModels.some((visionCapableModel) =>
-    getFullModelKey(visionCapableModel) === getFullModelKey(agentModel),
+  return visionCapableModels.some(
+    (visionCapableModel) =>
+      getFullModelKey(visionCapableModel) === getFullModelKey(agentModel),
   )
 }
 
@@ -54,7 +55,8 @@ function parseAgentModel(model: string): AgentModel | undefined {
 function toAgentInfo(value: unknown): AgentInfo | null {
   if (!isObject(value)) return null
   const name = typeof value["name"] === "string" ? value["name"] : undefined
-  const variant = typeof value["variant"] === "string" ? value["variant"] : undefined
+  const variant =
+    typeof value["variant"] === "string" ? value["variant"] : undefined
   const modelValue = value["model"]
   const model =
     isObject(modelValue) &&
@@ -70,10 +72,13 @@ async function resolveRegisteredAgentMetadata(
 ): Promise<ResolvedAgentMetadata> {
   const agentsResult = await ctx.client.app?.agents?.()
   const agentsRaw = isObject(agentsResult) ? agentsResult["data"] : undefined
-  const agents = Array.isArray(agentsRaw) ? agentsRaw.map(toAgentInfo).filter(Boolean) : []
+  const agents = Array.isArray(agentsRaw)
+    ? agentsRaw.map(toAgentInfo).filter(Boolean)
+    : []
 
   const matched = agents.find(
-    (agent) => agent?.name?.toLowerCase() === MULTIMODAL_LOOKER_AGENT.toLowerCase()
+    (agent) =>
+      agent?.name?.toLowerCase() === MULTIMODAL_LOOKER_AGENT.toLowerCase(),
   )
 
   return {
@@ -125,7 +130,7 @@ function isConfiguredVisionModel(
 }
 
 export async function resolveMultimodalLookerAgentMetadata(
-  ctx: PluginInput
+  ctx: PluginInput,
 ): Promise<ResolvedAgentMetadata> {
   try {
     const registeredMetadata = await resolveRegisteredAgentMetadata(ctx)
@@ -138,19 +143,28 @@ export async function resolveMultimodalLookerAgentMetadata(
       )
 
       if (registeredModelIsVisionCapable) {
-        log("[look_at] Using registered multimodal-looker model (vision-capable)", {
-          model: getFullModelKey(registeredMetadata.agentModel),
-        })
+        log(
+          "[look_at] Using registered multimodal-looker model (vision-capable)",
+          {
+            model: getFullModelKey(registeredMetadata.agentModel),
+          },
+        )
         return registeredMetadata
       }
 
-      log("[look_at] Registered multimodal-looker model not in vision-capable cache, using it anyway", {
-        model: getFullModelKey(registeredMetadata.agentModel),
-      })
+      log(
+        "[look_at] Registered multimodal-looker model not in vision-capable cache, using it anyway",
+        {
+          model: getFullModelKey(registeredMetadata.agentModel),
+        },
+      )
       return registeredMetadata
     }
 
-    const dynamicMetadata = await resolveDynamicAgentMetadata(ctx, visionCapableModels)
+    const dynamicMetadata = await resolveDynamicAgentMetadata(
+      ctx,
+      visionCapableModels,
+    )
     if (dynamicMetadata.agentModel) {
       log("[look_at] No registered model, using dynamic resolution", {
         model: getFullModelKey(dynamicMetadata.agentModel),

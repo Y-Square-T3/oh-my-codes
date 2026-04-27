@@ -224,192 +224,208 @@ bunDescribe("sendSyncPrompt", () => {
     bunExpect(promptArgs.body.variant).toBe("medium")
   })
 
-  bunTest("passes promoted fallback model settings through supported prompt channels", async () => {
-    //#given
-    const { sendSyncPrompt } = require("./sync-prompt-sender")
+  bunTest(
+    "passes promoted fallback model settings through supported prompt channels",
+    async () => {
+      //#given
+      const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    let promptArgs: any
-    const promptWithModelSuggestionRetry = bunMock(async (_client: any, input: any) => {
-      promptArgs = input
-    })
+      let promptArgs: any
+      const promptWithModelSuggestionRetry = bunMock(
+        async (_client: any, input: any) => {
+          promptArgs = input
+        },
+      )
 
-    const input = {
-      sessionID: "test-session",
-      agentToUse: "oracle",
-      args: {
-        description: "test task",
-        prompt: "test prompt",
-        run_in_background: false,
-        load_skills: [],
-      },
-      systemContent: undefined,
-      categoryModel: {
+      const input = {
+        sessionID: "test-session",
+        agentToUse: "oracle",
+        args: {
+          description: "test task",
+          prompt: "test prompt",
+          run_in_background: false,
+          load_skills: [],
+        },
+        systemContent: undefined,
+        categoryModel: {
+          providerID: "openai",
+          modelID: "gpt-5.4",
+          variant: "low",
+          reasoningEffort: "high",
+          temperature: 0.4,
+          top_p: 0.7,
+          maxTokens: 4096,
+          thinking: { type: "disabled" },
+        },
+        toastManager: null,
+        taskId: undefined,
+      }
+
+      //#when
+      await sendSyncPrompt(
+        { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
+        input,
+        {
+          promptWithModelSuggestionRetry,
+          promptSyncWithModelSuggestionRetry: bunMock(async () => {}),
+        },
+      )
+
+      //#then
+      bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
+      bunExpect(promptArgs.body.model).toEqual({
         providerID: "openai",
         modelID: "gpt-5.4",
-        variant: "low",
+      })
+      bunExpect(promptArgs.body.variant).toBe("low")
+      bunExpect(promptArgs.body.options).toEqual({
         reasoningEffort: "high",
+        thinking: { type: "disabled" },
+      })
+      bunExpect(promptArgs.body.maxOutputTokens).toBe(4096)
+      bunExpect(getSessionPromptParams("test-session")).toEqual({
         temperature: 0.4,
-        top_p: 0.7,
-        maxTokens: 4096,
-        thinking: { type: "disabled" },
-      },
-      toastManager: null,
-      taskId: undefined,
-    }
+        topP: 0.7,
+        maxOutputTokens: 4096,
+        options: {
+          reasoningEffort: "high",
+          thinking: { type: "disabled" },
+        },
+      })
+    },
+  )
 
-    //#when
-    await sendSyncPrompt(
-      { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
-      input,
-      {
-        promptWithModelSuggestionRetry,
-        promptSyncWithModelSuggestionRetry: bunMock(async () => {}),
-      },
-    )
+  bunTest(
+    "forwards category temperature through the sync prompt body",
+    async () => {
+      //#given
+      const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    //#then
-    bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
-    bunExpect(promptArgs.body.model).toEqual({
-      providerID: "openai",
-      modelID: "gpt-5.4",
-    })
-    bunExpect(promptArgs.body.variant).toBe("low")
-    bunExpect(promptArgs.body.options).toEqual({
-      reasoningEffort: "high",
-      thinking: { type: "disabled" },
-    })
-    bunExpect(promptArgs.body.maxOutputTokens).toBe(4096)
-    bunExpect(getSessionPromptParams("test-session")).toEqual({
-      temperature: 0.4,
-      topP: 0.7,
-      maxOutputTokens: 4096,
-      options: {
-        reasoningEffort: "high",
-        thinking: { type: "disabled" },
-      },
-    })
-  })
+      let promptArgs: any
+      const promptWithModelSuggestionRetry = bunMock(
+        async (_client: any, input: any) => {
+          promptArgs = input
+        },
+      )
 
-  bunTest("forwards category temperature through the sync prompt body", async () => {
-    //#given
-    const { sendSyncPrompt } = require("./sync-prompt-sender")
+      const input = {
+        sessionID: "test-session",
+        agentToUse: "sisyphus-junior",
+        args: {
+          description: "test task",
+          prompt: "test prompt",
+          category: "quick",
+          run_in_background: false,
+          load_skills: [],
+        },
+        systemContent: undefined,
+        categoryModel: {
+          providerID: "openai",
+          modelID: "gpt-5.4",
+          temperature: 0.25,
+        },
+        toastManager: null,
+        taskId: undefined,
+      }
 
-    let promptArgs: any
-    const promptWithModelSuggestionRetry = bunMock(async (_client: any, input: any) => {
-      promptArgs = input
-    })
+      //#when
+      await sendSyncPrompt(
+        { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
+        input,
+        {
+          promptWithModelSuggestionRetry,
+          promptSyncWithModelSuggestionRetry: bunMock(async () => {}),
+        },
+      )
 
-    const input = {
-      sessionID: "test-session",
-      agentToUse: "sisyphus-junior",
-      args: {
-        description: "test task",
-        prompt: "test prompt",
-        category: "quick",
-        run_in_background: false,
-        load_skills: [],
-      },
-      systemContent: undefined,
-      categoryModel: {
-        providerID: "openai",
-        modelID: "gpt-5.4",
-        temperature: 0.25,
-      },
-      toastManager: null,
-      taskId: undefined,
-    }
+      //#then
+      bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
+      bunExpect(promptArgs.body.temperature).toBe(0.25)
+    },
+  )
+  bunTest(
+    "retries with promptSync for oracle when promptAsync fails with unexpected EOF",
+    async () => {
+      //#given
+      const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    //#when
-    await sendSyncPrompt(
-      { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
-      input,
-      {
-        promptWithModelSuggestionRetry,
-        promptSyncWithModelSuggestionRetry: bunMock(async () => {}),
-      },
-    )
+      const promptWithModelSuggestionRetry = bunMock(async () => {
+        throw new Error("JSON Parse error: Unexpected EOF")
+      })
+      const promptSyncWithModelSuggestionRetry = bunMock(async () => {})
 
-    //#then
-    bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
-    bunExpect(promptArgs.body.temperature).toBe(0.25)
-  })
-  bunTest("retries with promptSync for oracle when promptAsync fails with unexpected EOF", async () => {
-    //#given
-    const { sendSyncPrompt } = require("./sync-prompt-sender")
+      const input = {
+        sessionID: "test-session",
+        agentToUse: "oracle",
+        args: {
+          description: "test task",
+          prompt: "test prompt",
+          run_in_background: false,
+          load_skills: [],
+        },
+        systemContent: undefined,
+        categoryModel: undefined,
+        toastManager: null,
+        taskId: undefined,
+      }
 
-    const promptWithModelSuggestionRetry = bunMock(async () => {
-      throw new Error("JSON Parse error: Unexpected EOF")
-    })
-    const promptSyncWithModelSuggestionRetry = bunMock(async () => {})
+      //#when
+      const result = await sendSyncPrompt(
+        { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
+        input,
+        {
+          promptWithModelSuggestionRetry,
+          promptSyncWithModelSuggestionRetry,
+        },
+      )
 
-    const input = {
-      sessionID: "test-session",
-      agentToUse: "oracle",
-      args: {
-        description: "test task",
-        prompt: "test prompt",
-        run_in_background: false,
-        load_skills: [],
-      },
-      systemContent: undefined,
-      categoryModel: undefined,
-      toastManager: null,
-      taskId: undefined,
-    }
+      //#then
+      bunExpect(result).toBeNull()
+      bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
+      bunExpect(promptSyncWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
+    },
+  )
 
-    //#when
-    const result = await sendSyncPrompt(
-      { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
-      input,
-      {
-        promptWithModelSuggestionRetry,
-        promptSyncWithModelSuggestionRetry,
-      },
-    )
+  bunTest(
+    "does not retry with promptSync for non-oracle on unexpected EOF",
+    async () => {
+      //#given
+      const { sendSyncPrompt } = require("./sync-prompt-sender")
 
-    //#then
-    bunExpect(result).toBeNull()
-    bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
-    bunExpect(promptSyncWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
-  })
+      const promptWithModelSuggestionRetry = bunMock(async () => {
+        throw new Error("JSON Parse error: Unexpected EOF")
+      })
+      const promptSyncWithModelSuggestionRetry = bunMock(async () => {})
 
-  bunTest("does not retry with promptSync for non-oracle on unexpected EOF", async () => {
-    //#given
-    const { sendSyncPrompt } = require("./sync-prompt-sender")
+      const input = {
+        sessionID: "test-session",
+        agentToUse: "metis",
+        args: {
+          description: "test task",
+          prompt: "test prompt",
+          run_in_background: false,
+          load_skills: [],
+        },
+        systemContent: undefined,
+        categoryModel: undefined,
+        toastManager: null,
+        taskId: undefined,
+      }
 
-    const promptWithModelSuggestionRetry = bunMock(async () => {
-      throw new Error("JSON Parse error: Unexpected EOF")
-    })
-    const promptSyncWithModelSuggestionRetry = bunMock(async () => {})
+      //#when
+      const result = await sendSyncPrompt(
+        { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
+        input,
+        {
+          promptWithModelSuggestionRetry,
+          promptSyncWithModelSuggestionRetry,
+        },
+      )
 
-    const input = {
-      sessionID: "test-session",
-      agentToUse: "metis",
-      args: {
-        description: "test task",
-        prompt: "test prompt",
-        run_in_background: false,
-        load_skills: [],
-      },
-      systemContent: undefined,
-      categoryModel: undefined,
-      toastManager: null,
-      taskId: undefined,
-    }
-
-    //#when
-    const result = await sendSyncPrompt(
-      { session: { promptAsync: bunMock(async () => ({ data: {} })) } },
-      input,
-      {
-        promptWithModelSuggestionRetry,
-        promptSyncWithModelSuggestionRetry,
-      },
-    )
-
-    //#then
-    bunExpect(result).toContain("Unexpected EOF")
-    bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
-    bunExpect(promptSyncWithModelSuggestionRetry).toHaveBeenCalledTimes(0)
-  })
+      //#then
+      bunExpect(result).toContain("Unexpected EOF")
+      bunExpect(promptWithModelSuggestionRetry).toHaveBeenCalledTimes(1)
+      bunExpect(promptSyncWithModelSuggestionRetry).toHaveBeenCalledTimes(0)
+    },
+  )
 })

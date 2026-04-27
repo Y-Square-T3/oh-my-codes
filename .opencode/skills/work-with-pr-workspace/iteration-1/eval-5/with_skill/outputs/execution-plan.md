@@ -3,6 +3,7 @@
 ## Phase 0: Setup (Worktree + Branch)
 
 1. Create worktree from `origin/dev`:
+
    ```bash
    git fetch origin dev
    git worktree add ../omo-wt/fix/comment-checker-note-false-positive origin/dev
@@ -28,41 +29,43 @@ The comment-checker delegates to an external Go binary (`code-yeongyu/go-claude-
 
 Full list of 24 embedded regex patterns extracted from the binary:
 
-| Pattern | Purpose |
-|---------|---------|
-| `(?i)^[\s#/*-]*note:\s*\w` | **THE PROBLEM** - Matches all "Note:" comments |
-| `(?i)^[\s#/*-]*added?\b` | Detects "add/added" |
-| `(?i)^[\s#/*-]*removed?\b` | Detects "remove/removed" |
-| `(?i)^[\s#/*-]*deleted?\b` | Detects "delete/deleted" |
-| `(?i)^[\s#/*-]*replaced?\b` | Detects "replace/replaced" |
-| `(?i)^[\s#/*-]*implemented?\b` | Detects "implement/implemented" |
-| `(?i)^[\s#/*-]*previously\b` | Detects "previously" |
-| `(?i)^[\s#/*-]*here\s+we\b` | Detects "here we" |
-| `(?i)^[\s#/*-]*refactor(ed\|ing)?\b` | Detects "refactor" variants |
-| `(?i)^[\s#/*-]*implementation\s+(of\|note)\b` | Detects "implementation of/note" |
-| `(?i)^[\s#/*-]*this\s+(implements?\|adds?\|removes?\|changes?\|fixes?)\b` | Detects "this implements/adds/etc" |
-| ... and 13 more migration/change patterns | |
+| Pattern                                                                   | Purpose                                        |
+| ------------------------------------------------------------------------- | ---------------------------------------------- |
+| `(?i)^[\s#/*-]*note:\s*\w`                                                | **THE PROBLEM** - Matches all "Note:" comments |
+| `(?i)^[\s#/*-]*added?\b`                                                  | Detects "add/added"                            |
+| `(?i)^[\s#/*-]*removed?\b`                                                | Detects "remove/removed"                       |
+| `(?i)^[\s#/*-]*deleted?\b`                                                | Detects "delete/deleted"                       |
+| `(?i)^[\s#/*-]*replaced?\b`                                               | Detects "replace/replaced"                     |
+| `(?i)^[\s#/*-]*implemented?\b`                                            | Detects "implement/implemented"                |
+| `(?i)^[\s#/*-]*previously\b`                                              | Detects "previously"                           |
+| `(?i)^[\s#/*-]*here\s+we\b`                                               | Detects "here we"                              |
+| `(?i)^[\s#/*-]*refactor(ed\|ing)?\b`                                      | Detects "refactor" variants                    |
+| `(?i)^[\s#/*-]*implementation\s+(of\|note)\b`                             | Detects "implementation of/note"               |
+| `(?i)^[\s#/*-]*this\s+(implements?\|adds?\|removes?\|changes?\|fixes?)\b` | Detects "this implements/adds/etc"             |
+| ... and 13 more migration/change patterns                                 |                                                |
 
 ### Approach
 
 Since the regex lives in the Go binary and this repo wraps it, the fix is two-pronged:
 
 **A. Go binary update** (separate repo: `code-yeongyu/go-claude-code-comment-checker`):
+
 - Relax `(?i)^[\s#/*-]*note:\s*\w` to only match AI-style memo patterns like `Note: this was changed...`, `Note: implementation details...`
 - Add `--exclude-pattern` CLI flag for user-configurable exclusions
 
 **B. This repo (oh-my-codes)** - the PR scope:
+
 1. Add `exclude_patterns` config field to `CommentCheckerConfigSchema`
 2. Pass `--exclude-pattern` flags to the CLI binary
 3. Add integration tests with mock binaries for false positive scenarios
 
 ### Commit Plan (Atomic)
 
-| # | Commit | Files |
-|---|--------|-------|
-| 1 | `feat(config): add exclude_patterns to comment-checker config` | `src/config/schema/comment-checker.ts` |
-| 2 | `feat(comment-checker): pass exclude patterns to CLI binary` | `src/hooks/comment-checker/cli.ts`, `src/hooks/comment-checker/cli-runner.ts` |
-| 3 | `test(comment-checker): add false positive test cases for Note: comments` | `src/hooks/comment-checker/cli.test.ts`, `src/hooks/comment-checker/hook.apply-patch.test.ts` |
+| #   | Commit                                                                    | Files                                                                                         |
+| --- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 1   | `feat(config): add exclude_patterns to comment-checker config`            | `src/config/schema/comment-checker.ts`                                                        |
+| 2   | `feat(comment-checker): pass exclude patterns to CLI binary`              | `src/hooks/comment-checker/cli.ts`, `src/hooks/comment-checker/cli-runner.ts`                 |
+| 3   | `test(comment-checker): add false positive test cases for Note: comments` | `src/hooks/comment-checker/cli.test.ts`, `src/hooks/comment-checker/hook.apply-patch.test.ts` |
 
 ### Local Validation (after each commit)
 
@@ -85,10 +88,12 @@ gh pr create --base dev \
 ## Phase 3: Verify Loop
 
 ### Gate A: CI
+
 - Wait for `ci.yml` workflow (tests, typecheck, build)
 - If CI fails: fix locally, amend or new commit, force push
 
 ### Gate B: review-work (5-agent)
+
 - Run `/review-work` to trigger 5 parallel sub-agents:
   - Oracle (goal/constraint verification)
   - Oracle (code quality)
@@ -98,6 +103,7 @@ gh pr create --base dev \
 - All 5 must pass
 
 ### Gate C: Cubic
+
 - Wait for `cubic-dev-ai[bot]` review
 - Must see "No issues found" comment
 - If issues found: address feedback, push fix, re-request review

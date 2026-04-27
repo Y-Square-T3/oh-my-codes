@@ -59,13 +59,13 @@ export function getAgentDisplayName(configKey: string): string {
   // Try exact match first
   const exactMatch = AGENT_DISPLAY_NAMES[configKey]
   if (exactMatch !== undefined) return exactMatch
-  
+
   // Fall back to case-insensitive search
   const lowerKey = configKey.toLowerCase()
   for (const [k, v] of Object.entries(AGENT_DISPLAY_NAMES)) {
     if (k.toLowerCase() === lowerKey) return v
   }
-  
+
   // Unknown agent: return original key
   return configKey
 }
@@ -78,7 +78,10 @@ export function getAgentListDisplayName(configKey: string): string {
 }
 
 const REVERSE_DISPLAY_NAMES: Record<string, string> = Object.fromEntries(
-  Object.entries(AGENT_DISPLAY_NAMES).map(([key, displayName]) => [displayName.toLowerCase(), key]),
+  Object.entries(AGENT_DISPLAY_NAMES).map(([key, displayName]) => [
+    displayName.toLowerCase(),
+    key,
+  ]),
 )
 
 // Legacy parenthesized display names for backward compatibility.
@@ -119,7 +122,9 @@ export function getAgentConfigKey(agentName: string): string {
  * - Known config keys (any case) -> canonical display names
  * - Unknown/custom names -> preserved as-is (trimmed)
  */
-export function normalizeAgentForPrompt(agentName: string | undefined): string | undefined {
+export function normalizeAgentForPrompt(
+  agentName: string | undefined,
+): string | undefined {
   if (typeof agentName !== "string") {
     return undefined
   }
@@ -137,7 +142,9 @@ export function normalizeAgentForPrompt(agentName: string | undefined): string |
   return trimmed
 }
 
-export function normalizeAgentForPromptKey(agentName: string | undefined): string | undefined {
+export function normalizeAgentForPromptKey(
+  agentName: string | undefined,
+): string | undefined {
   if (typeof agentName !== "string") {
     return undefined
   }

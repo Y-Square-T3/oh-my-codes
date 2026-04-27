@@ -14,29 +14,30 @@ LaunchInput → pending → [ConcurrencyManager queue] → running → polling �
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `manager.ts` | `BackgroundManager` — main class: launch, cancel, getTask, listTasks |
-| `spawner.ts` | Task spawning: create session → inject prompt → start polling |
-| `concurrency.ts` | `ConcurrencyManager` — FIFO queue per concurrency key, slot acquisition/release |
-| `task-poller.ts` | 3s interval polling, completion via idle events + stability detection (10s unchanged) |
-| `result-handler.ts` | Process completed tasks: extract result, notify parent, cleanup |
-| `state.ts` | In-memory task store (Map-based) |
-| `types.ts` | `BackgroundTask`, `LaunchInput`, `ResumeInput`, `BackgroundTaskStatus` |
+| File                | Purpose                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| `manager.ts`        | `BackgroundManager` — main class: launch, cancel, getTask, listTasks                  |
+| `spawner.ts`        | Task spawning: create session → inject prompt → start polling                         |
+| `concurrency.ts`    | `ConcurrencyManager` — FIFO queue per concurrency key, slot acquisition/release       |
+| `task-poller.ts`    | 3s interval polling, completion via idle events + stability detection (10s unchanged) |
+| `result-handler.ts` | Process completed tasks: extract result, notify parent, cleanup                       |
+| `state.ts`          | In-memory task store (Map-based)                                                      |
+| `types.ts`          | `BackgroundTask`, `LaunchInput`, `ResumeInput`, `BackgroundTaskStatus`                |
 
 ## SPAWNER SUBDIRECTORY (6 files)
 
-| File | Purpose |
-|------|---------|
-| `spawner-context.ts` | `SpawnerContext` interface composing all spawner deps |
-| `background-session-creator.ts` | Create OpenCode session for background task |
-| `concurrency-key-from-launch-input.ts` | Derive concurrency key from model/provider |
-| `parent-directory-resolver.ts` | Resolve working directory for child session |
-| `tmux-callback-invoker.ts` | Notify TmuxSessionManager on session creation |
+| File                                   | Purpose                                               |
+| -------------------------------------- | ----------------------------------------------------- |
+| `spawner-context.ts`                   | `SpawnerContext` interface composing all spawner deps |
+| `background-session-creator.ts`        | Create OpenCode session for background task           |
+| `concurrency-key-from-launch-input.ts` | Derive concurrency key from model/provider            |
+| `parent-directory-resolver.ts`         | Resolve working directory for child session           |
+| `tmux-callback-invoker.ts`             | Notify TmuxSessionManager on session creation         |
 
 ## COMPLETION DETECTION
 
 Two signals combined:
+
 1. **Session idle event** — OpenCode reports session became idle
 2. **Stability detection** — message count unchanged for 10s (3+ stable polls at 3s interval)
 

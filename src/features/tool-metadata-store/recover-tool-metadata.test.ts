@@ -14,7 +14,9 @@ describe("recoverToolMetadata", () => {
     storeToolMetadata("ses_parent", "call_123", payload)
 
     // when
-    const recovered = recoverToolMetadata("ses_parent", { callId: " call_123 " })
+    const recovered = recoverToolMetadata("ses_parent", {
+      callId: " call_123 ",
+    })
 
     // then
     expect(recovered).toEqual(payload)

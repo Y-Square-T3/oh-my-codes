@@ -7,6 +7,7 @@ bun run typecheck
 ```
 
 Verify:
+
 - `McpNameSchema` type union includes `"arxiv"`
 - `arxiv` export in `arxiv.ts` matches `RemoteMcpConfig` shape
 - Import in `index.ts` resolves correctly
@@ -19,10 +20,12 @@ bun test src/mcp/
 ```
 
 ### Existing test updates verified:
+
 - `index.test.ts`: All 7 existing tests pass with updated count (3 → 4)
 - `websearch.test.ts`: Unchanged, still passes (no side effects)
 
 ### New test coverage:
+
 - `index.test.ts`: New test "should filter out arxiv when disabled" passes
 - Arxiv appears in all "all MCPs" assertions
 - Arxiv excluded when in `disabled_mcps`
@@ -34,6 +37,7 @@ bun run build
 ```
 
 Verify:
+
 - ESM bundle includes `arxiv.ts` module
 - Type declarations emitted for `arxiv` export
 - No build errors
@@ -41,6 +45,7 @@ Verify:
 ## 4. Integration Check
 
 ### Config disable path
+
 - Add `"arxiv"` to `disabled_mcps` in test config → verify MCP excluded from `createBuiltinMcps()` output
 - This is already covered by the unit test, but can be manually verified:
 
@@ -54,6 +59,7 @@ console.log(Object.keys(withoutArxiv)) // ["websearch", "context7", "grep_app"]
 ```
 
 ### MCP config handler path
+
 - `mcp-config-handler.ts` calls `createBuiltinMcps()` and merges results
 - No changes needed there; arxiv automatically included in the merge
 - Verify by checking `applyMcpConfig()` output includes arxiv when not disabled
@@ -65,6 +71,7 @@ console.log(Object.keys(withoutArxiv)) // ["websearch", "context7", "grep_app"]
 ```
 
 Check `lsp_diagnostics` on:
+
 - `src/mcp/arxiv.ts`
 - `src/mcp/types.ts`
 - `src/mcp/index.ts`
@@ -85,6 +92,7 @@ If the endpoint doesn't exist or returns non-2xx, the MCP will silently fail at 
 ## 7. Regression Check
 
 Verify no existing functionality is broken:
+
 - `bun test` (full suite) passes
 - Existing 3 MCPs (websearch, context7, grep_app) still work
 - `disabled_mcps` config still works for all MCPs

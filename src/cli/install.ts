@@ -6,5 +6,7 @@ import { runTuiInstaller } from "./tui-installer"
 const VERSION = packageJson.version
 
 export async function install(args: InstallArgs): Promise<number> {
-  return args.tui ? runTuiInstaller(args, VERSION) : runCliInstaller(args, VERSION)
+  return args.tui
+    ? runTuiInstaller(args, VERSION)
+    : runCliInstaller(args, VERSION)
 }

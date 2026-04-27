@@ -15,7 +15,12 @@ afterAll(() => {
   mock.restore()
 })
 
-function createMockClient(messages: Array<{ info?: { id?: string }; parts?: Array<{ type?: string; text?: string }> }>) {
+function createMockClient(
+  messages: Array<{
+    info?: { id?: string }
+    parts?: Array<{ type?: string; text?: string }>
+  }>,
+) {
   return {
     session: {
       messages: mock(() => Promise.resolve({ data: messages })),
@@ -72,9 +77,7 @@ describe("fixEmptyMessagesWithSDK", () => {
 
   it("falls back to inject when replace fails", async () => {
     //#given
-    const client = createMockClient([
-      { info: { id: "msg_1" }, parts: [] },
-    ])
+    const client = createMockClient([{ info: { id: "msg_1" }, parts: [] }])
     mockReplaceEmptyTextParts.mockReturnValue(Promise.resolve(false))
     mockInjectTextPart.mockReturnValue(Promise.resolve(true))
 
@@ -114,10 +117,7 @@ describe("fixEmptyMessagesWithSDK", () => {
 
   it("skips messages without info.id", async () => {
     //#given
-    const client = createMockClient([
-      { parts: [] },
-      { info: {}, parts: [] },
-    ])
+    const client = createMockClient([{ parts: [] }, { info: {}, parts: [] }])
 
     //#when
     const result = await fixEmptyMessagesWithSDK({

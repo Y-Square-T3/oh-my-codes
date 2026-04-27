@@ -6,9 +6,17 @@ import {
 import { log } from "../../shared/logger"
 import { COMPACTION_CONTEXT_PROMPT } from "./compaction-context-prompt"
 import { resolveSessionPromptConfig } from "./session-prompt-config-resolver"
-import { finalizeTrackedAssistantMessage, shouldTreatAssistantPartAsOutput, trackAssistantOutput, type TailMonitorState } from "./tail-monitor"
+import {
+  finalizeTrackedAssistantMessage,
+  shouldTreatAssistantPartAsOutput,
+  trackAssistantOutput,
+  type TailMonitorState,
+} from "./tail-monitor"
 import { resolveSessionID } from "./session-id"
-import type { CompactionContextClient, CompactionContextInjector } from "./types"
+import type {
+  CompactionContextClient,
+  CompactionContextInjector,
+} from "./types"
 import { createRecoveryLogic } from "./recovery"
 
 export function createCompactionContextInjector(options?: {
@@ -33,7 +41,8 @@ export function createCompactionContextInjector(options?: {
     return created
   }
 
-  const { recoverCheckpointedAgentConfig, maybeWarnAboutNoTextTail } = createRecoveryLogic(ctx, getTailState)
+  const { recoverCheckpointedAgentConfig, maybeWarnAboutNoTextTail } =
+    createRecoveryLogic(ctx, getTailState)
 
   const capture = async (sessionID: string): Promise<void> => {
     if (!ctx || !sessionID) {
@@ -46,19 +55,23 @@ export function createCompactionContextInjector(options?: {
     }
 
     setCompactionAgentConfigCheckpoint(sessionID, promptConfig)
-    log(`[compaction-context-injector] Captured agent checkpoint before compaction`, {
-      sessionID,
-      agent: promptConfig.agent,
-      model: promptConfig.model,
-      hasTools: !!promptConfig.tools,
-    })
+    log(
+      `[compaction-context-injector] Captured agent checkpoint before compaction`,
+      {
+        sessionID,
+        agent: promptConfig.agent,
+        model: promptConfig.model,
+        hasTools: !!promptConfig.tools,
+      },
+    )
   }
 
   const inject = (sessionID?: string): string => {
     let prompt = COMPACTION_CONTEXT_PROMPT
 
     if (backgroundManager && sessionID) {
-      const history = backgroundManager.taskHistory.formatForCompaction(sessionID)
+      const history =
+        backgroundManager.taskHistory.formatForCompaction(sessionID)
       if (history) {
         prompt += `\n### Active/Recent Delegated Sessions\n${history}\n`
       }
@@ -67,7 +80,11 @@ export function createCompactionContextInjector(options?: {
     return prompt
   }
 
-  const event = async ({ event }: { event: { type: string; properties?: unknown } }): Promise<void> => {
+  const event = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }): Promise<void> => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {
@@ -85,7 +102,9 @@ export function createCompactionContextInjector(options?: {
         return
       }
 
-      const noTextCount = finalizeTrackedAssistantMessage(getTailState(sessionID))
+      const noTextCount = finalizeTrackedAssistantMessage(
+        getTailState(sessionID),
+      )
       if (noTextCount > 0) {
         await maybeWarnAboutNoTextTail(sessionID)
       }
@@ -107,18 +126,23 @@ export function createCompactionContextInjector(options?: {
     }
 
     if (event.type === "message.updated") {
-      const info = props?.info as {
-        id?: string
-        role?: string
-        sessionID?: string
-      } | undefined
+      const info = props?.info as
+        | {
+            id?: string
+            role?: string
+            sessionID?: string
+          }
+        | undefined
 
       if (!info?.sessionID || info.role !== "assistant" || !info.id) {
         return
       }
 
       const tailState = getTailState(info.sessionID)
-      if (tailState.currentMessageID && tailState.currentMessageID !== info.id) {
+      if (
+        tailState.currentMessageID &&
+        tailState.currentMessageID !== info.id
+      ) {
         finalizeTrackedAssistantMessage(tailState)
         await maybeWarnAboutNoTextTail(info.sessionID)
       }
@@ -145,12 +169,14 @@ export function createCompactionContextInjector(options?: {
     }
 
     if (event.type === "message.part.updated") {
-      const part = props?.part as {
-        messageID?: string
-        sessionID?: string
-        type?: string
-        text?: string
-      } | undefined
+      const part = props?.part as
+        | {
+            messageID?: string
+            sessionID?: string
+            type?: string
+            text?: string
+          }
+        | undefined
 
       if (!part?.sessionID || !shouldTreatAssistantPartAsOutput(part)) {
         return

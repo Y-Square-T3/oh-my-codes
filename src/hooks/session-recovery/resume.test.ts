@@ -70,7 +70,10 @@ describe("session-recovery resume", () => {
 
     // then
     expect(ok).toBe(true)
-    expect(promptBody?.model).toEqual({ providerID: "openai", modelID: "gpt-5.3-codex" })
+    expect(promptBody?.model).toEqual({
+      providerID: "openai",
+      modelID: "gpt-5.3-codex",
+    })
     expect(promptBody?.variant).toBe("max")
     expect(promptBody?.tools).toEqual({ question: false, bash: true })
     expect(Array.isArray(promptBody?.parts)).toBe(true)

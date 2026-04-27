@@ -1,5 +1,9 @@
 import { BUILTIN_SERVERS, LSP_INSTALL_HINTS } from "./constants"
-import { getConfigPaths, getMergedServers, loadAllConfigs } from "./server-config-loader"
+import {
+  getConfigPaths,
+  getMergedServers,
+  loadAllConfigs,
+} from "./server-config-loader"
 import { isServerInstalled } from "./server-installation"
 import type { ServerLookupResult } from "./types"
 
@@ -24,7 +28,9 @@ export function findServerForExtension(ext: string): ServerLookupResult {
 
   for (const server of servers) {
     if (server.extensions.includes(ext)) {
-      const installHint = LSP_INSTALL_HINTS[server.id] || `Install '${server.command[0]}' and ensure it's in your PATH`
+      const installHint =
+        LSP_INSTALL_HINTS[server.id] ||
+        `Install '${server.command[0]}' and ensure it's in your PATH`
       return {
         status: "not_installed",
         server: {
@@ -104,6 +110,10 @@ export function getAllServers(): Array<{
   return result
 }
 
-export function getConfigPaths_(): { project: string; user: string; opencode: string } {
+export function getConfigPaths_(): {
+  project: string
+  user: string
+  opencode: string
+} {
   return getConfigPaths()
 }

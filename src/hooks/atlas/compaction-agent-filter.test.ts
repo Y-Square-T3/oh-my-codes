@@ -1,15 +1,32 @@
 declare const require: (name: string) => any
-const { afterEach, beforeEach, describe, expect, mock, test, afterAll } = require("bun:test")
+const {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  test,
+  afterAll,
+} = require("bun:test")
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { randomUUID } from "node:crypto"
 
-import { clearBoulderState, writeBoulderState } from "../../features/boulder-state"
-import { _resetForTesting, registerAgentName } from "../../features/claude-code-session-state"
+import {
+  clearBoulderState,
+  writeBoulderState,
+} from "../../features/boulder-state"
+import {
+  _resetForTesting,
+  registerAgentName,
+} from "../../features/claude-code-session-state"
 import type { BoulderState } from "../../features/boulder-state"
 
-const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-compaction-storage-${randomUUID()}`)
+const TEST_STORAGE_ROOT = join(
+  tmpdir(),
+  `atlas-compaction-storage-${randomUUID()}`,
+)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
 
@@ -30,7 +47,9 @@ mock.module("../../shared/opencode-storage-detection", () => ({
   isSqliteBackend: () => false,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
 const { createAtlasHook } = await import("./index")
 
@@ -48,10 +67,16 @@ describe("atlas hook compaction agent filtering", () => {
         },
       },
       _promptMock: promptMock,
-    } as Parameters<typeof createAtlasHook>[0] & { _promptMock: ReturnType<typeof mock> }
+    } as Parameters<typeof createAtlasHook>[0] & {
+      _promptMock: ReturnType<typeof mock>
+    }
   }
 
-  function writeMessage(sessionID: string, fileName: string, agent: string): void {
+  function writeMessage(
+    sessionID: string,
+    fileName: string,
+    agent: string,
+  ): void {
     const messageDir = join(TEST_MESSAGE_STORAGE, sessionID)
     mkdirSync(messageDir, { recursive: true })
     writeFileSync(

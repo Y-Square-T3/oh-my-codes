@@ -14,7 +14,7 @@ export interface MatchResult {
 export function shouldApplyRule(
   metadata: RuleMetadata,
   currentFilePath: string,
-  projectRoot: string | null
+  projectRoot: string | null,
 ): MatchResult {
   if (metadata.alwaysApply === true) {
     return { applies: true, reason: "alwaysApply" }
@@ -30,7 +30,9 @@ export function shouldApplyRule(
     return { applies: false }
   }
 
-  const relativePath = projectRoot ? relative(projectRoot, currentFilePath) : currentFilePath
+  const relativePath = projectRoot
+    ? relative(projectRoot, currentFilePath)
+    : currentFilePath
 
   for (const pattern of patterns) {
     if (picomatch.isMatch(relativePath, pattern, { dot: true, bash: true })) {
@@ -44,7 +46,10 @@ export function shouldApplyRule(
 /**
  * Check if realPath already exists in cache (symlink deduplication)
  */
-export function isDuplicateByRealPath(realPath: string, cache: Set<string>): boolean {
+export function isDuplicateByRealPath(
+  realPath: string,
+  cache: Set<string>,
+): boolean {
   return cache.has(realPath)
 }
 
@@ -58,6 +63,9 @@ export function createContentHash(content: string): string {
 /**
  * Check if content hash already exists in cache
  */
-export function isDuplicateByContentHash(hash: string, cache: Set<string>): boolean {
+export function isDuplicateByContentHash(
+  hash: string,
+  cache: Set<string>,
+): boolean {
   return cache.has(hash)
 }

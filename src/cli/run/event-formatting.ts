@@ -60,9 +60,12 @@ function getSessionTag(ctx: RunContext, payload: EventPayload): string {
   const info = props?.info as Record<string, unknown> | undefined
   const part = props?.part as Record<string, unknown> | undefined
   const sessionID =
-    props?.sessionID ?? props?.sessionId ??
-    info?.sessionID ?? info?.sessionId ??
-    part?.sessionID ?? part?.sessionId
+    props?.sessionID ??
+    props?.sessionId ??
+    info?.sessionID ??
+    info?.sessionId ??
+    part?.sessionID ??
+    part?.sessionId
   const isMainSession = sessionID === ctx.sessionID
   if (isMainSession) return pc.green("[MAIN]")
   if (sessionID) return pc.yellow(`[${String(sessionID).slice(0, 8)}]`)
@@ -86,10 +89,18 @@ export function logEventVerbose(ctx: RunContext, payload: EventPayload): void {
       const part = partProps?.part
       if (part?.type === "tool") {
         const status = part.state?.status ?? "unknown"
-        console.error(pc.dim(`${sessionTag} message.part (tool): ${part.tool ?? part.name ?? "?"} [${status}]`))
+        console.error(
+          pc.dim(
+            `${sessionTag} message.part (tool): ${part.tool ?? part.name ?? "?"} [${status}]`,
+          ),
+        )
       } else if (part?.type === "text" && part.text) {
         const preview = part.text.slice(0, 80).replace(/\n/g, "\\n")
-        console.error(pc.dim(`${sessionTag} message.part (text): "${preview}${part.text.length > 80 ? "..." : ""}"`))
+        console.error(
+          pc.dim(
+            `${sessionTag} message.part (text): "${preview}${part.text.length > 80 ? "..." : ""}"`,
+          ),
+        )
       }
       break
     }
@@ -99,7 +110,11 @@ export function logEventVerbose(ctx: RunContext, payload: EventPayload): void {
       const field = deltaProps?.field ?? "unknown"
       const delta = deltaProps?.delta ?? ""
       const preview = delta.slice(0, 80).replace(/\n/g, "\\n")
-      console.error(pc.dim(`${sessionTag} message.part.delta (${field}): "${preview}${delta.length > 80 ? "..." : ""}"`))
+      console.error(
+        pc.dim(
+          `${sessionTag} message.part.delta (${field}): "${preview}${delta.length > 80 ? "..." : ""}"`,
+        ),
+      )
       break
     }
 
@@ -129,7 +144,11 @@ export function logEventVerbose(ctx: RunContext, payload: EventPayload): void {
       }
       const inputPreview = inputStr.slice(0, 150)
       console.error(pc.cyan(`${sessionTag} TOOL.EXECUTE: ${pc.bold(toolName)}`))
-      console.error(pc.dim(`   input: ${inputPreview}${inputStr.length >= 150 ? "..." : ""}`))
+      console.error(
+        pc.dim(
+          `   input: ${inputPreview}${inputStr.length >= 150 ? "..." : ""}`,
+        ),
+      )
       break
     }
 
@@ -137,7 +156,11 @@ export function logEventVerbose(ctx: RunContext, payload: EventPayload): void {
       const resultProps = props as ToolResultProps | undefined
       const output = resultProps?.output ?? ""
       const preview = output.slice(0, 200).replace(/\n/g, "\\n")
-      console.error(pc.green(`${sessionTag} TOOL.RESULT: "${preview}${output.length > 200 ? "..." : ""}"`))
+      console.error(
+        pc.green(
+          `${sessionTag} TOOL.RESULT: "${preview}${output.length > 200 ? "..." : ""}"`,
+        ),
+      )
       break
     }
 

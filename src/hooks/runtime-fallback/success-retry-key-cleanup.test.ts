@@ -6,7 +6,9 @@ import { createFallbackState } from "./fallback-state"
 type MessageUpdateHandlerModule = typeof import("./message-update-handler")
 
 async function importFreshMessageUpdateHandlerModule(): Promise<MessageUpdateHandlerModule> {
-  return import(`./message-update-handler?success-retry-key-${Date.now()}-${Math.random()}`)
+  return import(
+    `./message-update-handler?success-retry-key-${Date.now()}-${Math.random()}`
+  )
 }
 
 function createContext(messagesResponse: unknown): RuntimeFallbackPluginInput {
@@ -63,13 +65,20 @@ function createHelpers(clearCalls: string[]): AutoRetryHelpers {
 describe("createMessageUpdateHandler retry-key cleanup", () => {
   it("#given a visible assistant reply after the latest user turn #when a non-error assistant update arrives #then the retry dedupe key is cleared with the fallback watchdog", async () => {
     // given
-    const { createMessageUpdateHandler } = await importFreshMessageUpdateHandlerModule()
+    const { createMessageUpdateHandler } =
+      await importFreshMessageUpdateHandlerModule()
     const sessionID = "session-visible-assistant"
     const clearCalls: string[] = []
     const deps = createDeps({
       data: [
-        { info: { role: "user" }, parts: [{ type: "text", text: "latest question" }] },
-        { info: { role: "assistant" }, parts: [{ type: "text", text: "visible answer" }] },
+        {
+          info: { role: "user" },
+          parts: [{ type: "text", text: "latest question" }],
+        },
+        {
+          info: { role: "assistant" },
+          parts: [{ type: "text", text: "visible answer" }],
+        },
       ],
     })
     const state = createFallbackState("google/gemini-2.5-pro")

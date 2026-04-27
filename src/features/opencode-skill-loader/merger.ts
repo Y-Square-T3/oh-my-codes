@@ -19,7 +19,7 @@ export function mergeSkills(
   userOpencodeSkills: LoadedSkill[],
   projectClaudeSkills: LoadedSkill[],
   projectOpencodeSkills: LoadedSkill[],
-  options: MergeSkillsOptions = {}
+  options: MergeSkillsOptions = {},
 ): LoadedSkill[] {
   const skillMap = new Map<string, LoadedSkill>()
 
@@ -57,7 +57,10 @@ export function mergeSkills(
 
   for (const skill of fileSystemSkills) {
     const existing = skillMap.get(skill.name)
-    if (!existing || SCOPE_PRIORITY[skill.scope] > SCOPE_PRIORITY[existing.scope]) {
+    if (
+      !existing ||
+      SCOPE_PRIORITY[skill.scope] > SCOPE_PRIORITY[existing.scope]
+    ) {
       skillMap.set(skill.name, skill)
     }
   }

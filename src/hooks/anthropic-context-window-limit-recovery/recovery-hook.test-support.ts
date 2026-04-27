@@ -5,7 +5,8 @@ import { createAnthropicContextWindowLimitRecoveryHook } from "./recovery-hook"
 
 type ExecuteCompactFn = typeof import("./executor").executeCompact
 type GetLastAssistantFn = typeof import("./executor").getLastAssistant
-type ParseAnthropicTokenLimitErrorFn = typeof import("./parser").parseAnthropicTokenLimitError
+type ParseAnthropicTokenLimitErrorFn =
+  typeof import("./parser").parseAnthropicTokenLimitError
 
 export type MockLastAssistant = {
   info: {
@@ -17,20 +18,23 @@ export type MockLastAssistant = {
 }
 
 export const executeCompactMock = mock<ExecuteCompactFn>(async () => {})
-export const getLastAssistantMock = mock<GetLastAssistantFn>(async (): Promise<MockLastAssistant> => ({
-  info: {
+export const getLastAssistantMock = mock<GetLastAssistantFn>(
+  async (): Promise<MockLastAssistant> => ({
+    info: {
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    },
+    hasContent: true,
+  }),
+)
+export const parseAnthropicTokenLimitErrorMock =
+  mock<ParseAnthropicTokenLimitErrorFn>(() => ({
+    currentTokens: 250000,
+    maxTokens: 200000,
+    errorType: "token_limit_exceeded",
     providerID: "anthropic",
     modelID: "claude-sonnet-4-6",
-  },
-  hasContent: true,
-}))
-export const parseAnthropicTokenLimitErrorMock = mock<ParseAnthropicTokenLimitErrorFn>(() => ({
-  currentTokens: 250000,
-  maxTokens: 200000,
-  errorType: "token_limit_exceeded",
-  providerID: "anthropic",
-  modelID: "claude-sonnet-4-6",
-}))
+  }))
 
 const pluginConfig = {
   git_master: {
@@ -41,18 +45,15 @@ const pluginConfig = {
 } satisfies OhMyCodesConfig
 
 export function createRecoveryHook() {
-  return createAnthropicContextWindowLimitRecoveryHook(
-    createMockContext(),
-    {
-      pluginConfig,
-      dependencies: {
-        executeCompact: executeCompactMock,
-        getLastAssistant: getLastAssistantMock,
-        log: () => {},
-        parseAnthropicTokenLimitError: parseAnthropicTokenLimitErrorMock,
-      },
-    } as never,
-  )
+  return createAnthropicContextWindowLimitRecoveryHook(createMockContext(), {
+    pluginConfig,
+    dependencies: {
+      executeCompact: executeCompactMock,
+      getLastAssistant: getLastAssistantMock,
+      log: () => {},
+      parseAnthropicTokenLimitError: parseAnthropicTokenLimitErrorMock,
+    },
+  } as never)
 }
 
 export function createMockContext(): PluginInput {

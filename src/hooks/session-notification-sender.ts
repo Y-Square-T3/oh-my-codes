@@ -9,13 +9,18 @@ import {
   getAplayPath,
   getTerminalNotifierPath,
 } from "./session-notification-utils"
-import { buildWindowsToastScript, escapeAppleScriptText, escapePowerShellSingleQuotedText } from "./session-notification-formatting"
+import {
+  buildWindowsToastScript,
+  escapeAppleScriptText,
+  escapePowerShellSingleQuotedText,
+} from "./session-notification-formatting"
 
 export type Platform = "darwin" | "linux" | "win32" | "unsupported"
 
 export function detectPlatform(): Platform {
   const detected = platform()
-  if (detected === "darwin" || detected === "linux" || detected === "win32") return detected
+  if (detected === "darwin" || detected === "linux" || detected === "win32")
+    return detected
   return "unsupported"
 }
 
@@ -36,7 +41,7 @@ export async function sendSessionNotification(
   ctx: PluginInput,
   platform: Platform,
   title: string,
-  message: string
+  message: string,
 ): Promise<void> {
   switch (platform) {
     case "darwin": {
@@ -51,8 +56,7 @@ export async function sendSessionNotification(
             await ctx.$`${terminalNotifierPath} -title ${title} -message ${message}`.quiet()
           }
           break
-        } catch {
-        }
+        } catch {}
       }
 
       // Fallback: osascript (click may open Finder instead of terminal)
@@ -61,14 +65,18 @@ export async function sendSessionNotification(
 
       const escapedTitle = escapeAppleScriptText(title)
       const escapedMessage = escapeAppleScriptText(message)
-      await ctx.$`${osascriptPath} -e ${"display notification \"" + escapedMessage + "\" with title \"" + escapedTitle + "\""}`.nothrow().quiet()
+      await ctx.$`${osascriptPath} -e ${'display notification "' + escapedMessage + '" with title "' + escapedTitle + '"'}`
+        .nothrow()
+        .quiet()
       break
     }
     case "linux": {
       const notifySendPath = await getNotifySendPath()
       if (!notifySendPath) return
 
-      await ctx.$`${notifySendPath} ${title} ${message} 2>/dev/null`.nothrow().quiet()
+      await ctx.$`${notifySendPath} ${title} ${message} 2>/dev/null`
+        .nothrow()
+        .quiet()
       break
     }
     case "win32": {
@@ -85,7 +93,7 @@ export async function sendSessionNotification(
 export async function playSessionNotificationSound(
   ctx: PluginInput,
   platform: Platform,
-  soundPath: string
+  soundPath: string,
 ): Promise<void> {
   switch (platform) {
     case "darwin": {
@@ -110,7 +118,9 @@ export async function playSessionNotificationSound(
       const powershellPath = await getPowershellPath()
       if (!powershellPath) return
       const escaped = escapePowerShellSingleQuotedText(soundPath)
-      ctx.$`${powershellPath} -Command ${"(New-Object Media.SoundPlayer '" + escaped + "').PlaySync()"}`.nothrow().quiet()
+      ctx.$`${powershellPath} -Command ${"(New-Object Media.SoundPlayer '" + escaped + "').PlaySync()"}`
+        .nothrow()
+        .quiet()
       break
     }
   }

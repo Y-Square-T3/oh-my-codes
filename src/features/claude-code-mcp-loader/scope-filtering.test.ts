@@ -35,7 +35,7 @@ describe("loadMcpConfigs", () => {
           scope: "local",
           projectPath: "/tmp/repo",
         },
-        "/tmp/repo"
+        "/tmp/repo",
       )
 
       expect(result).toBe(true)
@@ -47,7 +47,7 @@ describe("loadMcpConfigs", () => {
           scope: "local",
           projectPath: "/tmp/repo",
         },
-        "/tmp/repo/packages/app"
+        "/tmp/repo/packages/app",
       )
 
       expect(result).toBe(true)
@@ -59,7 +59,7 @@ describe("loadMcpConfigs", () => {
           scope: "local",
           projectPath: "/tmp/repo",
         },
-        "/tmp/other"
+        "/tmp/other",
       )
 
       expect(result).toBe(false)
@@ -71,7 +71,7 @@ describe("loadMcpConfigs", () => {
           scope: "local",
           projectPath: "/tmp/repo",
         },
-        "/tmp"
+        "/tmp",
       )
 
       expect(result).toBe(false)
@@ -106,7 +106,7 @@ describe("loadMcpConfigs", () => {
               scope: "local",
             },
           },
-        })
+        }),
       )
 
       const originalCwd = process.cwd()

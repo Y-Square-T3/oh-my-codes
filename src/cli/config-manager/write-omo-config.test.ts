@@ -36,7 +36,10 @@ describe("writeOmoConfig", () => {
   let testConfigPath = ""
 
   beforeEach(() => {
-    testConfigDir = join(tmpdir(), `omo-write-config-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    testConfigDir = join(
+      tmpdir(),
+      `omo-write-config-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     testConfigPath = join(testConfigDir, `${CONFIG_BASENAME}.json`)
 
     mkdirSync(testConfigDir, { recursive: true })
@@ -60,7 +63,11 @@ describe("writeOmoConfig", () => {
       },
       disabled_hooks: ["comment-checker"],
     }
-    writeFileSync(testConfigPath, JSON.stringify(existingConfig, null, 2) + "\n", "utf-8")
+    writeFileSync(
+      testConfigPath,
+      JSON.stringify(existingConfig, null, 2) + "\n",
+      "utf-8",
+    )
 
     const generatedDefaults = generateOmoConfig(installConfig)
 
@@ -70,7 +77,9 @@ describe("writeOmoConfig", () => {
     // then
     expect(result.success).toBe(true)
 
-    const savedConfig = parseJsonc<Record<string, unknown>>(readFileSync(testConfigPath, "utf-8"))
+    const savedConfig = parseJsonc<Record<string, unknown>>(
+      readFileSync(testConfigPath, "utf-8"),
+    )
     const savedAgents = getRecord(savedConfig.agents)
     const savedSisyphus = getRecord(savedAgents.sisyphus)
     expect(savedSisyphus.model).toBe("custom/provider-model")

@@ -6,7 +6,10 @@ import type { AgentScope, ClaudeCodeAgentConfig, LoadedAgent } from "./types"
 import { getOpenCodeConfigDir } from "../../shared/opencode-config-dir"
 import { parseMarkdownAgentFile } from "./agent-definitions-loader"
 
-function loadAgentsFromDir(agentsDir: string, scope: AgentScope): LoadedAgent[] {
+function loadAgentsFromDir(
+  agentsDir: string,
+  scope: AgentScope,
+): LoadedAgent[] {
   if (!existsSync(agentsDir)) {
     return []
   }
@@ -39,7 +42,9 @@ export function loadUserAgents(): Record<string, ClaudeCodeAgentConfig> {
   return result
 }
 
-export function loadProjectAgents(directory?: string): Record<string, ClaudeCodeAgentConfig> {
+export function loadProjectAgents(
+  directory?: string,
+): Record<string, ClaudeCodeAgentConfig> {
   const projectAgentsDir = join(directory ?? process.cwd(), ".claude", "agents")
   const agents = loadAgentsFromDir(projectAgentsDir, "project")
 
@@ -50,7 +55,10 @@ export function loadProjectAgents(directory?: string): Record<string, ClaudeCode
   return result
 }
 
-export function loadOpencodeGlobalAgents(): Record<string, ClaudeCodeAgentConfig> {
+export function loadOpencodeGlobalAgents(): Record<
+  string,
+  ClaudeCodeAgentConfig
+> {
   const configDir = getOpenCodeConfigDir({ binary: "opencode" })
   const opencodeAgentsDir = join(configDir, "agents")
   const agents = loadAgentsFromDir(opencodeAgentsDir, "opencode")
@@ -62,8 +70,14 @@ export function loadOpencodeGlobalAgents(): Record<string, ClaudeCodeAgentConfig
   return result
 }
 
-export function loadOpencodeProjectAgents(directory?: string): Record<string, ClaudeCodeAgentConfig> {
-  const opencodeProjectDir = join(directory ?? process.cwd(), ".opencode", "agents")
+export function loadOpencodeProjectAgents(
+  directory?: string,
+): Record<string, ClaudeCodeAgentConfig> {
+  const opencodeProjectDir = join(
+    directory ?? process.cwd(),
+    ".opencode",
+    "agents",
+  )
   const agents = loadAgentsFromDir(opencodeProjectDir, "opencode-project")
 
   const result: Record<string, ClaudeCodeAgentConfig> = Object.create(null)

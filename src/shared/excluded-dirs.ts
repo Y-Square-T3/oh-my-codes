@@ -15,4 +15,6 @@ const EXCLUDED_DIR_NAMES = [
   ".local-ignore",
 ] as const
 
-export const EXCLUDED_DIRS: ReadonlySet<string> = Object.freeze(new Set<string>(EXCLUDED_DIR_NAMES))
+export const EXCLUDED_DIRS: ReadonlySet<string> = Object.freeze(
+  new Set<string>(EXCLUDED_DIR_NAMES),
+)

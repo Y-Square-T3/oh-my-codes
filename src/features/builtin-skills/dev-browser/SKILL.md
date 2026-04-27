@@ -101,14 +101,14 @@ Code passed to `page.evaluate()` runs in the browser, which doesn't understand T
 ```typescript
 // ✅ Correct: plain JavaScript
 const text = await page.evaluate(() => {
-  return document.body.innerText;
-});
+  return document.body.innerText
+})
 
 // ❌ Wrong: TypeScript syntax will fail at runtime
 const text = await page.evaluate(() => {
-  const el: HTMLElement = document.body; // Type annotation breaks in browser!
-  return el.innerText;
-});
+  const el: HTMLElement = document.body // Type annotation breaks in browser!
+  return el.innerText
+})
 ```
 
 ## Scraping Data
@@ -118,19 +118,21 @@ For scraping large datasets, intercept and replay network requests rather than s
 ## Client API
 
 ```typescript
-const client = await connect();
+const client = await connect()
 
 // Get or create named page (viewport only applies to new pages)
-const page = await client.page("name");
-const pageWithSize = await client.page("name", { viewport: { width: 1920, height: 1080 } });
+const page = await client.page("name")
+const pageWithSize = await client.page("name", {
+  viewport: { width: 1920, height: 1080 },
+})
 
-const pages = await client.list(); // List all page names
-await client.close("name"); // Close a page
-await client.disconnect(); // Disconnect (pages persist)
+const pages = await client.list() // List all page names
+await client.close("name") // Close a page
+await client.disconnect() // Disconnect (pages persist)
 
 // ARIA Snapshot methods
-const snapshot = await client.getAISnapshot("name"); // Get accessibility tree
-const element = await client.selectSnapshotRef("name", "e5"); // Get element by ref
+const snapshot = await client.getAISnapshot("name") // Get accessibility tree
+const element = await client.selectSnapshotRef("name", "e5") // Get element by ref
 ```
 
 The `page` object is a standard Playwright Page.
@@ -138,11 +140,11 @@ The `page` object is a standard Playwright Page.
 ## Waiting
 
 ```typescript
-import { waitForPageLoad } from "@/client.js";
+import { waitForPageLoad } from "@/client.js"
 
-await waitForPageLoad(page); // After navigation
-await page.waitForSelector(".results"); // For specific elements
-await page.waitForURL("**/success"); // For specific URL
+await waitForPageLoad(page) // After navigation
+await page.waitForSelector(".results") // For specific elements
+await page.waitForURL("**/success") // For specific URL
 ```
 
 ## Inspecting Page State
@@ -150,8 +152,8 @@ await page.waitForURL("**/success"); // For specific URL
 ### Screenshots
 
 ```typescript
-await page.screenshot({ path: "tmp/screenshot.png" });
-await page.screenshot({ path: "tmp/full.png", fullPage: true });
+await page.screenshot({ path: "tmp/screenshot.png" })
+await page.screenshot({ path: "tmp/full.png", fullPage: true })
 ```
 
 ### ARIA Snapshot (Element Discovery)
@@ -183,11 +185,11 @@ Use `getAISnapshot()` to discover page elements. Returns YAML-formatted accessib
 **Interacting with refs:**
 
 ```typescript
-const snapshot = await client.getAISnapshot("hackernews");
-console.log(snapshot); // Find the ref you need
+const snapshot = await client.getAISnapshot("hackernews")
+console.log(snapshot) // Find the ref you need
 
-const element = await client.selectSnapshotRef("hackernews", "e2");
-await element.click();
+const element = await client.selectSnapshotRef("hackernews", "e2")
+await element.click()
 ```
 
 ## Error Recovery

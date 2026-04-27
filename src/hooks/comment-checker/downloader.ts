@@ -12,14 +12,17 @@ import {
   getCachedBinaryPath as getCachedBinaryPathShared,
 } from "../../shared/binary-downloader"
 import { log } from "../../shared/logger"
-import { CACHE_DIR_NAME, PUBLISHED_PACKAGE_NAME } from "../../shared/plugin-identity"
+import {
+  CACHE_DIR_NAME,
+  PUBLISHED_PACKAGE_NAME,
+} from "../../shared/plugin-identity"
 
 const DEBUG = process.env.COMMENT_CHECKER_DEBUG === "1"
 const DEBUG_FILE = join(tmpdir(), "comment-checker-debug.log")
 
 function debugLog(...args: unknown[]) {
   if (DEBUG) {
-    const msg = `[${new Date().toISOString()}] [comment-checker:downloader] ${args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')}\n`
+    const msg = `[${new Date().toISOString()}] [comment-checker:downloader] ${args.map((a) => (typeof a === "object" ? JSON.stringify(a, null, 2) : String(a))).join(" ")}\n`
     appendFileSync(DEBUG_FILE, msg)
   }
 }
@@ -61,7 +64,9 @@ export function getCacheDir(): string {
  * Get the binary name based on platform.
  */
 export function getBinaryName(): string {
-  return process.platform === "win32" ? "comment-checker.exe" : "comment-checker"
+  return process.platform === "win32"
+    ? "comment-checker.exe"
+    : "comment-checker"
 }
 
 /**
@@ -92,39 +97,39 @@ function getPackageVersion(): string {
 export async function downloadCommentChecker(): Promise<string | null> {
   const platformKey = `${process.platform}-${process.arch}`
   const platformInfo = PLATFORM_MAP[platformKey]
-  
+
   if (!platformInfo) {
     debugLog(`Unsupported platform: ${platformKey}`)
     return null
   }
-  
+
   const cacheDir = getCacheDir()
   const binaryName = getBinaryName()
   const binaryPath = join(cacheDir, binaryName)
-  
+
   // Already exists in cache
   if (existsSync(binaryPath)) {
     debugLog("Binary already cached at:", binaryPath)
     return binaryPath
   }
-  
+
   const version = getPackageVersion()
   const { os, arch, ext } = platformInfo
   const assetName = `comment-checker_v${version}_${os}_${arch}.${ext}`
   const downloadUrl = `https://github.com/${REPO}/releases/download/v${version}/${assetName}`
-  
+
   debugLog(`Downloading from: ${downloadUrl}`)
   log(`[${PUBLISHED_PACKAGE_NAME}] Downloading comment-checker binary...`)
-  
+
   try {
     // Ensure cache directory exists
     ensureCacheDir(cacheDir)
-    
+
     const archivePath = join(cacheDir, assetName)
     await downloadArchive(downloadUrl, archivePath)
-    
+
     debugLog(`Downloaded archive to: ${archivePath}`)
-    
+
     // Extract based on file type
     if (ext === "tar.gz") {
       debugLog("Extracting tar.gz:", archivePath, "to", cacheDir)
@@ -132,21 +137,22 @@ export async function downloadCommentChecker(): Promise<string | null> {
     } else {
       await extractZipArchive(archivePath, cacheDir)
     }
-    
+
     // Clean up archive
     cleanupArchive(archivePath)
-    
+
     // Set execute permission on Unix
     ensureExecutable(binaryPath)
-    
+
     debugLog(`Successfully downloaded binary to: ${binaryPath}`)
     log(`[${PUBLISHED_PACKAGE_NAME}] comment-checker binary ready.`)
-    
+
     return binaryPath
-    
   } catch (err) {
     debugLog(`Failed to download: ${err}`)
-    log(`[${PUBLISHED_PACKAGE_NAME}] Failed to download comment-checker: ${err instanceof Error ? err.message : err}`)
+    log(
+      `[${PUBLISHED_PACKAGE_NAME}] Failed to download comment-checker: ${err instanceof Error ? err.message : err}`,
+    )
     log(`[${PUBLISHED_PACKAGE_NAME}] Comment checking disabled.`)
     return null
   }
@@ -164,7 +170,7 @@ export async function ensureCommentCheckerBinary(): Promise<string | null> {
     debugLog("Using cached binary:", cachedPath)
     return cachedPath
   }
-  
+
   // Download if not cached
   return downloadCommentChecker()
 }

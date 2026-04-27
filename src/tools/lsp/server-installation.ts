@@ -20,7 +20,9 @@ export function isServerInstalled(command: string[]): boolean {
     const pathExt = process.env.PATHEXT || ""
     if (pathExt) {
       const systemExts = pathExt.split(";").filter(Boolean)
-      exts = [...new Set([...exts, ...systemExts, ".exe", ".cmd", ".bat", ".ps1"])]
+      exts = [
+        ...new Set([...exts, ...systemExts, ".exe", ".cmd", ".bat", ".ps1"]),
+      ]
     } else {
       exts = ["", ".exe", ".cmd", ".bat", ".ps1"]
     }

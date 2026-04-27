@@ -53,7 +53,10 @@ export function setRetryTimer(
   autoCompactState.retryTimerBySession.set(sessionID, timeout)
 }
 
-export function clearRetryTimer(autoCompactState: AutoCompactState, sessionID: string): void {
+export function clearRetryTimer(
+  autoCompactState: AutoCompactState,
+  sessionID: string,
+): void {
   const retryTimer = autoCompactState.retryTimerBySession.get(sessionID)
   if (retryTimer !== undefined) {
     clearTimeout(retryTimer)

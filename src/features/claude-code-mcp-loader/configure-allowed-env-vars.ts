@@ -23,12 +23,16 @@ const BUILTIN_ALLOWED_MCP_ENV_VARS = [
   "APPDATA",
   "LOCALAPPDATA",
 ]
-const SENSITIVE_MCP_ENV_VAR_PATTERN = /KEY|TOKEN|SECRET|PASSWORD|AUTH|CREDENTIAL/i
+const SENSITIVE_MCP_ENV_VAR_PATTERN =
+  /KEY|TOKEN|SECRET|PASSWORD|AUTH|CREDENTIAL/i
 
 let additionalAllowedMcpEnvVars = new Set<string>()
 
 export function getAllowedMcpEnvVars(): Set<string> {
-  return new Set([...BUILTIN_ALLOWED_MCP_ENV_VARS, ...additionalAllowedMcpEnvVars])
+  return new Set([
+    ...BUILTIN_ALLOWED_MCP_ENV_VARS,
+    ...additionalAllowedMcpEnvVars,
+  ])
 }
 
 export function isSensitiveMcpEnvVar(varName: string): boolean {

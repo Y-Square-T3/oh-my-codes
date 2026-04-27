@@ -18,8 +18,12 @@ function migrationKey(oldModel: string, newModel: string): string {
 
 export function migrateModelVersions(
   configs: Record<string, unknown>,
-  appliedMigrations?: Set<string>
-): { migrated: Record<string, unknown>; changed: boolean; newMigrations: string[] } {
+  appliedMigrations?: Set<string>,
+): {
+  migrated: Record<string, unknown>
+  changed: boolean
+  newMigrations: string[]
+} {
   const migrated: Record<string, unknown> = {}
   let changed = false
   const newMigrations: string[] = []

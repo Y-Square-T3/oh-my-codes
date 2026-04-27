@@ -36,7 +36,10 @@ export function createCommandExecuteBeforeHandler(args: {
     const normalizedCommand = input.command.toLowerCase()
     const sessionID = input.sessionID
     if (hooks.ralphLoop && sessionID) {
-      if (normalizedCommand === "ralph-loop" || normalizedCommand === "ulw-loop") {
+      if (
+        normalizedCommand === "ralph-loop" ||
+        normalizedCommand === "ulw-loop"
+      ) {
         const parsedArguments = parseRalphLoopArguments(input.arguments || "")
         hooks.ralphLoop.startLoop(sessionID, parsedArguments.prompt, {
           ultrawork: normalizedCommand === "ulw-loop",
@@ -61,9 +64,9 @@ export function createCommandExecuteBeforeHandler(args: {
     }
 
     if (
-      hooks.startWork
-      && normalizedCommand === "start-work"
-      && hasPartsOutput(output)
+      hooks.startWork &&
+      normalizedCommand === "start-work" &&
+      hasPartsOutput(output)
     ) {
       await hooks.startWork["command.execute.before"]?.(input, output)
       if (hooks.stopContinuationGuard?.isStopped(sessionID)) {

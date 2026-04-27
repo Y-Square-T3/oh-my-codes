@@ -1,22 +1,34 @@
-import { getMessageCursor, restoreMessageCursor, type CursorState } from "./session-cursor"
+import {
+  getMessageCursor,
+  restoreMessageCursor,
+  type CursorState,
+} from "./session-cursor"
 
 type MessageConsumptionKey = `${string}:${string}`
 
-const cursorSnapshotsByMessage = new Map<MessageConsumptionKey, Map<string, CursorState | undefined>>()
+const cursorSnapshotsByMessage = new Map<
+  MessageConsumptionKey,
+  Map<string, CursorState | undefined>
+>()
 
-function getMessageKey(sessionID: string, messageID: string): MessageConsumptionKey {
+function getMessageKey(
+  sessionID: string,
+  messageID: string,
+): MessageConsumptionKey {
   return `${sessionID}:${messageID}`
 }
 
 export function recordBackgroundOutputConsumption(
   parentSessionID: string | undefined,
   parentMessageID: string | undefined,
-  taskSessionID: string | undefined
+  taskSessionID: string | undefined,
 ): void {
   if (!parentSessionID || !parentMessageID || !taskSessionID) return
 
   const messageKey = getMessageKey(parentSessionID, parentMessageID)
-  const existing = cursorSnapshotsByMessage.get(messageKey) ?? new Map<string, CursorState | undefined>()
+  const existing =
+    cursorSnapshotsByMessage.get(messageKey) ??
+    new Map<string, CursorState | undefined>()
 
   if (!cursorSnapshotsByMessage.has(messageKey)) {
     cursorSnapshotsByMessage.set(messageKey, existing)
@@ -28,7 +40,7 @@ export function recordBackgroundOutputConsumption(
 
 export function restoreBackgroundOutputConsumption(
   parentSessionID: string | undefined,
-  parentMessageID: string | undefined
+  parentMessageID: string | undefined,
 ): void {
   if (!parentSessionID || !parentMessageID) return
 
@@ -42,7 +54,9 @@ export function restoreBackgroundOutputConsumption(
   }
 }
 
-export function clearBackgroundOutputConsumptionsForParentSession(sessionID: string | undefined): void {
+export function clearBackgroundOutputConsumptionsForParentSession(
+  sessionID: string | undefined,
+): void {
   if (!sessionID) return
 
   const prefix = `${sessionID}:`
@@ -53,7 +67,9 @@ export function clearBackgroundOutputConsumptionsForParentSession(sessionID: str
   }
 }
 
-export function clearBackgroundOutputConsumptionsForTaskSession(taskSessionID: string | undefined): void {
+export function clearBackgroundOutputConsumptionsForTaskSession(
+  taskSessionID: string | undefined,
+): void {
   if (!taskSessionID) return
 
   for (const [messageKey, snapshots] of cursorSnapshotsByMessage) {

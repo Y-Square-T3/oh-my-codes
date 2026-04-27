@@ -17,7 +17,7 @@ describe("mergeCategories", () => {
   it("filters out categories with disable: true", () => {
     //#given
     const userCategories = {
-      "quick": { disable: true },
+      quick: { disable: true },
     }
 
     //#when
@@ -25,13 +25,15 @@ describe("mergeCategories", () => {
 
     //#then
     expect(result["quick"]).toBeUndefined()
-    expect(Object.keys(result).length).toBe(Object.keys(DEFAULT_CATEGORIES).length - 1)
+    expect(Object.keys(result).length).toBe(
+      Object.keys(DEFAULT_CATEGORIES).length - 1,
+    )
   })
 
   it("keeps categories with disable: false", () => {
     //#given
     const userCategories = {
-      "quick": { disable: false },
+      quick: { disable: false },
     }
 
     //#when
@@ -71,7 +73,7 @@ describe("mergeCategories", () => {
   it("user overrides merge with defaults", () => {
     //#given
     const userCategories = {
-      "ultrabrain": { model: "anthropic/claude-opus-4-7" },
+      ultrabrain: { model: "anthropic/claude-opus-4-7" },
     }
 
     //#when

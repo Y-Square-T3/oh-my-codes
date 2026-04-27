@@ -18,7 +18,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null
 }
 
-export function parseRegisteredAgentSummaries(input: unknown): RegisteredAgentSummary[] {
+export function parseRegisteredAgentSummaries(
+  input: unknown,
+): RegisteredAgentSummary[] {
   if (!Array.isArray(input)) return []
 
   const result: RegisteredAgentSummary[] = []
@@ -37,15 +39,24 @@ export function parseRegisteredAgentSummaries(input: unknown): RegisteredAgentSu
     const enabled = item.enabled
     if (enabled === false) continue
 
-    const description = typeof item.description === "string" ? item.description : ""
-    result.push({ name: sanitizeMarkdownTableCell(name), description: sanitizeMarkdownTableCell(description) })
+    const description =
+      typeof item.description === "string" ? item.description : ""
+    result.push({
+      name: sanitizeMarkdownTableCell(name),
+      description: sanitizeMarkdownTableCell(description),
+    })
   }
 
   return result
 }
 
-export function buildCustomAgentMetadata(agentName: string, description: string): AgentPromptMetadata {
-  const shortDescription = sanitizeMarkdownTableCell(truncateDescription(description))
+export function buildCustomAgentMetadata(
+  agentName: string,
+  description: string,
+): AgentPromptMetadata {
+  const shortDescription = sanitizeMarkdownTableCell(
+    truncateDescription(description),
+  )
   const safeAgentName = sanitizeMarkdownTableCell(agentName)
 
   return {
@@ -54,7 +65,9 @@ export function buildCustomAgentMetadata(agentName: string, description: string)
     triggers: [
       {
         domain: `Custom agent: ${safeAgentName}`,
-        trigger: shortDescription || "Use when this agent's description matches the task",
+        trigger:
+          shortDescription ||
+          "Use when this agent's description matches the task",
       },
     ],
   }

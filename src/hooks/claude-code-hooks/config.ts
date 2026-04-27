@@ -73,7 +73,9 @@ function getCacheKey(customSettingsPath?: string): string {
   return `${process.cwd()}::${customSettingsPath ?? ""}`
 }
 
-function getCachedConfig(cacheKey: string): ClaudeHooksConfig | null | undefined {
+function getCachedConfig(
+  cacheKey: string,
+): ClaudeHooksConfig | null | undefined {
   const cachedEntry = configCache.get(cacheKey)
   if (!cachedEntry) {
     return undefined
@@ -93,7 +95,7 @@ export function clearClaudeHooksConfigCache(): void {
 
 function mergeHooksConfig(
   base: ClaudeHooksConfig,
-  override: ClaudeHooksConfig
+  override: ClaudeHooksConfig,
 ): ClaudeHooksConfig {
   const result: ClaudeHooksConfig = { ...base }
   const eventTypes: (keyof ClaudeHooksConfig)[] = [
@@ -112,7 +114,7 @@ function mergeHooksConfig(
 }
 
 export async function loadClaudeHooksConfig(
-  customSettingsPath?: string
+  customSettingsPath?: string,
 ): Promise<ClaudeHooksConfig | null> {
   const cacheKey = getCacheKey(customSettingsPath)
   const cachedConfig = getCachedConfig(cacheKey)
@@ -138,7 +140,8 @@ export async function loadClaudeHooksConfig(
     }
   }
 
-  const resolvedConfig = Object.keys(mergedConfig).length > 0 ? mergedConfig : null
+  const resolvedConfig =
+    Object.keys(mergedConfig).length > 0 ? mergedConfig : null
   configCache.set(cacheKey, {
     value: resolvedConfig,
     cachedAt: Date.now(),

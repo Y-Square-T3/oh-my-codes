@@ -25,7 +25,9 @@ function logBackgroundCheckError(commandName: string, error: unknown): void {
   })
 }
 
-function createCommandFinder(commandName: string): () => Promise<string | null> {
+function createCommandFinder(
+  commandName: string,
+): () => Promise<string | null> {
   let cachedPath: string | null = null
   let pending: Promise<string | null> | null = null
 

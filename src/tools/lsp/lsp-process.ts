@@ -16,7 +16,10 @@ export function validateCwd(cwd: string): { valid: boolean; error?: string } {
     }
     return { valid: true }
   } catch (err) {
-    return { valid: false, error: `Cannot access working directory: ${cwd} (${err instanceof Error ? err.message : String(err)})` }
+    return {
+      valid: false,
+      error: `Cannot access working directory: ${cwd} (${err instanceof Error ? err.message : String(err)})`,
+    }
   }
 }
 interface StreamReader {
@@ -46,7 +49,9 @@ function wrapNodeProcess(proc: ChildProcess): UnifiedProcess {
       resolveExited(1)
     }
   })
-  const createStreamReader = (nodeStream: NodeJS.ReadableStream | null): StreamReader => {
+  const createStreamReader = (
+    nodeStream: NodeJS.ReadableStream | null,
+  ): StreamReader => {
     const chunks: Uint8Array[] = []
     let streamEnded = false
     type ReadResult = { done: boolean; value: Uint8Array | undefined }
@@ -129,7 +134,7 @@ function wrapNodeProcess(proc: ChildProcess): UnifiedProcess {
 }
 export function spawnProcess(
   command: string[],
-  options: { cwd: string; env: Record<string, string | undefined> }
+  options: { cwd: string; env: Record<string, string | undefined> },
 ): UnifiedProcess {
   const cwdValidation = validateCwd(options.cwd)
   if (!cwdValidation.valid) {
@@ -137,7 +142,9 @@ export function spawnProcess(
   }
   if (shouldUseNodeSpawn()) {
     const [cmd, ...args] = command
-    log("[LSP] Using Node.js child_process on Windows to avoid Bun spawn segfault")
+    log(
+      "[LSP] Using Node.js child_process on Windows to avoid Bun spawn segfault",
+    )
     const proc = nodeSpawn(cmd, args, {
       cwd: options.cwd,
       env: options.env as NodeJS.ProcessEnv,

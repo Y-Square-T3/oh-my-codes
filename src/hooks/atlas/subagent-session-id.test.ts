@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test"
 
-import { extractSessionIdFromMetadata, extractSessionIdFromOutput } from "./subagent-session-id"
+import {
+  extractSessionIdFromMetadata,
+  extractSessionIdFromOutput,
+} from "./subagent-session-id"
 
 describe("extractSessionIdFromOutput", () => {
   test("extracts Session ID blocks from background output", () => {

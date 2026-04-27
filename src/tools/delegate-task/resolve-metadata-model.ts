@@ -6,15 +6,19 @@ interface MetadataModel {
   variant?: string
 }
 
-type ModelLike = Pick<DelegatedModelConfig, "providerID" | "modelID" | "variant"> | MetadataModel
+type ModelLike =
+  | Pick<DelegatedModelConfig, "providerID" | "modelID" | "variant">
+  | MetadataModel
 
 function isModelLike(value: unknown): value is ModelLike {
-  return typeof value === "object"
-    && value !== null
-    && "providerID" in value
-    && typeof value.providerID === "string"
-    && "modelID" in value
-    && typeof value.modelID === "string"
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "providerID" in value &&
+    typeof value.providerID === "string" &&
+    "modelID" in value &&
+    typeof value.modelID === "string"
+  )
 }
 
 function toMetadataModel(model: ModelLike): MetadataModel {

@@ -1,9 +1,29 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 import { isSqliteBackend } from "../../shared/opencode-storage-detection"
 import { log } from "../../shared"
-import { getFileAllSessions, getFileMainSessions, fileSessionExists, getFileSessionInfo, getFileSessionMessages, getFileSessionTodos, getFileSessionTranscript } from "./file-storage"
-import { getSdkAllSessions, getSdkMainSessions, getSdkSessionMessages, getSdkSessionTodos, sdkSessionExists, shouldFallbackFromSdkError } from "./sdk-storage"
-import type { SessionInfo, SessionMessage, SessionMetadata, TodoItem } from "./types"
+import {
+  getFileAllSessions,
+  getFileMainSessions,
+  fileSessionExists,
+  getFileSessionInfo,
+  getFileSessionMessages,
+  getFileSessionTodos,
+  getFileSessionTranscript,
+} from "./file-storage"
+import {
+  getSdkAllSessions,
+  getSdkMainSessions,
+  getSdkSessionMessages,
+  getSdkSessionTodos,
+  sdkSessionExists,
+  shouldFallbackFromSdkError,
+} from "./sdk-storage"
+import type {
+  SessionInfo,
+  SessionMessage,
+  SessionMetadata,
+  TodoItem,
+} from "./types"
 
 export interface GetMainSessionsOptions {
   directory?: string
@@ -26,7 +46,10 @@ function mergeSessionMetadataLists(
   return [...merged.values()].sort((a, b) => b.time.updated - a.time.updated)
 }
 
-function mergeSessionIds(sdkSessionIds: string[], fileSessionIds: string[]): string[] {
+function mergeSessionIds(
+  sdkSessionIds: string[],
+  fileSessionIds: string[],
+): string[] {
   return [...new Set([...sdkSessionIds, ...fileSessionIds])]
 }
 
@@ -41,7 +64,9 @@ export function resetStorageClient(): void {
   sdkClient = null
 }
 
-export async function getMainSessions(options: GetMainSessionsOptions): Promise<SessionMetadata[]> {
+export async function getMainSessions(
+  options: GetMainSessionsOptions,
+): Promise<SessionMetadata[]> {
   if (isSqliteBackend() && sdkClient) {
     try {
       const sdkSessions = await getSdkMainSessions(sdkClient, options.directory)
@@ -49,7 +74,10 @@ export async function getMainSessions(options: GetMainSessionsOptions): Promise<
       return mergeSessionMetadataLists(sdkSessions, fileSessions)
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file session list after SDK unavailable error", { error: String(error) })
+      log(
+        "[session-manager] falling back to file session list after SDK unavailable error",
+        { error: String(error) },
+      )
     }
   }
 
@@ -64,7 +92,10 @@ export async function getAllSessions(): Promise<string[]> {
       return mergeSessionIds(sdkSessionIds, fileSessionIds)
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file session ids after SDK unavailable error", { error: String(error) })
+      log(
+        "[session-manager] falling back to file session ids after SDK unavailable error",
+        { error: String(error) },
+      )
     }
   }
 
@@ -80,20 +111,28 @@ export async function sessionExists(sessionID: string): Promise<boolean> {
       if (existsInSdk) return true
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file sessionExists after SDK unavailable error", { error: String(error), sessionID })
+      log(
+        "[session-manager] falling back to file sessionExists after SDK unavailable error",
+        { error: String(error), sessionID },
+      )
     }
   }
   return fileSessionExists(sessionID)
 }
 
-export async function readSessionMessages(sessionID: string): Promise<SessionMessage[]> {
+export async function readSessionMessages(
+  sessionID: string,
+): Promise<SessionMessage[]> {
   if (isSqliteBackend() && sdkClient) {
     try {
       const sdkMessages = await getSdkSessionMessages(sdkClient, sessionID)
       if (sdkMessages.length > 0) return sdkMessages
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file session messages after SDK unavailable error", { error: String(error), sessionID })
+      log(
+        "[session-manager] falling back to file session messages after SDK unavailable error",
+        { error: String(error), sessionID },
+      )
     }
   }
 
@@ -107,18 +146,25 @@ export async function readSessionTodos(sessionID: string): Promise<TodoItem[]> {
       if (sdkTodos.length > 0) return sdkTodos
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file session todos after SDK unavailable error", { error: String(error), sessionID })
+      log(
+        "[session-manager] falling back to file session todos after SDK unavailable error",
+        { error: String(error), sessionID },
+      )
     }
   }
 
   return getFileSessionTodos(sessionID)
 }
 
-export async function readSessionTranscript(sessionID: string): Promise<number> {
+export async function readSessionTranscript(
+  sessionID: string,
+): Promise<number> {
   return getFileSessionTranscript(sessionID)
 }
 
-export async function getSessionInfo(sessionID: string): Promise<SessionInfo | null> {
+export async function getSessionInfo(
+  sessionID: string,
+): Promise<SessionInfo | null> {
   if (isSqliteBackend() && sdkClient) {
     try {
       const sdkMessages = await getSdkSessionMessages(sdkClient, sessionID)
@@ -153,7 +199,10 @@ export async function getSessionInfo(sessionID: string): Promise<SessionInfo | n
       }
     } catch (error) {
       if (!shouldFallbackFromSdkError(error)) throw error
-      log("[session-manager] falling back to file session info after SDK unavailable error", { error: String(error), sessionID })
+      log(
+        "[session-manager] falling back to file session info after SDK unavailable error",
+        { error: String(error), sessionID },
+      )
     }
   }
 

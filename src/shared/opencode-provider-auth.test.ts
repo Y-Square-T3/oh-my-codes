@@ -21,7 +21,10 @@ describe("opencode-provider-auth", () => {
   }
 
   beforeAll(() => {
-    tempDataDir = path.join(tmpdir(), `opencode-provider-auth-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    tempDataDir = path.join(
+      tmpdir(),
+      `opencode-provider-auth-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     mkdirSync(tempDataDir, { recursive: true })
     process.env.XDG_DATA_HOME = tempDataDir
   })
@@ -42,10 +45,12 @@ describe("opencode-provider-auth", () => {
 
   it("#given auth.json with oauth entry #then detects OAuth for that provider", () => {
     // given auth.json where anthropic is OAuth
-    writeAuthFile(JSON.stringify({
-      anthropic: { type: "oauth", refresh: "r", access: "a", expires: 1 },
-      opencode: { type: "api", key: "sk-x" },
-    }))
+    writeAuthFile(
+      JSON.stringify({
+        anthropic: { type: "oauth", refresh: "r", access: "a", expires: 1 },
+        opencode: { type: "api", key: "sk-x" },
+      }),
+    )
 
     // when isProviderUsingOAuth queries each provider
     const anthropicOauth = isProviderUsingOAuth("anthropic")
@@ -58,7 +63,9 @@ describe("opencode-provider-auth", () => {
 
   it("#given api-key auth.json entry #then returns the api auth type", () => {
     // given auth.json with an API key for anthropic
-    writeAuthFile(JSON.stringify({ anthropic: { type: "api", key: "sk-ant-xxx" } }))
+    writeAuthFile(
+      JSON.stringify({ anthropic: { type: "api", key: "sk-ant-xxx" } }),
+    )
 
     // when getProviderAuthType queries the provider
     const authType = getProviderAuthType("anthropic")
@@ -95,7 +102,11 @@ describe("opencode-provider-auth", () => {
 
   it("#given unknown provider #then returns undefined", () => {
     // given auth.json without an entry for the queried provider
-    writeAuthFile(JSON.stringify({ anthropic: { type: "oauth", refresh: "r", access: "a", expires: 1 } }))
+    writeAuthFile(
+      JSON.stringify({
+        anthropic: { type: "oauth", refresh: "r", access: "a", expires: 1 },
+      }),
+    )
 
     // when querying a provider that is not present
     const openai = getProviderAuthType("openai")

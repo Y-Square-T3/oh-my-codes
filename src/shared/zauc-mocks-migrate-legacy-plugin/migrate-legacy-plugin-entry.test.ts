@@ -1,12 +1,24 @@
 /// <reference path="../../../bun-test.d.ts" />
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test"
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-async function importFreshMigrationModule(): Promise<typeof import("../migrate-legacy-plugin-entry")> {
-  return import(`../migrate-legacy-plugin-entry?test=${Date.now()}-${Math.random()}`)
+async function importFreshMigrationModule(): Promise<
+  typeof import("../migrate-legacy-plugin-entry")
+> {
+  return import(
+    `../migrate-legacy-plugin-entry?test=${Date.now()}-${Math.random()}`
+  )
 }
 
 afterAll(() => {
@@ -17,7 +29,10 @@ describe("migrateLegacyPluginEntry", () => {
   let testDir = ""
 
   beforeEach(() => {
-    testDir = join(tmpdir(), `omo-migrate-entry-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+    testDir = join(
+      tmpdir(),
+      `omo-migrate-entry-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    )
     mkdirSync(testDir, { recursive: true })
   })
 
@@ -29,7 +44,10 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when migrating the config", () => {
       it("#then replaces oh-my-codes with oh-my-openagent", async () => {
         const configPath = join(testDir, "opencode.json")
-        writeFileSync(configPath, JSON.stringify({ plugin: ["oh-my-codes@latest"] }, null, 2))
+        writeFileSync(
+          configPath,
+          JSON.stringify({ plugin: ["oh-my-codes@latest"] }, null, 2),
+        )
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
 
         const result = migrateLegacyPluginEntry(configPath)
@@ -46,7 +64,10 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when migrating the config", () => {
       it("#then replaces with oh-my-openagent", async () => {
         const configPath = join(testDir, "opencode.json")
-        writeFileSync(configPath, JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2))
+        writeFileSync(
+          configPath,
+          JSON.stringify({ plugin: ["oh-my-codes"] }, null, 2),
+        )
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
 
         const result = migrateLegacyPluginEntry(configPath)
@@ -63,7 +84,11 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when migrating the config", () => {
       it("#then keeps the original config untouched and writes the migrated content to a sibling temp file", async () => {
         const configPath = join(testDir, "opencode.json")
-        const originalContent = JSON.stringify({ plugin: ["oh-my-codes@latest"] }, null, 2)
+        const originalContent = JSON.stringify(
+          { plugin: ["oh-my-codes@latest"] },
+          null,
+          2,
+        )
         const tempPath = `${configPath}.tmp`
         writeFileSync(configPath, originalContent)
 
@@ -78,13 +103,16 @@ describe("migrateLegacyPluginEntry", () => {
         }))
 
         try {
-          const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
+          const { migrateLegacyPluginEntry } =
+            await importFreshMigrationModule()
 
           const result = migrateLegacyPluginEntry(configPath)
 
           expect(result).toBe(false)
           expect(readFileSync(configPath, "utf-8")).toBe(originalContent)
-          expect(readFileSync(tempPath, "utf-8")).toContain("oh-my-openagent@latest")
+          expect(readFileSync(tempPath, "utf-8")).toContain(
+            "oh-my-openagent@latest",
+          )
           expect(readFileSync(tempPath, "utf-8")).not.toContain("oh-my-codes")
         } finally {
           mock.module("node:fs", () => ({
@@ -100,7 +128,10 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when migrating the config", () => {
       it("#then preserves the version pin", async () => {
         const configPath = join(testDir, "opencode.json")
-        writeFileSync(configPath, JSON.stringify({ plugin: ["oh-my-codes@3.11.0"] }, null, 2))
+        writeFileSync(
+          configPath,
+          JSON.stringify({ plugin: ["oh-my-codes@3.11.0"] }, null, 2),
+        )
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
 
         const result = migrateLegacyPluginEntry(configPath)
@@ -116,7 +147,11 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when checking for migration", () => {
       it("#then returns false and does not modify the file", async () => {
         const configPath = join(testDir, "opencode.json")
-        const original = JSON.stringify({ plugin: ["oh-my-openagent@latest"] }, null, 2)
+        const original = JSON.stringify(
+          { plugin: ["oh-my-openagent@latest"] },
+          null,
+          2,
+        )
         writeFileSync(configPath, original)
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
 
@@ -132,13 +167,22 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when migrating the config", () => {
       it("#then removes the legacy entry instead of duplicating the canonical one", async () => {
         const configPath = join(testDir, "opencode.json")
-        writeFileSync(configPath, JSON.stringify({ plugin: ["oh-my-openagent", "oh-my-codes"] }, null, 2))
+        writeFileSync(
+          configPath,
+          JSON.stringify(
+            { plugin: ["oh-my-openagent", "oh-my-codes"] },
+            null,
+            2,
+          ),
+        )
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
 
         const result = migrateLegacyPluginEntry(configPath)
 
         expect(result).toBe(true)
-        const saved = JSON.parse(readFileSync(configPath, "utf-8")) as { plugin: string[] }
+        const saved = JSON.parse(readFileSync(configPath, "utf-8")) as {
+          plugin: string[]
+        }
         expect(saved.plugin).toEqual(["oh-my-openagent"])
       })
     })
@@ -211,7 +255,9 @@ describe("migrateLegacyPluginEntry", () => {
     describe("#when attempting migration", () => {
       it("#then returns false", async () => {
         const { migrateLegacyPluginEntry } = await importFreshMigrationModule()
-        const result = migrateLegacyPluginEntry(join(testDir, "nonexistent.json"))
+        const result = migrateLegacyPluginEntry(
+          join(testDir, "nonexistent.json"),
+        )
 
         expect(result).toBe(false)
       })

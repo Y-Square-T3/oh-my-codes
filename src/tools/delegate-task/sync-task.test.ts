@@ -1,4 +1,12 @@
-const { describe, test, expect, beforeEach, afterEach, mock, spyOn } = require("bun:test")
+const {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  mock,
+  spyOn,
+} = require("bun:test")
 
 function clearRequireCache(modulePath: string): void {
   const resolvedPath = require.resolve(modulePath)
@@ -33,7 +41,10 @@ describe("executeSyncTask - cleanup on error paths", () => {
     clearRequireCache("./sync-task")
 
     //#given - initialize real task toast manager (avoid global module mocks)
-    const { initTaskToastManager, _resetTaskToastManagerForTesting } = require("../../features/task-toast-manager/manager")
+    const {
+      initTaskToastManager,
+      _resetTaskToastManagerForTesting,
+    } = require("../../features/task-toast-manager/manager")
     _resetTaskToastManagerForTesting()
     resetToastManager = _resetTaskToastManagerForTesting
 
@@ -49,14 +60,15 @@ describe("executeSyncTask - cleanup on error paths", () => {
     })
 
     //#given - mock subagentSessions
-    const { subagentSessions } = require("../../features/claude-code-session-state")
+    const {
+      subagentSessions,
+    } = require("../../features/claude-code-session-state")
     spyOn(subagentSessions, "add").mockImplementation((id: string) => {
       addCalls.push(id)
     })
     spyOn(subagentSessions, "delete").mockImplementation((id: string) => {
       deleteCalls.push(id)
     })
-
   })
 
   afterEach(() => {
@@ -79,10 +91,16 @@ describe("executeSyncTask - cleanup on error paths", () => {
     const { executeSyncTask } = require("./sync-task")
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: false as const, error: "Fetch failed" }),
+      fetchSyncResult: async () => ({
+        ok: false as const,
+        error: "Fetch failed",
+      }),
     }
 
     const mockCtx = {
@@ -107,9 +125,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when - executeSyncTask with fetchSyncResult failing
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then - should return error and cleanup resources
     expect(result).toBe("Fetch failed")
@@ -131,17 +160,27 @@ describe("executeSyncTask - cleanup on error paths", () => {
     const commit = mock(() => 1)
     const rollback = mock(() => {})
     const reserveSubagentSpawn = mock(async () => ({
-      spawnContext: { rootSessionID: "parent-session", parentDepth: 0, childDepth: 1 },
+      spawnContext: {
+        rootSessionID: "parent-session",
+        parentDepth: 0,
+        childDepth: 1,
+      },
       descendantCount: 1,
       commit,
       rollback,
     }))
 
     const deps = {
-      createSyncSession: async () => ({ ok: false as const, error: "Failed to create session" }),
+      createSyncSession: async () => ({
+        ok: false as const,
+        error: "Failed to create session",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -167,9 +206,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then
     expect(result).toBe("Failed to create session")
@@ -188,10 +238,16 @@ describe("executeSyncTask - cleanup on error paths", () => {
     const { executeSyncTask } = require("./sync-task")
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => "Poll error",
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -216,9 +272,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when - executeSyncTask with pollSyncSession failing
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then - should return error and cleanup resources
     expect(result).toBe("Poll error")
@@ -237,16 +304,33 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     const { executeSyncTask } = require("./sync-task")
-    const attemptedModels: Array<{ providerID: string; modelID: string; variant?: string } | undefined> = []
+    const attemptedModels: Array<
+      { providerID: string; modelID: string; variant?: string } | undefined
+    > = []
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
-      sendSyncPrompt: async (_client: unknown, input: { categoryModel?: { providerID: string; modelID: string; variant?: string } }) => {
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
+      sendSyncPrompt: async (
+        _client: unknown,
+        input: {
+          categoryModel?: {
+            providerID: string
+            modelID: string
+            variant?: string
+          }
+        },
+      ) => {
         attemptedModels.push(input.categoryModel)
         return attemptedModels.length === 1 ? "Initial failure" : null
       },
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -281,9 +365,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     ]
 
     //#when
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", initialModel, undefined, undefined, fallbackChain, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      initialModel,
+      undefined,
+      undefined,
+      fallbackChain,
+      deps,
+    )
 
     //#then
     expect(result).toContain("Task completed")
@@ -303,17 +398,36 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     const { executeSyncTask } = require("./sync-task")
-    const attemptedModels: Array<{ providerID: string; modelID: string; variant?: string } | undefined> = []
+    const attemptedModels: Array<
+      { providerID: string; modelID: string; variant?: string } | undefined
+    > = []
     const promptErrors = ["Initial failure", "Second failure", "Final failure"]
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
-      sendSyncPrompt: async (_client: unknown, input: { categoryModel?: { providerID: string; modelID: string; variant?: string } }) => {
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
+      sendSyncPrompt: async (
+        _client: unknown,
+        input: {
+          categoryModel?: {
+            providerID: string
+            modelID: string
+            variant?: string
+          }
+        },
+      ) => {
         attemptedModels.push(input.categoryModel)
-        return promptErrors[attemptedModels.length - 1] ?? "Unexpected extra retry"
+        return (
+          promptErrors[attemptedModels.length - 1] ?? "Unexpected extra retry"
+        )
       },
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -349,9 +463,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     ]
 
     //#when
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", initialModel, undefined, undefined, fallbackChain, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      initialModel,
+      undefined,
+      undefined,
+      fallbackChain,
+      deps,
+    )
 
     //#then
     expect(result).toBe("Final failure")
@@ -372,10 +497,16 @@ describe("executeSyncTask - cleanup on error paths", () => {
     const { executeSyncTask } = require("./sync-task")
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -390,7 +521,11 @@ describe("executeSyncTask - cleanup on error paths", () => {
     const mockExecutorCtx = {
       manager: {
         reserveSubagentSpawn: mock(async () => ({
-          spawnContext: { rootSessionID: "parent-session", parentDepth: 0, childDepth: 1 },
+          spawnContext: {
+            rootSessionID: "parent-session",
+            parentDepth: 0,
+            childDepth: 1,
+          },
           descendantCount: 1,
           commit,
           rollback,
@@ -411,13 +546,26 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when - executeSyncTask completes successfully
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then - should complete and cleanup resources
     expect(result).toContain("Task completed")
-    expect(mockExecutorCtx.manager.reserveSubagentSpawn).toHaveBeenCalledWith("parent-session")
+    expect(mockExecutorCtx.manager.reserveSubagentSpawn).toHaveBeenCalledWith(
+      "parent-session",
+    )
     expect(commit).toHaveBeenCalledTimes(1)
     expect(rollback).toHaveBeenCalledTimes(0)
     expect(removeTaskCalls.length).toBe(1)
@@ -441,15 +589,21 @@ describe("executeSyncTask - cleanup on error paths", () => {
 
     const reserveSubagentSpawn = mock(async () => {
       throw new Error(
-        "Subagent spawn blocked: child depth 4 exceeds background_task.maxDepth=3. Parent session: parent. Root session: root. Continue in an existing subagent session instead of spawning another."
+        "Subagent spawn blocked: child depth 4 exceeds background_task.maxDepth=3. Parent session: parent. Root session: root. Continue in an existing subagent session instead of spawning another.",
       )
     })
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const mockCtx = {
@@ -475,9 +629,20 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when - executeSyncTask is called from a session at max depth
-    const result = await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    const result = await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then - should propagate the depth limit error and NOT create the session
     expect(result).toContain("Subagent spawn blocked")
@@ -518,17 +683,25 @@ describe("executeSyncTask - cleanup on error paths", () => {
     })
 
     const deps = {
-      createSyncSession: async () => ({ ok: true, sessionID: "ses_test_12345678" }),
+      createSyncSession: async () => ({
+        ok: true,
+        sessionID: "ses_test_12345678",
+      }),
       sendSyncPrompt: async () => null,
       pollSyncSession: async () => null,
-      fetchSyncResult: async () => ({ ok: true as const, textContent: "Result" }),
+      fetchSyncResult: async () => ({
+        ok: true as const,
+        textContent: "Result",
+      }),
     }
 
     const metadataCalls: any[] = []
     const mockCtx = {
       sessionID: "parent-session",
       callID: "call-123",
-      metadata: (input: any) => { metadataCalls.push(input) },
+      metadata: (input: any) => {
+        metadataCalls.push(input)
+      },
     }
 
     const mockExecutorCtx = {
@@ -548,13 +721,26 @@ describe("executeSyncTask - cleanup on error paths", () => {
     }
 
     //#when
-    await executeSyncTask(args, mockCtx, mockExecutorCtx, {
-      sessionID: "parent-session",
-    }, "test-agent", undefined, undefined, undefined, undefined, deps)
+    await executeSyncTask(
+      args,
+      mockCtx,
+      mockExecutorCtx,
+      {
+        sessionID: "parent-session",
+      },
+      "test-agent",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      deps,
+    )
 
     //#then - the spawnDepth recorded in metadata MUST match what reserveSubagentSpawn returned
     expect(reservedDepth).toBe(3)
-    const taskMeta = metadataCalls.find((c) => c.metadata?.spawnDepth !== undefined)
+    const taskMeta = metadataCalls.find(
+      (c) => c.metadata?.spawnDepth !== undefined,
+    )
     expect(taskMeta).toBeDefined()
     expect(taskMeta.metadata.spawnDepth).toBe(3) // NOT 1 (the fallback value)
   })

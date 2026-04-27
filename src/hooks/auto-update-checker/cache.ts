@@ -81,7 +81,9 @@ export function invalidatePackage(packageName: string = PACKAGE_NAME): boolean {
     lockRemoved = removeFromBunLock(packageName)
 
     if (!packageRemoved && !lockRemoved) {
-      log(`[auto-update-checker] Package not found, nothing to invalidate: ${packageName}`)
+      log(
+        `[auto-update-checker] Package not found, nothing to invalidate: ${packageName}`,
+      )
       return false
     }
 
@@ -94,6 +96,8 @@ export function invalidatePackage(packageName: string = PACKAGE_NAME): boolean {
 
 /** @deprecated Use invalidatePackage instead - this nukes ALL plugins */
 export function invalidateCache(): boolean {
-  log("[auto-update-checker] WARNING: invalidateCache is deprecated, use invalidatePackage")
+  log(
+    "[auto-update-checker] WARNING: invalidateCache is deprecated, use invalidatePackage",
+  )
   return invalidatePackage()
 }

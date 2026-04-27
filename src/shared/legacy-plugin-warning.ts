@@ -25,7 +25,10 @@ function getOpenCodeConfigPath(overrideConfigDir?: string): string | null {
     return null
   }
 
-  const { configJsonc, configJson } = getOpenCodeConfigPaths({ binary: "opencode", version: null })
+  const { configJsonc, configJson } = getOpenCodeConfigPaths({
+    binary: "opencode",
+    version: null,
+  })
 
   if (existsSync(configJsonc)) return configJsonc
   if (existsSync(configJson)) return configJson
@@ -33,28 +36,46 @@ function getOpenCodeConfigPath(overrideConfigDir?: string): string | null {
 }
 
 function isLegacyPluginEntry(entry: string): boolean {
-  return entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  return (
+    entry === LEGACY_PLUGIN_NAME || entry.startsWith(`${LEGACY_PLUGIN_NAME}@`)
+  )
 }
 
 function isCanonicalPluginEntry(entry: string): boolean {
   return entry === PLUGIN_NAME || entry.startsWith(`${PLUGIN_NAME}@`)
 }
 
-export function checkForLegacyPluginEntry(overrideConfigDir?: string): LegacyPluginCheckResult {
+export function checkForLegacyPluginEntry(
+  overrideConfigDir?: string,
+): LegacyPluginCheckResult {
   const configPath = getOpenCodeConfigPath(overrideConfigDir)
   if (!configPath) {
-    return { hasLegacyEntry: false, hasCanonicalEntry: false, legacyEntries: [], configPath: null }
+    return {
+      hasLegacyEntry: false,
+      hasCanonicalEntry: false,
+      legacyEntries: [],
+      configPath: null,
+    }
   }
 
   try {
     const content = readFileSync(configPath, "utf-8")
     const parseResult = parseJsoncSafe<OpenCodeConfig>(content)
     if (!parseResult.data) {
-      return { hasLegacyEntry: false, hasCanonicalEntry: false, legacyEntries: [], configPath }
+      return {
+        hasLegacyEntry: false,
+        hasCanonicalEntry: false,
+        legacyEntries: [],
+        configPath,
+      }
     }
 
-    const legacyEntries = (parseResult.data.plugin ?? []).filter(isLegacyPluginEntry)
-    const hasCanonicalEntry = (parseResult.data.plugin ?? []).some(isCanonicalPluginEntry)
+    const legacyEntries = (parseResult.data.plugin ?? []).filter(
+      isLegacyPluginEntry,
+    )
+    const hasCanonicalEntry = (parseResult.data.plugin ?? []).some(
+      isCanonicalPluginEntry,
+    )
 
     return {
       hasLegacyEntry: legacyEntries.length > 0,
@@ -63,6 +84,11 @@ export function checkForLegacyPluginEntry(overrideConfigDir?: string): LegacyPlu
       configPath,
     }
   } catch {
-    return { hasLegacyEntry: false, hasCanonicalEntry: false, legacyEntries: [], configPath: null }
+    return {
+      hasLegacyEntry: false,
+      hasCanonicalEntry: false,
+      legacyEntries: [],
+      configPath: null,
+    }
   }
 }

@@ -19,10 +19,12 @@ type ToolResultPart = {
 
 type TransformPart = Part | ToolUsePart | ToolResultPart
 
-type TransformMessageInfo = Message | {
-  role: "user"
-  sessionID?: string
-}
+type TransformMessageInfo =
+  | Message
+  | {
+      role: "user"
+      sessionID?: string
+    }
 
 interface MessageWithParts {
   info: TransformMessageInfo
@@ -32,18 +34,26 @@ interface MessageWithParts {
 type MessagesTransformHook = {
   "experimental.chat.messages.transform"?: (
     input: Record<string, never>,
-    output: { messages: MessageWithParts[] }
+    output: { messages: MessageWithParts[] },
   ) => Promise<void>
 }
 
 function getToolUseID(part: TransformPart): string | null {
   const candidate = part as { type?: unknown; id?: unknown; callID?: unknown }
 
-  if (candidate.type === "tool_use" && typeof candidate.id === "string" && candidate.id.length > 0) {
+  if (
+    candidate.type === "tool_use" &&
+    typeof candidate.id === "string" &&
+    candidate.id.length > 0
+  ) {
     return candidate.id
   }
 
-  if (candidate.type === "tool" && typeof candidate.callID === "string" && candidate.callID.length > 0) {
+  if (
+    candidate.type === "tool" &&
+    typeof candidate.callID === "string" &&
+    candidate.callID.length > 0
+  ) {
     return candidate.callID
   }
 
@@ -53,7 +63,11 @@ function getToolUseID(part: TransformPart): string | null {
 function getToolResultID(part: TransformPart): string | null {
   const candidate = part as { type?: unknown; tool_use_id?: unknown }
 
-  if (candidate.type === "tool_result" && typeof candidate.tool_use_id === "string" && candidate.tool_use_id.length > 0) {
+  if (
+    candidate.type === "tool_result" &&
+    typeof candidate.tool_use_id === "string" &&
+    candidate.tool_use_id.length > 0
+  ) {
     return candidate.tool_use_id
   }
 
@@ -110,22 +124,35 @@ function findToolResultInsertIndex(parts: TransformPart[]): number {
   return lastToolResultIndex === -1 ? 0 : lastToolResultIndex + 1
 }
 
-function insertMissingToolResults(message: MessageWithParts, missingToolUseIDs: string[]): void {
-  const toolResultParts = missingToolUseIDs.map((toolUseID) => createToolResultPart(toolUseID))
+function insertMissingToolResults(
+  message: MessageWithParts,
+  missingToolUseIDs: string[],
+): void {
+  const toolResultParts = missingToolUseIDs.map((toolUseID) =>
+    createToolResultPart(toolUseID),
+  )
   const insertIndex = findToolResultInsertIndex(message.parts)
   message.parts.splice(insertIndex, 0, ...toolResultParts)
 }
 
-function createSyntheticUserMessage(assistantMessage: MessageWithParts, missingToolUseIDs: string[]): MessageWithParts {
+function createSyntheticUserMessage(
+  assistantMessage: MessageWithParts,
+  missingToolUseIDs: string[],
+): MessageWithParts {
   const assistantInfo = assistantMessage.info as { sessionID?: unknown }
-  const sessionID = typeof assistantInfo.sessionID === "string" ? assistantInfo.sessionID : undefined
+  const sessionID =
+    typeof assistantInfo.sessionID === "string"
+      ? assistantInfo.sessionID
+      : undefined
 
   return {
     info: {
       role: "user",
       ...(sessionID ? { sessionID } : {}),
     },
-    parts: missingToolUseIDs.map((toolUseID) => createToolResultPart(toolUseID)),
+    parts: missingToolUseIDs.map((toolUseID) =>
+      createToolResultPart(toolUseID),
+    ),
   }
 }
 
@@ -134,7 +161,10 @@ function getMessageID(message: TransformMessageInfo): string | undefined {
   return typeof candidate.id === "string" ? candidate.id : undefined
 }
 
-function repairMissingToolResults(messages: MessageWithParts[], assistantIndex: number): void {
+function repairMissingToolResults(
+  messages: MessageWithParts[],
+  assistantIndex: number,
+): void {
   const assistantMessage = messages[assistantIndex]
   const toolUseIDs = extractUniqueToolUseIDs(assistantMessage.parts)
 
@@ -145,7 +175,11 @@ function repairMissingToolResults(messages: MessageWithParts[], assistantIndex: 
   const nextMessage = messages[assistantIndex + 1]
 
   if (nextMessage?.info.role !== "user") {
-    messages.splice(assistantIndex + 1, 0, createSyntheticUserMessage(assistantMessage, toolUseIDs))
+    messages.splice(
+      assistantIndex + 1,
+      0,
+      createSyntheticUserMessage(assistantMessage, toolUseIDs),
+    )
     log("[tool-pair-validator] Repaired missing tool_result blocks", {
       assistantMessageID: getMessageID(assistantMessage.info),
       syntheticUserMessageInserted: true,
@@ -155,7 +189,9 @@ function repairMissingToolResults(messages: MessageWithParts[], assistantIndex: 
   }
 
   const existingToolResultIDs = extractToolResultIDs(nextMessage.parts)
-  const missingToolUseIDs = toolUseIDs.filter((toolUseID) => !existingToolResultIDs.has(toolUseID))
+  const missingToolUseIDs = toolUseIDs.filter(
+    (toolUseID) => !existingToolResultIDs.has(toolUseID),
+  )
 
   if (missingToolUseIDs.length === 0) {
     return

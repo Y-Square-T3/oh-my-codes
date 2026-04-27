@@ -9,7 +9,12 @@ import {
 describe("team-mode types", () => {
   test("member category branch parses and narrows", () => {
     // given
-    const member = { kind: "category", name: "m1", category: "deep", prompt: "impl X" }
+    const member = {
+      kind: "category",
+      name: "m1",
+      category: "deep",
+      prompt: "impl X",
+    }
 
     // when
     const result = MemberSchema.safeParse(member)
@@ -65,9 +70,13 @@ describe("team-mode types", () => {
 
     // then
     expect(entries).toHaveLength(11)
-    expect(verdictCounts).toEqual({ eligible: 3, conditional: 1, "hard-reject": 7 })
+    expect(verdictCounts).toEqual({
+      eligible: 3,
+      conditional: 1,
+      "hard-reject": 7,
+    })
     expect(AGENT_ELIGIBILITY_REGISTRY.hephaestus.rejectionMessage).toBe(
-      "Agent 'hephaestus' lacks teammate permission. Either apply D-36 (add teammate: \"allow\" in tool-config-handler.ts) or use subagent_type: \"sisyphus\" instead.",
+      'Agent \'hephaestus\' lacks teammate permission. Either apply D-36 (add teammate: "allow" in tool-config-handler.ts) or use subagent_type: "sisyphus" instead.',
     )
     expect(AGENT_ELIGIBILITY_REGISTRY.oracle.rejectionMessage).toBe(
       "Agent 'oracle' is read-only (cannot write files). Team members must write to mailbox inbox files. Use delegate-task with subagent_type: 'oracle' for read-only analysis instead.",
@@ -78,7 +87,9 @@ describe("team-mode types", () => {
     expect(AGENT_ELIGIBILITY_REGISTRY.explore.rejectionMessage).toBe(
       "Agent 'explore' is read-only (write/edit denied). Cannot write to mailbox as team member. Use delegate-task for codebase exploration instead.",
     )
-    expect(AGENT_ELIGIBILITY_REGISTRY["multimodal-looker"].rejectionMessage).toBe(
+    expect(
+      AGENT_ELIGIBILITY_REGISTRY["multimodal-looker"].rejectionMessage,
+    ).toBe(
       "Agent 'multimodal-looker' has read-only tool access (only 'read' allowed). Cannot write to mailbox as team member.",
     )
     expect(AGENT_ELIGIBILITY_REGISTRY.metis.rejectionMessage).toBe(

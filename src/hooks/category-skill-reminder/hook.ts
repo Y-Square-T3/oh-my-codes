@@ -9,11 +9,7 @@ import { buildReminderMessage } from "./formatter"
  * Target agents that should receive category+skill reminders.
  * These are orchestrator agents that delegate work to specialized agents.
  */
-const TARGET_AGENTS = new Set([
-  "sisyphus",
-  "sisyphus-junior",
-  "atlas",
-])
+const TARGET_AGENTS = new Set(["sisyphus", "sisyphus-junior", "atlas"])
 
 /**
  * Tools that indicate the agent is doing work that could potentially be delegated.
@@ -31,10 +27,7 @@ const DELEGATABLE_WORK_TOOLS = new Set([
 /**
  * Tools that indicate the agent is already using delegation properly.
  */
-const DELEGATION_TOOLS = new Set([
-   "task",
-   "call_omo_agent",
-])
+const DELEGATION_TOOLS = new Set(["task", "call_omo_agent"])
 
 interface ToolExecuteInput {
   tool: string
@@ -57,7 +50,7 @@ interface SessionState {
 
 export function createCategorySkillReminderHook(
   _ctx: PluginInput,
-  availableSkills: AvailableSkill[] = []
+  availableSkills: AvailableSkill[] = [],
 ) {
   const sessionStates = new Map<string, SessionState>()
   const reminderMessage = buildReminderMessage(availableSkills)
@@ -84,7 +77,10 @@ export function createCategorySkillReminderHook(
     )
   }
 
-  const toolExecuteAfter = async (input: ToolExecuteInput, output: ToolExecuteOutput) => {
+  const toolExecuteAfter = async (
+    input: ToolExecuteInput,
+    output: ToolExecuteOutput,
+  ) => {
     const { tool, sessionID } = input
     const toolLower = tool.toLowerCase()
 
@@ -106,7 +102,11 @@ export function createCategorySkillReminderHook(
 
     state.toolCallCount++
 
-    if (state.toolCallCount >= 3 && !state.delegationUsed && !state.reminderShown) {
+    if (
+      state.toolCallCount >= 3 &&
+      !state.delegationUsed &&
+      !state.reminderShown
+    ) {
       output.output += reminderMessage
       state.reminderShown = true
       log("[category-skill-reminder] Reminder injected", {
@@ -116,7 +116,11 @@ export function createCategorySkillReminderHook(
     }
   }
 
-  const eventHandler = async ({ event }: { event: { type: string; properties?: unknown } }) => {
+  const eventHandler = async ({
+    event,
+  }: {
+    event: { type: string; properties?: unknown }
+  }) => {
     const props = event.properties as Record<string, unknown> | undefined
 
     if (event.type === "session.deleted") {

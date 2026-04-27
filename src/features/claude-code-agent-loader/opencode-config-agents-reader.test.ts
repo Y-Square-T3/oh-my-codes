@@ -11,8 +11,12 @@ describe("readOpencodeConfigAgents", () => {
   let configDirSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
-    mockGlobalConfigDir = fs.mkdtempSync(path.join(os.tmpdir(), "opencode-mock-global-"))
-    configDirSpy = spyOn(configDir, "getOpenCodeConfigDir").mockReturnValue(mockGlobalConfigDir)
+    mockGlobalConfigDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "opencode-mock-global-"),
+    )
+    configDirSpy = spyOn(configDir, "getOpenCodeConfigDir").mockReturnValue(
+      mockGlobalConfigDir,
+    )
   })
 
   afterEach(() => {
@@ -43,13 +47,15 @@ describe("readOpencodeConfigAgents", () => {
             prompt: "You are a helpful assistant",
           },
         },
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
 
     expect(result).toHaveProperty("my-agent")
-    expect(result["my-agent"].description).toBe("(opencode-config) Custom agent")
+    expect(result["my-agent"].description).toBe(
+      "(opencode-config) Custom agent",
+    )
     expect(result["my-agent"].mode).toBe("subagent")
     expect(result["my-agent"].prompt).toBe("You are a helpful assistant")
     expect(result["my-agent"].model).toBeDefined()
@@ -74,14 +80,16 @@ describe("readOpencodeConfigAgents", () => {
     }
   }
 }
-`
+`,
     )
 
     const result = readOpencodeConfigAgents(tempDir)
 
     expect(Object.keys(result).length).toBeGreaterThan(0)
     expect(result).toHaveProperty("test-agent")
-    expect(result["test-agent"].description).toBe("(opencode-config) Test agent")
+    expect(result["test-agent"].description).toBe(
+      "(opencode-config) Test agent",
+    )
     expect(result["test-agent"].prompt).toBe("Test prompt")
 
     fs.rmSync(tempDir, { recursive: true })
@@ -122,7 +130,7 @@ describe("readOpencodeConfigAgents", () => {
             prompt: "test",
           },
         },
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
@@ -145,7 +153,7 @@ describe("readOpencodeConfigAgents", () => {
         name: "definition-agent",
         description: "From definition file",
         prompt: "File-based agent prompt",
-      })
+      }),
     )
 
     const configPath = path.join(opencodeDir, "opencode.json")
@@ -153,14 +161,16 @@ describe("readOpencodeConfigAgents", () => {
       configPath,
       JSON.stringify({
         agent_definitions: ["./agents.json"],
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
 
     if (Object.keys(result).length > 0) {
       expect(result).toHaveProperty("definition-agent")
-      expect(result["definition-agent"].description).toContain("From definition file")
+      expect(result["definition-agent"].description).toContain(
+        "From definition file",
+      )
     }
 
     fs.rmSync(tempDir, { recursive: true })
@@ -178,7 +188,7 @@ describe("readOpencodeConfigAgents", () => {
         name: "shared-agent",
         description: "From definition file",
         prompt: "Definition prompt",
-      })
+      }),
     )
 
     const configPath = path.join(opencodeDir, "opencode.json")
@@ -192,12 +202,14 @@ describe("readOpencodeConfigAgents", () => {
           },
         },
         agent_definitions: ["./agents.json"],
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
 
-    expect(result["shared-agent"].description).toBe("(opencode-config) From inline")
+    expect(result["shared-agent"].description).toBe(
+      "(opencode-config) From inline",
+    )
     expect(result["shared-agent"].prompt).toBe("Inline prompt")
 
     fs.rmSync(tempDir, { recursive: true })
@@ -224,7 +236,7 @@ describe("readOpencodeConfigAgents", () => {
             prompt: "test",
           },
         },
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
@@ -259,20 +271,24 @@ describe("readOpencodeConfigAgents", () => {
             prompt: "Fallback prompt",
           },
         },
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)
 
     expect(result).toHaveProperty("fallback-agent")
-    expect(result["fallback-agent"].description).toBe("(opencode-config) Using agent key")
+    expect(result["fallback-agent"].description).toBe(
+      "(opencode-config) Using agent key",
+    )
     expect(result["fallback-agent"].prompt).toBe("Fallback prompt")
 
     fs.rmSync(tempDir, { recursive: true })
   })
 
   it("prioritizes project-level opencode.json over user-level", () => {
-    const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), "opencode-project-"))
+    const projectDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "opencode-project-"),
+    )
     const projectOpencodeDir = path.join(projectDir, ".opencode")
     fs.mkdirSync(projectOpencodeDir, { recursive: true })
 
@@ -286,13 +302,15 @@ describe("readOpencodeConfigAgents", () => {
             prompt: "Project prompt",
           },
         },
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(projectDir)
 
     expect(result).toHaveProperty("project-agent")
-    expect(result["project-agent"].description).toBe("(opencode-config) From project")
+    expect(result["project-agent"].description).toBe(
+      "(opencode-config) From project",
+    )
 
     fs.rmSync(projectDir, { recursive: true })
   })
@@ -309,7 +327,7 @@ describe("readOpencodeConfigAgents", () => {
         name: "agent-one",
         description: "First agent",
         prompt: "Prompt 1",
-      })
+      }),
     )
 
     const agentDef2 = path.join(opencodeDir, "agents2.json")
@@ -319,7 +337,7 @@ describe("readOpencodeConfigAgents", () => {
         name: "agent-two",
         description: "Second agent",
         prompt: "Prompt 2",
-      })
+      }),
     )
 
     const configPath = path.join(opencodeDir, "opencode.json")
@@ -327,7 +345,7 @@ describe("readOpencodeConfigAgents", () => {
       configPath,
       JSON.stringify({
         agent_definitions: ["./agents1.json", "./agents2.json"],
-      })
+      }),
     )
 
     const result = readOpencodeConfigAgents(tempDir)

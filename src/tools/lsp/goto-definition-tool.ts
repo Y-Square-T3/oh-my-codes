@@ -14,11 +14,11 @@ export const lsp_goto_definition: ToolDefinition = tool({
   execute: async (args, _context) => {
     try {
       const result = await withLspClient(args.filePath, async (client) => {
-        return (await client.definition(args.filePath, args.line, args.character)) as
-          | Location
-          | Location[]
-          | LocationLink[]
-          | null
+        return (await client.definition(
+          args.filePath,
+          args.line,
+          args.character,
+        )) as Location | Location[] | LocationLink[] | null
       })
 
       if (!result) {

@@ -21,7 +21,10 @@ export function getMessageDir(sessionID: string): string | null {
       }
     }
   } catch (error) {
-    log("[opencode-message-dir] Failed to scan message directories", { sessionID, error: String(error) })
+    log("[opencode-message-dir] Failed to scan message directories", {
+      sessionID,
+      error: String(error),
+    })
     return null
   }
 

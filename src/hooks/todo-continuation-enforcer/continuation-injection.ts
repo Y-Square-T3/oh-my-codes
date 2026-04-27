@@ -34,12 +34,17 @@ import { getIncompleteCount } from "./todo"
 import type { ResolvedMessageInfo, Todo } from "./types"
 import type { SessionStateStore } from "./session-state"
 
-function hasWritePermission(tools: Record<string, ToolPermission> | undefined): boolean {
+function hasWritePermission(
+  tools: Record<string, ToolPermission> | undefined,
+): boolean {
   const editPermission = tools?.edit
   const writePermission = tools?.write
   return (
     !tools ||
-    (editPermission !== false && editPermission !== "deny" && writePermission !== false && writePermission !== "deny")
+    (editPermission !== false &&
+      editPermission !== "deny" &&
+      writePermission !== false &&
+      writePermission !== "deny")
   )
 }
 
@@ -69,30 +74,43 @@ export async function injectContinuation(args: {
   }
 
   if (state?.wasCancelled) {
-    log(`[${HOOK_NAME}] Skipped injection: session was cancelled`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped injection: session was cancelled`, {
+      sessionID,
+    })
     return
   }
 
   if (isContinuationStopped?.(sessionID)) {
-    log(`[${HOOK_NAME}] Skipped injection: continuation stopped for session`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped injection: continuation stopped for session`, {
+      sessionID,
+    })
     return
   }
 
   const hasRunningBgTasks = backgroundManager
-    ? backgroundManager.getTasksByParentSession(sessionID).some((task: { status: string }) => task.status === "running")
+    ? backgroundManager
+        .getTasksByParentSession(sessionID)
+        .some((task: { status: string }) => task.status === "running")
     : false
 
   if (hasRunningBgTasks) {
-    log(`[${HOOK_NAME}] Skipped injection: background tasks running`, { sessionID })
+    log(`[${HOOK_NAME}] Skipped injection: background tasks running`, {
+      sessionID,
+    })
     return
   }
 
   let todos: Todo[] = []
   try {
     const response = await ctx.client.session.todo({ path: { id: sessionID } })
-    todos = normalizeSDKResponse(response, [] as Todo[], { preferResponseOnMissingData: true })
+    todos = normalizeSDKResponse(response, [] as Todo[], {
+      preferResponseOnMissingData: true,
+    })
   } catch (error) {
-    log(`[${HOOK_NAME}] Failed to fetch todos`, { sessionID, error: String(error) })
+    log(`[${HOOK_NAME}] Failed to fetch todos`, {
+      sessionID,
+      error: String(error),
+    })
     return
   }
 
@@ -109,10 +127,15 @@ export async function injectContinuation(args: {
   if (!agentName || !model) {
     let previousMessage = null
     if (isSqliteBackend()) {
-      previousMessage = await findNearestMessageWithFieldsFromSDK(ctx.client, sessionID)
+      previousMessage = await findNearestMessageWithFieldsFromSDK(
+        ctx.client,
+        sessionID,
+      )
     } else {
       const messageDir = getMessageDir(sessionID)
-      previousMessage = messageDir ? findNearestMessageWithFields(messageDir) : null
+      previousMessage = messageDir
+        ? findNearestMessageWithFields(messageDir)
+        : null
     }
     agentName = agentName ?? previousMessage?.agent
     model =
@@ -132,26 +155,46 @@ export async function injectContinuation(args: {
   const promptAgent = normalizeAgentForPromptKey(agentName)
   const launchAgent = resolveRegisteredAgentName(agentName)
 
-  if (promptAgent && skipAgents.some(s => getAgentConfigKey(s) === getAgentConfigKey(promptAgent))) {
-    log(`[${HOOK_NAME}] Skipped: agent in skipAgents list`, { sessionID, agent: agentName })
+  if (
+    promptAgent &&
+    skipAgents.some(
+      (s) => getAgentConfigKey(s) === getAgentConfigKey(promptAgent),
+    )
+  ) {
+    log(`[${HOOK_NAME}] Skipped: agent in skipAgents list`, {
+      sessionID,
+      agent: agentName,
+    })
     return
   }
 
   if (!promptAgent) {
     const compactionState = sessionStateStore.getExistingState(sessionID)
-    if (compactionState && isCompactionGuardActive(compactionState, Date.now())) {
-      log(`[${HOOK_NAME}] Skipped: agent unknown after compaction`, { sessionID })
+    if (
+      compactionState &&
+      isCompactionGuardActive(compactionState, Date.now())
+    ) {
+      log(`[${HOOK_NAME}] Skipped: agent unknown after compaction`, {
+        sessionID,
+      })
       return
     }
   }
 
   if (!hasWritePermission(tools)) {
-    log(`[${HOOK_NAME}] Skipped: agent lacks write permission`, { sessionID, agent: agentName })
+    log(`[${HOOK_NAME}] Skipped: agent lacks write permission`, {
+      sessionID,
+      agent: agentName,
+    })
     return
   }
 
-  const incompleteTodos = todos.filter((todo) => todo.status !== "completed" && todo.status !== "cancelled")
-  const todoList = incompleteTodos.map((todo) => `- [${todo.status}] ${todo.content}`).join("\n")
+  const incompleteTodos = todos.filter(
+    (todo) => todo.status !== "completed" && todo.status !== "cancelled",
+  )
+  const todoList = incompleteTodos
+    .map((todo) => `- [${todo.status}] ${todo.content}`)
+    .join("\n")
   const prompt = `${CONTINUATION_PROMPT}
 
 [Status: ${todos.length - freshIncompleteCount}/${todos.length} completed, ${freshIncompleteCount} remaining]
@@ -161,7 +204,10 @@ ${todoList}`
 
   const injectionState = sessionStateStore.getExistingState(sessionID)
   if (injectionState?.wasCancelled) {
-    log(`[${HOOK_NAME}] Skipped injection: session was cancelled before prompt`, { sessionID })
+    log(
+      `[${HOOK_NAME}] Skipped injection: session was cancelled before prompt`,
+      { sessionID },
+    )
     return
   }
 
@@ -208,14 +254,19 @@ ${todoList}`
     if (injectionState) {
       injectionState.inFlight = false
       injectionState.lastInjectedAt = Date.now()
-      injectionState.consecutiveFailures = (injectionState.consecutiveFailures ?? 0) + 1
+      injectionState.consecutiveFailures =
+        (injectionState.consecutiveFailures ?? 0) + 1
 
-      const errorObj = error instanceof Error
-        ? { name: error.name, message: error.message }
-        : { message: String(error) }
+      const errorObj =
+        error instanceof Error
+          ? { name: error.name, message: error.message }
+          : { message: String(error) }
       if (isTokenLimitError(errorObj)) {
         injectionState.tokenLimitDetected = true
-        log(`[${HOOK_NAME}] Token limit error detected during injection, stopping continuation`, { sessionID })
+        log(
+          `[${HOOK_NAME}] Token limit error detected during injection, stopping continuation`,
+          { sessionID },
+        )
       }
     }
   }

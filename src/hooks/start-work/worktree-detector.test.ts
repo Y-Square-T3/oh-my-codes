@@ -2,14 +2,19 @@
 
 import { describe, expect, test, spyOn, beforeEach, afterEach } from "bun:test"
 import * as childProcess from "node:child_process"
-import { detectWorktreePath, parseWorktreeListPorcelain, listWorktrees } from "./worktree-detector"
+import {
+  detectWorktreePath,
+  parseWorktreeListPorcelain,
+  listWorktrees,
+} from "./worktree-detector"
 
 describe("detectWorktreePath", () => {
   let execFileSyncSpy: ReturnType<typeof spyOn>
 
   beforeEach(() => {
     execFileSyncSpy = spyOn(childProcess, "execFileSync").mockImplementation(
-      ((_file: string, _args: string[]) => "") as typeof childProcess.execFileSync,
+      ((_file: string, _args: string[]) =>
+        "") as typeof childProcess.execFileSync,
     )
   })
 
@@ -20,7 +25,8 @@ describe("detectWorktreePath", () => {
   describe("when directory is a valid git worktree", () => {
     test("#given valid git dir #when detecting #then returns worktree root path", () => {
       execFileSyncSpy.mockImplementation(
-        ((_file: string, _args: string[]) => "/home/user/my-repo\n") as typeof childProcess.execFileSync,
+        ((_file: string, _args: string[]) =>
+          "/home/user/my-repo\n") as typeof childProcess.execFileSync,
       )
 
       // when
@@ -32,7 +38,8 @@ describe("detectWorktreePath", () => {
 
     test("#given git output with trailing newline #when detecting #then trims output", () => {
       execFileSyncSpy.mockImplementation(
-        ((_file: string, _args: string[]) => "/projects/worktree-a\n\n") as typeof childProcess.execFileSync,
+        ((_file: string, _args: string[]) =>
+          "/projects/worktree-a\n\n") as typeof childProcess.execFileSync,
       )
 
       const result = detectWorktreePath("/projects/worktree-a")
@@ -42,7 +49,8 @@ describe("detectWorktreePath", () => {
 
     test("#given valid dir #when detecting #then calls git rev-parse with cwd", () => {
       execFileSyncSpy.mockImplementation(
-        ((_file: string, _args: string[]) => "/repo\n") as typeof childProcess.execFileSync,
+        ((_file: string, _args: string[]) =>
+          "/repo\n") as typeof childProcess.execFileSync,
       )
 
       detectWorktreePath("/repo/some/subdir")
@@ -98,7 +106,11 @@ describe("parseWorktreeListPorcelain", () => {
     // then
     expect(result).toEqual([
       { path: "/home/user/main-repo", branch: "main", bare: false },
-      { path: "/home/user/worktrees/feature-a", branch: "feature-a", bare: false },
+      {
+        path: "/home/user/worktrees/feature-a",
+        branch: "feature-a",
+        bare: false,
+      },
     ])
   })
 
@@ -136,9 +148,7 @@ describe("parseWorktreeListPorcelain", () => {
     const result = parseWorktreeListPorcelain(output)
 
     // then
-    expect(result).toEqual([
-      { path: "/repo", branch: "dev", bare: false },
-    ])
+    expect(result).toEqual([{ path: "/repo", branch: "dev", bare: false }])
   })
 })
 
@@ -147,7 +157,8 @@ describe("listWorktrees", () => {
 
   beforeEach(() => {
     execFileSyncSpy = spyOn(childProcess, "execFileSync").mockImplementation(
-      ((_file: string, _args: string[]) => "") as typeof childProcess.execFileSync,
+      ((_file: string, _args: string[]) =>
+        "") as typeof childProcess.execFileSync,
     )
   })
 

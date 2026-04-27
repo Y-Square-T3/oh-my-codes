@@ -38,5 +38,7 @@ export async function pollSessionUntilIdle(
     await new Promise((resolve) => setTimeout(resolve, pollInterval))
   }
 
-  throw new Error(`[look_at] Polling timed out after ${timeout}ms waiting for session ${sessionID} to become idle`)
+  throw new Error(
+    `[look_at] Polling timed out after ${timeout}ms waiting for session ${sessionID} to become idle`,
+  )
 }

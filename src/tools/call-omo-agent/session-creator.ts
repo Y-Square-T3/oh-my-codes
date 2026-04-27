@@ -1,6 +1,9 @@
 import type { CallOmoAgentArgs } from "./types"
 import type { PluginInput } from "@opencode-ai/plugin"
-import { subagentSessions, syncSubagentSessions } from "../../features/claude-code-session-state"
+import {
+  subagentSessions,
+  syncSubagentSessions,
+} from "../../features/claude-code-session-state"
 import { log } from "../../shared"
 
 export async function createOrGetSession(
@@ -10,9 +13,12 @@ export async function createOrGetSession(
     messageID: string
     agent: string
     abort: AbortSignal
-    metadata?: (input: { title?: string; metadata?: Record<string, unknown> }) => void
+    metadata?: (input: {
+      title?: string
+      metadata?: Record<string, unknown>
+    }) => void
   },
-  ctx: PluginInput
+  ctx: PluginInput,
 ): Promise<{ sessionID: string; isNew: boolean }> {
   if (args.session_id) {
     log(`[call_omo_agent] Using existing session: ${args.session_id}`)
@@ -25,14 +31,20 @@ export async function createOrGetSession(
     }
     return { sessionID: args.session_id, isNew: false }
   } else {
-    log(`[call_omo_agent] Creating new session with parent: ${toolContext.sessionID}`)
-    const parentSession = await ctx.client.session.get({
-      path: { id: toolContext.sessionID },
-    }).catch((err) => {
-      log(`[call_omo_agent] Failed to get parent session:`, err)
-      return null
-    })
-    log(`[call_omo_agent] Parent session dir: ${parentSession?.data?.directory}, fallback: ${ctx.directory}`)
+    log(
+      `[call_omo_agent] Creating new session with parent: ${toolContext.sessionID}`,
+    )
+    const parentSession = await ctx.client.session
+      .get({
+        path: { id: toolContext.sessionID },
+      })
+      .catch((err) => {
+        log(`[call_omo_agent] Failed to get parent session:`, err)
+        return null
+      })
+    log(
+      `[call_omo_agent] Parent session dir: ${parentSession?.data?.directory}, fallback: ${ctx.directory}`,
+    )
     const parentDirectory = parentSession?.data?.directory ?? ctx.directory
 
     const createResult = await ctx.client.session.create({

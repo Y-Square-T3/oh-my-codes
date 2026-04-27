@@ -5,8 +5,13 @@ const EFFORT_UNSUPPORTED_PATTERN = /claude-.*haiku/i
 const INTERNAL_SKIP_AGENTS = new Set(["title", "summary", "compaction"])
 
 function isClaudeProvider(providerID: string, modelID: string): boolean {
-  if (["anthropic", "google-vertex-anthropic", "opencode"].includes(providerID)) return true
-  if (providerID === "github-copilot" && modelID.toLowerCase().includes("claude")) return true
+  if (["anthropic", "google-vertex-anthropic", "opencode"].includes(providerID))
+    return true
+  if (
+    providerID === "github-copilot" &&
+    modelID.toLowerCase().includes("claude")
+  )
+    return true
   return false
 }
 
@@ -61,7 +66,11 @@ const MAX_VARIANT_BY_TIER: Record<string, string> = {
   default: "high",
 }
 
-function clampVariant(variant: string, isOpus: boolean, isConstrained: boolean): string {
+function clampVariant(
+  variant: string,
+  isOpus: boolean,
+  isConstrained: boolean,
+): string {
   if (variant !== "max") return variant
   if (isConstrained) return MAX_VARIANT_BY_TIER.default
   return isOpus ? MAX_VARIANT_BY_TIER.opus : MAX_VARIANT_BY_TIER.default
@@ -71,7 +80,7 @@ export function createAnthropicEffortHook() {
   return {
     "chat.params": async (
       input: ChatParamsInput,
-      output: ChatParamsOutput
+      output: ChatParamsOutput,
     ): Promise<void> => {
       const { agent, model, message } = input
       if (!model?.modelID || !model?.providerID) return

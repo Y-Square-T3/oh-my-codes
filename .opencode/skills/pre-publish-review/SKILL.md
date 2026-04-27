@@ -7,11 +7,11 @@ description: "Nuclear-grade 16-agent pre-publish release gate. Runs /get-unpubli
 
 Three-layer review before publishing to npm. Every layer covers a different angle — together they catch what no single reviewer could.
 
-| Layer | Agents | Type | What They Check |
-|-------|--------|------|-----------------|
-| Per-Change Deep Dive | up to 10 | ultrabrain | Each logical change group individually — correctness, edge cases, pattern adherence |
-| Holistic Review | 5 | review-work | Goal compliance, QA execution, code quality, security, context mining across full changeset |
-| Release Synthesis | 1 | oracle | Overall release readiness, version bump, breaking changes, deployment risk |
+| Layer                | Agents   | Type        | What They Check                                                                             |
+| -------------------- | -------- | ----------- | ------------------------------------------------------------------------------------------- |
+| Per-Change Deep Dive | up to 10 | ultrabrain  | Each logical change group individually — correctness, edge cases, pattern adherence         |
+| Holistic Review      | 5        | review-work | Goal compliance, QA execution, code quality, security, context mining across full changeset |
+| Release Synthesis    | 1        | oracle      | Overall release readiness, version bump, breaking changes, deployment risk                  |
 
 ---
 
@@ -24,6 +24,7 @@ skill(name="get-unpublished-changes")
 ```
 
 This command automatically:
+
 - Detects published npm version vs local version
 - Lists all commits since last release
 - Reads actual diffs (not just commit messages) to describe REAL changes
@@ -48,14 +49,14 @@ CHANGED_FILES=$(git diff --name-only "v${PUBLISHED}"..HEAD 2>/dev/null || echo "
 FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
 ```
 
-If `PUBLISHED` is "not published", this is a first release — use the full git history instead.
----
+## If `PUBLISHED` is "not published", this is a first release — use the full git history instead.
 
 ## Phase 1: Parse Changes into Groups
 
 Use the `/get-unpublished-changes` output as the starting point — it already groups by scope and type.
 
 **Grouping strategy:**
+
 1. Start from the `/get-unpublished-changes` analysis which already categorizes by feat/fix/refactor/docs with scope
 2. Further split by **module/area** — changes touching the same module or feature area belong together
 3. Target **up to 10 groups**. If fewer than 10 commits, each commit is its own group. If more than 10 logical areas, merge the smallest groups.
@@ -286,11 +287,11 @@ As agents complete (system notifications), collect via `background_output(task_i
 
 Track completion in a table:
 
-| # | Agent | Type | Status | Verdict |
-|---|-------|------|--------|---------|
-| 1-10 | Ultrabrain: {group_name} | ultrabrain | pending | — |
-| 11 | Review-Work Coordinator | unspecified-high | pending | — |
-| 12 | Release Synthesis Oracle | oracle | pending | — |
+| #    | Agent                    | Type             | Status  | Verdict |
+| ---- | ------------------------ | ---------------- | ------- | ------- |
+| 1-10 | Ultrabrain: {group_name} | ultrabrain       | pending | —       |
+| 11   | Review-Work Coordinator  | unspecified-high | pending | —       |
+| 12   | Release Synthesis Oracle | oracle           | pending | —       |
 
 Do NOT deliver the final report until ALL agents have completed.
 
@@ -301,21 +302,25 @@ Do NOT deliver the final report until ALL agents have completed.
 <verdict_logic>
 
 **BLOCK** if:
+
 - Oracle verdict is BLOCK
 - Any ultrabrain found CRITICAL blocking issues
 - Review-work failed on any MAIN agent
 
 **RISKY** if:
+
 - Oracle verdict is RISKY
 - Multiple ultrabrains returned CAUTION or FAIL
 - Review-work passed but with significant findings
 
 **CAUTION** if:
+
 - Oracle verdict is CAUTION
 - A few ultrabrains flagged minor issues
 - Review-work passed cleanly
 
 **SAFE** if:
+
 - Oracle verdict is SAFE
 - All ultrabrains passed
 - Review-work passed
@@ -328,6 +333,7 @@ Compile the final report:
 # Pre-Publish Review — oh-my-codes
 
 ## Release: v{PUBLISHED} -> v{LOCAL}
+
 **Commits:** {COMMIT_COUNT} | **Files Changed:** {FILE_COUNT} | **Agents:** {AGENT_COUNT}
 
 ---
@@ -335,33 +341,36 @@ Compile the final report:
 ## Overall Verdict: SAFE / CAUTION / RISKY / BLOCK
 
 ## Recommended Version Bump: PATCH / MINOR / MAJOR
+
 {Justification from Oracle}
 
 ---
 
 ## Per-Change Analysis (Ultrabrains)
 
-| # | Change Group | Verdict | Risk | Breaking? | Blocking Issues |
-|---|-------------|---------|------|-----------|-----------------|
-| 1 | {name} | PASS/FAIL | SAFE/CAUTION/RISKY | YES/NO | {count or "none"} |
-| ... | ... | ... | ... | ... | ... |
+| #   | Change Group | Verdict   | Risk               | Breaking? | Blocking Issues   |
+| --- | ------------ | --------- | ------------------ | --------- | ----------------- |
+| 1   | {name}       | PASS/FAIL | SAFE/CAUTION/RISKY | YES/NO    | {count or "none"} |
+| ... | ...          | ...       | ...                | ...       | ...               |
 
 ### Blocking Issues from Per-Change Analysis
+
 {Aggregated from all ultrabrains — deduplicated}
 
 ---
 
 ## Holistic Review (Review-Work)
 
-| # | Review Area | Verdict | Confidence |
-|---|------------|---------|------------|
-| 1 | Goal & Constraint Verification | PASS/FAIL | HIGH/MED/LOW |
-| 2 | QA Execution | PASS/FAIL | HIGH/MED/LOW |
-| 3 | Code Quality | PASS/FAIL | HIGH/MED/LOW |
-| 4 | Security | PASS/FAIL | Severity |
-| 5 | Context Mining | PASS/FAIL | HIGH/MED/LOW |
+| #   | Review Area                    | Verdict   | Confidence   |
+| --- | ------------------------------ | --------- | ------------ |
+| 1   | Goal & Constraint Verification | PASS/FAIL | HIGH/MED/LOW |
+| 2   | QA Execution                   | PASS/FAIL | HIGH/MED/LOW |
+| 3   | Code Quality                   | PASS/FAIL | HIGH/MED/LOW |
+| 4   | Security                       | PASS/FAIL | Severity     |
+| 5   | Context Mining                 | PASS/FAIL | HIGH/MED/LOW |
 
 ### Blocking Issues from Holistic Review
+
 {Aggregated from review-work}
 
 ---
@@ -369,23 +378,29 @@ Compile the final report:
 ## Release Synthesis (Oracle)
 
 ### Breaking Changes
+
 {From Oracle — exhaustive list or "None"}
 
 ### Changelog Draft
+
 {From Oracle — ready to use}
 
 ### Deployment Risk
+
 {From Oracle — specific concerns}
 
 ### Post-Publish Monitoring
+
 {From Oracle — what to watch}
 
 ---
 
 ## All Blocking Issues (Prioritized)
+
 {Deduplicated, merged from all three layers, ordered by severity}
 
 ## Recommendations
+
 {If BLOCK/RISKY: exactly what to fix, in priority order}
 {If CAUTION: suggestions worth considering before publish}
 {If SAFE: non-blocking improvements for future}
@@ -395,13 +410,13 @@ Compile the final report:
 
 ## Anti-Patterns
 
-| Violation | Severity |
-|-----------|----------|
-| Publishing without waiting for all agents | **CRITICAL** |
-| Spawning ultrabrains sequentially instead of in parallel | CRITICAL |
-| Using `run_in_background=false` for any agent | CRITICAL |
-| Skipping the Oracle synthesis | HIGH |
-| Not reading file contents for Oracle (it cannot read files) | HIGH |
-| Grouping all changes into 1-2 ultrabrains instead of distributing | HIGH |
-| Delivering verdict before all agents complete | HIGH |
-| Not including diff in ultrabrain prompts | MAJOR |
+| Violation                                                         | Severity     |
+| ----------------------------------------------------------------- | ------------ |
+| Publishing without waiting for all agents                         | **CRITICAL** |
+| Spawning ultrabrains sequentially instead of in parallel          | CRITICAL     |
+| Using `run_in_background=false` for any agent                     | CRITICAL     |
+| Skipping the Oracle synthesis                                     | HIGH         |
+| Not reading file contents for Oracle (it cannot read files)       | HIGH         |
+| Grouping all changes into 1-2 ultrabrains instead of distributing | HIGH         |
+| Delivering verdict before all agents complete                     | HIGH         |
+| Not including diff in ultrabrain prompts                          | MAJOR        |

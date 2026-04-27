@@ -5,6 +5,7 @@
 **File:** `src/features/boulder-state/storage.ts`
 
 ### Before (lines 16-36):
+
 ```typescript
 export function readBoulderState(directory: string): BoulderState | null {
   const filePath = getBoulderFilePath(directory)
@@ -30,6 +31,7 @@ export function readBoulderState(directory: string): BoulderState | null {
 ```
 
 ### After:
+
 ```typescript
 export function readBoulderState(directory: string): BoulderState | null {
   const filePath = getBoulderFilePath(directory)
@@ -44,13 +46,19 @@ export function readBoulderState(directory: string): BoulderState | null {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       return null
     }
-    if (typeof parsed.active_plan !== "string" || typeof parsed.plan_name !== "string") {
+    if (
+      typeof parsed.active_plan !== "string" ||
+      typeof parsed.plan_name !== "string"
+    ) {
       return null
     }
     if (!Array.isArray(parsed.session_ids)) {
       parsed.session_ids = []
     }
-    if (parsed.worktree_path !== undefined && typeof parsed.worktree_path !== "string") {
+    if (
+      parsed.worktree_path !== undefined &&
+      typeof parsed.worktree_path !== "string"
+    ) {
       delete parsed.worktree_path
     }
     return parsed as BoulderState
@@ -69,10 +77,44 @@ export function readBoulderState(directory: string): BoulderState | null {
 **File:** `src/hooks/atlas/idle-event.ts`
 
 ### Before (lines 62-88):
+
 ```typescript
 sessionState.pendingRetryTimer = setTimeout(async () => {
-    sessionState.pendingRetryTimer = undefined
+  sessionState.pendingRetryTimer = undefined
 
+  if (sessionState.promptFailureCount >= 2) return
+  if (sessionState.waitingForFinalWaveApproval) return
+
+  const currentBoulder = readBoulderState(ctx.directory)
+  if (!currentBoulder) return
+  if (!currentBoulder.session_ids?.includes(sessionID)) return
+
+  const currentProgress = getPlanProgress(currentBoulder.active_plan)
+  if (currentProgress.isComplete) return
+  if (options?.isContinuationStopped?.(sessionID)) return
+  if (options?.shouldSkipContinuation?.(sessionID)) return
+  if (hasRunningBackgroundTasks(sessionID, options)) return
+
+  await injectContinuation({
+    ctx,
+    sessionID,
+    sessionState,
+    options,
+    planName: currentBoulder.plan_name,
+    progress: currentProgress,
+    agent: currentBoulder.agent,
+    worktreePath: currentBoulder.worktree_path,
+  })
+}, RETRY_DELAY_MS)
+```
+
+### After:
+
+```typescript
+sessionState.pendingRetryTimer = setTimeout(async () => {
+  sessionState.pendingRetryTimer = undefined
+
+  try {
     if (sessionState.promptFailureCount >= 2) return
     if (sessionState.waitingForFinalWaveApproval) return
 
@@ -96,42 +138,13 @@ sessionState.pendingRetryTimer = setTimeout(async () => {
       agent: currentBoulder.agent,
       worktreePath: currentBoulder.worktree_path,
     })
-  }, RETRY_DELAY_MS)
-```
-
-### After:
-```typescript
-sessionState.pendingRetryTimer = setTimeout(async () => {
-    sessionState.pendingRetryTimer = undefined
-
-    try {
-      if (sessionState.promptFailureCount >= 2) return
-      if (sessionState.waitingForFinalWaveApproval) return
-
-      const currentBoulder = readBoulderState(ctx.directory)
-      if (!currentBoulder) return
-      if (!currentBoulder.session_ids?.includes(sessionID)) return
-
-      const currentProgress = getPlanProgress(currentBoulder.active_plan)
-      if (currentProgress.isComplete) return
-      if (options?.isContinuationStopped?.(sessionID)) return
-      if (options?.shouldSkipContinuation?.(sessionID)) return
-      if (hasRunningBackgroundTasks(sessionID, options)) return
-
-      await injectContinuation({
-        ctx,
-        sessionID,
-        sessionState,
-        options,
-        planName: currentBoulder.plan_name,
-        progress: currentProgress,
-        agent: currentBoulder.agent,
-        worktreePath: currentBoulder.worktree_path,
-      })
-    } catch (error) {
-      log(`[${HOOK_NAME}] Retry continuation failed`, { sessionID, error: String(error) })
-    }
-  }, RETRY_DELAY_MS)
+  } catch (error) {
+    log(`[${HOOK_NAME}] Retry continuation failed`, {
+      sessionID,
+      error: String(error),
+    })
+  }
+}, RETRY_DELAY_MS)
 ```
 
 **Rationale:** The async callback in setTimeout creates a floating promise. Without try/catch, any error becomes an unhandled rejection that can crash the process. This is the critical safety net even after the `readBoulderState` fix.
@@ -143,6 +156,7 @@ sessionState.pendingRetryTimer = setTimeout(async () => {
 **File:** `src/features/boulder-state/storage.ts`
 
 ### Before (lines 115-118):
+
 ```typescript
 export function getPlanProgress(planPath: string): PlanProgress {
   if (!existsSync(planPath)) {
@@ -151,6 +165,7 @@ export function getPlanProgress(planPath: string): PlanProgress {
 ```
 
 ### After:
+
 ```typescript
 export function getPlanProgress(planPath: string): PlanProgress {
   if (typeof planPath !== "string" || !existsSync(planPath)) {
@@ -170,11 +185,14 @@ export function getPlanProgress(planPath: string): PlanProgress {
 test("should return null when active_plan is missing", () => {
   // given - boulder.json without active_plan
   const boulderFile = join(SISYPHUS_DIR, "boulder.json")
-  writeFileSync(boulderFile, JSON.stringify({
-    started_at: "2026-01-01T00:00:00Z",
-    session_ids: ["ses-1"],
-    plan_name: "plan",
-  }))
+  writeFileSync(
+    boulderFile,
+    JSON.stringify({
+      started_at: "2026-01-01T00:00:00Z",
+      session_ids: ["ses-1"],
+      plan_name: "plan",
+    }),
+  )
 
   // when
   const result = readBoulderState(TEST_DIR)
@@ -186,11 +204,14 @@ test("should return null when active_plan is missing", () => {
 test("should return null when plan_name is missing", () => {
   // given - boulder.json without plan_name
   const boulderFile = join(SISYPHUS_DIR, "boulder.json")
-  writeFileSync(boulderFile, JSON.stringify({
-    active_plan: "/path/to/plan.md",
-    started_at: "2026-01-01T00:00:00Z",
-    session_ids: ["ses-1"],
-  }))
+  writeFileSync(
+    boulderFile,
+    JSON.stringify({
+      active_plan: "/path/to/plan.md",
+      started_at: "2026-01-01T00:00:00Z",
+      session_ids: ["ses-1"],
+    }),
+  )
 
   // when
   const result = readBoulderState(TEST_DIR)
@@ -202,13 +223,16 @@ test("should return null when plan_name is missing", () => {
 test("should strip non-string worktree_path from boulder state", () => {
   // given - boulder.json with worktree_path set to null
   const boulderFile = join(SISYPHUS_DIR, "boulder.json")
-  writeFileSync(boulderFile, JSON.stringify({
-    active_plan: "/path/to/plan.md",
-    started_at: "2026-01-01T00:00:00Z",
-    session_ids: ["ses-1"],
-    plan_name: "plan",
-    worktree_path: null,
-  }))
+  writeFileSync(
+    boulderFile,
+    JSON.stringify({
+      active_plan: "/path/to/plan.md",
+      started_at: "2026-01-01T00:00:00Z",
+      session_ids: ["ses-1"],
+      plan_name: "plan",
+      worktree_path: null,
+    }),
+  )
 
   // when
   const result = readBoulderState(TEST_DIR)
@@ -221,13 +245,16 @@ test("should strip non-string worktree_path from boulder state", () => {
 test("should preserve valid worktree_path string", () => {
   // given - boulder.json with valid worktree_path
   const boulderFile = join(SISYPHUS_DIR, "boulder.json")
-  writeFileSync(boulderFile, JSON.stringify({
-    active_plan: "/path/to/plan.md",
-    started_at: "2026-01-01T00:00:00Z",
-    session_ids: ["ses-1"],
-    plan_name: "plan",
-    worktree_path: "/valid/worktree/path",
-  }))
+  writeFileSync(
+    boulderFile,
+    JSON.stringify({
+      active_plan: "/path/to/plan.md",
+      started_at: "2026-01-01T00:00:00Z",
+      session_ids: ["ses-1"],
+      plan_name: "plan",
+      worktree_path: "/valid/worktree/path",
+    }),
+  )
 
   // when
   const result = readBoulderState(TEST_DIR)
@@ -316,7 +343,9 @@ test("should include worktree context when worktree_path is present in boulder s
   // then - should include worktree context in continuation prompt
   expect(mockInput._promptMock).toHaveBeenCalled()
   const callArgs = mockInput._promptMock.mock.calls[0][0]
-  expect(callArgs.body.parts[0].text).toContain("[Worktree: /some/worktree/path]")
+  expect(callArgs.body.parts[0].text).toContain(
+    "[Worktree: /some/worktree/path]",
+  )
 })
 ```
 
@@ -324,11 +353,11 @@ test("should include worktree context when worktree_path is present in boulder s
 
 ## Summary of Changes
 
-| File | Change | Lines Modified |
-|------|--------|---------------|
-| `src/features/boulder-state/storage.ts` | Validate required fields + sanitize worktree_path + guard getPlanProgress | ~8 lines added |
-| `src/hooks/atlas/idle-event.ts` | try/catch around setTimeout async callback | ~4 lines added |
-| `src/features/boulder-state/storage.test.ts` | 5 new tests for validation | ~60 lines added |
-| `src/hooks/atlas/index.test.ts` | 2 new tests for worktree_path handling | ~50 lines added |
+| File                                         | Change                                                                    | Lines Modified  |
+| -------------------------------------------- | ------------------------------------------------------------------------- | --------------- |
+| `src/features/boulder-state/storage.ts`      | Validate required fields + sanitize worktree_path + guard getPlanProgress | ~8 lines added  |
+| `src/hooks/atlas/idle-event.ts`              | try/catch around setTimeout async callback                                | ~4 lines added  |
+| `src/features/boulder-state/storage.test.ts` | 5 new tests for validation                                                | ~60 lines added |
+| `src/hooks/atlas/index.test.ts`              | 2 new tests for worktree_path handling                                    | ~50 lines added |
 
 Total: ~4 production lines changed, ~8 defensive lines added, ~110 test lines added.

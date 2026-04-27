@@ -1,4 +1,8 @@
-import type { PluginContext, PluginInterface, ToolsRecord } from "./plugin/types"
+import type {
+  PluginContext,
+  PluginInterface,
+  ToolsRecord,
+} from "./plugin/types"
 import type { OhMyCodesConfig } from "./config"
 
 import { createChatParamsHandler } from "./plugin/chat-params"
@@ -20,7 +24,11 @@ export function createPluginInterface(args: {
   firstMessageVariantGate: {
     shouldOverride: (sessionID: string) => boolean
     markApplied: (sessionID: string) => void
-    markSessionCreated: (sessionInfo: { id?: string; title?: string; parentID?: string } | undefined) => void
+    markSessionCreated: (
+      sessionInfo:
+        | { id?: string; title?: string; parentID?: string }
+        | undefined,
+    ) => void
     clear: (sessionID: string) => void
   }
   managers: Managers

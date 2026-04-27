@@ -46,7 +46,10 @@ describe("getCachedVersion (GH-3257)", () => {
   it("returns the version when the package is installed under oh-my-codes", () => {
     const pkgDir = join(cacheRoot, "node_modules", "oh-my-codes")
     mkdirSync(pkgDir, { recursive: true })
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }))
+    writeFileSync(
+      join(pkgDir, "package.json"),
+      JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }),
+    )
 
     expect(getCachedVersion()).toBe("3.16.0")
   })
@@ -57,7 +60,10 @@ describe("getCachedVersion (GH-3257)", () => {
     // path. The cached version resolver must check both.
     const pkgDir = join(cacheRoot, "node_modules", "oh-my-openagent")
     mkdirSync(pkgDir, { recursive: true })
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ name: "oh-my-openagent", version: "3.16.0" }))
+    writeFileSync(
+      join(pkgDir, "package.json"),
+      JSON.stringify({ name: "oh-my-openagent", version: "3.16.0" }),
+    )
 
     expect(getCachedVersion()).toBe("3.16.0")
   })
@@ -65,11 +71,17 @@ describe("getCachedVersion (GH-3257)", () => {
   it("prefers oh-my-codes when both are installed", () => {
     const legacyDir = join(cacheRoot, "node_modules", "oh-my-codes")
     mkdirSync(legacyDir, { recursive: true })
-    writeFileSync(join(legacyDir, "package.json"), JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }))
+    writeFileSync(
+      join(legacyDir, "package.json"),
+      JSON.stringify({ name: "oh-my-codes", version: "3.16.0" }),
+    )
 
     const aliasDir = join(cacheRoot, "node_modules", "oh-my-openagent")
     mkdirSync(aliasDir, { recursive: true })
-    writeFileSync(join(aliasDir, "package.json"), JSON.stringify({ name: "oh-my-openagent", version: "3.15.0" }))
+    writeFileSync(
+      join(aliasDir, "package.json"),
+      JSON.stringify({ name: "oh-my-openagent", version: "3.15.0" }),
+    )
 
     expect(getCachedVersion()).toBe("3.16.0")
   })

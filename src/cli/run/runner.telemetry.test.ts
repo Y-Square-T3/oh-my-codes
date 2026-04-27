@@ -73,7 +73,9 @@ describe("run telemetry isolation", () => {
       getPostHogDistinctId: mock(() => "run-distinct-id"),
     }))
 
-    const { run } = await import(`./runner?telemetry=${Date.now()}-${Math.random()}`)
+    const { run } = await import(
+      `./runner?telemetry=${Date.now()}-${Math.random()}`
+    )
 
     // when
     const result = await run({ message: "test" })

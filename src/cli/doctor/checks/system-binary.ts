@@ -19,7 +19,14 @@ export function getDesktopAppPaths(platform: NodeJS.Platform): string[] {
     case "darwin":
       return [
         "/Applications/OpenCode.app/Contents/MacOS/OpenCode",
-        join(home, "Applications", "OpenCode.app", "Contents", "MacOS", "OpenCode"),
+        join(
+          home,
+          "Applications",
+          "OpenCode.app",
+          "Contents",
+          "MacOS",
+          "OpenCode",
+        ),
       ]
     case "win32": {
       const programFiles = process.env.ProgramFiles
@@ -47,7 +54,9 @@ export function getDesktopAppPaths(platform: NodeJS.Platform): string[] {
   }
 }
 
-export function getBinaryLookupCommand(platform: NodeJS.Platform): "which" | "where" {
+export function getBinaryLookupCommand(
+  platform: NodeJS.Platform,
+): "which" | "where" {
   return platform === "win32" ? "where" : "which"
 }
 
@@ -58,13 +67,18 @@ export function parseBinaryPaths(output: string): string[] {
     .filter((line) => line.length > 0)
 }
 
-export function selectBinaryPath(paths: string[], platform: NodeJS.Platform): string | null {
+export function selectBinaryPath(
+  paths: string[],
+  platform: NodeJS.Platform,
+): string | null {
   if (paths.length === 0) return null
   if (platform !== "win32") return paths[0] ?? null
 
   const normalizedPaths = paths.map((path) => path.toLowerCase())
   for (const extension of WINDOWS_EXECUTABLE_EXTS) {
-    const pathIndex = normalizedPaths.findIndex((path) => path.endsWith(extension))
+    const pathIndex = normalizedPaths.findIndex((path) =>
+      path.endsWith(extension),
+    )
     if (pathIndex !== -1) {
       return paths[pathIndex] ?? null
     }
@@ -73,9 +87,20 @@ export function selectBinaryPath(paths: string[], platform: NodeJS.Platform): st
   return paths[0] ?? null
 }
 
-export function buildVersionCommand(binaryPath: string, platform: NodeJS.Platform): string[] {
+export function buildVersionCommand(
+  binaryPath: string,
+  platform: NodeJS.Platform,
+): string[] {
   if (platform === "win32" && binaryPath.toLowerCase().endsWith(".ps1")) {
-    return ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", binaryPath, "--version"]
+    return [
+      "powershell",
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      binaryPath,
+      "--version",
+    ]
   }
 
   return [binaryPath, "--version"]
@@ -83,7 +108,7 @@ export function buildVersionCommand(binaryPath: string, platform: NodeJS.Platfor
 
 export function findDesktopBinary(
   platform: NodeJS.Platform = process.platform,
-  checkExists: (path: string) => boolean = existsSync
+  checkExists: (path: string) => boolean = existsSync,
 ): OpenCodeBinaryInfo | null {
   for (const desktopPath of getDesktopAppPaths(platform)) {
     if (checkExists(desktopPath)) {
@@ -107,11 +132,14 @@ export async function findOpenCodeBinary(): Promise<OpenCodeBinaryInfo | null> {
 
 export async function getOpenCodeVersion(
   binaryPath: string,
-  platform: NodeJS.Platform = process.platform
+  platform: NodeJS.Platform = process.platform,
 ): Promise<string | null> {
   try {
     const command = buildVersionCommand(binaryPath, platform)
-    const result = await spawnWithTimeout(command, { stdout: "pipe", stderr: "pipe" })
+    const result = await spawnWithTimeout(command, {
+      stdout: "pipe",
+      stderr: "pipe",
+    })
     if (result.timedOut || result.exitCode !== 0) return null
     return result.stdout.trim() || null
   } catch {

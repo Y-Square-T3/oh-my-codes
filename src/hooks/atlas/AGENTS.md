@@ -9,6 +9,7 @@
 ## WHAT ATLAS DOES
 
 Atlas is the "keeper of sessions" — it tracks every session and decides:
+
 1. Should this session be forced to continue? (if boulder session with incomplete todos)
 2. Should write/edit be blocked? (policy enforcement for certain session types)
 3. Should a verification reminder be injected? (after tool execution)
@@ -29,28 +30,28 @@ session.idle event
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `atlas-hook.ts` | `createAtlasHook()` — composes event + tool handlers, maintains session state |
-| `event-handler.ts` | `createAtlasEventHandler()` — decision gate for session.idle events |
-| `boulder-continuation-injector.ts` | Build + inject continuation prompt into session |
-| `system-reminder-templates.ts` | Templates for continuation reminder messages |
-| `tool-execute-before.ts` | Block write/edit based on session policy |
-| `tool-execute-after.ts` | Inject verification reminders post-tool |
-| `write-edit-tool-policy.ts` | Policy: which sessions can write/edit? |
-| `verification-reminders.ts` | Reminder content for verifying work |
-| `session-last-agent.ts` | Determine which agent owns the session |
-| `recent-model-resolver.ts` | Resolve model used in recent messages |
-| `subagent-session-id.ts` | Detect if session is a subagent session |
-| `sisyphus-path.ts` | Resolve `.sisyphus/` directory path |
-| `is-abort-error.ts` | Detect abort signals in session output |
-| `types.ts` | `SessionState`, `AtlasHookOptions`, `AtlasContext` |
+| File                               | Purpose                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `atlas-hook.ts`                    | `createAtlasHook()` — composes event + tool handlers, maintains session state |
+| `event-handler.ts`                 | `createAtlasEventHandler()` — decision gate for session.idle events           |
+| `boulder-continuation-injector.ts` | Build + inject continuation prompt into session                               |
+| `system-reminder-templates.ts`     | Templates for continuation reminder messages                                  |
+| `tool-execute-before.ts`           | Block write/edit based on session policy                                      |
+| `tool-execute-after.ts`            | Inject verification reminders post-tool                                       |
+| `write-edit-tool-policy.ts`        | Policy: which sessions can write/edit?                                        |
+| `verification-reminders.ts`        | Reminder content for verifying work                                           |
+| `session-last-agent.ts`            | Determine which agent owns the session                                        |
+| `recent-model-resolver.ts`         | Resolve model used in recent messages                                         |
+| `subagent-session-id.ts`           | Detect if session is a subagent session                                       |
+| `sisyphus-path.ts`                 | Resolve `.sisyphus/` directory path                                           |
+| `is-abort-error.ts`                | Detect abort signals in session output                                        |
+| `types.ts`                         | `SessionState`, `AtlasHookOptions`, `AtlasContext`                            |
 
 ## STATE PER SESSION
 
 ```typescript
 interface SessionState {
-  promptFailureCount: number  // Increments on failed continuations
+  promptFailureCount: number // Increments on failed continuations
   // Resets on successful continuation
 }
 ```

@@ -9,9 +9,12 @@ mock.module("../shared/logger", () => ({
   log: logMock,
 }))
 
-afterAll(() => { mock.restore() })
+afterAll(() => {
+  mock.restore()
+})
 
-const { createPreemptiveCompactionHook } = await import("./preemptive-compaction")
+const { createPreemptiveCompactionHook } =
+  await import("./preemptive-compaction")
 
 function createMockCtx() {
   return {
@@ -50,7 +53,11 @@ describe("preemptive-compaction context-limit cache invalidation", () => {
       modelCacheState,
     })
 
-    const hook = createPreemptiveCompactionHook(ctx as never, {} as never, modelCacheState)
+    const hook = createPreemptiveCompactionHook(
+      ctx as never,
+      {} as never,
+      modelCacheState,
+    )
 
     await hook.event({
       event: {

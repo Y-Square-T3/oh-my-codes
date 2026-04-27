@@ -1,6 +1,15 @@
 import type { BackgroundTask, LaunchInput, ResumeInput } from "./types"
-import type { OpencodeClient, OnSubagentSessionCreated, QueueItem } from "./constants"
-import { log, getAgentToolRestrictions, promptWithModelSuggestionRetry, createInternalAgentTextPart } from "../../shared"
+import type {
+  OpencodeClient,
+  OnSubagentSessionCreated,
+  QueueItem,
+} from "./constants"
+import {
+  log,
+  getAgentToolRestrictions,
+  promptWithModelSuggestionRetry,
+  createInternalAgentTextPart,
+} from "../../shared"
 import { applySessionPromptParams } from "../../shared/session-prompt-params-helpers"
 import { subagentSessions } from "../claude-code-session-state"
 import { getTaskToastManager } from "../task-toast-manager"
@@ -16,13 +25,12 @@ export function isAgentNotFoundError(error: unknown): boolean {
       ? error
       : error instanceof Error
         ? error.message
-        : typeof error === "object" && error !== null && typeof (error as { message?: unknown }).message === "string"
+        : typeof error === "object" &&
+            error !== null &&
+            typeof (error as { message?: unknown }).message === "string"
           ? (error as { message: string }).message
           : String(error)
-  return (
-    message.includes("Agent not found") ||
-    message.includes("agent.name")
-  )
+  return message.includes("Agent not found") || message.includes("agent.name")
 }
 
 export function buildFallbackBody(
@@ -68,10 +76,17 @@ export function createTask(input: LaunchInput): BackgroundTask {
 
 export async function startTask(
   item: QueueItem,
-  ctx: SpawnerContext
+  ctx: SpawnerContext,
 ): Promise<void> {
   const { task, input } = item
-  const { client, directory, concurrencyManager, tmuxEnabled, onSubagentSessionCreated, onTaskError } = ctx
+  const {
+    client,
+    directory,
+    concurrencyManager,
+    tmuxEnabled,
+    onSubagentSessionCreated,
+    onTaskError,
+  } = ctx
 
   log("[background-agent] Starting task:", {
     taskId: task.id,
@@ -83,32 +98,42 @@ export async function startTask(
     ? `${input.model.providerID}/${input.model.modelID}`
     : input.agent
 
-  const parentSession = await client.session.get({
-    path: { id: input.parentSessionID },
-    query: { directory },
-  }).catch((err) => {
-    log(`[background-agent] Failed to get parent session: ${err}`)
-    return null
-  })
+  const parentSession = await client.session
+    .get({
+      path: { id: input.parentSessionID },
+      query: { directory },
+    })
+    .catch((err) => {
+      log(`[background-agent] Failed to get parent session: ${err}`)
+      return null
+    })
   const parentDirectory = parentSession?.data?.directory ?? directory
-  log(`[background-agent] Parent dir: ${parentSession?.data?.directory}, using: ${parentDirectory}`)
+  log(
+    `[background-agent] Parent dir: ${parentSession?.data?.directory}, using: ${parentDirectory}`,
+  )
 
-  const createResult = await client.session.create({
-    body: {
-      parentID: input.parentSessionID,
-      ...(input.sessionPermission ? { permission: input.sessionPermission } : {}),
-    } as Record<string, unknown>,
-    query: {
-      directory: parentDirectory,
-    },
-  }).catch((error) => {
-    concurrencyManager.release(concurrencyKey)
-    throw error
-  })
+  const createResult = await client.session
+    .create({
+      body: {
+        parentID: input.parentSessionID,
+        ...(input.sessionPermission
+          ? { permission: input.sessionPermission }
+          : {}),
+      } as Record<string, unknown>,
+      query: {
+        directory: parentDirectory,
+      },
+    })
+    .catch((error) => {
+      concurrencyManager.release(concurrencyKey)
+      throw error
+    })
 
   if (createResult.error) {
     concurrencyManager.release(concurrencyKey)
-    throw new Error(`Failed to create background session: ${createResult.error}`)
+    throw new Error(
+      `Failed to create background session: ${createResult.error}`,
+    )
   }
 
   const sessionID = createResult.data.id
@@ -124,7 +149,11 @@ export async function startTask(
   task.concurrencyKey = concurrencyKey
   task.concurrencyGroup = concurrencyKey
 
-  log("[background-agent] Launching task:", { taskId: task.id, sessionID, agent: input.agent })
+  log("[background-agent] Launching task:", {
+    taskId: task.id,
+    sessionID,
+    agent: input.agent,
+  })
 
   const toastManager = getTaskToastManager()
   if (toastManager) {
@@ -184,7 +213,12 @@ export async function startTask(
         return
       } catch (retryError) {
         log("[background-agent] Fallback agent also failed:", retryError)
-        onTaskError(task, retryError instanceof Error ? retryError : new Error(String(retryError)))
+        onTaskError(
+          task,
+          retryError instanceof Error
+            ? retryError
+            : new Error(String(retryError)),
+        )
         return
       }
     }
@@ -203,7 +237,9 @@ export async function startTask(
   })
 
   if (onSubagentSessionCreated && tmuxEnabled && isInsideTmux()) {
-    log("[background-agent] Invoking tmux callback (fire-and-forget)", { sessionID })
+    log("[background-agent] Invoking tmux callback (fire-and-forget)", {
+      sessionID,
+    })
     void onSubagentSessionCreated({
       sessionID,
       parentID: input.parentSessionID,
@@ -219,7 +255,7 @@ export async function startTask(
 export async function resumeTask(
   task: BackgroundTask,
   input: ResumeInput,
-  ctx: Pick<SpawnerContext, "client" | "concurrencyManager" | "onTaskError">
+  ctx: Pick<SpawnerContext, "client" | "concurrencyManager" | "onTaskError">,
 ): Promise<void> {
   const { client, concurrencyManager, onTaskError } = ctx
 
@@ -266,14 +302,20 @@ export async function resumeTask(
     })
   }
 
-  log("[background-agent] Resuming task:", { taskId: task.id, sessionID: task.sessionID })
-
-  log("[background-agent] Resuming task - calling prompt (fire-and-forget) with:", {
+  log("[background-agent] Resuming task:", {
+    taskId: task.id,
     sessionID: task.sessionID,
-    agent: task.agent,
-    model: task.model,
-    promptLength: input.prompt.length,
   })
+
+  log(
+    "[background-agent] Resuming task - calling prompt (fire-and-forget) with:",
+    {
+      sessionID: task.sessionID,
+      agent: task.agent,
+      model: task.model,
+      promptLength: input.prompt.length,
+    },
+  )
 
   const resumeModel = task.model
     ? {
@@ -298,30 +340,46 @@ export async function resumeTask(
     parts: [createInternalAgentTextPart(input.prompt)],
   }
 
-  client.session.promptAsync({
-    path: { id: task.sessionID },
-    body: resumeBody,
-  }).catch(async (error) => {
-    if (isAgentNotFoundError(error) && task.agent !== FALLBACK_AGENT) {
-      log("[background-agent] Resume agent not found, retrying with fallback agent", {
-        original: task.agent,
-        fallback: FALLBACK_AGENT,
-        taskId: task.id,
-      })
-      try {
-        await promptWithModelSuggestionRetry(client, {
-          path: { id: task.sessionID! },
-          body: buildFallbackBody(resumeBody, FALLBACK_AGENT),
-        })
-        task.agent = FALLBACK_AGENT
-        return
-      } catch (retryError) {
-        log("[background-agent] Resume fallback agent also failed:", retryError)
-        onTaskError(task, retryError instanceof Error ? retryError : new Error(String(retryError)))
-        return
+  client.session
+    .promptAsync({
+      path: { id: task.sessionID },
+      body: resumeBody,
+    })
+    .catch(async (error) => {
+      if (isAgentNotFoundError(error) && task.agent !== FALLBACK_AGENT) {
+        log(
+          "[background-agent] Resume agent not found, retrying with fallback agent",
+          {
+            original: task.agent,
+            fallback: FALLBACK_AGENT,
+            taskId: task.id,
+          },
+        )
+        try {
+          await promptWithModelSuggestionRetry(client, {
+            path: { id: task.sessionID! },
+            body: buildFallbackBody(resumeBody, FALLBACK_AGENT),
+          })
+          task.agent = FALLBACK_AGENT
+          return
+        } catch (retryError) {
+          log(
+            "[background-agent] Resume fallback agent also failed:",
+            retryError,
+          )
+          onTaskError(
+            task,
+            retryError instanceof Error
+              ? retryError
+              : new Error(String(retryError)),
+          )
+          return
+        }
       }
-    }
-    log("[background-agent] resume prompt error:", error)
-    onTaskError(task, error instanceof Error ? error : new Error(String(error)))
-  })
+      log("[background-agent] resume prompt error:", error)
+      onTaskError(
+        task,
+        error instanceof Error ? error : new Error(String(error)),
+      )
+    })
 }

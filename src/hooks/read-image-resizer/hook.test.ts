@@ -1,6 +1,14 @@
 /// <reference types="bun-types" />
 
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from "bun:test"
 import type { PluginInput } from "@opencode-ai/plugin"
 
 import type { ImageDimensions, ResizeResult } from "./types"
@@ -12,10 +20,13 @@ import { createReadImageResizerHook } from "./hook"
 const mockParseImageDimensions = mock((): ImageDimensions | null => null)
 const mockCalculateTargetDimensions = mock((): ImageDimensions | null => null)
 const mockResizeImage = mock(async (): Promise<ResizeResult | null> => null)
-const mockGetSessionModel = mock((_sessionID: string) => ({
-  providerID: "anthropic",
-  modelID: "claude-sonnet-4-6",
-} as { providerID: string; modelID: string } | undefined))
+const mockGetSessionModel = mock(
+  (_sessionID: string) =>
+    ({
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    }) as { providerID: string; modelID: string } | undefined,
+)
 
 let parseImageDimensionsSpy: { mockRestore: () => void } | undefined
 let calculateTargetDimensionsSpy: { mockRestore: () => void } | undefined
@@ -23,10 +34,21 @@ let resizeImageSpy: { mockRestore: () => void } | undefined
 let getSessionModelSpy: { mockRestore: () => void } | undefined
 
 function setupHookSpies(): void {
-  parseImageDimensionsSpy = spyOn(imageDimensions, "parseImageDimensions").mockImplementation(mockParseImageDimensions)
-  calculateTargetDimensionsSpy = spyOn(imageResizer, "calculateTargetDimensions").mockImplementation(mockCalculateTargetDimensions)
-  resizeImageSpy = spyOn(imageResizer, "resizeImage").mockImplementation(mockResizeImage)
-  getSessionModelSpy = spyOn(sessionModelState, "getSessionModel").mockImplementation(mockGetSessionModel)
+  parseImageDimensionsSpy = spyOn(
+    imageDimensions,
+    "parseImageDimensions",
+  ).mockImplementation(mockParseImageDimensions)
+  calculateTargetDimensionsSpy = spyOn(
+    imageResizer,
+    "calculateTargetDimensions",
+  ).mockImplementation(mockCalculateTargetDimensions)
+  resizeImageSpy = spyOn(imageResizer, "resizeImage").mockImplementation(
+    mockResizeImage,
+  )
+  getSessionModelSpy = spyOn(
+    sessionModelState,
+    "getSessionModel",
+  ).mockImplementation(mockGetSessionModel)
 }
 
 type ToolOutput = {
@@ -43,7 +65,11 @@ function createMockContext(): PluginInput {
   } as PluginInput
 }
 
-function createInput(tool: string): { tool: string; sessionID: string; callID: string } {
+function createInput(tool: string): {
+  tool: string
+  sessionID: string
+  callID: string
+} {
   return {
     tool,
     sessionID: "session-1",
@@ -58,7 +84,10 @@ describe("createReadImageResizerHook", () => {
     mockCalculateTargetDimensions.mockReset()
     mockResizeImage.mockReset()
     mockGetSessionModel.mockReset()
-    mockGetSessionModel.mockReturnValue({ providerID: "anthropic", modelID: "claude-sonnet-4-6" })
+    mockGetSessionModel.mockReturnValue({
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-6",
+    })
   })
 
   afterEach(() => {
@@ -79,7 +108,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "image.png",
+        },
+      ],
     }
 
     //#when
@@ -92,7 +127,10 @@ describe("createReadImageResizerHook", () => {
 
   it("skips when provider is not anthropic", async () => {
     //#given
-    mockGetSessionModel.mockReturnValue({ providerID: "openai", modelID: "gpt-5.3-codex" })
+    mockGetSessionModel.mockReturnValue({
+      providerID: "openai",
+      modelID: "gpt-5.3-codex",
+    })
     mockParseImageDimensions.mockReturnValue({ width: 3000, height: 2000 })
     mockCalculateTargetDimensions.mockReturnValue({ width: 1568, height: 1045 })
     const hook = createReadImageResizerHook(createMockContext())
@@ -100,7 +138,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "image.png",
+        },
+      ],
     }
 
     //#when
@@ -120,7 +164,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "image.png",
+        },
+      ],
     }
 
     //#when
@@ -155,7 +205,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "application/pdf", url: "data:application/pdf;base64,AAAA", filename: "file.pdf" }],
+      attachments: [
+        {
+          mime: "application/pdf",
+          url: "data:application/pdf;base64,AAAA",
+          filename: "file.pdf",
+        },
+      ],
     }
 
     //#when
@@ -173,7 +229,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/heic", url: "data:image/heic;base64,AAAA", filename: "photo.heic" }],
+      attachments: [
+        {
+          mime: "image/heic",
+          url: "data:image/heic;base64,AAAA",
+          filename: "photo.heic",
+        },
+      ],
     }
 
     //#when
@@ -194,7 +256,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "image.png",
+        },
+      ],
     }
 
     //#when
@@ -222,7 +290,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "big.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "big.png",
+        },
+      ],
     }
 
     //#when
@@ -245,7 +319,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "fail.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "fail.png",
+        },
+      ],
     }
 
     //#when
@@ -262,7 +342,9 @@ describe("createReadImageResizerHook", () => {
     mockParseImageDimensions
       .mockReturnValueOnce({ width: 800, height: 600 })
       .mockReturnValueOnce({ width: 4000, height: 3000 })
-    mockCalculateTargetDimensions.mockReturnValueOnce(null).mockReturnValueOnce({ width: 1568, height: 1176 })
+    mockCalculateTargetDimensions
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce({ width: 1568, height: 1176 })
     mockResizeImage.mockResolvedValueOnce(null)
 
     const hook = createReadImageResizerHook(createMockContext())
@@ -271,8 +353,16 @@ describe("createReadImageResizerHook", () => {
       output: "original output",
       metadata: {},
       attachments: [
-        { mime: "image/png", url: "data:image/png;base64,small", filename: "small.png" },
-        { mime: "image/png", url: "data:image/png;base64,big", filename: "big.png" },
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,small",
+          filename: "small.png",
+        },
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,big",
+          filename: "big.png",
+        },
       ],
     }
 
@@ -294,7 +384,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "corrupt.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "corrupt.png",
+        },
+      ],
     }
 
     //#when
@@ -315,7 +411,13 @@ describe("createReadImageResizerHook", () => {
       title: "Read",
       output: "original output",
       metadata: {},
-      attachments: [{ mime: "image/png", url: "data:image/png;base64,old", filename: "image.png" }],
+      attachments: [
+        {
+          mime: "image/png",
+          url: "data:image/png;base64,old",
+          filename: "image.png",
+        },
+      ],
     }
 
     //#when

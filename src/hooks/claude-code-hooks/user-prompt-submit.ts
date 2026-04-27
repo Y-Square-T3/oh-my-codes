@@ -5,7 +5,10 @@ import type {
 } from "./types"
 import { findMatchingHooks, log } from "../../shared"
 import { dispatchHook, getHookIdentifier } from "./dispatch-hook"
-import { isHookCommandDisabled, type PluginExtendedConfig } from "./config-loader"
+import {
+  isHookCommandDisabled,
+  type PluginExtendedConfig,
+} from "./config-loader"
 
 const USER_PROMPT_SUBMIT_TAG_OPEN = "<user-prompt-submit-hook>"
 const USER_PROMPT_SUBMIT_TAG_CLOSE = "</user-prompt-submit-hook>"
@@ -35,7 +38,7 @@ export interface UserPromptSubmitResult {
 export async function executeUserPromptSubmitHooks(
   ctx: UserPromptSubmitContext,
   config: ClaudeHooksConfig | null,
-  extendedConfig?: PluginExtendedConfig | null
+  extendedConfig?: PluginExtendedConfig | null,
 ): Promise<UserPromptSubmitResult> {
   const modifiedParts = ctx.parts
   const messages: string[] = []
@@ -77,25 +80,39 @@ export async function executeUserPromptSubmitHooks(
     hook_source: "opencode-plugin",
   }
 
-   for (const matcher of matchers) {
-     if (!matcher.hooks || matcher.hooks.length === 0) continue
-     for (const hook of matcher.hooks) {
-       if (hook.type !== "command" && hook.type !== "http") continue
+  for (const matcher of matchers) {
+    if (!matcher.hooks || matcher.hooks.length === 0) continue
+    for (const hook of matcher.hooks) {
+      if (hook.type !== "command" && hook.type !== "http") continue
 
       const hookName = getHookIdentifier(hook)
-      if (isHookCommandDisabled("UserPromptSubmit", hookName, extendedConfig ?? null)) {
-        log("UserPromptSubmit hook command skipped (disabled by config)", { command: hookName })
+      if (
+        isHookCommandDisabled(
+          "UserPromptSubmit",
+          hookName,
+          extendedConfig ?? null,
+        )
+      ) {
+        log("UserPromptSubmit hook command skipped (disabled by config)", {
+          command: hookName,
+        })
         continue
       }
 
-      const result = await dispatchHook(hook, JSON.stringify(stdinData), ctx.cwd)
+      const result = await dispatchHook(
+        hook,
+        JSON.stringify(stdinData),
+        ctx.cwd,
+      )
 
       if (result.stdout) {
         const output = result.stdout.trim()
         if (output.startsWith(USER_PROMPT_SUBMIT_TAG_OPEN)) {
           messages.push(output)
         } else {
-          messages.push(`${USER_PROMPT_SUBMIT_TAG_OPEN}\n${output}\n${USER_PROMPT_SUBMIT_TAG_CLOSE}`)
+          messages.push(
+            `${USER_PROMPT_SUBMIT_TAG_OPEN}\n${output}\n${USER_PROMPT_SUBMIT_TAG_CLOSE}`,
+          )
         }
       }
 
@@ -110,9 +127,9 @@ export async function executeUserPromptSubmitHooks(
               messages,
             }
           }
-         } catch {
+        } catch {
           // Ignore JSON parse errors
-         }
+        }
       }
     }
   }

@@ -4,9 +4,17 @@ import type {
   PermissionDecision,
   ClaudeHooksConfig,
 } from "./types"
-import { findMatchingHooks, objectToSnakeCase, transformToolName, log } from "../../shared"
+import {
+  findMatchingHooks,
+  objectToSnakeCase,
+  transformToolName,
+  log,
+} from "../../shared"
 import { dispatchHook, getHookIdentifier } from "./dispatch-hook"
-import { isHookCommandDisabled, type PluginExtendedConfig } from "./config-loader"
+import {
+  isHookCommandDisabled,
+  type PluginExtendedConfig,
+} from "./config-loader"
 
 export interface PreToolUseContext {
   sessionId: string
@@ -46,7 +54,7 @@ function buildInputLines(toolInput: Record<string, unknown>): string {
 export async function executePreToolUseHooks(
   ctx: PreToolUseContext,
   config: ClaudeHooksConfig | null,
-  extendedConfig?: PluginExtendedConfig | null
+  extendedConfig?: PluginExtendedConfig | null,
 ): Promise<PreToolUseResult> {
   if (!config) {
     return { decision: "allow" }
@@ -74,25 +82,35 @@ export async function executePreToolUseHooks(
   let firstHookName: string | undefined
   const inputLines = buildInputLines(ctx.toolInput)
 
-   for (const matcher of matchers) {
-     if (!matcher.hooks || matcher.hooks.length === 0) continue
-     for (const hook of matcher.hooks) {
-       if (hook.type !== "command" && hook.type !== "http") continue
+  for (const matcher of matchers) {
+    if (!matcher.hooks || matcher.hooks.length === 0) continue
+    for (const hook of matcher.hooks) {
+      if (hook.type !== "command" && hook.type !== "http") continue
 
       const hookName = getHookIdentifier(hook)
-      if (isHookCommandDisabled("PreToolUse", hookName, extendedConfig ?? null)) {
-        log("PreToolUse hook command skipped (disabled by config)", { command: hookName, toolName: ctx.toolName })
+      if (
+        isHookCommandDisabled("PreToolUse", hookName, extendedConfig ?? null)
+      ) {
+        log("PreToolUse hook command skipped (disabled by config)", {
+          command: hookName,
+          toolName: ctx.toolName,
+        })
         continue
       }
 
       if (!firstHookName) firstHookName = hookName
 
-      const result = await dispatchHook(hook, JSON.stringify(stdinData), ctx.cwd)
+      const result = await dispatchHook(
+        hook,
+        JSON.stringify(stdinData),
+        ctx.cwd,
+      )
 
       if (result.exitCode === 2) {
         return {
           decision: "deny",
-          reason: result.stderr || result.stdout || "Hook blocked the operation",
+          reason:
+            result.stderr || result.stdout || "Hook blocked the operation",
           elapsedMs: Date.now() - startTime,
           hookName: firstHookName,
           toolName: transformedToolName,
@@ -129,7 +147,10 @@ export async function executePreToolUseHooks(
             const legacyDecision = output.decision
             if (legacyDecision === "approve" || legacyDecision === "allow") {
               decision = "allow"
-            } else if (legacyDecision === "block" || legacyDecision === "deny") {
+            } else if (
+              legacyDecision === "block" ||
+              legacyDecision === "deny"
+            ) {
               decision = "deny"
             } else if (legacyDecision === "ask") {
               decision = "ask"
@@ -138,9 +159,10 @@ export async function executePreToolUseHooks(
           }
 
           // Return if decision is set OR if any common fields are set (fallback to allow)
-          const hasCommonFields = output.continue !== undefined || 
-            output.stopReason !== undefined || 
-            output.suppressOutput !== undefined || 
+          const hasCommonFields =
+            output.continue !== undefined ||
+            output.stopReason !== undefined ||
+            output.suppressOutput !== undefined ||
             output.systemMessage !== undefined
 
           if (decision || hasCommonFields) {
@@ -158,8 +180,7 @@ export async function executePreToolUseHooks(
               systemMessage: output.systemMessage,
             }
           }
-        } catch {
-        }
+        } catch {}
       }
     }
   }

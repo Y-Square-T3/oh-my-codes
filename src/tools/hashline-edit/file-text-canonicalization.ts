@@ -23,7 +23,10 @@ function normalizeToLf(content: string): string {
   return content.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
 }
 
-function restoreLineEndings(content: string, lineEnding: "\n" | "\r\n"): string {
+function restoreLineEndings(
+  content: string,
+  lineEnding: "\n" | "\r\n",
+): string {
   if (lineEnding === "\n") return content
   return content.replace(/\n/g, "\r\n")
 }
@@ -37,7 +40,10 @@ export function canonicalizeFileText(content: string): FileTextEnvelope {
   }
 }
 
-export function restoreFileText(content: string, envelope: FileTextEnvelope): string {
+export function restoreFileText(
+  content: string,
+  envelope: FileTextEnvelope,
+): string {
   const withLineEnding = restoreLineEndings(content, envelope.lineEnding)
   if (!envelope.hadBom) return withLineEnding
   return `\uFEFF${withLineEnding}`

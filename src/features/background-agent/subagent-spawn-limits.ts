@@ -16,7 +16,7 @@ export function getMaxSubagentDepth(config?: BackgroundTaskConfig): number {
 export async function resolveSubagentSpawnContext(
   client: OpencodeClient,
   parentSessionID: string,
-  directory?: string
+  directory?: string,
 ): Promise<SubagentSpawnContext> {
   const visitedSessionIDs = new Set<string>()
   let rootSessionID = parentSessionID
@@ -25,7 +25,9 @@ export async function resolveSubagentSpawnContext(
 
   while (true) {
     if (visitedSessionIDs.has(currentSessionID)) {
-      throw new Error(`Detected a session parent cycle while resolving ${parentSessionID}`)
+      throw new Error(
+        `Detected a session parent cycle while resolving ${parentSessionID}`,
+      )
     }
 
     visitedSessionIDs.add(currentSessionID)
@@ -48,7 +50,7 @@ export async function resolveSubagentSpawnContext(
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error)
       throw new Error(
-        `Subagent spawn blocked: failed to resolve session lineage for ${parentSessionID}, so background_task.maxDepth cannot be enforced safely. ${reason}`
+        `Subagent spawn blocked: failed to resolve session lineage for ${parentSessionID}, so background_task.maxDepth cannot be enforced safely. ${reason}`,
       )
     }
 
@@ -76,6 +78,6 @@ export function createSubagentDepthLimitError(input: {
 }): Error {
   const { childDepth, maxDepth, parentSessionID, rootSessionID } = input
   return new Error(
-    `Subagent spawn blocked: child depth ${childDepth} exceeds background_task.maxDepth=${maxDepth}. Parent session: ${parentSessionID}. Root session: ${rootSessionID}. Continue in an existing subagent session instead of spawning another.`
+    `Subagent spawn blocked: child depth ${childDepth} exceeds background_task.maxDepth=${maxDepth}. Parent session: ${parentSessionID}. Root session: ${rootSessionID}. Continue in an existing subagent session instead of spawning another.`,
   )
 }

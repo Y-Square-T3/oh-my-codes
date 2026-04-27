@@ -1,7 +1,8 @@
 import { readFileSync } from "fs"
 import { spawn } from "bun"
 
-export const REPLY_LISTENER_DAEMON_IDENTITY_MARKER = "--openclaw-reply-listener-daemon"
+export const REPLY_LISTENER_DAEMON_IDENTITY_MARKER =
+  "--openclaw-reply-listener-daemon"
 
 const REPLY_LISTENER_DAEMON_ENV_ALLOWLIST = [
   "PATH",
@@ -36,7 +37,9 @@ const REPLY_LISTENER_DAEMON_ENV_ALLOWLIST = [
   "COMSPEC",
 ] as const
 
-export function createReplyListenerDaemonEnv(extraEnv: Record<string, string>): Record<string, string> {
+export function createReplyListenerDaemonEnv(
+  extraEnv: Record<string, string>,
+): Record<string, string> {
   const env: Record<string, string> = {}
 
   for (const key of REPLY_LISTENER_DAEMON_ENV_ALLOWLIST) {
@@ -58,7 +61,9 @@ export function isReplyListenerProcessRunning(pid: number): boolean {
   }
 }
 
-export async function isReplyListenerDaemonProcess(pid: number): Promise<boolean> {
+export async function isReplyListenerDaemonProcess(
+  pid: number,
+): Promise<boolean> {
   try {
     if (process.platform === "linux") {
       const cmdline = readFileSync(`/proc/${pid}/cmdline`, "utf-8")

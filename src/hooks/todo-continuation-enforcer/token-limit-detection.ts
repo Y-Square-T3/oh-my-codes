@@ -14,7 +14,9 @@ const TOKEN_LIMIT_ERROR_NAMES = new Set([
   "context_length_exceeded",
 ])
 
-export function isTokenLimitError(error: { name?: string; message?: string } | undefined): boolean {
+export function isTokenLimitError(
+  error: { name?: string; message?: string } | undefined,
+): boolean {
   if (!error) return false
 
   const isRetryable = isRetryableModelError({
@@ -31,7 +33,9 @@ export function isTokenLimitError(error: { name?: string; message?: string } | u
 
   if (error.message) {
     const lower = error.message.toLowerCase()
-    return TOKEN_LIMIT_FALLBACK_PATTERNS.some((pattern) => lower.includes(pattern))
+    return TOKEN_LIMIT_FALLBACK_PATTERNS.some((pattern) =>
+      lower.includes(pattern),
+    )
   }
 
   return false

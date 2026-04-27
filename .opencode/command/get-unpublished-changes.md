@@ -8,21 +8,24 @@ IMMEDIATELY output the analysis. NO questions. NO preamble.
 ## CRITICAL: DO NOT just copy commit messages!
 
 For each commit, you MUST:
+
 1. Read the actual diff to understand WHAT CHANGED
 2. Describe the REAL change in plain language
 3. Explain WHY it matters (if not obvious)
 
 ## Steps:
+
 1. Run `git diff v{published-version}..HEAD` to see actual changes
 2. Group by type (feat/fix/refactor/docs) with REAL descriptions
 3. Note breaking changes if any
 4. Recommend version bump (major/minor/patch)
 
 ## Output Format:
+
 - feat: "Added X that does Y" (not just "add X feature")
 - fix: "Fixed bug where X happened, now Y" (not just "fix X bug")
 - refactor: "Changed X from A to B, now supports C" (not just "rename X")
-</command-instruction>
+  </command-instruction>
 
 <version-context>
 <published-version>
@@ -52,35 +55,42 @@ For each commit, you MUST:
 ## Unpublished Changes (v{published} → HEAD)
 
 ### feat
-| Scope | What Changed |
-|-------|--------------|
-| X | Description of actual changes |
+
+| Scope | What Changed                  |
+| ----- | ----------------------------- |
+| X     | Description of actual changes |
 
 ### fix
-| Scope | What Changed |
-|-------|--------------|
-| X | Description of actual changes |
+
+| Scope | What Changed                  |
+| ----- | ----------------------------- |
+| X     | Description of actual changes |
 
 ### refactor
-| Scope | What Changed |
-|-------|--------------|
-| X | Description of actual changes |
+
+| Scope | What Changed                  |
+| ----- | ----------------------------- |
+| X     | Description of actual changes |
 
 ### docs
-| Scope | What Changed |
-|-------|--------------|
-| X | Description of actual changes |
+
+| Scope | What Changed                  |
+| ----- | ----------------------------- |
+| X     | Description of actual changes |
 
 ### Breaking Changes
+
 None or list
 
 ### Files Changed
+
 {diff-stat}
 
 ### Suggested Version Bump
+
 - **Recommendation**: patch|minor|major
 - **Reason**: Reason for recommendation
-</output-format>
+  </output-format>
 
 <oracle-safety-review>
 ## Oracle Deployment Safety Review (Only when user explicitly requests)
@@ -90,10 +100,12 @@ None or list
 When user includes any of the above keywords in their request:
 
 ### 1. Pre-validation
+
 ```bash
 bun run typecheck
 bun test
 ```
+
 - On failure → Report "❌ Cannot deploy" immediately without invoking Oracle
 
 ### 2. Oracle Invocation Prompt
@@ -133,16 +145,20 @@ Suggest keywords to monitor after deployment if any.
 ### Verdict: ✅ SAFE / ⚠️ CAUTION / ❌ UNSAFE
 
 ### Risk Analysis
+
 | Area | Risk Level | Description |
-|------|------------|-------------|
-| ... | 🟢/🟡/🔴 | ... |
+| ---- | ---------- | ----------- |
+| ...  | 🟢/🟡/🔴   | ...         |
 
 ### Recommendations
+
 - ...
 
 ### Post-deployment Monitoring Keywords
+
 - ...
 
 ### Conclusion
+
 {Oracle's final judgment}
 </oracle-safety-review>

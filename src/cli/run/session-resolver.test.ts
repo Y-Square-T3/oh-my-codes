@@ -1,23 +1,26 @@
 /// <reference types="bun-types" />
 
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { resolveSession } from "./session-resolver";
-import type { OpencodeClient } from "./types";
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test"
+import { resolveSession } from "./session-resolver"
+import type { OpencodeClient } from "./types"
 
-const createMockClient = (overrides: {
-  getResult?: { error?: unknown; data?: { id: string } }
-  createResults?: Array<{ error?: unknown; data?: { id: string } }>
-} = {}): OpencodeClient => {
+const createMockClient = (
+  overrides: {
+    getResult?: { error?: unknown; data?: { id: string } }
+    createResults?: Array<{ error?: unknown; data?: { id: string } }>
+  } = {},
+): OpencodeClient => {
   const { getResult, createResults = [] } = overrides
   let createCallIndex = 0
   return {
     session: {
       get: mock((opts: { path: { id: string } }) =>
-        Promise.resolve(getResult ?? { data: { id: opts.path.id } })
+        Promise.resolve(getResult ?? { data: { id: opts.path.id } }),
       ),
       create: mock(() => {
-        const result =
-          createResults[createCallIndex] ?? { data: { id: "new-session-id" } }
+        const result = createResults[createCallIndex] ?? {
+          data: { id: "new-session-id" },
+        }
         createCallIndex++
         return Promise.resolve(result)
       }),
@@ -41,7 +44,11 @@ describe("resolveSession", () => {
     })
 
     // when
-    const result = await resolveSession({ client: mockClient, sessionId, directory })
+    const result = await resolveSession({
+      client: mockClient,
+      sessionId,
+      directory,
+    })
 
     // then
     expect(result).toBe(sessionId)
@@ -64,7 +71,7 @@ describe("resolveSession", () => {
 
     // then
     await Promise.resolve(
-      expect(result).rejects.toThrow(`Session not found: ${sessionId}`)
+      expect(result).rejects.toThrow(`Session not found: ${sessionId}`),
     )
     expect(mockClient.session.get).toHaveBeenCalledWith({
       path: { id: sessionId },
@@ -87,9 +94,7 @@ describe("resolveSession", () => {
     expect(mockClient.session.create).toHaveBeenCalledWith({
       body: {
         title: "oh-my-codes run",
-        permission: [
-          { permission: "question", action: "deny", pattern: "*" },
-        ],
+        permission: [{ permission: "question", action: "deny", pattern: "*" }],
       },
       query: { directory },
     })
@@ -114,9 +119,7 @@ describe("resolveSession", () => {
     expect(mockClient.session.create).toHaveBeenCalledWith({
       body: {
         title: "oh-my-codes run",
-        permission: [
-          { permission: "question", action: "deny", pattern: "*" },
-        ],
+        permission: [{ permission: "question", action: "deny", pattern: "*" }],
       },
       query: { directory },
     })
@@ -137,7 +140,9 @@ describe("resolveSession", () => {
 
     // then
     await Promise.resolve(
-      expect(result).rejects.toThrow("Failed to create session after all retries")
+      expect(result).rejects.toThrow(
+        "Failed to create session after all retries",
+      ),
     )
     expect(mockClient.session.create).toHaveBeenCalledTimes(3)
   })
@@ -157,7 +162,9 @@ describe("resolveSession", () => {
 
     // then
     await Promise.resolve(
-      expect(result).rejects.toThrow("Failed to create session after all retries")
+      expect(result).rejects.toThrow(
+        "Failed to create session after all retries",
+      ),
     )
     expect(mockClient.session.create).toHaveBeenCalledTimes(3)
   })

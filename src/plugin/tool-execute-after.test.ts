@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from "bun:test"
 
-import { clearPendingStore, storeToolMetadata } from "../features/tool-metadata-store"
+import {
+  clearPendingStore,
+  storeToolMetadata,
+} from "../features/tool-metadata-store"
 import { createToolExecuteAfterHandler } from "./tool-execute-after"
 
 describe("createToolExecuteAfterHandler", () => {
@@ -32,7 +35,7 @@ describe("createToolExecuteAfterHandler", () => {
 
     await handler(
       { tool: "hashline_edit", sessionID: "ses_test", callID: "call_test" },
-      { title: "result", output: "original output", metadata: {} }
+      { title: "result", output: "original output", metadata: {} },
     )
 
     expect(callOrder).toEqual(["truncator", "claude"])
@@ -51,17 +54,29 @@ describe("createToolExecuteAfterHandler", () => {
       hooks: {} as never,
     })
 
-    const output = { title: "result", output: "original output", metadata: { truncated: true } }
+    const output = {
+      title: "result",
+      output: "original output",
+      metadata: { truncated: true },
+    }
 
     // when
     await handler(
-      { tool: "hashline_edit", sessionID: "ses_parent", callId: " call_legacy " },
-      output
+      {
+        tool: "hashline_edit",
+        sessionID: "ses_parent",
+        callId: " call_legacy ",
+      },
+      output,
     )
 
     // then
     expect(output.title).toBe("stored title")
-    expect(output.metadata).toEqual({ truncated: true, sessionId: "ses_child", agent: "oracle" })
+    expect(output.metadata).toEqual({
+      truncated: true,
+      sessionId: "ses_child",
+      agent: "oracle",
+    })
   })
 
   it("#given native session metadata #when stored metadata exists #then stored metadata does not overwrite native session linkage", async () => {
@@ -85,11 +100,14 @@ describe("createToolExecuteAfterHandler", () => {
     // when
     await handler(
       { tool: "hashline_edit", sessionID: "ses_parent", callID: "call_native" },
-      output
+      output,
     )
 
     // then
     expect(output.title).toBe("stored title")
-    expect(output.metadata).toEqual({ sessionId: "ses_native", agent: "hephaestus" })
+    expect(output.metadata).toEqual({
+      sessionId: "ses_native",
+      agent: "hephaestus",
+    })
   })
 })

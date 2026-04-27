@@ -3,11 +3,16 @@ import type { HookName, OhMyCodesConfig } from "../../config"
 import type { LoadedSkill } from "../../features/opencode-skill-loader/types"
 import type { PluginContext } from "../types"
 
-import { createAutoSlashCommandHook, createCategorySkillReminderHook } from "../../hooks"
+import {
+  createAutoSlashCommandHook,
+  createCategorySkillReminderHook,
+} from "../../hooks"
 import { safeCreateHook } from "../../shared/safe-create-hook"
 
 export type SkillHooks = {
-  categorySkillReminder: ReturnType<typeof createCategorySkillReminderHook> | null
+  categorySkillReminder: ReturnType<
+    typeof createCategorySkillReminderHook
+  > | null
   autoSlashCommand: ReturnType<typeof createAutoSlashCommandHook> | null
 }
 
@@ -33,7 +38,8 @@ export function createSkillHooks(args: {
 
   const categorySkillReminder = isHookEnabled("category-skill-reminder")
     ? safeHook("category-skill-reminder", () =>
-        createCategorySkillReminderHook(ctx, availableSkills))
+        createCategorySkillReminderHook(ctx, availableSkills),
+      )
     : null
 
   const autoSlashCommand = isHookEnabled("auto-slash-command")
@@ -43,7 +49,8 @@ export function createSkillHooks(args: {
           pluginsEnabled: pluginConfig.claude_code?.plugins ?? true,
           enabledPluginsOverride: pluginConfig.claude_code?.plugins_override,
           directory: ctx.directory,
-        }))
+        }),
+      )
     : null
 
   return { categorySkillReminder, autoSlashCommand }

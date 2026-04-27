@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+} from "bun:test"
 import { randomUUID } from "node:crypto"
 import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -9,7 +17,8 @@ import type { PluginInput } from "@opencode-ai/plugin"
 const storageMaps = new Map<string, Set<string>>()
 
 mock.module("./storage", () => ({
-  loadInjectedPaths: (sessionID: string) => storageMaps.get(sessionID) ?? new Set<string>(),
+  loadInjectedPaths: (sessionID: string) =>
+    storageMaps.get(sessionID) ?? new Set<string>(),
   saveInjectedPaths: (sessionID: string, paths: Set<string>) => {
     storageMaps.set(sessionID, paths)
   },
@@ -56,7 +65,10 @@ describe("processFilePathForReadmeInjection", () => {
     // given
     const sourceDirectory = join(testRoot, "src")
     mkdirSync(sourceDirectory, { recursive: true })
-    writeFileSync(join(sourceDirectory, "README.md"), "# Source README\nlocal context")
+    writeFileSync(
+      join(sourceDirectory, "README.md"),
+      "# Source README\nlocal context",
+    )
 
     const { processFilePathForReadmeInjection } = await import("./injector")
     const output = { title: "Result", output: "base", metadata: {} }
@@ -110,7 +122,10 @@ describe("processFilePathForReadmeInjection", () => {
     writeFileSync(join(testRoot, "README.md"), "# Root README")
     writeFileSync(join(sourceDirectory, "README.md"), "# Src README")
     writeFileSync(join(componentsDirectory, "README.md"), "# Components README")
-    writeFileSync(join(componentsDirectory, "button.ts"), "export const button = true")
+    writeFileSync(
+      join(componentsDirectory, "button.ts"),
+      "export const button = true",
+    )
 
     const { processFilePathForReadmeInjection } = await import("./injector")
     const output = { title: "Result", output: "", metadata: {} }
@@ -203,7 +218,10 @@ describe("processFilePathForReadmeInjection", () => {
 
     const { processFilePathForReadmeInjection } = await import("./injector")
     const output = { title: "Result", output: "", metadata: {} }
-    const truncator = createTruncator({ result: "trimmed content", truncated: true })
+    const truncator = createTruncator({
+      result: "trimmed content",
+      truncated: true,
+    })
 
     // when
     await processFilePathForReadmeInjection({

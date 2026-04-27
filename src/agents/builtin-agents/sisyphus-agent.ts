@@ -1,8 +1,15 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import type { AgentOverrides } from "../types"
 import type { CategoriesConfig, CategoryConfig } from "../../config/schema"
-import type { AvailableAgent, AvailableCategory, AvailableSkill } from "../dynamic-agent-prompt-builder"
-import { AGENT_MODEL_REQUIREMENTS, isAnyFallbackModelAvailable } from "../../shared"
+import type {
+  AvailableAgent,
+  AvailableCategory,
+  AvailableSkill,
+} from "../dynamic-agent-prompt-builder"
+import {
+  AGENT_MODEL_REQUIREMENTS,
+  isAnyFallbackModelAvailable,
+} from "../../shared"
 import { applyEnvironmentContext } from "./environment-context"
 import { applyOverrides } from "./agent-overrides"
 import { applyModelResolution, getFirstFallbackModel } from "./model-resolution"
@@ -48,12 +55,17 @@ export function maybeCreateSisyphusConfig(input: {
     !sisyphusRequirement?.requiresAnyModel ||
     hasSisyphusExplicitConfig ||
     isFirstRunNoCache ||
-    isAnyFallbackModelAvailable(sisyphusRequirement.fallbackChain, availableModels)
+    isAnyFallbackModelAvailable(
+      sisyphusRequirement.fallbackChain,
+      availableModels,
+    )
 
-  if (disabledAgents.includes("sisyphus") || !meetsSisyphusAnyModelRequirement) return undefined
+  if (disabledAgents.includes("sisyphus") || !meetsSisyphusAnyModelRequirement)
+    return undefined
 
   let sisyphusResolution = applyModelResolution({
-    uiSelectedModel: sisyphusOverride?.model !== undefined ? undefined : uiSelectedModel,
+    uiSelectedModel:
+      sisyphusOverride?.model !== undefined ? undefined : uiSelectedModel,
     userModel: sisyphusOverride?.model,
     requirement: sisyphusRequirement,
     availableModels,
@@ -65,7 +77,8 @@ export function maybeCreateSisyphusConfig(input: {
   }
 
   if (!sisyphusResolution) return undefined
-  const { model: sisyphusModel, variant: sisyphusResolvedVariant } = sisyphusResolution
+  const { model: sisyphusModel, variant: sisyphusResolvedVariant } =
+    sisyphusResolution
 
   let sisyphusConfig = createSisyphusAgent(
     sisyphusModel,
@@ -73,14 +86,19 @@ export function maybeCreateSisyphusConfig(input: {
     undefined,
     availableSkills,
     availableCategories,
-    useTaskSystem
+    useTaskSystem,
   )
 
   if (sisyphusResolvedVariant) {
     sisyphusConfig = { ...sisyphusConfig, variant: sisyphusResolvedVariant }
   }
 
-  sisyphusConfig = applyOverrides(sisyphusConfig, sisyphusOverride, mergedCategories, directory)
+  sisyphusConfig = applyOverrides(
+    sisyphusConfig,
+    sisyphusOverride,
+    mergedCategories,
+    directory,
+  )
 
   const resolvedModel = sisyphusConfig.model ?? ""
   const gptDeny = getGptApplyPatchPermission(resolvedModel)

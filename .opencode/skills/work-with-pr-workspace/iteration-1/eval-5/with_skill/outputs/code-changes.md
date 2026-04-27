@@ -3,6 +3,7 @@
 ## File 1: `src/config/schema/comment-checker.ts`
 
 ### Before
+
 ```typescript
 import { z } from "zod"
 
@@ -15,6 +16,7 @@ export type CommentCheckerConfig = z.infer<typeof CommentCheckerConfigSchema>
 ```
 
 ### After
+
 ```typescript
 import { z } from "zod"
 
@@ -37,6 +39,7 @@ export type CommentCheckerConfig = z.infer<typeof CommentCheckerConfigSchema>
 Add `excludePatterns` parameter and pass `--exclude-pattern` flags to the binary.
 
 ### Before (line 151)
+
 ```typescript
 export async function runCommentChecker(input: HookInput, cliPath?: string, customPrompt?: string): Promise<CheckResult> {
   const binaryPath = cliPath ?? resolvedCliPath ?? getCommentCheckerPathSync()
@@ -49,6 +52,7 @@ export async function runCommentChecker(input: HookInput, cliPath?: string, cust
 ```
 
 ### After
+
 ```typescript
 export async function runCommentChecker(
   input: HookInput,
@@ -79,6 +83,7 @@ export async function runCommentChecker(
 Add `excludePatterns` parameter threading.
 
 ### Before (line 43-79)
+
 ```typescript
 export async function processWithCli(
   input: { tool: string; sessionID: string; callID: string },
@@ -94,6 +99,7 @@ export async function processWithCli(
 ```
 
 ### After
+
 ```typescript
 export async function processWithCli(
   input: { tool: string; sessionID: string; callID: string },
@@ -114,6 +120,7 @@ export async function processWithCli(
 Same pattern - thread `excludePatterns` through.
 
 ### Before (line 87-120)
+
 ```typescript
 export async function processApplyPatchEditsWithCli(
   sessionID: string,
@@ -128,6 +135,7 @@ export async function processApplyPatchEditsWithCli(
 ```
 
 ### After
+
 ```typescript
 export async function processApplyPatchEditsWithCli(
   sessionID: string,
@@ -149,16 +157,34 @@ export async function processApplyPatchEditsWithCli(
 ### Change: Thread `config.exclude_patterns` through to CLI calls
 
 ### Before (line 177)
+
 ```typescript
-await processWithCli(input, pendingCall, output, cliPath, config?.custom_prompt, debugLog)
+await processWithCli(
+  input,
+  pendingCall,
+  output,
+  cliPath,
+  config?.custom_prompt,
+  debugLog,
+)
 ```
 
 ### After
+
 ```typescript
-await processWithCli(input, pendingCall, output, cliPath, config?.custom_prompt, debugLog, config?.exclude_patterns)
+await processWithCli(
+  input,
+  pendingCall,
+  output,
+  cliPath,
+  config?.custom_prompt,
+  debugLog,
+  config?.exclude_patterns,
+)
 ```
 
 ### Before (line 147-154)
+
 ```typescript
 await processApplyPatchEditsWithCli(
   input.sessionID,
@@ -171,6 +197,7 @@ await processApplyPatchEditsWithCli(
 ```
 
 ### After
+
 ```typescript
 await processApplyPatchEditsWithCli(
   input.sessionID,
@@ -232,16 +259,17 @@ exit 0
 `)
 
   // when
-  await runCommentChecker(
-    createMockInput(),
-    binaryPath,
-    undefined,
-    ["^Note:", "^TODO:"],
-  )
+  await runCommentChecker(createMockInput(), binaryPath, undefined, [
+    "^Note:",
+    "^TODO:",
+  ])
 
   // then
   const { readFileSync } = await import("node:fs")
-  const args = readFileSync("/tmp/comment-checker-test-args.txt", "utf-8").trim()
+  const args = readFileSync(
+    "/tmp/comment-checker-test-args.txt",
+    "utf-8",
+  ).trim()
   expect(args).toContain("--exclude-pattern")
   expect(args).toContain("^Note:")
   expect(args).toContain("^TODO:")
@@ -352,9 +380,15 @@ exit 2
 ```typescript
 it("passes exclude_patterns from config to CLI", async () => {
   // given
-  const hooks = createCommentCheckerHooks({ exclude_patterns: ["^Note:", "^TODO:"] })
+  const hooks = createCommentCheckerHooks({
+    exclude_patterns: ["^Note:", "^TODO:"],
+  })
 
-  const input = { tool: "apply_patch", sessionID: "ses_test", callID: "call_test" }
+  const input = {
+    tool: "apply_patch",
+    sessionID: "ses_test",
+    callID: "call_test",
+  }
   const output = {
     title: "ok",
     output: "Success. Updated the following files:\nM src/a.ts",
@@ -376,7 +410,13 @@ it("passes exclude_patterns from config to CLI", async () => {
   // then
   expect(processApplyPatchEditsWithCli).toHaveBeenCalledWith(
     "ses_test",
-    [{ filePath: "/repo/src/a.ts", before: "const a = 1\n", after: "// Note: Thread-safe\nconst a = 1\n" }],
+    [
+      {
+        filePath: "/repo/src/a.ts",
+        before: "const a = 1\n",
+        after: "// Note: Thread-safe\nconst a = 1\n",
+      },
+    ],
     expect.any(Object),
     "/tmp/fake-comment-checker",
     undefined,

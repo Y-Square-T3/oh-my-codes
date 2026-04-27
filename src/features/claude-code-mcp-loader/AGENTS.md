@@ -32,38 +32,38 @@ loadMcpConfigs(ctx)
       "command": "node",
       "args": ["server.js"],
       "env": {
-        "API_KEY": "${MY_API_KEY}"
-      }
+        "API_KEY": "${MY_API_KEY}",
+      },
     },
     "my-http": {
-      "type": "http",       // "sse" legacy → mapped to http
+      "type": "http", // "sse" legacy → mapped to http
       "url": "https://example.com/mcp",
       "headers": {
-        "Authorization": "Bearer ${MY_TOKEN}"
-      }
-    }
-  }
+        "Authorization": "Bearer ${MY_TOKEN}",
+      },
+    },
+  },
 }
 ```
 
 ## KEY FILES
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | Barrel: `loadMcpConfigs`, types |
-| `loader.ts` | `loadMcpConfigs()` main entry |
-| `types.ts` | `ClaudeCodeMcpServer`, `LoadedMcpServer`, `McpScope` |
+| File              | Purpose                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `index.ts`        | Barrel: `loadMcpConfigs`, types                             |
+| `loader.ts`       | `loadMcpConfigs()` main entry                               |
+| `types.ts`        | `ClaudeCodeMcpServer`, `LoadedMcpServer`, `McpScope`        |
 | `env-expander.ts` | `expandEnvVarsInObject()` — recursive `${VAR}` substitution |
-| `transformer.ts` | Claude Code format → OpenCode `Mcp` shape |
-| `scope-filter.ts` | Project vs user scope precedence |
+| `transformer.ts`  | Claude Code format → OpenCode `Mcp` shape                   |
+| `scope-filter.ts` | Project vs user scope precedence                            |
 
 ## THREE-TIER MCP CONTEXT
 
-| Tier | Loader | Scope |
-|------|--------|-------|
-| 1. Built-in | `src/mcp/` `createBuiltinMcps()` | Global, 3 remote HTTP MCPs |
-| 2. **Claude Code** | **This module** | **From `.mcp.json`, project + user** |
-| 3. Skill-embedded | `src/features/skill-mcp-manager/` | Per-session, from SKILL.md YAML |
+| Tier               | Loader                            | Scope                                |
+| ------------------ | --------------------------------- | ------------------------------------ |
+| 1. Built-in        | `src/mcp/` `createBuiltinMcps()`  | Global, 3 remote HTTP MCPs           |
+| 2. **Claude Code** | **This module**                   | **From `.mcp.json`, project + user** |
+| 3. Skill-embedded  | `src/features/skill-mcp-manager/` | Per-session, from SKILL.md YAML      |
 
 ## SECURITY
 

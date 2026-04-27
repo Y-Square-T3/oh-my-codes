@@ -1,10 +1,13 @@
 import { dirname } from "path"
-import { resolveCommandsInText, resolveFileReferencesInText } from "../../shared"
+import {
+  resolveCommandsInText,
+  resolveFileReferencesInText,
+} from "../../shared"
 import type { CommandInfo } from "./types"
 
 export async function formatLoadedCommand(
   command: CommandInfo,
-  userMessage?: string
+  userMessage?: string,
 ): Promise<string> {
   const sections: string[] = []
 
@@ -15,7 +18,9 @@ export async function formatLoadedCommand(
   }
 
   if (command.metadata.argumentHint) {
-    sections.push(`**Usage**: /${command.name} ${command.metadata.argumentHint}\n`)
+    sections.push(
+      `**Usage**: /${command.name} ${command.metadata.argumentHint}\n`,
+    )
   }
 
   if (userMessage) {
@@ -44,7 +49,10 @@ export async function formatLoadedCommand(
   }
 
   const commandDir = command.path ? dirname(command.path) : process.cwd()
-  const withFileReferences = await resolveFileReferencesInText(content, commandDir)
+  const withFileReferences = await resolveFileReferencesInText(
+    content,
+    commandDir,
+  )
   const resolvedContent = await resolveCommandsInText(withFileReferences)
 
   let finalContent = resolvedContent.trim()
@@ -64,9 +72,11 @@ export function formatCommandList(items: CommandInfo[]): string {
   const lines = ["# Available Commands & Skills\n"]
 
   for (const command of items) {
-    const hint = command.metadata.argumentHint ? ` ${command.metadata.argumentHint}` : ""
+    const hint = command.metadata.argumentHint
+      ? ` ${command.metadata.argumentHint}`
+      : ""
     lines.push(
-      `- **/${command.name}${hint}**: ${command.metadata.description || "(no description)"} (${command.scope})`
+      `- **/${command.name}${hint}**: ${command.metadata.description || "(no description)"} (${command.scope})`,
     )
   }
 

@@ -4,7 +4,8 @@ import { describe, expect, it, mock } from "bun:test"
 
 import { OhMyCodesConfigSchema } from "../config"
 
-const { createPreemptiveCompactionHook } = await import("./preemptive-compaction")
+const { createPreemptiveCompactionHook } =
+  await import("./preemptive-compaction")
 
 type HookContext = Parameters<typeof createPreemptiveCompactionHook>[0]
 

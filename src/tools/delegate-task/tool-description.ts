@@ -1,4 +1,7 @@
-import type { AvailableCategory, AvailableSkill } from "../../agents/dynamic-agent-prompt-builder"
+import type {
+  AvailableCategory,
+  AvailableSkill,
+} from "../../agents/dynamic-agent-prompt-builder"
 import { mergeCategories } from "../../shared/merge-categories"
 import { CATEGORY_DESCRIPTIONS } from "./constants"
 import type { DelegateTaskToolOptions } from "./types"
@@ -10,19 +13,25 @@ export interface DelegateTaskPresentation {
   description: string
 }
 
-export function createDelegateTaskPresentation(options: DelegateTaskToolOptions): DelegateTaskPresentation {
+export function createDelegateTaskPresentation(
+  options: DelegateTaskToolOptions,
+): DelegateTaskPresentation {
   const { userCategories } = options
   const allCategories = mergeCategories(userCategories)
-  const categoryEntries = Object.entries(allCategories).map(([name, categoryConfig]) => ({
-    name,
-    categoryConfig,
-    description: userCategories?.[name]?.description || CATEGORY_DESCRIPTIONS[name],
-  }))
+  const categoryEntries = Object.entries(allCategories).map(
+    ([name, categoryConfig]) => ({
+      name,
+      categoryConfig,
+      description:
+        userCategories?.[name]?.description || CATEGORY_DESCRIPTIONS[name],
+    }),
+  )
   const categoryNames = categoryEntries.map(({ name }) => name)
   const categoryExamples = categoryNames.join(", ")
 
-  const availableCategories: AvailableCategory[] = options.availableCategories
-    ?? categoryEntries.map(({ name, categoryConfig, description }) => {
+  const availableCategories: AvailableCategory[] =
+    options.availableCategories ??
+    categoryEntries.map(({ name, categoryConfig, description }) => {
       return {
         name,
         description: description || "General tasks",
@@ -32,9 +41,11 @@ export function createDelegateTaskPresentation(options: DelegateTaskToolOptions)
 
   const availableSkills: AvailableSkill[] = options.availableSkills ?? []
 
-  const categoryList = categoryEntries.map(({ name, description }) => {
-    return description ? `  - ${name}: ${description}` : `  - ${name}`
-  }).join("\n")
+  const categoryList = categoryEntries
+    .map(({ name, description }) => {
+      return description ? `  - ${name}: ${description}` : `  - ${name}`
+    })
+    .join("\n")
 
   const description = `Spawn agent task with category-based or direct agent selection.
   

@@ -68,17 +68,22 @@ export async function findWorkingOpencodeBinary(
   return null
 }
 
-export function buildPathWithBinaryFirst(pathEnv: string | undefined, binaryPath: string): string {
+export function buildPathWithBinaryFirst(
+  pathEnv: string | undefined,
+  binaryPath: string,
+): string {
   const preferredDir = dirname(binaryPath)
-  const existing = (pathEnv ?? "").split(delimiter).filter(
-    (entry) => entry.length > 0 && entry !== preferredDir,
-  )
+  const existing = (pathEnv ?? "")
+    .split(delimiter)
+    .filter((entry) => entry.length > 0 && entry !== preferredDir)
   return [preferredDir, ...existing].join(delimiter)
 }
 
 export async function withWorkingOpencodePath<T>(
   startServer: () => Promise<T>,
-  finder: (pathEnv: string | undefined) => Promise<string | null> = findWorkingOpencodeBinary,
+  finder: (
+    pathEnv: string | undefined,
+  ) => Promise<string | null> = findWorkingOpencodeBinary,
 ): Promise<T> {
   const originalPath = process.env.PATH
   const binaryPath = await finder(originalPath)
