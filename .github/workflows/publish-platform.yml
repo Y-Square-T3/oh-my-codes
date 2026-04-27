@@ -88,26 +88,15 @@ jobs:
           
           # Check oh-my-codes
           OC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-codes-${{ matrix.platform }}/${VERSION}")
-          # Check oh-my-openagent
-          OA_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-openagent-${{ matrix.platform }}/${VERSION}")
           
           echo "oh-my-codes-${{ matrix.platform }}@${VERSION}: ${OC_STATUS}"
-          echo "oh-my-openagent-${{ matrix.platform }}@${VERSION}: ${OA_STATUS}"
           
           if [ "$OC_STATUS" = "200" ]; then
-            echo "skip_opencode=true" >> $GITHUB_OUTPUT
+            echo "skip_codes=true" >> $GITHUB_OUTPUT
             echo "✓ oh-my-codes-${{ matrix.platform }}@${VERSION} already published"
           else
-            echo "skip_opencode=false" >> $GITHUB_OUTPUT
+            echo "skip_codes=false" >> $GITHUB_OUTPUT
             echo "→ oh-my-codes-${{ matrix.platform }}@${VERSION} needs publishing"
-          fi
-          
-          if [ "$OA_STATUS" = "200" ]; then
-            echo "skip_openagent=true" >> $GITHUB_OUTPUT
-            echo "✓ oh-my-openagent-${{ matrix.platform }}@${VERSION} already published"
-          else
-            echo "skip_openagent=false" >> $GITHUB_OUTPUT
-            echo "→ oh-my-openagent-${{ matrix.platform }}@${VERSION} needs publishing"
           fi
           
           # Skip build only if BOTH are already published
@@ -213,20 +202,6 @@ jobs:
             echo "Built binary:"
             ls -lh "$OUTPUT"
 
-      - name: Ad-hoc sign darwin binary
-        if: steps.check.outputs.skip != 'true' && startsWith(matrix.platform, 'darwin-')
-        run: |
-          BINARY="packages/${{ matrix.platform }}/bin/oh-my-codes"
-          echo "Initial state:"
-          codesign -dvvv "$BINARY" 2>&1 || true
-          echo "Removing any existing signature:"
-          codesign --remove-signature "$BINARY" 2>&1 || true
-          echo "Applying ad-hoc signature:"
-          codesign --sign - --force --timestamp=none "$BINARY"
-          echo "Final state:"
-          codesign -dvvv "$BINARY" 2>&1
-          codesign --verify --verbose "$BINARY"
-
       - name: Compress binary
         if: steps.check.outputs.skip != 'true'
         run: |
@@ -264,7 +239,20 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        platform: [darwin-arm64, darwin-x64, darwin-x64-baseline, linux-x64, linux-x64-baseline, linux-arm64, linux-x64-musl, linux-x64-musl-baseline, linux-arm64-musl, windows-x64, windows-x64-baseline]
+        platform:
+          [
+            darwin-arm64,
+            darwin-x64,
+            darwin-x64-baseline,
+            linux-x64,
+            linux-x64-baseline,
+            linux-arm64,
+            linux-x64-musl,
+            linux-x64-musl-baseline,
+            linux-arm64-musl,
+            windows-x64,
+            windows-x64-baseline,
+          ]
     steps:
       - name: Validate release inputs
         id: validate
@@ -293,23 +281,15 @@ jobs:
         env:
           VERSION: ${{ steps.validate.outputs.version }}
         run: |
-          OC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-codes-${{ matrix.platform }}/${VERSION}")
-          OA_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-openagent-${{ matrix.platform }}/${VERSION}")
-          
+          OC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/@matrix-ai/oh-my-matrix-${{ matrix.platform }}/${VERSION}")
+
           if [ "$OC_STATUS" = "200" ]; then
-            echo "skip_opencode=true" >> $GITHUB_OUTPUT
-            echo "✓ oh-my-codes-${{ matrix.platform }}@${VERSION} already published"
+            echo "skip_matrix=true" >> $GITHUB_OUTPUT
+            echo "✓ oh-my-matrix-${{ matrix.platform }}@${VERSION} already published"
           else
-            echo "skip_opencode=false" >> $GITHUB_OUTPUT
+            echo "skip_matrix=false" >> $GITHUB_OUTPUT
           fi
-          
-          if [ "$OA_STATUS" = "200" ]; then
-            echo "skip_openagent=true" >> $GITHUB_OUTPUT
-            echo "✓ oh-my-openagent-${{ matrix.platform }}@${VERSION} already published"
-          else
-            echo "skip_openagent=false" >> $GITHUB_OUTPUT
-          fi
-          
+
           # Need artifact if either package needs publishing
           if [ "$OC_STATUS" = "200" ] && [ "$OA_STATUS" = "200" ]; then
             echo "skip_all=true" >> $GITHUB_OUTPUT
@@ -331,13 +311,13 @@ jobs:
         run: |
           PLATFORM="${{ matrix.platform }}"
           mkdir -p packages/${PLATFORM}
-          
+
           if [[ "$PLATFORM" == windows-* ]]; then
             unzip binary-${PLATFORM}.zip -d packages/${PLATFORM}/
           else
             tar -xzvf binary-${PLATFORM}.tar.gz -C packages/${PLATFORM}/
           fi
-          
+
           echo "Extracted contents:"
           ls -la packages/${PLATFORM}/
           ls -la packages/${PLATFORM}/bin/
@@ -348,36 +328,14 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Publish oh-my-codes-${{ matrix.platform }}
-        if: steps.check.outputs.skip_opencode != 'true' && steps.download.outcome == 'success'
+      - name: Publish oh-my-matrix-${{ matrix.platform }}
+        if: steps.check.outputs.skip_matrix != 'true' && steps.download.outcome == 'success'
         env:
           DIST_TAG: ${{ steps.validate.outputs.dist_tag }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
         run: |
           cd packages/${{ matrix.platform }}
-
-          if [ -n "$DIST_TAG" ]; then
-            npm publish --access public --provenance --tag "$DIST_TAG"
-          else
-            npm publish --access public --provenance
-          fi
-        timeout-minutes: 15
-
-      - name: Publish oh-my-openagent-${{ matrix.platform }}
-        if: steps.check.outputs.skip_openagent != 'true' && steps.download.outcome == 'success'
-        env:
-          DIST_TAG: ${{ steps.validate.outputs.dist_tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
-        run: |
-          cd packages/${{ matrix.platform }}
-
-          # Rename package for oh-my-openagent
-          jq --arg name "oh-my-openagent-${{ matrix.platform }}" \
-             --arg desc "Platform-specific binary for oh-my-openagent (${{ matrix.platform }})" \
-             '.name = $name | .description = $desc | .bin = {"oh-my-openagent": (.bin | to_entries | .[0].value)}' \
-             package.json > tmp.json && mv tmp.json package.json
 
           if [ -n "$DIST_TAG" ]; then
             npm publish --access public --provenance --tag "$DIST_TAG"
