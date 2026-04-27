@@ -1,16 +1,14 @@
-import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { basename, dirname, extname, join } from "node:path"
+import {existsSync, readFileSync, statSync, writeFileSync} from "node:fs"
 
-import { parseJsonc } from "../../shared"
-import { migrateLegacyConfigFile } from "../../shared/migrate-legacy-config-file"
-import { CONFIG_BASENAME, LEGACY_CONFIG_BASENAME } from "../../shared/plugin-identity"
-import type { ConfigMergeResult, InstallConfig } from "../types"
-import { backupConfigFile } from "./backup-config"
-import { getConfigDir, getOmoConfigPath } from "./config-context"
-import { deepMergeRecord } from "./deep-merge-record"
-import { ensureConfigDirectoryExists } from "./ensure-config-directory-exists"
-import { formatErrorWithSuggestion } from "./format-error-with-suggestion"
-import { generateOmoConfig } from "./generate-omo-config"
+import {parseJsonc} from "../../shared"
+import {CONFIG_BASENAME} from "../../shared/plugin-identity"
+import type {ConfigMergeResult, InstallConfig} from "../types"
+import {backupConfigFile} from "./backup-config"
+import {getConfigDir, getOmoConfigPath} from "./config-context"
+import {deepMergeRecord} from "./deep-merge-record"
+import {ensureConfigDirectoryExists} from "./ensure-config-directory-exists"
+import {formatErrorWithSuggestion} from "./format-error-with-suggestion"
+import {generateOmoConfig} from "./generate-omo-config"
 
 function isEmptyOrWhitespace(content: string): boolean {
   return content.trim().length === 0
@@ -27,14 +25,7 @@ export function writeOmoConfig(installConfig: InstallConfig): ConfigMergeResult 
     }
   }
 
-  const detectedConfigPath = getOmoConfigPath()
-  const canonicalConfigPath = join(dirname(detectedConfigPath), `${CONFIG_BASENAME}${extname(detectedConfigPath) || ".json"}`)
-  const shouldMigrateLegacyPath = basename(detectedConfigPath).startsWith(LEGACY_CONFIG_BASENAME)
-  const omoConfigPath = shouldMigrateLegacyPath
-    ? ((migrateLegacyConfigFile(detectedConfigPath) || existsSync(canonicalConfigPath))
-        ? canonicalConfigPath
-        : detectedConfigPath)
-    : detectedConfigPath
+  const omoConfigPath = getOmoConfigPath()
 
   try {
     const newConfig = generateOmoConfig(installConfig)
