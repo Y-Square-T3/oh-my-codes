@@ -1,6 +1,6 @@
-# What Is Oh My OpenAgent?
+# What Is oh-my-codes?
 
-Oh My OpenAgent is a multi-model agent orchestration harness for OpenCode. It transforms a single AI agent into a coordinated development team that actually ships code.
+oh-my-codes is a multi-model agent orchestration harness for OpenCode. It transforms a single AI agent into a coordinated development team that actually ships code.
 
 Not locked to Claude. Not locked to OpenAI. Not locked to anyone.
 
@@ -15,7 +15,7 @@ Just better results, cheaper models, real orchestration.
 Paste this into your LLM agent session:
 
 ```
-Install and configure oh-my-openagent by following the instructions here:
+Install and configure oh-my-codes by following the instructions here:
 https://raw.githubusercontent.com/vibration-autos/oh-my-codes/refs/heads/dev/docs/guide/installation.md
 ```
 
@@ -41,13 +41,13 @@ We used to call this "Claude Code on steroids." That was wrong.
 
 This isn't about making Claude Code better. It's about breaking free from the idea that one model, one provider, one way of working is enough. Anthropic wants you locked in. OpenAI wants you locked in. Everyone wants you locked in.
 
-Oh My OpenAgent doesn't play that game. It orchestrates across models, picking the right brain for the right job. Claude for orchestration. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for quick tasks. All working together, automatically.
+oh-my-codes doesn't play that game. It orchestrates across models, picking the right brain for the right job. Claude for orchestration. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for quick tasks. All working together, automatically.
 
 ---
 
 ## How It Works: Agent Orchestration
 
-Instead of one agent doing everything, Oh My OpenAgent uses **specialized agents that delegate to each other** based on task type.
+Instead of one agent doing everything, oh-my-codes uses **specialized agents that delegate to each other** based on task type.
 
 **The Architecture:**
 
@@ -98,7 +98,7 @@ Use Hephaestus when you need deep architectural reasoning, complex debugging acr
 
 **Why this beats vanilla Codex CLI:**
 
-- **Multi-model orchestration.** Pure Codex is single-model. OmO routes different tasks to different models automatically. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for speed. The right brain for the right job.
+- **Multi-model orchestration.** Pure Codex is single-model. oh-my-codes routes different tasks to different models automatically. GPT for deep reasoning. Gemini for frontend. GPT-5.4 Mini for speed. The right brain for the right job.
 - **Background agents.** Fire 5+ agents in parallel. Something Codex simply cannot do. While one agent writes code, another researches patterns, another checks documentation. Like a real dev team.
 - **Category system.** Tasks are routed by intent, not model name. `visual-engineering` gets Gemini. `ultrabrain` gets GPT-5.4 xhigh. `deep` gets GPT-5.4. `artistry` gets Gemini. `quick` gets GPT-5.4 Mini. `unspecified-low` gets fast cheap models. `unspecified-high` gets Claude Opus. `writing` gets prose-optimized models. No manual juggling.
 - **Accumulated wisdom.** Subagents learn from previous results. Conventions discovered in task 1 are passed to task 5. Mistakes made early aren't repeated. The system gets smarter as it works.
@@ -153,7 +153,7 @@ Use Prometheus for multi-day projects, critical production changes, complex refa
 
 ## Agent Model Matching
 
-Different agents work best with different models. Oh My OpenAgent automatically assigns optimal models, but you can customize everything.
+Different agents work best with different models. oh-my-codes automatically assigns optimal models, but you can customize everything.
 
 ### Default Configuration
 
@@ -167,7 +167,7 @@ You can override specific agents or categories in your config:
 
 ```jsonc
 {
-  "$schema": "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-openagent.schema.json",
+  "$schema": "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json",
 
   "agents": {
     // Main orchestrator: Claude Opus or Kimi K2.5 work best
@@ -245,13 +245,13 @@ See the [Agent-Model Matching Guide](./agent-model-matching.md) for complete det
 
 Claude Code is good. But it's a single agent running a single model doing everything alone.
 
-Oh My OpenAgent turns that into a coordinated team:
+oh-my-codes turns that into a coordinated team:
 
-**Parallel execution.** Claude Code processes one thing at a time. OmO fires background agents in parallel — research, implementation, and verification happening simultaneously. Like having 5 engineers instead of 1.
+**Parallel execution.** Claude Code processes one thing at a time. oh-my-codes fires background agents in parallel — research, implementation, and verification happening simultaneously. Like having 5 engineers instead of 1.
 
-**Hash-anchored edits.** Claude Code's edit tool fails when the model can't reproduce lines exactly. OmO's `LINE#ID` content hashing validates every edit before applying. Grok Code Fast 1 went from 6.7% to 68.3% success rate just from this change.
+**Hash-anchored edits.** Claude Code's edit tool fails when the model can't reproduce lines exactly. oh-my-codes' `LINE#ID` content hashing validates every edit before applying. Grok Code Fast 1 went from 6.7% to 68.3% success rate just from this change.
 
-**Intent Gate.** Claude Code takes your prompt and runs. OmO classifies your true intent first — research, implementation, investigation, fix — then routes accordingly. Fewer misinterpretations, better results.
+**Intent Gate.** Claude Code takes your prompt and runs. oh-my-codes classifies your true intent first — research, implementation, investigation, fix — then routes accordingly. Fewer misinterpretations, better results.
 
 **LSP + AST tools.** Workspace-level rename, go-to-definition, find-references, pre-build diagnostics, AST-aware code rewrites. IDE precision that vanilla Claude Code doesn't have.
 
@@ -259,7 +259,7 @@ Oh My OpenAgent turns that into a coordinated team:
 
 **Discipline enforcement.** Todo enforcer yanks idle agents back to work. Comment checker strips AI slop. Ralph Loop keeps going until 100% done. The system doesn't let the agent slack off.
 
-**The fundamental advantage.** Models have different temperaments. Claude thinks deeply. GPT reasons architecturally. Gemini visualizes. Haiku moves fast. Single-model tools force you to pick one personality for all tasks. Oh My OpenAgent leverages them all, routing by task type. This isn't a temporary hack — it's the only architecture that makes sense as models specialize further. The gap between multi-model orchestration and single-model limitation widens every month. We're betting on that future.
+**The fundamental advantage.** Models have different temperaments. Claude thinks deeply. GPT reasons architecturally. Gemini visualizes. Haiku moves fast. Single-model tools force you to pick one personality for all tasks. oh-my-codes leverages them all, routing by task type. This isn't a temporary hack — it's the only architecture that makes sense as models specialize further. The gap between multi-model orchestration and single-model limitation widens every month. We're betting on that future.
 
 ---
 
@@ -269,7 +269,7 @@ Before acting on any request, Sisyphus classifies your true intent.
 
 Are you asking for research? Implementation? Investigation? A fix? The Intent Gate figures out what you actually want, not just the literal words you typed. This means the agent understands context, nuance, and the real goal behind your request.
 
-Claude Code doesn't have this. It takes your prompt and runs. Oh My OpenAgent thinks first, then acts.
+Claude Code doesn't have this. It takes your prompt and runs. oh-my-codes thinks first, then acts.
 
 ---
 
