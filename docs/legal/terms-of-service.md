@@ -2,7 +2,7 @@
 
 Last revised: April 11, 2026
 
-These Terms of Service govern your use of oh-my-codes and oh-my-openagent, including the published CLI package, the OpenCode plugin runtime, the repository, and related distribution materials.
+These Terms of Service govern your use of oh-my-codes, including the published CLI package, the OpenCode plugin runtime, the repository, and related distribution materials.
 
 For these Terms, "Application" means the published `oh-my-codes` package and plugin. "Service" means the Application and related project distribution surfaces. "We" and "our" refer to the maintainer of oh-my-codes. "You" refer to the individual or entity using the Service.
 

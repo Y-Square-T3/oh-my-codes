@@ -4,7 +4,7 @@
 
 ### Problem
 
-When using Ollama as a provider with oh-my-openagent agents, you may encounter:
+When using Ollama as a provider with oh-my-codes agents, you may encounter:
 
 ```
 JSON Parse error: Unexpected EOF
@@ -27,7 +27,7 @@ Claude Code SDK expects a single JSON object, not multiple NDJSON lines, causing
 
 - **Ollama API**: Returns streaming responses as NDJSON by design
 - **Claude Code SDK**: Doesn't properly handle NDJSON responses for tool calls
-- **oh-my-openagent**: Passes through the SDK's behavior (can't fix at this layer)
+- **oh-my-codes**: Passes through the SDK's behavior (can't fix at this layer)
 
 ## Solutions
 
@@ -117,7 +117,7 @@ curl -s http://localhost:11434/api/chat \
 
 ## Related Issues
 
-- **oh-my-openagent**: https://github.com/vibration-autos/oh-my-codes/issues/1124 (closed - workaround documented)
+- **oh-my-codes**: https://github.com/vibration-autos/oh-my-codes/issues/1124 (closed - workaround documented)
 - **Ollama API Docs**: https://github.com/ollama/ollama/blob/main/docs/api.md
 
 ## Getting Help

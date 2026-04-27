@@ -132,7 +132,7 @@ task({
 
 ### Custom Categories
 
-You can define custom categories in your plugin config file. During the rename transition, both `oh-my-openagent.json[c]` and legacy `oh-my-codes.json[c]` basenames are recognized.
+You can define custom categories in your plugin config file. Config file is `oh-my-codes.json[c]`.
 
 #### Category Configuration Schema
 
@@ -195,7 +195,7 @@ When you use a Category, a special agent called **Sisyphus-Junior** performs the
 
 ### Rename Compatibility
 
-The published package and binary remain `oh-my-codes`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`, while legacy `oh-my-codes` entries still load with a warning. Plugin config files (`oh-my-openagent.json[c]` or legacy `oh-my-codes.json[c]`) are recognized during the transition. Run `bunx oh-my-codes doctor` to check for legacy package name warnings.
+The published package and binary are `oh-my-codes`. Inside `opencode.json`, the plugin entry is `oh-my-codes`. Plugin config file is `oh-my-codes.json[c]`. Run `bunx oh-my-codes doctor` to check for any warnings.
 
 ### Fallback Models
 
@@ -636,7 +636,7 @@ Requires `experimental.task_system: true` in config.
 
 #### Task System Details
 
-**Note on Claude Code Alignment**: This implementation follows Claude Code's internal Task tool signatures (`TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`) and field naming conventions (`subject`, `blockedBy`, `blocks`, etc.). However, Anthropic has not published official documentation for these tools. This is Oh My OpenAgent's own implementation based on observed Claude Code behavior and internal specifications.
+**Note on Claude Code Alignment**: This implementation follows Claude Code's internal Task tool signatures (`TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`) and field naming conventions (`subject`, `blockedBy`, `blocks`, etc.). However, Anthropic has not published official documentation for these tools. This is oh-my-codes' own implementation based on observed Claude Code behavior and internal specifications.
 
 **Task Schema**:
 

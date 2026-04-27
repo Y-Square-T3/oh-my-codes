@@ -1,6 +1,6 @@
 # CLI Reference
 
-Complete reference for the published `oh-my-codes` CLI. During the rename transition, OpenCode plugin registration now prefers `oh-my-openagent` inside `opencode.json`.
+Complete reference for the published `oh-my-codes` CLI. OpenCode plugin registration uses `oh-my-codes` inside `opencode.json`.
 
 ## Basic Usage
 
@@ -28,7 +28,7 @@ npx oh-my-codes
 
 ## install
 
-Interactive installation tool for initial Oh My OpenCode setup. Provides a TUI based on `@clack/prompts`.
+Interactive installation tool for initial oh-my-codes setup. Provides a TUI based on `@clack/prompts`.
 
 ### Usage
 
@@ -39,8 +39,8 @@ bunx oh-my-codes install
 ### Installation Process
 
 1. **Subscription Selection**: Choose which providers and subscriptions you actually have
-2. **Plugin Registration**: Registers `oh-my-openagent` in OpenCode settings, or upgrades a legacy `oh-my-codes` entry during the compatibility window
-3. **Configuration File Creation**: Writes the generated OmO config to `oh-my-codes.json` in the active OpenCode config directory
+2. **Plugin Registration**: Registers `oh-my-codes` in OpenCode settings
+3. **Configuration File Creation**: Writes the generated config to `oh-my-codes.json` in the active OpenCode config directory
 4. **Authentication Hints**: Shows the `opencode auth login` steps for the providers you selected, unless `--skip-auth` is set
 5. **Telemetry Defaults**: Anonymous telemetry remains enabled unless you opt out through environment variables
 
@@ -66,11 +66,11 @@ Anonymous telemetry uses PostHog with a hashed installation identifier. Disable 
 
 ## doctor
 
-Diagnoses your environment to ensure Oh My OpenCode is functioning correctly. The current checks are grouped into system, config, tools, and models.
+Diagnoses your environment to ensure oh-my-codes is functioning correctly. The current checks are grouped into system, config, tools, and models.
 
 The doctor command detects common issues including:
 
-- Legacy plugin entry references in `opencode.json` (warns when `oh-my-codes` is still used instead of `oh-my-openagent`)
+- Legacy plugin entry references in `opencode.json` (warns when using old naming)
 - Configuration file validity and JSONC parsing errors
 - Model resolution and fallback chain verification
 - Missing or misconfigured MCP servers
@@ -236,10 +236,10 @@ Tokens are stored in `~/.config/opencode/mcp-oauth.json` with `0600` permissions
 
 The runtime loads user config as the base config, then merges project config on top:
 
-1. **Project Level**: `.opencode/oh-my-openagent.jsonc`, `.opencode/oh-my-openagent.json`, `.opencode/oh-my-codes.jsonc`, or `.opencode/oh-my-codes.json`
-2. **User Level**: `~/.config/opencode/oh-my-openagent.jsonc`, `~/.config/opencode/oh-my-openagent.json`, `~/.config/opencode/oh-my-codes.jsonc`, or `~/.config/opencode/oh-my-codes.json`
+1. **Project Level**: `.opencode/oh-my-codes.jsonc` or `.opencode/oh-my-codes.json`
+2. **User Level**: `~/.config/opencode/oh-my-codes.jsonc` or `~/.config/opencode/oh-my-codes.json`
 
-**Naming Note**: The published package and binary are still `oh-my-codes`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`. Plugin config loading recognizes both `oh-my-openagent.*` and legacy `oh-my-codes.*` basenames. If both basenames exist in the same directory, the legacy `oh-my-codes.*` file currently wins.
+**Naming Note**: The published package and binary are `oh-my-codes`. Inside `opencode.json`, the plugin entry is `oh-my-codes`. Plugin config loading uses `oh-my-codes.*` basenames.
 
 ### Filename Compatibility
 
@@ -306,11 +306,11 @@ bunx oh-my-codes doctor --json
 
 ### "Using legacy package name" Warning
 
-The doctor warns if it finds the legacy plugin entry `oh-my-codes` in `opencode.json`. Update the plugin array to the canonical `oh-my-openagent` entry:
+The doctor warns if it finds an outdated plugin entry in `opencode.json`. Update the plugin array to use `oh-my-codes`:
 
 ```bash
-# Replace the legacy plugin entry in user config
-jq '.plugin = (.plugin // [] | map(if . == "oh-my-codes" then "oh-my-openagent" else . end))' \
+# Migrate from oh-my-openagent to oh-my-codes
+jq '.plugin = (.plugin // [] | map(if . == "oh-my-openagent" then "oh-my-codes" else . end))' \
   ~/.config/opencode/opencode.json > /tmp/opencode.json && mv /tmp/opencode.json ~/.config/opencode/opencode.json
 ```
 

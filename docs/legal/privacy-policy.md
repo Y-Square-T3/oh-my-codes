@@ -2,7 +2,7 @@
 
 Last updated: April 11, 2026
 
-This Privacy Policy explains how oh-my-codes and oh-my-openagent collect, use, and protect information related to the published CLI package, the OpenCode plugin, and the project website or repository materials where they apply.
+This Privacy Policy explains how oh-my-codes collects, uses, and protects information related to the published CLI package, the OpenCode plugin, and the project website or repository materials where they apply.
 
 For this policy, "Application" means the published `oh-my-codes` CLI package and the OpenCode plugin runtime it installs. "Service" means the Application and the project distribution surfaces together. "We" and "our" refer to the maintainer of oh-my-codes. "You" refers to a user of the Service.
 

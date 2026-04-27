@@ -1,6 +1,6 @@
 # Configuration Reference
 
-Complete reference for Oh My OpenCode plugin configuration. During the rename transition, the runtime recognizes both `oh-my-openagent.json[c]` and legacy `oh-my-codes.json[c]` files.
+Complete reference for oh-my-codes plugin configuration. Config file is `oh-my-codes.json[c]`.
 
 ---
 
@@ -45,15 +45,15 @@ Complete reference for Oh My OpenCode plugin configuration. During the rename tr
 
 User config is loaded first, then project config overrides it. In each directory, the compatibility layer recognizes both the renamed and legacy basenames.
 
-1. Project config: `.opencode/oh-my-openagent.json[c]` or `.opencode/oh-my-codes.json[c]`
+1. Project config: `.opencode/oh-my-codes.json[c]`
 2. User config (`.jsonc` preferred over `.json`):
 
-| Platform    | Path candidates                                                                        |
-| ----------- | -------------------------------------------------------------------------------------- |
-| macOS/Linux | `~/.config/opencode/oh-my-openagent.json[c]`, `~/.config/opencode/oh-my-codes.json[c]` |
-| Windows     | `%APPDATA%\opencode\oh-my-openagent.json[c]`, `%APPDATA%\opencode\oh-my-codes.json[c]` |
+| Platform    | Path candidates                                              |
+| ----------- | ----------------------------------------------------------- |
+| macOS/Linux | `~/.config/opencode/oh-my-codes.json[c]`                   |
+| Windows     | `%APPDATA%\opencode\oh-my-codes.json[c]`                   |
 
-**Rename compatibility:** The published package and CLI binary remain `oh-my-codes`. OpenCode plugin registration prefers `oh-my-openagent`, while legacy `oh-my-codes` entries and config basenames still load during the transition. Config detection checks `oh-my-codes` before `oh-my-openagent`, so if both plugin config basenames exist in the same directory, the legacy `oh-my-codes.*` file currently wins.
+The published package and CLI binary are `oh-my-codes`. Plugin config file is `oh-my-codes.json[c]`.
 JSONC supports `// line comments`, `/* block comments */`, and trailing commas.
 
 Enable schema autocomplete:
@@ -279,7 +279,7 @@ Both `prompt` and `prompt_append` support loading content from files via `file:/
 }
 ```
 
-Paths can be absolute (`file:///abs/path`), relative to project root (`file://./rel/path`), or home-relative (`file://~/home/path`). If a file URI cannot be decoded, resolved, or read, OmO inserts a warning placeholder into the prompt instead of failing hard.
+Paths can be absolute (`file:///abs/path`), relative to project root (`file://./rel/path`), or home-relative (`file://~/home/path`). If a file URI cannot be decoded, resolved, or read, oh-my-codes inserts a warning placeholder into the prompt instead of failing hard.
 
 ### Categories
 
@@ -328,7 +328,7 @@ Runtime priority:
 2. **User override** - model set in config → used exactly as-is. Even on cold cache, explicit user configuration takes precedence over hardcoded fallback chains
 3. **Category default** - model inherited from the assigned category config
 4. **User `fallback_models`** - user-configured fallback list is tried before built-in fallback chains
-5. **Provider fallback chain** - built-in provider/model chain from OmO source
+5. **Provider fallback chain** - built-in provider/model chain from oh-my-codes source
 6. **System default** - OpenCode's configured default model
 
 #### Model Settings Compatibility
@@ -351,7 +351,7 @@ Examples:
 - o-series models support `none` through `high` - `xhigh` is downgraded to `high`
 - GPT-5 supports `none`, `minimal`, `low`, `medium`, `high`, `xhigh` - all pass through
 
-Capability data comes from provider runtime metadata first. OmO also ships bundled models.dev-backed capability data, supports a refreshable local models.dev cache, and falls back to heuristic family detection plus alias rules when exact metadata is unavailable. `bunx oh-my-codes doctor` surfaces capability diagnostics and warns when a configured model relies on compatibility fallback.
+Capability data comes from provider runtime metadata first. oh-my-codes also ships bundled models.dev-backed capability data, supports a refreshable local models.dev cache, and falls back to heuristic family detection plus alias rules when exact metadata is unavailable. `bunx oh-my-codes doctor` surfaces capability diagnostics and warns when a configured model relies on compatibility fallback.
 
 #### Agent Provider Chains
 
@@ -728,7 +728,7 @@ Object entries use the following shape:
 
 | Field             | Type   | Description                                                                                       |
 | ----------------- | ------ | ------------------------------------------------------------------------------------------------- |
-| `model`           | string | Fallback model ID. Provider prefix is optional when OmO can inherit the current/default provider. |
+| `model`           | string | Fallback model ID. Provider prefix is optional when oh-my-codes can inherit the current/default provider. |
 | `variant`         | string | Explicit variant override for this fallback entry.                                                |
 | `reasoningEffort` | string | OpenAI reasoning effort override for this fallback entry.                                         |
 | `temperature`     | number | Temperature applied if this fallback model becomes active.                                        |
@@ -745,7 +745,7 @@ Per-model settings are **fallback-only**. They are promoted only when that speci
 | `type`         | string | `enabled` or `disabled`            |
 | `budgetTokens` | number | Optional Anthropic thinking budget |
 
-Object entries can also omit the provider prefix when OmO can infer it from the current/default provider. If you provide both inline variant syntax in `model` and an explicit `variant` field, the explicit `variant` field wins.
+Object entries can also omit the provider prefix when oh-my-codes can infer it from the current/default provider. If you provide both inline variant syntax in `model` and an explicit `variant` field, the explicit `variant` field wins.
 
 #### Full examples
 
@@ -790,7 +790,7 @@ If the primary model already establishes the provider, fallback entries can omit
 }
 ```
 
-In this example OmO treats `gpt-5.4-mini` and `gpt-5.3-codex` as OpenAI fallback entries because the current/default provider is already `openai`.
+In this example oh-my-codes treats `gpt-5.4-mini` and `gpt-5.3-codex` as OpenAI fallback entries because the current/default provider is already `openai`.
 
 **3. Mixed cross-provider chain**
 
@@ -882,7 +882,7 @@ This final example is a **complete shape reference**. In real configs, prefer pr
 
 ### Model Capabilities
 
-OmO can refresh a local models.dev capability snapshot on startup. This cache is controlled by `model_capabilities`.
+oh-my-codes can refresh a local models.dev capability snapshot on startup. This cache is controlled by `model_capabilities`.
 
 ```jsonc
 {
@@ -906,7 +906,7 @@ Notes:
 
 - Startup refresh runs through the auto-update checker hook.
 - Manual refresh is available via `bunx oh-my-codes refresh-model-capabilities`.
-- Provider runtime metadata still takes priority when OmO resolves capabilities for compatibility checks.
+- Provider runtime metadata still takes priority when oh-my-codes resolves capabilities for compatibility checks.
 
 ### Hashline Edit
 
