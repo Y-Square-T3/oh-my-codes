@@ -171,12 +171,11 @@ jobs:
         env:
           DIST_TAG: ${{ steps.version.outputs.dist_tag }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
         run: |
           if [ -n "$DIST_TAG" ]; then
-            npm publish --access public --provenance --tag "$DIST_TAG"
+            npm publish --access public  --tag "$DIST_TAG"
           else
-            npm publish --access public --provenance
+            npm publish --access public 
           fi
 
   publish-platform:
