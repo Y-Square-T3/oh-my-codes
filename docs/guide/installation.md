@@ -27,7 +27,7 @@ Anonymous telemetry is enabled by default to help improve install and runtime re
 
 After you install it, you can read this [overview guide](./overview.md) to understand more.
 
-The published package and local binary are still `oh-my-codes`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`, while legacy `oh-my-codes` entries still load with a warning. Plugin config loading recognizes both `oh-my-openagent.json[c]` and `oh-my-codes.json[c]` during the transition. If you see a "Using legacy package name" warning from `bunx oh-my-codes doctor`, update your `opencode.json` plugin entry from `"oh-my-codes"` to `"oh-my-openagent"`.
+The published package and local binary are `oh-my-codes`. Inside `opencode.json`, the plugin entry should be `oh-my-codes`. Plugin config loading uses `oh-my-codes.json[c]`. If you see a "Using legacy package name" warning from `bunx oh-my-codes doctor`, update your `opencode.json` plugin entry to `"oh-my-codes"`.
 
 ## For LLM Agents
 
@@ -131,7 +131,7 @@ The CLI will:
 
 ```bash
 opencode --version  # Should be 1.0.150 or higher
-cat ~/.config/opencode/opencode.json  # Should contain "oh-my-openagent" in plugin array, or the legacy "oh-my-codes" entry while you are still migrating
+cat ~/.config/opencode/opencode.json  # Should contain "oh-my-codes" in plugin array
 ```
 
 #### Run Doctor Verification
@@ -166,7 +166,7 @@ First, add the opencode-antigravity-auth plugin:
 
 ```json
 {
-  "plugin": ["oh-my-openagent", "opencode-antigravity-auth@latest"]
+  "plugin": ["oh-my-codes", "opencode-antigravity-auth@latest"]
 }
 ```
 
@@ -177,7 +177,7 @@ Read the [opencode-antigravity-auth documentation](https://github.com/NoeFabris/
 
 ##### Plugin config model override
 
-The `opencode-antigravity-auth` plugin uses different model names than the built-in Google auth. Override the agent models in your plugin config file. Existing installs still commonly use `oh-my-codes.json` or `.opencode/oh-my-codes.json`, while the compatibility layer also recognizes `oh-my-openagent.json[c]`.
+The `opencode-antigravity-auth` plugin uses different model names than the built-in Google auth. Override the agent models in your plugin config file. Existing installs use `oh-my-codes.json` or `.opencode/oh-my-codes.json`.
 
 ```json
 {
@@ -321,7 +321,7 @@ Not all models behave the same way. Understanding which models are "similar" hel
 | **Grok Code Fast 1**       | github-copilot, xai   | Very fast      | Optimized for code grep/search. Default for Explore.                                                                                           |
 | **Claude Haiku 4.5**       | anthropic, opencode   | Fast           | Good balance of speed and intelligence.                                                                                                        |
 | **MiniMax M2.7 Highspeed** | opencode-go, opencode | Very fast      | High-speed MiniMax utility fallback used by runtime chains such as Explore and, on the OpenCode catalog, Librarian.                            |
-| **GPT-5.3-codex-spark**    | openai                | Extremely fast | Blazing fast but compacts so aggressively that oh-my-openagent's context management doesn't work well with it. Not recommended for omo agents. |
+| **GPT-5.3-codex-spark**    | openai                | Extremely fast | Blazing fast but compacts so aggressively that oh-my-codes' context management doesn't work well with it. Not recommended for omo agents. |
 
 #### What Each Agent Does and Which Model It Got
 
@@ -380,7 +380,7 @@ This is why Prometheus and Atlas ship separate prompts per model family — they
 
 #### Custom Model Configuration
 
-If the user wants to override which model an agent uses, you can customize in your plugin config file. Existing installs still commonly use `oh-my-codes.json`, while the compatibility layer also recognizes `oh-my-openagent.json[c]`.
+If the user wants to override which model an agent uses, you can customize in your plugin config file. Config file is `oh-my-codes.json`.
 
 ```jsonc
 {
@@ -436,7 +436,7 @@ Read this document again, think about you have done everything correctly.
 
 #### Say 'Congratulations! 🎉' to the user
 
-Say to user: Congratulations! 🎉 You have successfully set up OhMyOpenAgent! Type `opencode` in your terminal to start using it.
+Say to user: Congratulations! 🎉 You have successfully set up oh-my-codes! Type `opencode` in your terminal to start using it.
 
 #### Free advertising
 
@@ -455,7 +455,7 @@ After everything is set up and working, ask the user:
 If the user agrees, run:
 
 ```bash
-gh api --silent --method PUT /user/starred/code-yeongyu/oh-my-openagent >/dev/null 2>&1 || true
+gh api --silent --method PUT /user/starred/vibration-autos/oh-my-codes >/dev/null 2>&1 || true
 ```
 
 **Important**: Only run the command if the user explicitly says yes. Never run it automatically without consent.
