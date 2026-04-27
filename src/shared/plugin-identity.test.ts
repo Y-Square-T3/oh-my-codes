@@ -8,24 +8,24 @@ import {
 
 describe("plugin-identity constants", () => {
   describe("PLUGIN_NAME", () => {
-    it("equals oh-my-openagent", () => {
+    it("equals oh-my-codes", () => {
       // given
 
       // when
 
       // then
-      expect(PLUGIN_NAME).toBe("oh-my-openagent")
+      expect(PLUGIN_NAME).toBe("oh-my-codes")
     })
   })
 
   describe("CONFIG_BASENAME", () => {
-    it("equals oh-my-openagent", () => {
+    it("equals oh-my-codes", () => {
       // given
 
       // when
 
       // then
-      expect(CONFIG_BASENAME).toBe("oh-my-openagent")
+      expect(CONFIG_BASENAME).toBe("oh-my-codes")
     })
   })
 
