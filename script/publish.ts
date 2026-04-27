@@ -26,9 +26,14 @@ interface PublishResult {
   error?: string
 }
 
-async function checkPackageVersionExists(pkgName: string, version: string): Promise<boolean> {
+async function checkPackageVersionExists(
+  pkgName: string,
+  version: string,
+  registry?: string,
+): Promise<boolean> {
   try {
-    const res = await fetch(`https://registry.npmjs.org/${pkgName}/${version}`)
+    const baseUrl = registry ?? "https://registry.npmjs.org"
+    const res = await fetch(`${baseUrl}/${pkgName}/${version}`)
     return res.ok
   } catch {
     return false
@@ -48,13 +53,15 @@ async function publishPackage(
   useProvenance = true,
   pkgName?: string,
   version?: string,
+  registry?: string,
 ): Promise<PublishResult> {
   const tagArgs = distTag ? ["--tag", distTag] : []
   const provenanceArgs = process.env.CI && useProvenance ? ["--provenance"] : []
+  const registryArgs = registry ? ["--registry", registry] : []
   const env = useProvenance ? {} : { NPM_CONFIG_PROVENANCE: "false" }
 
   try {
-    await $`npm publish --access public --ignore-scripts ${provenanceArgs} ${tagArgs}`
+    await $`npm publish --access public --ignore-scripts ${provenanceArgs} ${tagArgs} ${registryArgs}`
       .cwd(cwd)
       .env({ ...process.env, ...env })
     return { success: true }
@@ -72,7 +79,7 @@ async function publishPackage(
 
     if (stderr.includes("E403")) {
       if (pkgName && version) {
-        const exists = await checkPackageVersionExists(pkgName, version)
+        const exists = await checkPackageVersionExists(pkgName, version, registry)
         if (exists) {
           return { success: true, alreadyPublished: true }
         }
@@ -88,6 +95,7 @@ async function publishAllPackages(
   version: string,
   distTag: string | null,
   skipPlatform: boolean,
+  registry?: string,
 ): Promise<void> {
   if (skipPlatform) {
     console.log("\nSkipping platform packages (--skip-platform)")
@@ -109,7 +117,7 @@ async function publishAllPackages(
         const pkgName = `${PACKAGE_NAME}-${platform}`
 
         console.log(`    Starting ${pkgName}...`)
-        const result = await publishPackage(pkgDir, distTag, false, pkgName, version)
+        const result = await publishPackage(pkgDir, distTag, false, pkgName, version, registry)
 
         return { platform, pkgName, result }
       })
@@ -136,7 +144,7 @@ async function publishAllPackages(
   }
 
   console.log(`\nPublishing main package...`)
-  const mainResult = await publishPackage(process.cwd(), distTag, true, PACKAGE_NAME, version)
+  const mainResult = await publishPackage(process.cwd(), distTag, true, PACKAGE_NAME, version, registry)
 
   if (mainResult.success) {
     if (mainResult.alreadyPublished) {
@@ -158,12 +166,14 @@ async function main() {
     .description("Publish oh-my-codes packages")
     .option("--dist-tag <tag>", "npm dist-tag (auto-detected from version if not specified)")
     .option("--skip-platform", "Skip publishing platform packages")
+    .option("--registry <url>", "npm registry to publish to")
 
   program.parse(process.argv)
 
   const opts = program.opts()
   const distTagOverride = opts.distTag
   const skipPlatform = opts.skipPlatform ?? false
+  const registry = opts.registry
 
   const mainPkgPath = new URL("../package.json", import.meta.url).pathname
   const mainContent = await Bun.file(mainPkgPath).text()
@@ -175,10 +185,13 @@ async function main() {
   if (distTagOverride) {
     console.log(`Dist-tag: ${distTagOverride}`)
   }
+  if (registry) {
+    console.log(`Registry: ${registry}`)
+  }
 
   const distTag = distTagOverride ?? getDistTag(version)
 
-  await publishAllPackages(version, distTag, skipPlatform)
+  await publishAllPackages(version, distTag, skipPlatform, registry)
 
   console.log(`\n=== Successfully published ${PACKAGE_NAME}@${version} ===`)
 }
