@@ -1,3 +1,6 @@
+[![CI](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/ci.yml/badge.svg)](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/ci.yml)
+[![publish](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/publish.yml/badge.svg)](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/publish.yml)
+
 # Oh My Codes
 
 You're juggling Claude Code, Codex, random OSS models. Configuring workflows. Debugging agents.
