@@ -13,7 +13,7 @@ describe("detectPluginConfigFile memoization", () => {
     // given
     const existsSync = spyOn(fs, "existsSync").mockImplementation(
       (filePath: fs.PathLike) => {
-        return String(filePath).endsWith("oh-my-openagent.jsonc")
+        return String(filePath).endsWith("oh-my-codes.jsonc")
       },
     )
     const readdirSync = spyOn(fs, "readdirSync").mockImplementation(() => [])
@@ -38,7 +38,7 @@ describe("detectPluginConfigFile memoization", () => {
     // given
     const existsSync = spyOn(fs, "existsSync").mockImplementation(
       (filePath: fs.PathLike) => {
-        return String(filePath).endsWith("oh-my-openagent.jsonc")
+        return String(filePath).endsWith("oh-my-codes.jsonc")
       },
     )
     const readdirSync = spyOn(fs, "readdirSync").mockImplementation(() => [])
