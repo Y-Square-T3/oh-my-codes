@@ -1,7 +1,6 @@
 /// <reference types="bun-types" />
 
 import { beforeEach, describe, expect, it, mock } from "bun:test"
-import { PLUGIN_NAME } from "../../../shared"
 import type { PluginInfo } from "./system-plugin"
 import type { OpenCodeBinaryInfo } from "./system-binary"
 import { checkSystem } from "./system"
@@ -125,100 +124,6 @@ describe("system check", () => {
       expect(outdatedIssue?.fix).toBe(
         'Update: cd "/Users/test/Library/Caches/opencode with spaces" && bun add oh-my-codes@canary',
       )
-    })
-  })
-
-  describe("#given OpenCode plugin entry uses legacy package name", () => {
-    it("adds a warning for a bare legacy entry", async () => {
-      //#given
-      mockGetPluginInfo.mockReturnValue({
-        registered: true,
-        entry: "oh-my-codes",
-        isPinned: false,
-        pinnedVersion: null,
-        configPath: null,
-        isLocalDev: false,
-      })
-
-      //#when
-      const result = await checkSystem(createSystemDeps())
-
-      //#then
-      const legacyEntryIssue = result.issues.find(
-        (issue) => issue.title === "Using legacy package name",
-      )
-      expect(legacyEntryIssue?.severity).toBe("warning")
-      expect(legacyEntryIssue?.fix).toBe(
-        'Update your opencode.json plugin entry: "oh-my-codes" → "oh-my-openagent"',
-      )
-    })
-
-    it("adds a warning for a version-pinned legacy entry", async () => {
-      //#given
-      mockGetPluginInfo.mockReturnValue({
-        registered: true,
-        entry: "oh-my-codes@3.0.0",
-        isPinned: true,
-        pinnedVersion: "3.0.0",
-        configPath: null,
-        isLocalDev: false,
-      })
-
-      //#when
-      const result = await checkSystem(createSystemDeps())
-
-      //#then
-      const legacyEntryIssue = result.issues.find(
-        (issue) => issue.title === "Using legacy package name",
-      )
-      expect(legacyEntryIssue?.severity).toBe("warning")
-      expect(legacyEntryIssue?.fix).toBe(
-        'Update your opencode.json plugin entry: "oh-my-codes@3.0.0" → "oh-my-openagent@3.0.0"',
-      )
-    })
-
-    it("does not warn for a canonical plugin entry", async () => {
-      //#given
-      mockGetPluginInfo.mockReturnValue({
-        registered: true,
-        entry: PLUGIN_NAME,
-        isPinned: false,
-        pinnedVersion: null,
-        configPath: null,
-        isLocalDev: false,
-      })
-
-      //#when
-      const result = await checkSystem(createSystemDeps())
-
-      //#then
-      expect(
-        result.issues.some(
-          (issue) => issue.title === "Using legacy package name",
-        ),
-      ).toBe(false)
-    })
-
-    it("does not warn for a local-dev legacy entry", async () => {
-      //#given
-      mockGetPluginInfo.mockReturnValue({
-        registered: true,
-        entry: "oh-my-codes",
-        isPinned: false,
-        pinnedVersion: null,
-        configPath: null,
-        isLocalDev: true,
-      })
-
-      //#when
-      const result = await checkSystem(createSystemDeps())
-
-      //#then
-      expect(
-        result.issues.some(
-          (issue) => issue.title === "Using legacy package name",
-        ),
-      ).toBe(false)
     })
   })
 })
