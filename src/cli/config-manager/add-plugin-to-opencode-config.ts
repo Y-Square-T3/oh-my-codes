@@ -46,15 +46,12 @@ export async function addPluginToOpenCodeConfig(currentVersion: string): Promise
     const canonicalEntries = plugins.filter(
       (plugin) => plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`)
     )
-    const legacyEntries = plugins.filter(
-      (plugin) => plugin === LEGACY_PLUGIN_NAME || plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`)
-    )
     const otherPlugins = plugins.filter(
       (plugin) => !(plugin === PLUGIN_NAME || plugin.startsWith(`${PLUGIN_NAME}@`))
         && !(plugin === LEGACY_PLUGIN_NAME || plugin.startsWith(`${LEGACY_PLUGIN_NAME}@`))
     )
 
-    const existingEntry = canonicalEntries[0] ?? legacyEntries[0]
+    const existingEntry = canonicalEntries[0]
     if (existingEntry) {
       const installedVersion = extractVersionFromPluginEntry(existingEntry)
       const compatibility = checkVersionCompatibility(installedVersion, currentVersion)
