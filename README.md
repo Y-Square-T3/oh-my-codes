@@ -1,4 +1,4 @@
-# Oh My OpenCode
+# Oh My Codes
 
 You're juggling Claude Code, Codex, random OSS models. Configuring workflows. Debugging agents.
 

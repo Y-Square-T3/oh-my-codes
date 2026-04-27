@@ -1,4 +1,4 @@
-# Contributing to Oh My OpenCode
+# Contributing to Oh My Codes
 
 First off, thanks for taking the time to contribute! This document provides guidelines and instructions for contributing to oh-my-codes.
 
@@ -271,4 +271,4 @@ export function createMyHook(input: PluginInput) {
 
 ---
 
-Thank you for contributing to Oh My OpenCode! Your efforts help make AI-assisted coding better for everyone.
+Thank you for contributing to Oh My Codes! Your efforts help make AI-assisted coding better for everyone.
