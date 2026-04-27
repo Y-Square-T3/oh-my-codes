@@ -28,7 +28,7 @@ Fetch the installation guide and follow it:
 curl -s https://raw.githubusercontent.com/vibration-autos/oh-my-codes/refs/heads/dev/docs/guide/installation.md
 ```
 
-**Note**: Use the published package and binary name `oh-my-codes`. Inside `opencode.json`, the compatibility layer now prefers the plugin entry `oh-my-openagent`, while legacy `oh-my-codes` entries still load with a warning. Plugin config files still commonly use `oh-my-codes.json` or `oh-my-codes.jsonc`, and both legacy and renamed basenames are recognized during the transition.
+**Note**: Use the published package and binary name `oh-my-codes`. Plugin config files use `oh-my-codes.json` or `oh-my-codes.jsonc`.
 
 Anonymous telemetry is enabled by default to help improve install and runtime reliability. It uses PostHog with a hashed installation identifier, never the raw hostname, and can be disabled with `OMO_SEND_ANONYMOUS_TELEMETRY=0` or `OMO_DISABLE_POSTHOG=1`. See [Privacy Policy](docs/legal/privacy-policy.md) and [Terms of Service](docs/legal/terms-of-service.md).
 
@@ -194,11 +194,11 @@ To remove oh-my-codes:
 
 1. **Remove the plugin from your OpenCode config**
 
-   Edit `~/.config/opencode/opencode.json` (or `opencode.jsonc`) and remove either `"oh-my-openagent"` or the legacy `"oh-my-codes"` entry from the `plugin` array:
+   Edit `~/.config/opencode/opencode.json` (or `opencode.jsonc`) and remove `"oh-my-codes"` from the `plugin` array:
 
    ```bash
    # Using jq
-   jq '.plugin = [.plugin[] | select(. != "oh-my-openagent" and . != "oh-my-codes")]' \
+   jq '.plugin = [.plugin[] | select(. != "oh-my-codes")]' \
        ~/.config/opencode/opencode.json > /tmp/oc.json && \
        mv /tmp/oc.json ~/.config/opencode/opencode.json
    ```
@@ -206,13 +206,11 @@ To remove oh-my-codes:
 2. **Remove configuration files (optional)**
 
    ```bash
-   # Remove plugin config files recognized during the compatibility window
-   rm -f ~/.config/opencode/oh-my-openagent.jsonc ~/.config/opencode/oh-my-openagent.json \
-         ~/.config/opencode/oh-my-codes.jsonc ~/.config/opencode/oh-my-codes.json
+   # Remove plugin config files
+   rm -f ~/.config/opencode/oh-my-codes.jsonc ~/.config/opencode/oh-my-codes.json
 
    # Remove project config (if exists)
-   rm -f .opencode/oh-my-openagent.jsonc .opencode/oh-my-openagent.json \
-         .opencode/oh-my-codes.jsonc .opencode/oh-my-codes.json
+   rm -f .opencode/oh-my-codes.jsonc .opencode/oh-my-codes.json
    ```
 
 3. **Verify removal**
@@ -251,7 +249,7 @@ Opinionated defaults, adjustable if you insist.
 See [Configuration Documentation](docs/reference/configuration.md).
 
 **Quick Overview:**
-- **Config Locations**: The compatibility layer recognizes both `oh-my-openagent.json[c]` and legacy `oh-my-codes.json[c]` plugin config files. Existing installs still commonly use the legacy basename.
+- **Config Locations**: Plugin config files use `oh-my-codes.json` or `oh-my-codes.jsonc`.
 - **JSONC Support**: Comments and trailing commas supported
 - **Agents**: Override models, temperatures, prompts, and permissions for any agent
 - **Built-in Skills**: `playwright` (browser automation), `git-master` (atomic commits)
