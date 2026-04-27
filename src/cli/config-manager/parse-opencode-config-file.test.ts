@@ -19,14 +19,14 @@ describe("parseOpenCodeConfigFileWithError", () => {
     const directory = mkdtempSync(join(tmpdir(), "omo-parse-config-"))
     tempDirectories.push(directory)
     const filePath = join(directory, "opencode.json")
-    writeFileSync(filePath, '{"plugin": ["oh-my-openagent"]}\n', "utf-8")
+    writeFileSync(filePath, '{"plugin": ["oh-my-codes"]}\n', "utf-8")
 
     // when
     const result = parseOpenCodeConfigFileWithError(filePath)
 
     // then
     expect(result).toEqual({
-      config: { plugin: ["oh-my-openagent"] },
+      config: { plugin: ["oh-my-codes"] },
     })
   })
 
