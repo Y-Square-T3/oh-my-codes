@@ -209,7 +209,7 @@ async function main() {
   program.parse(process.argv)
 
   const opts = program.opts()
-  const baseName = "oh-my-matrix"
+  const baseName = "oh-my-codes"
   const newBaseName = opts.name ?? baseName
 
   const distTagOverride = opts.distTag
