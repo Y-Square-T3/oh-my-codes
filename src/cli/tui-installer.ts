@@ -139,9 +139,6 @@ export async function runTuiInstaller(
   p.log.message(
     `${color.yellow("★")} If you found this helpful, consider starring the repo!`,
   )
-  p.log.message(
-    `  ${color.dim("gh api --silent --method PUT /user/starred/code-yeongyu/oh-my-openagent >/dev/null 2>&1 || true")}`,
-  )
 
   p.outro(color.green("oMoMoMoMo... Enjoy!"))
 
