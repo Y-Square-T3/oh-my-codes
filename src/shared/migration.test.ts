@@ -1407,7 +1407,7 @@ describe("migrateConfigFile with migration tracking via sidecar (#3263)", () => 
   function tempConfigPath(label: string): string {
     const workdir = fs.mkdtempSync(`/tmp/omo-migration-${label}-`)
     cleanupPaths.push(workdir)
-    return path.join(workdir, "oh-my-openagent.json")
+    return path.join(workdir, "oh-my-codes.json")
   }
 
   function sidecarPath(configPath: string): string {
