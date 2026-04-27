@@ -60,7 +60,7 @@ describe("loadJsonFile", () => {
     }
   }
 }`
-      const userPath = join(tempBase, "oh-my-openagent.jsonc")
+      const userPath = join(tempBase, "oh-my-codes.jsonc")
       writeFileSync(userPath, userJsonc, "utf-8")
 
       const servers = getMergedServers()
@@ -129,7 +129,7 @@ describe("loadJsonFile", () => {
       const projectPath = join(
         tempProject,
         ".opencode",
-        "oh-my-openagent.jsonc",
+        "oh-my-codes.jsonc",
       )
       writeFileSync(projectPath, projectJsonc, "utf-8")
 
@@ -173,12 +173,12 @@ describe("loadJsonFile", () => {
   }
 }`
       writeFileSync(
-        join(tempBase, "oh-my-openagent.json"),
+        join(tempBase, "oh-my-codes.json"),
         jsonContent,
         "utf-8",
       )
       writeFileSync(
-        join(tempBase, "oh-my-openagent.jsonc"),
+        join(tempBase, "oh-my-codes.jsonc"),
         jsoncContent,
         "utf-8",
       )
