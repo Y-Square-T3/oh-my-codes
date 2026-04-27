@@ -113,7 +113,7 @@ async function importFreshIndexModule(): Promise<typeof import("./index")> {
   return import(`./index?test=${Date.now()}-${Math.random()}`)
 }
 
-describe("oh-my-openagent plugin module", () => {
+describe("oh-my-codes plugin module", () => {
   beforeEach(async () => {
     mock.restore()
     installIndexModuleMocks()
@@ -183,7 +183,7 @@ describe("oh-my-openagent plugin module", () => {
     // when inspecting the default export
     // then it has the expected V1 shape
     expect(typeof pluginModule).toBe("object")
-    expect(pluginModule.id).toBe("oh-my-openagent")
+    expect(pluginModule.id).toBe("oh-my-codes")
     expect(typeof pluginModule.server).toBe("function")
   })
 })
