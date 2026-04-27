@@ -327,11 +327,11 @@ describe("loadPluginConfig", () => {
     mkdirSync(projectConfigDir, { recursive: true })
 
     writeFileSync(
-      join(userConfigDir, "oh-my-openagent.jsonc"),
+      join(userConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({ mcp_env_allowlist: ["USER_ONLY_TOKEN"] }),
     )
     writeFileSync(
-      join(projectConfigDir, "oh-my-openagent.jsonc"),
+      join(projectConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({ mcp_env_allowlist: ["PROJECT_TOKEN"] }),
     )
 
@@ -359,7 +359,7 @@ describe("loadPluginConfig", () => {
     mkdirSync(projectConfigDir, { recursive: true })
 
     writeFileSync(
-      join(userConfigDir, "oh-my-openagent.jsonc"),
+      join(userConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({
         git_master: {
           commit_footer: false,
@@ -369,7 +369,7 @@ describe("loadPluginConfig", () => {
     )
 
     writeFileSync(
-      join(projectConfigDir, "oh-my-openagent.jsonc"),
+      join(projectConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({
         agents: {
           hephaestus: { model: "openai/gpt-5.4" },
@@ -405,7 +405,7 @@ describe("loadPluginConfig", () => {
     mkdirSync(projectConfigDir, { recursive: true })
 
     writeFileSync(
-      join(userConfigDir, "oh-my-openagent.jsonc"),
+      join(userConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({
         git_master: {
           commit_footer: false,
@@ -415,7 +415,7 @@ describe("loadPluginConfig", () => {
     )
 
     writeFileSync(
-      join(projectConfigDir, "oh-my-openagent.jsonc"),
+      join(projectConfigDir, "oh-my-codes.jsonc"),
       JSON.stringify({
         git_master: {
           commit_footer: true,
