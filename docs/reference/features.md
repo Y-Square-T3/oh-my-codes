@@ -1,8 +1,8 @@
-# Oh-My-OpenAgent Features Reference
+# Oh-My-Codes Features Reference
 
 ## Agents
 
-Oh-My-OpenAgent provides 11 specialized AI agents. Each has distinct expertise, optimized models, and tool permissions.
+Oh-My-Codes provides 11 specialized AI agents. Each has distinct expertise, optimized models, and tool permissions.
 
 ### Core Agents
 
@@ -315,7 +315,7 @@ Skills provide specialized workflows with embedded MCP servers and detailed inst
 
 ### Browser Automation Options
 
-Oh-My-OpenAgent provides two browser automation providers, configurable via `browser_automation_engine.provider`.
+Oh-My-Codes provides two browser automation providers, configurable via `browser_automation_engine.provider`.
 
 #### Option 1: Playwright MCP (Default)
 

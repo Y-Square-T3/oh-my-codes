@@ -104,7 +104,7 @@ bunx oh-my-codes doctor
 oh-my-codes doctor
 
 ┌──────────────────────────────────────────────────┐
-│  Oh-My-OpenAgent Doctor                           │
+│  Oh-My-Codes Doctor                           │
 └──────────────────────────────────────────────────┘
 
 System
