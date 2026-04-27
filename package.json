@@ -48,12 +48,12 @@
   "license": "SUL-1.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vibration-autos/oh-my-codes.git"
+    "url": "git+https://github.com/Y-Square-T3/oh-my-codes.git"
   },
   "bugs": {
-    "url": "https://github.com/vibration-autos/oh-my-codes/issues"
+    "url": "https://github.com/Y-Square-T3/oh-my-codes/issues"
   },
-  "homepage": "https://github.com/vibration-autos/oh-my-codes#readme",
+  "homepage": "https://github.com/Y-Square-T3/oh-my-codes#readme",
   "dependencies": {
     "@ast-grep/cli": "^0.41.1",
     "@ast-grep/napi": "^0.41.1",

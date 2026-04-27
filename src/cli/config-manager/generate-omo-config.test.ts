@@ -53,7 +53,7 @@ describe("generateOmoConfig - model fallback system", () => {
 
     //#then
     expect(result.$schema).toBe(
-      "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json",
+      "https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/dev/assets/oh-my-codes.schema.json",
     )
     expect(
       (result.agents as Record<string, { model: string }>).sisyphus,

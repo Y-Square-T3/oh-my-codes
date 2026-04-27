@@ -21,7 +21,7 @@ export async function findAgentsMdUp(input: {
 
   while (true) {
     // Skip root AGENTS.md - OpenCode's system.ts already loads it via custom()
-    // See: https://github.com/vibration-autos/oh-my-codes/issues/379
+    // See: https://github.com/Y-Square-T3/oh-my-codes/issues/379
     const isRootDir = current === input.rootDir
     if (!isRootDir) {
       const agentsPath = join(current, AGENTS_FILENAME)

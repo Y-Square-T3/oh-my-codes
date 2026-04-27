@@ -17,7 +17,7 @@ Copy and paste this prompt to your LLM agent (Claude Code, AmpCode, Cursor, etc.
 
 ```
 Install and configure oh-my-codes by following the instructions here:
-https://raw.githubusercontent.com/vibration-autos/oh-my-codes/refs/heads/dev/docs/guide/installation.md
+https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/docs/guide/installation.md
 ```
 
 Or read the [Installation Guide](docs/guide/installation.md), but seriously, let an agent do it. Humans fat-finger configs.
@@ -27,7 +27,7 @@ Or read the [Installation Guide](docs/guide/installation.md), but seriously, let
 Fetch the installation guide and follow it:
 
 ```bash
-curl -s https://raw.githubusercontent.com/vibration-autos/oh-my-codes/refs/heads/dev/docs/guide/installation.md
+curl -s https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/docs/guide/installation.md
 ```
 
 **Note**: Use the published package and binary name `oh-my-codes`. Plugin config files use `oh-my-codes.json` or `oh-my-codes.jsonc`.
@@ -41,7 +41,7 @@ Anonymous telemetry is enabled by default to help improve install and runtime re
 We're past the era of reading docs. Just paste this into your agent:
 
 ```
-Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/vibration-autos/oh-my-codes/refs/heads/dev/README.md
+Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/README.md
 ```
 
 ## Highlights

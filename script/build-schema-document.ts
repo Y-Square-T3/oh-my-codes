@@ -9,7 +9,7 @@ export function createOhMyCodesJsonSchema(): Record<string, unknown> {
 
   return {
     $schema: "http://json-schema.org/draft-07/schema#",
-    $id: "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json",
+    $id: "https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/dev/assets/oh-my-codes.schema.json",
     title: "Oh My Codes Configuration",
     description: "Configuration schema for oh-my-codes plugin",
     ...jsonSchema,

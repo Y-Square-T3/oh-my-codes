@@ -130,7 +130,7 @@ function buildCommitFooterInjection(
     const footerText =
       typeof commitFooter === "string"
         ? commitFooter
-        : "Ultraworked with [Sisyphus](https://github.com/vibration-autos/oh-my-codes)"
+        : "Ultraworked with [Sisyphus](https://github.com/Y-Square-T3/oh-my-codes)"
     sections.push("1. **Footer in commit body:**")
     sections.push("```")
     sections.push(footerText)
@@ -150,7 +150,7 @@ function buildCommitFooterInjection(
     const footerText =
       typeof commitFooter === "string"
         ? commitFooter
-        : "Ultraworked with [Sisyphus](https://github.com/vibration-autos/oh-my-codes)"
+        : "Ultraworked with [Sisyphus](https://github.com/Y-Square-T3/oh-my-codes)"
     sections.push("**Example (both enabled):**")
     sections.push("```bash")
     sections.push(
@@ -161,7 +161,7 @@ function buildCommitFooterInjection(
     const footerText =
       typeof commitFooter === "string"
         ? commitFooter
-        : "Ultraworked with [Sisyphus](https://github.com/vibration-autos/oh-my-codes)"
+        : "Ultraworked with [Sisyphus](https://github.com/Y-Square-T3/oh-my-codes)"
     sections.push("**Example:**")
     sections.push("```bash")
     sections.push(

@@ -85,7 +85,7 @@ function convertSDKMessageToStoredMessage(
 // TODO: These SDK-based functions are exported for future use when hooks migrate to async.
 // Currently, callers still use the sync JSON-based functions which return null on beta.
 // Migration requires making callers async, which is a larger refactoring.
-// See: https://github.com/vibration-autos/oh-my-codes/pull/1837
+// See: https://github.com/Y-Square-T3/oh-my-codes/pull/1837
 
 /**
  * Finds the nearest message with required fields using SDK (for beta/SQLite backend).

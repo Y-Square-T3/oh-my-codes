@@ -34,7 +34,7 @@ const ZAI_MODEL = "zai-coding-plan/glm-4.7"
 
 const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
 const SCHEMA_URL =
-  "https://raw.githubusercontent.com/vibration-autos/oh-my-codes/dev/assets/oh-my-codes.schema.json"
+  "https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/dev/assets/oh-my-codes.schema.json"
 
 function toFallbackModelObject(
   entry: FallbackEntry,

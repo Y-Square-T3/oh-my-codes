@@ -91,7 +91,7 @@ export async function createBuiltinAgents(
   )
   // IMPORTANT: Do NOT call OpenCode client APIs during plugin initialization.
   // This function is called from config handler, and calling client API causes deadlock.
-  // See: https://github.com/vibration-autos/oh-my-codes/issues/1301
+  // See: https://github.com/Y-Square-T3/oh-my-codes/issues/1301
   const availableModels = await fetchAvailableModels(undefined, {
     connectedProviders:
       mergedConnectedProviders.length > 0

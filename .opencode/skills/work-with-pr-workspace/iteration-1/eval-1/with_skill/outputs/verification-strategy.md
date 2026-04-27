@@ -113,7 +113,7 @@ Cubic is an automated code review bot that analyzes the PR diff. It must respond
 
 ```bash
 # Read Cubic's review
-gh api repos/vibration-autos/oh-my-codes/pulls/<PR_NUMBER>/reviews
+gh api repos/Y-Square-T3/oh-my-codes/pulls/<PR_NUMBER>/reviews
 
 # Address each comment
 # ... edit files ...

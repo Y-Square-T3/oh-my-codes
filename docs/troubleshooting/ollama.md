@@ -70,7 +70,7 @@ The proper fix requires Claude Code SDK to:
 3. Merge `tool_calls` from multiple lines
 4. Return a single merged response
 
-**Tracking**: https://github.com/vibration-autos/oh-my-codes/issues/1124 (closed - documented workaround)
+**Tracking**: https://github.com/Y-Square-T3/oh-my-codes/issues/1124 (closed - documented workaround)
 
 ## Workaround Implementation
 
@@ -117,7 +117,7 @@ curl -s http://localhost:11434/api/chat \
 
 ## Related Issues
 
-- **oh-my-codes**: https://github.com/vibration-autos/oh-my-codes/issues/1124 (closed - workaround documented)
+- **oh-my-codes**: https://github.com/Y-Square-T3/oh-my-codes/issues/1124 (closed - workaround documented)
 - **Ollama API Docs**: https://github.com/ollama/ollama/blob/main/docs/api.md
 
 ## Getting Help
