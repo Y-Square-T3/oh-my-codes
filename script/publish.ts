@@ -157,7 +157,7 @@ async function getContributors(previous: string): Promise<string[]> {
 
   try {
     const compare =
-      await $`gh api "/repos/code-yeongyu/oh-my-openagent/compare/v${previous}...HEAD" --jq '.commits[] | {login: .author.login, message: .commit.message}'`.text()
+      await $`gh api "/repos/vibration-autos/oh-my-codes/compare/v${previous}...HEAD" --jq '.commits[] | {login: .author.login, message: .commit.message}'`.text()
     const contributors = new Map<string, string[]>()
 
     for (const line of compare.split("\n").filter(Boolean)) {
