@@ -96,7 +96,7 @@ describe("formatDoctorOutput", () => {
 
       //#then
       expect(output).toContain(
-        "System OK (opencode 1.0.200 · oh-my-openagent 3.4.0)",
+        "System OK (opencode 1.0.200 · oh-my-codes 3.4.0)",
       )
     })
 
