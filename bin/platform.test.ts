@@ -200,7 +200,7 @@ describe("getPlatformPackageCandidates", () => {
       platform: "linux",
       arch: "x64",
       libcFamily: "glibc",
-      packageBaseName: "oh-my-openagent",
+      packageBaseName: "oh-my-codes",
     }
 
     // #when getting package candidates
@@ -208,8 +208,8 @@ describe("getPlatformPackageCandidates", () => {
 
     // #then returns renamed package family candidates
     expect(result).toEqual([
-      "oh-my-openagent-linux-x64",
-      "oh-my-openagent-linux-x64-baseline",
+      "oh-my-codes-linux-x64",
+      "oh-my-codes-linux-x64-baseline",
     ])
   })
   test("returns only one candidate for ARM64", () => {
