@@ -26,7 +26,7 @@ import { createPluginPostHog, getPostHogDistinctId } from "./shared/posthog"
 
 const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
   initConfigContext("opencode", null)
-  log("[oh-my-openagent] ENTRY - plugin loading", {
+  log("[oh-my-codes] ENTRY - plugin loading", {
     directory: input.directory,
   })
 
@@ -136,7 +136,7 @@ const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
 }
 
 const pluginModule: PluginModule = {
-  id: "oh-my-openagent",
+  id: "oh-my-codes",
   server: serverPlugin,
 }
 
