@@ -163,7 +163,7 @@ describe("parseJsonc", () => {
     const jsonc = `\uFEFF{
       // Windows-saved file with BOM
       "$schema": "https://opencode.ai/config.json",
-      "plugin": ["oh-my-openagent@3.15.3"],
+      "plugin": ["oh-my-codes@3.15.3"],
     }`
 
     // when
@@ -171,7 +171,7 @@ describe("parseJsonc", () => {
 
     // then
     expect(result.$schema).toBe("https://opencode.ai/config.json")
-    expect(result.plugin).toEqual(["oh-my-openagent@3.15.3"])
+    expect(result.plugin).toEqual(["oh-my-codes@3.15.3"])
   })
 })
 
@@ -270,7 +270,7 @@ describe("readJsoncFile", () => {
     const jsonBytes = Buffer.from(`{
       // Created on Windows with BOM
       "$schema": "https://opencode.ai/config.json",
-      "plugin": ["oh-my-openagent@3.15.3"]
+      "plugin": ["oh-my-codes@3.15.3"]
     }`)
     writeFileSync(testFile, Buffer.concat([bomBytes, jsonBytes]))
 
@@ -282,7 +282,7 @@ describe("readJsoncFile", () => {
     // then
     expect(result).not.toBeNull()
     expect(result?.$schema).toBe("https://opencode.ai/config.json")
-    expect(result?.plugin).toEqual(["oh-my-openagent@3.15.3"])
+    expect(result?.plugin).toEqual(["oh-my-codes@3.15.3"])
 
     rmSync(testDir, { recursive: true, force: true })
   })
@@ -347,38 +347,6 @@ describe("detectPluginConfigFile", () => {
     clearPluginConfigFileDetectionCache()
   })
 
-  test("prefers oh-my-openagent over oh-my-codes when both jsonc files exist", () => {
-    // given
-    if (!existsSync(testDir)) mkdirSync(testDir, { recursive: true })
-    writeFileSync(join(testDir, "oh-my-openagent.jsonc"), "{}")
-    writeFileSync(join(testDir, "oh-my-codes.jsonc"), "{}")
-
-    // when
-    const result = detectPluginConfigFile(testDir)
-
-    // then
-    expect(result.format).toBe("jsonc")
-    expect(result.path).toBe(join(testDir, "oh-my-openagent.jsonc"))
-
-    rmSync(testDir, { recursive: true, force: true })
-  })
-
-  test("loads oh-my-openagent.json before oh-my-codes.json when no jsonc exists", () => {
-    // given
-    if (!existsSync(testDir)) mkdirSync(testDir, { recursive: true })
-    writeFileSync(join(testDir, "oh-my-openagent.json"), "{}")
-    writeFileSync(join(testDir, "oh-my-codes.json"), "{}")
-
-    // when
-    const result = detectPluginConfigFile(testDir)
-
-    // then
-    expect(result.format).toBe("json")
-    expect(result.path).toBe(join(testDir, "oh-my-openagent.json"))
-
-    rmSync(testDir, { recursive: true, force: true })
-  })
-
   test("returns none when no config files exist", () => {
     // given
     const emptyDir = join(testDir, "empty")
@@ -389,38 +357,22 @@ describe("detectPluginConfigFile", () => {
 
     // then
     expect(result.format).toBe("none")
-    expect(result.path).toBe(join(emptyDir, "oh-my-openagent.json"))
+    expect(result.path).toBe(join(emptyDir, "oh-my-codes.json"))
 
     rmSync(testDir, { recursive: true, force: true })
   })
 
-  test("prefers canonical jsonc over legacy json when both exist", () => {
+  test("loads oh-my-codes when only canonical jsonc exists", () => {
     // given
     if (!existsSync(testDir)) mkdirSync(testDir, { recursive: true })
-    writeFileSync(join(testDir, "oh-my-codes.json"), "{}")
-    writeFileSync(join(testDir, "oh-my-openagent.jsonc"), "{}")
+    writeFileSync(join(testDir, "oh-my-codes.jsonc"), "{}")
 
     // when
     const result = detectPluginConfigFile(testDir)
 
     // then
     expect(result.format).toBe("jsonc")
-    expect(result.path).toBe(join(testDir, "oh-my-openagent.jsonc"))
-
-    rmSync(testDir, { recursive: true, force: true })
-  })
-
-  test("loads oh-my-openagent when only canonical jsonc exists", () => {
-    // given
-    if (!existsSync(testDir)) mkdirSync(testDir, { recursive: true })
-    writeFileSync(join(testDir, "oh-my-openagent.jsonc"), "{}")
-
-    // when
-    const result = detectPluginConfigFile(testDir)
-
-    // then
-    expect(result.format).toBe("jsonc")
-    expect(result.path).toBe(join(testDir, "oh-my-openagent.jsonc"))
+    expect(result.path).toBe(join(testDir, "oh-my-codes.jsonc"))
 
     rmSync(testDir, { recursive: true, force: true })
   })
