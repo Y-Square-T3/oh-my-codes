@@ -24,6 +24,7 @@ import {
 } from "./install-validators"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 import { createCliPostHog, getPostHogDistinctId } from "../shared/posthog"
+import { hasAnyAccount } from "./account/check-account-exists"
 
 export async function runCliInstaller(
   args: InstallArgs,
@@ -198,6 +199,14 @@ export async function runCliInstaller(
   console.log()
   console.log(color.dim("oMoMoMoMo... Enjoy!"))
   console.log()
+
+  const hasAccounts = await hasAnyAccount()
+  if (!hasAccounts) {
+    printInfo(
+      `No account logged in. Run: ${color.cyan("bunx oh-my-codes account login <server-url>")}`,
+    )
+    console.log()
+  }
 
   try {
     posthog.capture({
