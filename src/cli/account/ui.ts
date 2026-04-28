@@ -132,18 +132,17 @@ export const select = <T>(
   options: ClackOption<T>[],
   message: string,
 ): Effect.Effect<Option.Option<T>> =>
-  Effect.sync(() => {
-    const choice = p.select({
+  Effect.tryPromise(() =>
+    p.select({
       message,
       options,
-    })
-
-    if (p.isCancel(choice)) {
-      return Option.none()
-    }
-
-    return Option.some(choice as T)
-  })
+    }).then((choice) => {
+      if (p.isCancel(choice)) {
+        return Option.none()
+      }
+      return Option.some(choice as T)
+    }),
+  ).pipe(Effect.orDie)
 
 export const openBrowser = (url: string): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
