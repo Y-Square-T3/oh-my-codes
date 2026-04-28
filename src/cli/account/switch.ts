@@ -1,8 +1,8 @@
 import { Effect, Option, Cause } from "effect"
 
-import { Service as Account, defaultLayer } from "./account"
+import { Service as Account, defaultLayer } from "../../features/account"
 import { intro, outro, selectWorkspaceEffect } from "./ui"
-import type { AccountInfo, AccountID, WorkspaceID } from "./schema"
+import type { AccountInfo, AccountID, WorkspaceID } from "../../features/account"
 
 export const switchEffect = Effect.gen(function* () {
   yield* intro("Switch workspace")
