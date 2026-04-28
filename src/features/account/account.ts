@@ -88,89 +88,87 @@ export interface AccountServiceInterface {
 
 export const Service = Context.GenericTag<AccountServiceInterface>("@account/Account")
 
-const fetchUser = (serverUrl: string, accessToken: string) =>
-  fetchJson(`${serverUrl}/api/me`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).pipe(Effect.flatMap(decodeSchema(User, "Failed to decode user response")))
-
-const fetchWorkspacesList = (serverUrl: string, accessToken: string) =>
-  fetchJson(`${serverUrl}/api/workspaces`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }).pipe(
-    Effect.flatMap((json) =>
-      Effect.try({
-        try: () => {
-          const arr = json as Record<string, unknown>[]
-          return arr.map((item) => S.decodeUnknownSync(Workspace)(item))
-        },
-        catch: (cause) => serviceError("Failed to decode workspaces response", cause),
-      }),
-    ),
-  )
-
-const refreshTokenInternal = (row: AccountRepo.AccountRow) =>
-  Effect.gen(function* () {
-    const response = yield* fetchJson(`${row.url}/auth/device/token`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        grant_type: "refresh_token",
-        refresh_token: row.refresh_token,
-        client_id: CLIENT_ID,
-      }),
-    })
-
-    const parsed = yield* decodeSchema(TokenRefreshResponse, "Failed to decode token refresh response")(response)
-
-    const now = yield* Clock.currentTimeMillis
-    const expiry = now + parsed.expiresIn * 1000
-
-    const repo = yield* AccountRepo.Service
-    yield* repo.persistToken({
-      accountID: row.id,
-      accessToken: parsed.accessToken as AccessToken,
-      refreshToken: parsed.refreshToken as RefreshToken,
-      expiry: Option.some(expiry),
-    })
-
-    return parsed.accessToken as AccessToken
-  })
-
-const resolveToken = (row: AccountRepo.AccountRow) =>
-  Effect.gen(function* () {
-    const now = yield* Clock.currentTimeMillis
-    if (isTokenFresh(row.token_expiry, now)) {
-      return row.access_token
-    }
-    return yield* refreshTokenInternal(row)
-  })
-
-const resolveAccess = (accountID: AccountID) =>
-  Effect.gen(function* () {
-    const repo = yield* AccountRepo.Service
-    const maybeAccount = yield* repo.getRow(accountID)
-    if (Option.isNone(maybeAccount)) return Option.none()
-
-    const account = maybeAccount.value
-    const accessToken = yield* resolveToken(account)
-    return Option.some({ account, accessToken })
-  })
-
 export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const repo = yield* AccountRepo.Service
+
+    const fetchUser = (serverUrl: string, accessToken: string) =>
+      fetchJson(`${serverUrl}/api/me`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }).pipe(Effect.flatMap(decodeSchema(User, "Failed to decode user response")))
+
+    const fetchWorkspacesList = (serverUrl: string, accessToken: string) =>
+      fetchJson(`${serverUrl}/api/workspaces`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }).pipe(
+        Effect.flatMap((json) =>
+          Effect.try({
+            try: () => {
+              const arr = json as Record<string, unknown>[]
+              return arr.map((item) => S.decodeUnknownSync(Workspace)(item))
+            },
+            catch: (cause) => serviceError("Failed to decode workspaces response", cause),
+          }),
+        ),
+      )
+
+    const refreshTokenInternal = (row: AccountRepo.AccountRow) =>
+      Effect.gen(function* () {
+        const response = yield* fetchJson(`${row.url}/auth/device/token`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            grant_type: "refresh_token",
+            refresh_token: row.refresh_token,
+            client_id: CLIENT_ID,
+          }),
+        })
+
+        const parsed = yield* decodeSchema(TokenRefreshResponse, "Failed to decode token refresh response")(response)
+
+        const now = yield* Clock.currentTimeMillis
+        const expiry = now + parsed.expiresIn * 1000
+
+        yield* repo.persistToken({
+          accountID: row.id,
+          accessToken: parsed.accessToken as AccessToken,
+          refreshToken: parsed.refreshToken as RefreshToken,
+          expiry: Option.some(expiry),
+        })
+
+        return parsed.accessToken as AccessToken
+      })
+
+    const resolveToken = (row: AccountRepo.AccountRow) =>
+      Effect.gen(function* () {
+        const now = yield* Clock.currentTimeMillis
+        if (isTokenFresh(row.token_expiry, now)) {
+          return row.access_token
+        }
+        return yield* refreshTokenInternal(row)
+      })
+
+    const resolveAccess = (accountID: AccountID) =>
+      Effect.gen(function* () {
+        const maybeAccount = yield* repo.getRow(accountID)
+        if (Option.isNone(maybeAccount)) return Option.none()
+
+        const account = maybeAccount.value
+        const accessToken = yield* resolveToken(account)
+        return Option.some({ account, accessToken })
+      })
 
     const active = () =>
       repo.active().pipe(
