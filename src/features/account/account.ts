@@ -34,7 +34,7 @@ export type AccountWorkspace = {
   workspaces: readonly Workspace[]
 }
 
-const CLIENT_ID = "matrix-cli"
+const CLIENT_ID = "oh-my-codes"
 const EAGER_REFRESH_THRESHOLD_MS = 5 * 60 * 1000
 
 const isTokenFresh = (tokenExpiry: number | null, now: number): boolean =>
