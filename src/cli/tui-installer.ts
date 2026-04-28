@@ -92,13 +92,6 @@ export async function runTuiInstaller(
   }
   spinner.stop(`Config written to ${color.cyan(omoResult.configPath)}`)
 
-  if (!config.hasClaude) {
-    p.log.info(
-      `${color.bold("Note:")} Sisyphus agent performs best with Claude Opus 4.5+.\n` +
-        `Other models work but may have reduced orchestration quality.`,
-    )
-  }
-
   if (
     !config.hasClaude &&
     !config.hasOpenAI &&
