@@ -1,9 +1,12 @@
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { existsSync, mkdirSync } from "node:fs"
+import pc from "picocolors"
 import { Database as BunDatabase } from "bun:sqlite"
 import { drizzle } from "drizzle-orm/bun-sqlite"
 import { migrate } from "drizzle-orm/bun-sqlite/migrator"
+
+const SUPPORT_URL = "https://github.com/Y-Square-T3/oh-my-codes/issues"
 
 function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
@@ -25,6 +28,17 @@ const MIGRATIONS_DIR = isInSource
   ? join(dirname(currentFile), "migrations")
   : join(dirname(dirname(currentFile)), "migrations")
 
+function migrationError(err: unknown): void {
+  const message = err instanceof Error ? err.message : String(err)
+  console.error(pc.red("error: database migration failed"))
+  console.error(pc.dim(message))
+  console.error()
+  console.error(
+    pc.dim("please report this issue to our team:"),
+    pc.cyan(SUPPORT_URL),
+  )
+}
+
 export async function ensureMigrated(): Promise<void> {
   const dbPath = resolveDbPath()
 
@@ -38,8 +52,9 @@ export async function ensureMigrated(): Promise<void> {
 
   try {
     migrate(db, { migrationsFolder: MIGRATIONS_DIR })
-  } catch {
-    // non-fatal -- let downstream commands handle errors naturally
+  } catch (err) {
+    migrationError(err)
+    process.exit(1)
   } finally {
     sqlite.close()
   }
