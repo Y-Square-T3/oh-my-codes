@@ -118,7 +118,6 @@ export const selectWorkspaceEffect = (
 
     const selected = yield* select(opts, "Select workspace")
     if (Option.isSome(selected)) {
-      yield* outro("Switched to " + selected.value.label)
       return Option.some(selected.value)
     }
 
