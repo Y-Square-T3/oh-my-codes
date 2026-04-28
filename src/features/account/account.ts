@@ -134,17 +134,17 @@ const refreshTokenInternal = (row: AccountRepo.AccountRow) =>
     const parsed = yield* decodeSchema(TokenRefreshResponse, "Failed to decode token refresh response")(response)
 
     const now = yield* Clock.currentTimeMillis
-    const expiry = now + parsed.expires_in * 1000
+    const expiry = now + parsed.expiresIn * 1000
 
     const repo = yield* AccountRepo.Service
     yield* repo.persistToken({
       accountID: row.id,
-      accessToken: parsed.access_token as AccessToken,
-      refreshToken: parsed.refresh_token as RefreshToken,
+      accessToken: parsed.accessToken as AccessToken,
+      refreshToken: parsed.refreshToken as RefreshToken,
       expiry: Option.some(expiry),
     })
 
-    return parsed.access_token as AccessToken
+    return parsed.accessToken as AccessToken
   })
 
 const resolveToken = (row: AccountRepo.AccountRow) =>
@@ -239,11 +239,11 @@ export const layer = Layer.effect(
         const parsed = yield* decodeSchema(DeviceAuthResponse, "Failed to decode device code response")(response)
 
         return new Login({
-          code: parsed.device_code as unknown as DeviceCode,
-          user: parsed.user_code as unknown as UserCode,
-          url: `${normalizedServer}${parsed.verification_uri_complete}`,
+          code: parsed.deviceCode as unknown as DeviceCode,
+          user: parsed.userCode as unknown as UserCode,
+          url: `${normalizedServer}${parsed.verificationUriComplete}`,
           server: normalizedServer,
-          expiry: parsed.expires_in,
+          expiry: parsed.expiresIn,
           interval: parsed.interval,
         })
       })
@@ -270,17 +270,17 @@ export const layer = Layer.effect(
         }
 
         const tokenSuccess = parsed as DeviceTokenSuccess
-        const user = yield* fetchUser(input.server, tokenSuccess.access_token)
+        const user = yield* fetchUser(input.server, tokenSuccess.accessToken)
 
         const now = yield* Clock.currentTimeMillis
-        const expiry = now + tokenSuccess.expires_in * 1000
+        const expiry = now + tokenSuccess.expiresIn * 1000
 
         yield* repo.persistAccount({
           id: user.id,
           email: user.email,
           url: input.server,
-          accessToken: tokenSuccess.access_token as AccessToken,
-          refreshToken: tokenSuccess.refresh_token as RefreshToken,
+          accessToken: tokenSuccess.accessToken as AccessToken,
+          refreshToken: tokenSuccess.refreshToken as RefreshToken,
           expiry,
         })
 

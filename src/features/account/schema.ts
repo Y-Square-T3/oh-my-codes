@@ -22,7 +22,7 @@ export class AccountInfo extends Schema.Class<AccountInfo>("AccountInfo")({
   id: AccountID,
   email: Schema.String,
   url: Schema.String,
-  active_workspace_id: Schema.NullOr(WorkspaceID),
+  activeWorkspaceId: Schema.NullOr(WorkspaceID),
 }) {}
 
 export class Workspace extends Schema.Class<Workspace>("Workspace")({
@@ -79,23 +79,24 @@ export class AccountTransportError extends Schema.TaggedClass<AccountTransportEr
 export type AccountError = AccountRepoError | AccountServiceError | AccountTransportError
 
 export class DeviceAuthResponse extends Schema.Class<DeviceAuthResponse>("DeviceAuthResponse")({
-  device_code: Schema.String,
-  user_code: Schema.String,
-  verification_uri_complete: Schema.String,
-  expires_in: Schema.Number,
+  deviceCode: Schema.String,
+  userCode: Schema.String,
+  verificationUri: Schema.String,
+  verificationUriComplete: Schema.String,
+  expiresIn: Schema.Number,
   interval: Schema.Number,
 }) {}
 
 export class DeviceTokenSuccess extends Schema.Class<DeviceTokenSuccess>("DeviceTokenSuccess")({
-  access_token: Schema.String,
-  refresh_token: Schema.String,
-  token_type: Schema.Literal("Bearer"),
-  expires_in: Schema.Number,
+  accessToken: Schema.String,
+  refreshToken: Schema.String,
+  tokenType: Schema.Literal("Bearer"),
+  expiresIn: Schema.Number,
 }) {}
 
 export class DeviceTokenError extends Schema.Class<DeviceTokenError>("DeviceTokenError")({
   error: Schema.String,
-  error_description: Schema.String,
+  errorDescription: Schema.String,
 }) {
   toPollResult(): PollResult {
     if (this.error === "authorization_pending") return new PollPending()
@@ -114,7 +115,7 @@ export class User extends Schema.Class<User>("User")({
 }) {}
 
 export class TokenRefreshResponse extends Schema.Class<TokenRefreshResponse>("TokenRefreshResponse")({
-  access_token: Schema.String,
-  refresh_token: Schema.String,
-  expires_in: Schema.Number,
+  accessToken: Schema.String,
+  refreshToken: Schema.String,
+  expiresIn: Schema.Number,
 }) {}

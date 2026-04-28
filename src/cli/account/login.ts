@@ -20,7 +20,7 @@ const selectWorkspaceAfterLogin = Effect.gen(function* () {
 
   const activeOpt = Option.map(active, (a: AccountInfo) => ({
     id: a.id as unknown as AccountID,
-    active_workspace_id: a.active_workspace_id as WorkspaceID | null,
+    active_workspace_id: a.activeWorkspaceId as WorkspaceID | null,
   }))
 
   const selected = yield* selectWorkspaceEffect(groups, activeOpt)

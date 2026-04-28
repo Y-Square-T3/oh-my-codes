@@ -54,7 +54,7 @@ const decodeAccountInfo = (row: { id: AccountID; email: string; url: string }): 
     id: row.id,
     email: row.email,
     url: row.url,
-    active_workspace_id: null,
+    activeWorkspaceId: null,
   })
 
 const runOneTyped = <T>(db: Db.DatabaseService, sql: string, params?: unknown[]): Effect.Effect<Option.Option<T>, Db.DatabaseQueryError> =>
@@ -97,7 +97,7 @@ export const layer = Layer.effect(
           id: accountOpt.value.id,
           email: accountOpt.value.email,
           url: accountOpt.value.url,
-          active_workspace_id: state.active_workspace_id,
+          activeWorkspaceId: state.active_workspace_id,
         }))
       })
 
