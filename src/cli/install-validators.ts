@@ -16,8 +16,6 @@ export const SYMBOLS = {
   star: color.yellow("*"),
 }
 
-const ANSI_COLOR_PATTERN = new RegExp("\u001b\\[[0-9;]*m", "g")
-
 function formatProvider(
   name: string,
   enabled: boolean,
@@ -85,74 +83,6 @@ export function formatConfigSummary(config: InstallConfig): string {
   )
 
   return lines.join("\n")
-}
-
-export function printHeader(isUpdate: boolean): void {
-  const mode = isUpdate ? "Update" : "Install"
-  console.log()
-  console.log(color.bgMagenta(color.white(` oMoMoMoMo... ${mode} `)))
-  console.log()
-}
-
-export function printStep(step: number, total: number, message: string): void {
-  const progress = color.dim(`[${step}/${total}]`)
-  console.log(`${progress} ${message}`)
-}
-
-export function printSuccess(message: string): void {
-  console.log(`${SYMBOLS.check} ${message}`)
-}
-
-export function printError(message: string): void {
-  console.log(`${SYMBOLS.cross} ${color.red(message)}`)
-}
-
-export function printInfo(message: string): void {
-  console.log(`${SYMBOLS.info} ${message}`)
-}
-
-export function printWarning(message: string): void {
-  console.log(`${SYMBOLS.warn} ${color.yellow(message)}`)
-}
-
-export function printBox(content: string, title?: string): void {
-  const lines = content.split("\n")
-  const maxWidth =
-    Math.max(
-      ...lines.map((line) => line.replace(ANSI_COLOR_PATTERN, "").length),
-      title?.length ?? 0,
-    ) + 4
-  const border = color.dim("─".repeat(maxWidth))
-
-  console.log()
-  if (title) {
-    console.log(
-      color.dim("┌─") +
-        color.bold(` ${title} `) +
-        color.dim("─".repeat(maxWidth - title.length - 4)) +
-        color.dim("┐"),
-    )
-  } else {
-    console.log(color.dim("┌") + border + color.dim("┐"))
-  }
-
-  for (const line of lines) {
-    const stripped = line.replace(ANSI_COLOR_PATTERN, "")
-    const padding = maxWidth - stripped.length
-    console.log(
-      color.dim("│") + ` ${line}${" ".repeat(padding - 1)}` + color.dim("│"),
-    )
-  }
-
-  console.log(color.dim("└") + border + color.dim("┘"))
-  console.log()
-}
-
-export function validateNonTuiArgs(): {
-  valid: boolean
-  errors: string[]
-} {
-  return { valid: true, errors: [] }
 }
 
 export function createDefaultInstallConfig(): InstallConfig {

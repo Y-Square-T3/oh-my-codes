@@ -1,7 +1,6 @@
 import * as p from "@clack/prompts"
 import color from "picocolors"
 import { PLUGIN_NAME } from "../shared"
-import type { InstallArgs } from "./types"
 import {
   addPluginToOpenCodeConfig,
   detectCurrentConfig,
@@ -19,13 +18,10 @@ import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version
 import { hasAnyAccount } from "./account/check-account-exists"
 import { login } from "./account/login"
 
-export async function runTuiInstaller(
-  args: InstallArgs,
-  version: string,
-): Promise<number> {
+export async function runTuiInstaller(version: string): Promise<number> {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error(
-      "Error: Interactive installer requires a TTY. Use --non-interactive or set environment variables directly.",
+      "Error: Interactive installer requires a TTY. Set environment variables directly in ~/.config/opencode/oh-my-codes.jsonc for scripted installation.",
     )
     return 1
   }

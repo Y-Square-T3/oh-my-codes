@@ -1,10 +1,6 @@
 export type ClaudeSubscription = "no" | "yes" | "max20"
 export type BooleanArg = "no" | "yes"
 
-export interface InstallArgs {
-  tui: boolean
-}
-
 export interface InstallConfig {
   hasClaude: boolean
   isMax20: boolean

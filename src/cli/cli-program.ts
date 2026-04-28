@@ -7,7 +7,6 @@ import { refreshModelCapabilities } from "./refresh-model-capabilities"
 import { createAccountCommand } from "./account"
 import { createMcpOAuthCommand } from "./mcp-oauth"
 import { ensureMigrated } from "../features/database/ensure-migrated"
-import type { InstallArgs } from "./types"
 import type { RunOptions } from "./run"
 import type { GetLocalVersionOptions } from "./get-local-version/types"
 import type { DoctorOptions } from "./doctor"
@@ -28,23 +27,18 @@ program
 program
   .command("install")
   .description("Install and configure oh-my-codes with interactive setup")
-  .option("--no-tui", "Run in non-interactive mode")
   .addHelpText(
     "after",
     `
 Examples:
   $ bunx oh-my-codes install
-  $ bunx oh-my-codes install --no-tui
 
 Model providers are auto-detected from your existing OpenCode authentication.
 You can configure providers later in ~/.config/opencode/oh-my-codes.jsonc.
 `,
   )
-  .action(async (options) => {
-    const args: InstallArgs = {
-      tui: options.tui !== false,
-    }
-    const exitCode = await install(args)
+  .action(async () => {
+    const exitCode = await install()
     process.exit(exitCode)
   })
 

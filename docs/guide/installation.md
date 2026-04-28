@@ -31,7 +31,7 @@ The published package and local binary are `oh-my-codes`. Inside `opencode.json`
 
 ## For LLM Agents
 
-> **IMPORTANT: Use `curl` to fetch this file, NOT WebFetch.** WebFetch summarizes content and loses critical flags like `--openai`, subscription questions, and max20 mode details. Always use:
+> **IMPORTANT: Use `curl` to fetch this file, NOT WebFetch.** WebFetch summarizes content. Always use:
 >
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/docs/guide/installation.md
@@ -40,53 +40,6 @@ The published package and local binary are `oh-my-codes`. Inside `opencode.json`
 If you're an LLM Agent helping set up oh-my-codes, welcome. You'll help your user install the harness and verify the rename-compat setup cleanly. Tell user this with greetings, with text 'oMoMoMoMo...'
 
 follow these steps:
-
-### Step 0: Ask user about subscriptions
-
-Ask the user these questions to determine CLI options:
-
-1. **Do you have a Claude Pro/Max Subscription?**
-   - If **yes**: **Are you on max20 (20x mode)?**
-     - **max20** → `--claude=max20`
-     - **not max20** → `--claude=yes`
-   - If **no** → `--claude=no`
-
-2. **Do you have an OpenAI/ChatGPT Plus Subscription?**
-   - If **yes** → `--openai=yes` (GPT-5.4 for Oracle agent)
-   - If **no** → `--openai=no` (default)
-
-3. **Will you integrate Gemini models?**
-   - If **yes** → `--gemini=yes`
-   - If **no** → `--gemini=no`
-
-4. **Do you have a GitHub Copilot Subscription?**
-   - If **yes** → `--copilot=yes`
-   - If **no** → `--copilot=no`
-
-5. **Do you have access to OpenCode Zen (opencode/ models)?**
-   - If **yes** → `--opencode-zen=yes`
-   - If **no** → `--opencode-zen=no` (default)
-
-6. **Do you have a Z.ai Coding Plan subscription?**
-   - If **yes** → `--zai-coding-plan=yes`
-   - If **no** → `--zai-coding-plan=no` (default)
-
-7. **Do you have an OpenCode Go subscription?**
-   - OpenCode Go is a $10/month subscription providing access to GLM-5, Kimi K2.5, and MiniMax M2.7 models
-   - If **yes** → `--opencode-go=yes`
-   - If **no** → `--opencode-go=no` (default)
-
-8. **Do you have a Kimi for Coding subscription?**
-   - If **yes** → `--kimi-for-coding=yes`
-   - If **no** → `--kimi-for-coding=no` (default)
-
-9. **Do you use Vercel AI Gateway?**
-   - If **yes** → `--vercel-ai-gateway=yes`
-   - If **no** → `--vercel-ai-gateway=no` (default)
-
-**Provider selection is agent-specific.** The installer and runtime do not use one single global provider priority. Each agent resolves against its own fallback chain.
-
-MUST STRONGLY WARNING, WHEN USER SAID THEY DON'T HAVE CLAUDE SUBSCRIPTION, SISYPHUS AGENT MIGHT NOT WORK IDEALLY.
 
 ### Step 1: Install OpenCode (if not installed)
 
@@ -104,27 +57,17 @@ Spawn a subagent to handle installation and report back - to save context.
 
 ### Step 2: Run the installer
 
-Based on user's answers, run the CLI installer with appropriate flags:
+Run the interactive installer:
 
 ```bash
-bunx oh-my-codes install --no-tui --claude=<yes|no|max20> --gemini=<yes|no> --copilot=<yes|no> [--openai=<yes|no>] [--opencode-go=<yes|no>] [--opencode-zen=<yes|no>] [--zai-coding-plan=<yes|no>] [--kimi-for-coding=<yes|no>] [--vercel-ai-gateway=<yes|no>] [--skip-auth]
+bunx oh-my-codes install
 ```
 
-**Examples:**
+The installer will guide you through subscription selection. It will:
 
-- User has all native subscriptions: `bunx oh-my-codes install --no-tui --claude=max20 --openai=yes --gemini=yes --copilot=no`
-- User has only Claude: `bunx oh-my-codes install --no-tui --claude=yes --gemini=no --copilot=no`
-- User has Claude + OpenAI: `bunx oh-my-codes install --no-tui --claude=yes --openai=yes --gemini=no --copilot=no`
-- User has only GitHub Copilot: `bunx oh-my-codes install --no-tui --claude=no --gemini=no --copilot=yes`
-- User has Z.ai for Librarian: `bunx oh-my-codes install --no-tui --claude=yes --gemini=no --copilot=no --zai-coding-plan=yes`
-- User has only OpenCode Zen: `bunx oh-my-codes install --no-tui --claude=no --gemini=no --copilot=no --opencode-zen=yes`
-- User has OpenCode Go only: `bunx oh-my-codes install --no-tui --claude=no --openai=no --gemini=no --copilot=no --opencode-go=yes`
-- User has no subscriptions: `bunx oh-my-codes install --no-tui --claude=no --gemini=no --copilot=no`
-
-The CLI will:
-
+- Detect existing OpenCode authentication
 - Register the plugin in `opencode.json`
-- Configure agent models based on subscription flags
+- Configure agent models based on your selections
 - Show which auth steps are needed
 
 ### Step 3: Verify Setup
@@ -266,12 +209,6 @@ Run the installer and select "Yes" for OpenCode Zen:
 bunx oh-my-codes install
 # Select your subscriptions (Claude, ChatGPT, Gemini, OpenCode Zen, etc.)
 # When prompted: "Do you have access to OpenCode Zen (opencode/ models)?" → Select "Yes"
-```
-
-Or use non-interactive mode:
-
-```bash
-bunx oh-my-codes install --no-tui --claude=no --openai=no --gemini=no --opencode-zen=yes
 ```
 
 This provider uses the `opencode/` model catalog. If your OpenCode environment prompts for provider authentication, follow the OpenCode provider flow for `opencode/` models instead of reusing the fallback-provider auth steps above.

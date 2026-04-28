@@ -10,7 +10,7 @@ Commander.js CLI with 8 commands. Entry: `index.ts` → `runCli()` in `cli-progr
 
 | Command                      | Purpose                           | Key Logic                                             |
 | ---------------------------- | --------------------------------- | ----------------------------------------------------- |
-| `install`                    | Interactive/non-interactive setup | Provider selection → config gen → plugin registration |
+| `install`                    | Interactive setup                 | Provider selection → config gen → plugin registration |
 | `run <message>`              | Non-interactive session launcher  | Agent resolution (flag → env → config → Sisyphus)     |
 | `doctor`                     | 4-category health checks          | System, Config, Tools, Models                         |
 | `get-local-version`          | Version detection                 | Installed vs npm latest                               |
@@ -27,8 +27,7 @@ Commander.js CLI with 8 commands. Entry: `index.ts` → `runCli()` in `cli-progr
 cli/
 ├── index.ts                     # Entry point → runCli()
 ├── cli-program.ts               # Commander.js program (8 commands)
-├── install.ts                   # Routes to TUI or CLI installer
-├── cli-installer.ts             # Non-interactive (console output)
+├── install.ts                   # Routes to TUI installer
 ├── tui-installer.ts             # Interactive (@clack/prompts)
 ├── model-fallback.ts            # Model config gen by provider availability
 ├── provider-availability.ts     # Provider detection

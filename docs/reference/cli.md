@@ -41,24 +41,8 @@ bunx oh-my-codes install
 1. **Subscription Selection**: Choose which providers and subscriptions you actually have
 2. **Plugin Registration**: Registers `oh-my-codes` in OpenCode settings
 3. **Configuration File Creation**: Writes the generated config to `oh-my-codes.json` in the active OpenCode config directory
-4. **Authentication Hints**: Shows the `opencode auth login` steps for the providers you selected, unless `--skip-auth` is set
+4. **Authentication Hints**: Shows the `opencode auth login` steps for the providers you selected
 5. **Telemetry Defaults**: Anonymous telemetry remains enabled unless you opt out through environment variables
-
-### Options
-
-| Option                          | Description                              |
-| ------------------------------- | ---------------------------------------- |
-| `--no-tui`                      | Run in non-interactive mode without TUI  |
-| `--claude <no\|yes\|max20>`     | Claude subscription mode                 |
-| `--openai <no\|yes>`            | OpenAI / ChatGPT subscription            |
-| `--gemini <no\|yes>`            | Gemini integration                       |
-| `--copilot <no\|yes>`           | GitHub Copilot subscription              |
-| `--opencode-zen <no\|yes>`      | OpenCode Zen access                      |
-| `--zai-coding-plan <no\|yes>`   | Z.ai Coding Plan subscription            |
-| `--kimi-for-coding <no\|yes>`   | Kimi for Coding subscription             |
-| `--opencode-go <no\|yes>`       | OpenCode Go subscription                 |
-| `--vercel-ai-gateway <no\|yes>` | Vercel AI Gateway: no, yes (default: no) |
-| `--skip-auth`                   | Skip authentication setup hints          |
 
 Anonymous telemetry uses PostHog with a hashed installation identifier. Disable it with `OMO_SEND_ANONYMOUS_TELEMETRY=0` or `OMO_DISABLE_POSTHOG=1`. See [Privacy Policy](../legal/privacy-policy.md).
 
@@ -341,7 +325,7 @@ Configure automatic refresh behavior in your plugin config:
 
 ---
 
-## Non-Interactive Mode
+## JSON Output for Scripting
 
 Use JSON output for CI or scripted diagnostics.
 
