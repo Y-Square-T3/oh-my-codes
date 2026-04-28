@@ -1,8 +1,8 @@
 import { Effect, Option, Cause } from "effect"
 
-import { Service as Account, defaultLayer } from "./account"
+import { Service as Account, defaultLayer } from "../../features/account"
 import { formatAccountLabel, intro, outro, println, select } from "./ui"
-import type { AccountInfo, AccountError } from "./schema"
+import type { AccountInfo, AccountError } from "../../features/account"
 
 export const logoutEffect = (email?: string): Effect.Effect<void, AccountError, never> =>
   (Effect.gen(function* () {

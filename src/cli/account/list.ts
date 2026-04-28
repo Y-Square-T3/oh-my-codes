@@ -1,8 +1,8 @@
 import { Effect, Option, Cause } from "effect"
 
-import { Service as Account, defaultLayer } from "./account"
+import { Service as Account, defaultLayer } from "../../features/account"
 import { isActiveWorkspaceChoice, formatOrgLine, println } from "./ui"
-import type { AccountInfo, AccountID, WorkspaceID } from "./schema"
+import type { AccountInfo, AccountID, WorkspaceID } from "../../features/account"
 
 export const listEffect = Effect.gen(function* () {
   const service = yield* Account

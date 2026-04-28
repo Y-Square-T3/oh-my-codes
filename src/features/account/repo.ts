@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Option } from "effect"
 
-import * as Db from "../../features/database"
+import * as Db from "../database"
 import {
   AccountID,
   AccessToken,

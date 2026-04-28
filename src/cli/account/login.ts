@@ -1,9 +1,9 @@
 import { Duration, Effect, Option, Cause } from "effect"
 
-import { Service as Account, defaultLayer } from "./account"
+import { Service as Account, defaultLayer } from "../../features/account"
 import { createSpinner, intro, logInfo, openBrowser, outro, selectWorkspaceEffect } from "./ui"
-import { AccountError, PollResult, PollSuccess } from "./schema"
-import type { AccountInfo, AccountID, WorkspaceID } from "./schema"
+import { AccountError, PollResult, PollSuccess } from "../../features/account"
+import type { AccountInfo, AccountID, WorkspaceID } from "../../features/account"
 
 const selectWorkspaceAfterLogin = Effect.gen(function* () {
   const service = yield* Account

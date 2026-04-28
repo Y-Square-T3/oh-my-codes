@@ -2,8 +2,7 @@ import { Effect, Option } from "effect"
 import * as p from "@clack/prompts"
 import pc from "picocolors"
 
-import type { AccountWorkspace } from "./account"
-import type { AccountInfo, Workspace, WorkspaceID, AccountID } from "./schema"
+import type { AccountWorkspace, AccountInfo, Workspace, WorkspaceID, AccountID } from "../../features/account"
 
 export const intro = (title: string): Effect.Effect<void> =>
   Effect.sync(() => p.intro(pc.cyan(title)))
