@@ -1,4 +1,4 @@
-import { join, dirname } from "node:path"
+import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { existsSync, mkdirSync } from "node:fs"
 import { Database as BunDatabase } from "bun:sqlite"
@@ -7,7 +7,8 @@ import { migrate } from "drizzle-orm/bun-sqlite/migrator"
 
 function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
-  const xdgConfig = process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
+  const xdgConfig =
+    process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
   const configDir = envConfigDir ?? join(xdgConfig, "opencode")
 
   if (!existsSync(configDir)) {
@@ -18,7 +19,8 @@ function resolveDbPath(): string {
 }
 
 const currentFile = fileURLToPath(import.meta.url)
-const isInSource = currentFile.includes("/src/") || currentFile.includes("\\src\\")
+const isInSource =
+  currentFile.includes("/src/") || currentFile.includes("\\src\\")
 const MIGRATIONS_DIR = isInSource
   ? join(dirname(currentFile), "migrations")
   : join(dirname(dirname(currentFile)), "migrations")
