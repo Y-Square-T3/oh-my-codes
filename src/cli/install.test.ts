@@ -89,12 +89,6 @@ describe("install CLI - binary check behavior", () => {
 
     const args: InstallArgs = {
       tui: false,
-      claude: "yes",
-      openai: "no",
-      gemini: "no",
-      copilot: "no",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
     }
 
     // when running install
@@ -130,12 +124,6 @@ describe("install CLI - binary check behavior", () => {
 
     const args: InstallArgs = {
       tui: false,
-      claude: "yes",
-      openai: "no",
-      gemini: "no",
-      copilot: "no",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
     }
 
     // when running install
@@ -176,12 +164,6 @@ describe("install CLI - binary check behavior", () => {
 
     const args: InstallArgs = {
       tui: false,
-      claude: "yes",
-      openai: "no",
-      gemini: "no",
-      copilot: "no",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
     }
 
     // when running install

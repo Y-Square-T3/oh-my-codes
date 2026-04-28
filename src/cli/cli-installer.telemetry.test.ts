@@ -53,14 +53,6 @@ describe("runCliInstaller telemetry isolation", () => {
     )
     const args: InstallArgs = {
       tui: false,
-      claude: "no",
-      openai: "yes",
-      gemini: "no",
-      copilot: "yes",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
-      kimiForCoding: "no",
-      opencodeGo: "no",
     }
 
     // when

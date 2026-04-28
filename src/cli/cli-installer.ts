@@ -1,5 +1,5 @@
 import color from "picocolors"
-import { PLUGIN_NAME, PUBLISHED_PACKAGE_NAME } from "../shared"
+import { PLUGIN_NAME } from "../shared"
 import type { InstallArgs } from "./types"
 import {
   addPluginToOpenCodeConfig,
@@ -10,7 +10,7 @@ import {
 } from "./config-manager"
 import {
   SYMBOLS,
-  argsToConfig,
+  createDefaultInstallConfig,
   detectedToInitialValues,
   formatConfigSummary,
   printBox,
@@ -31,17 +31,13 @@ export async function runCliInstaller(
 ): Promise<number> {
   const posthog = createCliPostHog()
   const distinctId = getPostHogDistinctId()
-  const validation = validateNonTuiArgs(args)
+  const validation = validateNonTuiArgs()
   if (!validation.valid) {
     printHeader(false)
     printError("Validation failed:")
     for (const err of validation.errors) {
       console.log(`  ${SYMBOLS.bullet} ${err}`)
     }
-    console.log()
-    printInfo(
-      `Usage: bunx ${PUBLISHED_PACKAGE_NAME} install --no-tui --claude=<no|yes|max20> --gemini=<no|yes> --copilot=<no|yes>`,
-    )
     console.log()
     return 1
   }
@@ -98,7 +94,7 @@ export async function runCliInstaller(
     )
   }
 
-  const config = argsToConfig(args)
+  const config = createDefaultInstallConfig()
 
   printStep(step++, totalSteps, `Adding ${PLUGIN_NAME} plugin...`)
   const pluginResult = await addPluginToOpenCodeConfig(version)
@@ -161,12 +157,9 @@ export async function runCliInstaller(
     isUpdate ? "Updated Configuration" : "Installation Complete",
   )
 
-  if (!config.hasClaude) {
-    printInfo(
-      "Note: Sisyphus agent performs best with Claude Opus 4.5+. " +
-        "Other models work but may have reduced orchestration quality.",
-    )
-  }
+  printInfo(
+    "Model providers are auto-configured. Edit ~/.config/opencode/oh-my-codes.jsonc to customize.",
+  )
 
   if (
     !config.hasClaude &&
@@ -221,31 +214,10 @@ export async function runCliInstaller(
       },
     })
   } catch {
-    // telemetry failure is non-fatal, silently ignore
   }
   try {
     await posthog.shutdown()
   } catch {
-    // telemetry failure is non-fatal, silently ignore
-  }
-
-  if (
-    (config.hasClaude || config.hasGemini || config.hasCopilot) &&
-    !args.skipAuth
-  ) {
-    printBox(
-      `Run ${color.cyan("opencode auth login")} and select your provider:\n` +
-        (config.hasClaude
-          ? `  ${SYMBOLS.bullet} Anthropic ${color.gray("→ Claude Pro/Max")}\n`
-          : "") +
-        (config.hasGemini
-          ? `  ${SYMBOLS.bullet} Google ${color.gray("→ Gemini")}\n`
-          : "") +
-        (config.hasCopilot
-          ? `  ${SYMBOLS.bullet} GitHub ${color.gray("→ Copilot")}`
-          : ""),
-      "Authenticate Your Providers",
-    )
   }
 
   return 0

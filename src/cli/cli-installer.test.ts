@@ -54,14 +54,6 @@ describe("runCliInstaller", () => {
 
     const args: InstallArgs = {
       tui: false,
-      claude: "no",
-      openai: "no",
-      gemini: "no",
-      copilot: "no",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
-      kimiForCoding: "no",
-      opencodeGo: "no",
     }
 
     // when
@@ -108,14 +100,6 @@ describe("runCliInstaller", () => {
 
     const args: InstallArgs = {
       tui: false,
-      claude: "no",
-      openai: "yes",
-      gemini: "no",
-      copilot: "yes",
-      opencodeZen: "no",
-      zaiCodingPlan: "no",
-      kimiForCoding: "no",
-      opencodeGo: "no",
     }
 
     // when

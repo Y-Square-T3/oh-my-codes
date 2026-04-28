@@ -10,12 +10,12 @@ import {
   writeOmoConfig,
 } from "./config-manager"
 import {
+  createDefaultInstallConfig,
   detectedToInitialValues,
   formatConfigSummary,
   SYMBOLS,
 } from "./install-validators"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
-import { promptInstallConfig } from "./tui-install-prompts"
 
 export async function runTuiInstaller(
   args: InstallArgs,
@@ -72,8 +72,7 @@ export async function runTuiInstaller(
     }
   }
 
-  const config = await promptInstallConfig(detected)
-  if (!config) return 1
+  const config = createDefaultInstallConfig()
 
   spinner.start(`Adding ${PLUGIN_NAME} to OpenCode config`)
   const pluginResult = await addPluginToOpenCodeConfig(version)
@@ -142,10 +141,7 @@ export async function runTuiInstaller(
 
   p.outro(color.green("oMoMoMoMo... Enjoy!"))
 
-  if (
-    (config.hasClaude || config.hasGemini || config.hasCopilot) &&
-    !args.skipAuth
-  ) {
+  if (config.hasClaude || config.hasGemini || config.hasCopilot) {
     const providers: string[] = []
     if (config.hasClaude)
       providers.push(`Anthropic ${color.gray("→ Claude Pro/Max")}`)

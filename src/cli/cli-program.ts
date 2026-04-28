@@ -28,67 +28,21 @@ program
 program
   .command("install")
   .description("Install and configure oh-my-codes with interactive setup")
-  .option("--no-tui", "Run in non-interactive mode (requires all options)")
-  .option("--claude <value>", "Claude subscription: no, yes, max20")
-  .option(
-    "--openai <value>",
-    "OpenAI/ChatGPT subscription: no, yes (default: no)",
-  )
-  .option("--gemini <value>", "Gemini integration: no, yes")
-  .option("--copilot <value>", "GitHub Copilot subscription: no, yes")
-  .option(
-    "--opencode-zen <value>",
-    "OpenCode Zen access: no, yes (default: no)",
-  )
-  .option(
-    "--zai-coding-plan <value>",
-    "Z.ai Coding Plan subscription: no, yes (default: no)",
-  )
-  .option(
-    "--kimi-for-coding <value>",
-    "Kimi For Coding subscription: no, yes (default: no)",
-  )
-  .option(
-    "--opencode-go <value>",
-    "OpenCode Go subscription: no, yes (default: no)",
-  )
-  .option(
-    "--vercel-ai-gateway <value>",
-    "Vercel AI Gateway: no, yes (default: no)",
-  )
-  .option("--skip-auth", "Skip authentication setup hints")
+  .option("--no-tui", "Run in non-interactive mode")
   .addHelpText(
     "after",
     `
 Examples:
   $ bunx oh-my-codes install
-  $ bunx oh-my-codes install --no-tui --claude=max20 --openai=yes --gemini=yes --copilot=no
-  $ bunx oh-my-codes install --no-tui --claude=no --gemini=no --copilot=yes --opencode-zen=yes
+  $ bunx oh-my-codes install --no-tui
 
-Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Vercel):
-  Claude        Native anthropic/ models (Opus, Sonnet, Haiku)
-  OpenAI        Native openai/ models (GPT-5.4 for Oracle)
-  Gemini        Native google/ models (Gemini 3.1 Pro, Flash)
-  Copilot       github-copilot/ models (fallback)
-  OpenCode Zen  opencode/ models (opencode/claude-opus-4-7, etc.)
-  Z.ai          zai-coding-plan/glm-5 (visual-engineering fallback)
-  Kimi          kimi-for-coding/k2p5 (Sisyphus/Prometheus fallback)
-  Vercel        vercel/ models (universal proxy, always last fallback)
+Model providers are auto-detected from your existing OpenCode authentication.
+You can configure providers later in ~/.config/opencode/oh-my-codes.jsonc.
 `,
   )
   .action(async (options) => {
     const args: InstallArgs = {
       tui: options.tui !== false,
-      claude: options.claude,
-      openai: options.openai,
-      gemini: options.gemini,
-      copilot: options.copilot,
-      opencodeZen: options.opencodeZen,
-      zaiCodingPlan: options.zaiCodingPlan,
-      kimiForCoding: options.kimiForCoding,
-      opencodeGo: options.opencodeGo,
-      vercelAiGateway: options.vercelAiGateway,
-      skipAuth: options.skipAuth ?? false,
     }
     const exitCode = await install(args)
     process.exit(exitCode)
