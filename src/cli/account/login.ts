@@ -83,20 +83,16 @@ export const loginEffect = (
     )
 
     if (result._tag === "PollSuccess") {
-      yield* Effect.sync(() =>
-        spinner.stop("Logged in as " + (result as PollSuccess).email),
-      )
+      yield* spinner.stop("Logged in as " + (result as PollSuccess).email)
       yield* selectWorkspaceAfterLogin
     } else if (result._tag === "PollExpired") {
-      yield* Effect.sync(() => spinner.stop("Device code expired", 1))
+      yield* spinner.stop("Device code expired", 1)
     } else if (result._tag === "PollDenied") {
-      yield* Effect.sync(() => spinner.stop("Authorization denied", 1))
+      yield* spinner.stop("Authorization denied", 1)
     } else if (result._tag === "PollError") {
-      yield* Effect.sync(() =>
-        spinner.stop(
-          "Error: " + String((result as { cause: unknown }).cause),
-          1,
-        ),
+      yield* spinner.stop(
+        "Error: " + String((result as { cause: unknown }).cause),
+        1,
       )
     }
   }) as unknown as Effect.Effect<void, AccountError, never>
