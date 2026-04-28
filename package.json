@@ -21,6 +21,7 @@
     "./schema.json": "./dist/oh-my-codes.schema.json"
   },
   "scripts": {
+    "dev": "bun --bun src/cli/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --format esm --external @ast-grep/napi --external zod && tsc --emitDeclarationOnly && bun build src/cli/index.ts --outdir dist/cli --target bun --format esm --external @ast-grep/napi && bun run build:schema",
     "build:all": "bun run build && bun run build:binaries",
     "build:binaries": "bun run script/build-binaries.ts",
