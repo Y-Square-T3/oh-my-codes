@@ -1,6 +1,7 @@
 import { Context, Effect, Layer, Option } from "effect"
 
 import * as Db from "../database"
+import { allMigrations } from "../database/migrations"
 import {
   AccountID,
   AccessToken,
@@ -183,4 +184,15 @@ export const layer = Layer.effect(
   }),
 )
 
-export const defaultLayer = layer.pipe(Layer.provide(Db.defaultLayer))
+const migrationLayer = Layer.effect(
+  Db.Database,
+  Effect.gen(function* () {
+    const db = yield* Db.Database
+    yield* db.migrate(allMigrations)
+    return db
+  }),
+)
+
+export const defaultLayer = layer
+  .pipe(Layer.provide(migrationLayer))
+  .pipe(Layer.provide(Db.defaultLayer))
