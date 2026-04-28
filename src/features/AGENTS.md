@@ -1,4 +1,4 @@
-# src/features/ — 19 Feature Modules
+# src/features/ — 20 Feature Modules
 
 **Generated:** 2026-04-18
 
@@ -29,6 +29,7 @@ Standalone feature modules wired into plugin/ layer. Each is self-contained with
 | **claude-code-session-state**  | 3     | LOW        | Subagent session state tracking                                                                                            |
 | **claude-code-command-loader** | 3     | LOW        | Load commands from .opencode/commands/                                                                                     |
 | **claude-code-agent-loader**   | 3     | LOW        | Load agents from .opencode/agents/                                                                                         |
+| **account**                    | 6     | MEDIUM     | Account management: OAuth device code flow, token refresh, SQLite persistence, workspace switching                         |
 
 ## KEY MODULES
 
@@ -74,3 +75,13 @@ State-first tmux integration:
 | ai-slop-remover | ~LOC               | ---             | ---                     |
 
 Browser variant selected by `browserProvider` config: playwright (default) | playwright-cli | agent-browser.
+
+### account (6 files, ~800 LOC)
+
+Account management feature module with OAuth 2.0 device code flow:
+
+- `AccountService`: Effect-based service layer (login, poll, token refresh, workspace management)
+- `AccountRepo`: SQLite repository using Database feature (persist accounts/tokens, active state)
+- Schemas: Effect Schema branded types (AccountID, WorkspaceID, AccessToken, etc.)
+- Layer composition: `accountDefaultLayer` → `accountRepoDefaultLayer` → `Database.defaultLayer`
+- Used by CLI (`src/cli/account/`) for login/logout/switch/list commands
