@@ -1,7 +1,7 @@
 import { Context, Effect, Layer, Option } from "effect"
+import { eq, asc } from "drizzle-orm"
 
 import * as Db from "../database"
-import { allMigrations } from "../database/migrations"
 import {
   AccountID,
   AccessToken,
@@ -12,18 +12,12 @@ import {
 } from "./schema"
 
 export interface AccountRow {
-  id: AccountID
-  email: string
-  url: string
-  access_token: AccessToken
-  refresh_token: RefreshToken
-  token_expiry: number | null
-}
-
-export interface AccountStateRow {
-  id: number
-  active_account_id: AccountID | null
-  active_workspace_id: WorkspaceID | null
+  readonly id: AccountID
+  readonly email: string
+  readonly url: string
+  readonly access_token: AccessToken
+  readonly refresh_token: RefreshToken
+  readonly token_expiry: number | null
 }
 
 export interface AccountRepoService {
@@ -50,25 +44,15 @@ export interface AccountRepoService {
 
 export const Service = Context.GenericTag<AccountRepoService>("@account/AccountRepo")
 
-const decodeAccountInfo = (row: { id: AccountID; email: string; url: string }): AccountInfoSchema =>
+const decodeAccountInfo = (row: { id: string; email: string; url: string }, activeWorkspaceId: string | null): AccountInfoSchema =>
   new AccountInfoSchema({
-    id: row.id,
+    id: row.id as AccountID,
     email: row.email,
     url: row.url,
-    activeWorkspaceId: null,
+    activeWorkspaceId: activeWorkspaceId as WorkspaceID | null,
   })
 
-const runOneTyped = <T>(db: Db.DatabaseService, sql: string, params?: unknown[]): Effect.Effect<Option.Option<T>, Db.DatabaseQueryError> =>
-  db.runOne(sql, params as string[]).pipe(
-    Effect.map((opt: Option.Option<unknown>) => opt as Option.Option<T>),
-  )
-
-const runAllTyped = <T>(db: Db.DatabaseService, sql: string, params?: unknown[]): Effect.Effect<T[], Db.DatabaseQueryError> =>
-  db.runAll(sql, params as string[]).pipe(
-    Effect.map((arr: unknown[]) => arr as T[]),
-  )
-
-const mapDbError = (message: string) =>
+const mapDbError = <A>(message: string) =>
   Effect.catchAll((cause: Db.DatabaseQueryError) =>
     Effect.fail(new AccountRepoError({ message, cause: cause.cause }))
   )
@@ -77,64 +61,110 @@ export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const database = yield* Db.Database
-    yield* database.migrate(allMigrations)
+    yield* database.migrate()
 
     const active = () =>
       Effect.gen(function* () {
-        const stateOpt = yield* runOneTyped<AccountStateRow>(database, "SELECT * FROM account_state WHERE id = 1").pipe(mapDbError("Failed to read account state"))
-        if (Option.isNone(stateOpt)) return Option.none()
+        const stateOpt = yield* Effect.tryPromise({
+          try: () =>
+            database.db.query.accountState.findFirst({
+              where: eq(Db.schema.accountState.id, 1),
+            }),
+          catch: (cause) => new Db.DatabaseQueryError("Failed to read account state", cause),
+        }).pipe(mapDbError("Failed to read account state"))
 
-        const state = stateOpt.value
-        if (!state.active_account_id) return Option.none()
+        if (!stateOpt) return Option.none()
+        if (!stateOpt.activeAccountId) return Option.none()
 
-        const accountOpt = yield* runOneTyped<{ id: AccountID; email: string; url: string }>(
-          database,
-          "SELECT id, email, url FROM accounts WHERE id = ?",
-          [state.active_account_id],
-        ).pipe(mapDbError("Failed to read account"))
+        const activeAccountId = stateOpt.activeAccountId
 
-        if (Option.isNone(accountOpt)) return Option.none()
+        const accountOpt = yield* Effect.tryPromise({
+          try: () =>
+            database.db.query.accounts.findFirst({
+              where: eq(Db.schema.accounts.id, activeAccountId),
+              columns: { id: true, email: true, url: true },
+            }),
+          catch: (cause) => new Db.DatabaseQueryError("Failed to read account", cause),
+        }).pipe(mapDbError("Failed to read account"))
 
-        return Option.some(new AccountInfoSchema({
-          id: accountOpt.value.id,
-          email: accountOpt.value.email,
-          url: accountOpt.value.url,
-          activeWorkspaceId: state.active_workspace_id,
-        }))
+        if (!accountOpt) return Option.none()
+
+        return Option.some(decodeAccountInfo(accountOpt, stateOpt.activeWorkspaceId))
       })
 
     const list = () =>
-      runAllTyped<{ id: AccountID; email: string; url: string }>(
-        database,
-        "SELECT id, email, url FROM accounts ORDER BY email",
-      ).pipe(
-        Effect.map((rows) => rows.map(decodeAccountInfo)),
+      Effect.tryPromise({
+        try: () =>
+          database.db.query.accounts.findMany({
+            orderBy: (accounts) => asc(accounts.email),
+            columns: { id: true, email: true, url: true },
+          }),
+        catch: (cause) => new Db.DatabaseQueryError("Failed to list accounts", cause),
+      }).pipe(
+        Effect.map((rows) => rows.map((row) => decodeAccountInfo(row, null))),
         mapDbError("Failed to list accounts"),
       )
 
     const remove = (accountID: AccountID) =>
       Effect.gen(function* () {
-        yield* database.run(
-          "UPDATE account_state SET active_account_id = NULL, active_workspace_id = NULL WHERE active_account_id = ?",
-          [accountID as string],
-        ).pipe(mapDbError("Failed to update account state"))
+        yield* Effect.tryPromise({
+          try: () =>
+            database.db.update(Db.schema.accountState).set({
+              activeAccountId: null,
+              activeWorkspaceId: null,
+            }).where(eq(Db.schema.accountState.activeAccountId, accountID)),
+          catch: (cause) => new Db.DatabaseQueryError("Failed to update account state", cause),
+        }).pipe(mapDbError("Failed to update account state"))
 
-        yield* database.run("DELETE FROM accounts WHERE id = ?", [accountID as string]).pipe(mapDbError("Failed to delete account"))
+        yield* Effect.tryPromise({
+          try: () =>
+            database.db.delete(Db.schema.accounts).where(eq(Db.schema.accounts.id, accountID)),
+          catch: (cause) => new Db.DatabaseQueryError("Failed to delete account", cause),
+        }).pipe(mapDbError("Failed to delete account"))
       })
 
-    const use = (accountID: AccountID, workspaceID: Option.Option<WorkspaceID>) =>
-      database.run(
-        `INSERT INTO account_state (id, active_account_id, active_workspace_id)
-         VALUES (1, ?, ?)
-         ON CONFLICT(id) DO UPDATE SET active_account_id = ?, active_workspace_id = ?`,
-        [accountID as string, Option.getOrElse(workspaceID, () => null as WorkspaceID | null), accountID as string, Option.getOrElse(workspaceID, () => null as WorkspaceID | null)],
-      ).pipe(
+    const use = (accountID: AccountID, workspaceID: Option.Option<WorkspaceID>) => {
+      const wsId = Option.getOrElse(workspaceID, () => null as WorkspaceID | null)
+      return Effect.tryPromise({
+        try: () =>
+          database.db.insert(Db.schema.accountState).values({
+            id: 1,
+            activeAccountId: accountID,
+            activeWorkspaceId: wsId,
+          }).onConflictDoUpdate({
+            target: Db.schema.accountState.id,
+            set: {
+              activeAccountId: accountID,
+              activeWorkspaceId: wsId,
+            },
+          }),
+        catch: (cause) => new Db.DatabaseQueryError("Failed to update active workspace", cause),
+      }).pipe(
         Effect.asVoid,
         mapDbError("Failed to update active workspace"),
       )
+    }
 
     const getRow = (accountID: AccountID) =>
-      runOneTyped<AccountRow>(database, "SELECT * FROM accounts WHERE id = ?", [accountID as string]).pipe(
+      Effect.tryPromise({
+        try: () =>
+          database.db.query.accounts.findFirst({
+            where: eq(Db.schema.accounts.id, accountID),
+          }),
+        catch: (cause) => new Db.DatabaseQueryError("Failed to get account row", cause),
+      }).pipe(
+        Effect.map((row) =>
+          row
+            ? Option.some({
+              id: row.id as AccountID,
+              email: row.email,
+              url: row.url,
+              access_token: row.accessToken as AccessToken,
+              refresh_token: row.refreshToken as RefreshToken,
+              token_expiry: row.tokenExpiry,
+            } satisfies AccountRow)
+            : Option.none()
+        ),
         mapDbError("Failed to get account row"),
       )
 
@@ -144,10 +174,15 @@ export const layer = Layer.effect(
       refreshToken: RefreshToken
       expiry: Option.Option<number>
     }) =>
-      database.run(
-        "UPDATE accounts SET access_token = ?, refresh_token = ?, token_expiry = ? WHERE id = ?",
-        [input.accessToken as string, input.refreshToken as string, Option.getOrElse(input.expiry, () => null as number | null), input.accountID as string],
-      ).pipe(
+      Effect.tryPromise({
+        try: () =>
+          database.db.update(Db.schema.accounts).set({
+            accessToken: input.accessToken,
+            refreshToken: input.refreshToken,
+            tokenExpiry: Option.getOrElse(input.expiry, () => null as number | null),
+          }).where(eq(Db.schema.accounts.id, input.accountID)),
+        catch: (cause) => new Db.DatabaseQueryError("Failed to persist token", cause),
+      }).pipe(
         Effect.asVoid,
         mapDbError("Failed to persist token"),
       )
@@ -160,15 +195,27 @@ export const layer = Layer.effect(
       refreshToken: RefreshToken
       expiry: number
     }) =>
-      database.run(
-        `INSERT INTO accounts (id, email, url, access_token, refresh_token, token_expiry)
-         VALUES (?, ?, ?, ?, ?, ?)
-         ON CONFLICT(id) DO UPDATE SET email = ?, url = ?, access_token = ?, refresh_token = ?, token_expiry = ?`,
-        [
-          input.id as string, input.email, input.url, input.accessToken as string, input.refreshToken as string, input.expiry,
-          input.email, input.url, input.accessToken as string, input.refreshToken as string, input.expiry,
-        ],
-      ).pipe(
+      Effect.tryPromise({
+        try: () =>
+          database.db.insert(Db.schema.accounts).values({
+            id: input.id,
+            email: input.email,
+            url: input.url,
+            accessToken: input.accessToken,
+            refreshToken: input.refreshToken,
+            tokenExpiry: input.expiry,
+          }).onConflictDoUpdate({
+            target: Db.schema.accounts.id,
+            set: {
+              email: input.email,
+              url: input.url,
+              accessToken: input.accessToken,
+              refreshToken: input.refreshToken,
+              tokenExpiry: input.expiry,
+            },
+          }),
+        catch: (cause) => new Db.DatabaseQueryError("Failed to persist account", cause),
+      }).pipe(
         Effect.asVoid,
         mapDbError("Failed to persist account"),
       )

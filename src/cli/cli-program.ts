@@ -6,6 +6,7 @@ import { doctor } from "./doctor"
 import { refreshModelCapabilities } from "./refresh-model-capabilities"
 import { createAccountCommand } from "./account"
 import { createMcpOAuthCommand } from "./mcp-oauth"
+import { ensureMigrated } from "../features/database/ensure-migrated"
 import type { InstallArgs } from "./types"
 import type { RunOptions } from "./run"
 import type { GetLocalVersionOptions } from "./get-local-version/types"
@@ -260,6 +261,7 @@ program
 program.addCommand(createMcpOAuthCommand())
 program.addCommand(createAccountCommand())
 
-export function runCli(): void {
+export async function runCli(): Promise<void> {
+  await ensureMigrated()
   program.parse()
 }

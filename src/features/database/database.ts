@@ -1,9 +1,17 @@
-import { join } from "node:path"
+import { join, dirname } from "node:path"
 import { mkdirSync, existsSync } from "node:fs"
-import { Database as BunDatabase, type Database as BunDatabaseType } from "bun:sqlite"
-import { Context, Effect, Layer, Option } from "effect"
+import { fileURLToPath } from "node:url"
+import { Database as BunDatabase } from "bun:sqlite"
+import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
+import { migrate } from "drizzle-orm/bun-sqlite/migrator"
+import { Context, Effect, Layer } from "effect"
+import * as schema from "./schema"
 
-type SqlParam = string | number | bigint | boolean | null | Uint8Array
+const currentFile = fileURLToPath(import.meta.url)
+const isInSource = currentFile.includes("/src/") || currentFile.includes("\\src\\")
+const MIGRATIONS_DIR = isInSource
+  ? join(dirname(currentFile), "migrations")
+  : join(dirname(dirname(currentFile)), "migrations")
 
 export class DatabaseQueryError extends Error {
   readonly _tag = "DatabaseQueryError"
@@ -16,29 +24,9 @@ export class DatabaseQueryError extends Error {
   }
 }
 
-export interface Migration {
-  readonly id: number
-  readonly name: string
-  readonly up: string
-}
-
-export interface DatabaseService {
-  readonly db: BunDatabaseType
-  readonly run: (sql: string, params?: SqlParam[]) => Effect.Effect<void, DatabaseQueryError>
-  readonly runAll: <T>(sql: string, params?: SqlParam[]) => Effect.Effect<T[], DatabaseQueryError>
-  readonly runOne: (sql: string, params?: SqlParam[]) => Effect.Effect<Option.Option<unknown>, DatabaseQueryError>
-  readonly migrate: (migrations: readonly Migration[]) => Effect.Effect<void, DatabaseQueryError>
-  readonly close: () => Effect.Effect<void>
-}
-
-export const Database = Context.GenericTag<DatabaseService>("@account/Database")
-
-function getDbPath(): string {
+export function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
-  const xdgConfig = process.env.XDG_CONFIG_HOME ?? join(
-    process.env.HOME ?? "",
-    ".config",
-  )
+  const xdgConfig = process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
   const configDir = envConfigDir ?? join(xdgConfig, "opencode")
 
   if (!existsSync(configDir)) {
@@ -48,69 +36,39 @@ function getDbPath(): string {
   return join(configDir, "oh-my-codes.db")
 }
 
-const migrationsTableSql = `
-  CREATE TABLE IF NOT EXISTS _migrations (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    applied_at INTEGER NOT NULL DEFAULT (unixepoch())
-  )
-`
+export { schema }
+
+export interface DatabaseService {
+  readonly db: BunSQLiteDatabase<typeof schema>
+  readonly sqlite: BunDatabase
+  readonly migrate: () => Effect.Effect<void, DatabaseQueryError>
+  readonly close: () => Effect.Effect<void>
+}
+
+export const Database = Context.GenericTag<DatabaseService>("@account/Database")
 
 const createDefaultLayer = (dbPath?: string) =>
   Layer.sync(Database, () => {
-    const path = dbPath ?? getDbPath()
+    const path = dbPath ?? resolveDbPath()
     const dir = path.substring(0, path.lastIndexOf("/"))
 
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
 
-    const db = new BunDatabase(path)
-    db.run(migrationsTableSql)
+    const sqlite = new BunDatabase(path)
+    const db = drizzle(sqlite, { schema })
 
     return {
       db,
-      run: (sql, params) =>
+      sqlite,
+      migrate: () =>
         Effect.try({
-          try: () => {
-            db.run(sql, params ?? [])
-          },
-          catch: (cause) => new DatabaseQueryError(`Query failed: ${sql}`, cause),
+          try: () => migrate(db, { migrationsFolder: MIGRATIONS_DIR }),
+          catch: (cause) =>
+            new DatabaseQueryError("Database migration failed", cause),
         }),
-      runAll: <T>(sql: string, params?: SqlParam[]) =>
-        Effect.try({
-          try: () => db.query(sql).all(...(params ?? [])) as T[],
-          catch: (cause) => new DatabaseQueryError(`Query failed: ${sql}`, cause),
-        }),
-      runOne: (sql, params) =>
-        Effect.succeed(Option.fromNullable(db.query(sql).get(...(params ?? [])))),
-      migrate: (migrations) =>
-        Effect.gen(function* () {
-          const applied: { id: number }[] = yield* Effect.sync(() =>
-            (db.query("SELECT id FROM _migrations ORDER BY id").all() as { id: number }[]),
-          )
-          const appliedIds = new Set(applied.map((r) => r.id))
-
-          for (const migration of migrations) {
-            if (!appliedIds.has(migration.id)) {
-              yield* Effect.try({
-                try: () => db.run(migration.up),
-                catch: (cause) =>
-                  new DatabaseQueryError(`Migration ${migration.name} failed`, cause),
-              })
-              yield* Effect.try({
-                try: () =>
-                  db.run(
-                    "INSERT INTO _migrations (id, name) VALUES (?, ?)",
-                    [migration.id, migration.name],
-                  ),
-                catch: (cause) =>
-                  new DatabaseQueryError(`Failed to record migration ${migration.name}`, cause),
-              })
-            }
-          }
-        }),
-      close: () => Effect.sync(() => db.close()),
+      close: () => Effect.sync(() => sqlite.close()),
     }
   })
 

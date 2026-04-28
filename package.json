@@ -22,10 +22,11 @@
   },
   "scripts": {
     "dev": "bun --bun src/cli/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun --format esm --external @ast-grep/napi --external zod && tsc --emitDeclarationOnly && bun build src/cli/index.ts --outdir dist/cli --target bun --format esm --external @ast-grep/napi && bun run build:schema",
+    "build": "bun build src/index.ts --outdir dist --target bun --format esm --external @ast-grep/napi --external zod && tsc --emitDeclarationOnly && bun build src/cli/index.ts --outdir dist/cli --target bun --format esm --external @ast-grep/napi && bun run build:schema && bun run build:migrations",
     "build:all": "bun run build && bun run build:binaries",
     "build:binaries": "bun run script/build-binaries.ts",
     "build:schema": "bun run script/build-schema.ts",
+    "build:migrations": "cp -R src/features/database/migrations dist/migrations 2>/dev/null || true",
     "build:model-capabilities": "bun run script/build-model-capabilities.ts",
     "clean": "rm -rf dist",
     "prepare": "bun run build",
@@ -66,6 +67,7 @@
     "commander": "^14.0.2",
     "detect-libc": "^2.0.0",
     "diff": "^8.0.3",
+    "drizzle-orm": "^0.45.2",
     "effect": "^3.21.2",
     "js-yaml": "^4.1.1",
     "jsonc-parser": "^3.3.1",
@@ -78,6 +80,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/picomatch": "^3.0.2",
     "bun-types": "1.3.11",
+    "drizzle-kit": "^0.31.10",
     "prettier": "3.8.3",
     "typescript": "^5.7.3",
     "zod": "^4.3.0"
