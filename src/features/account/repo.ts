@@ -77,6 +77,7 @@ export const layer = Layer.effect(
   Service,
   Effect.gen(function* () {
     const database = yield* Db.Database
+    yield* database.migrate(allMigrations)
 
     const active = () =>
       Effect.gen(function* () {
@@ -184,15 +185,4 @@ export const layer = Layer.effect(
   }),
 )
 
-const migrationLayer = Layer.effect(
-  Db.Database,
-  Effect.gen(function* () {
-    const db = yield* Db.Database
-    yield* db.migrate(allMigrations)
-    return db
-  }),
-)
-
-export const defaultLayer = layer
-  .pipe(Layer.provide(migrationLayer))
-  .pipe(Layer.provide(Db.defaultLayer))
+export const defaultLayer = layer.pipe(Layer.provide(Db.defaultLayer))
