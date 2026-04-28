@@ -128,10 +128,6 @@ export async function runTuiInstaller(
     "The Magic Word",
   )
 
-  p.log.message(
-    `${color.yellow("★")} If you found this helpful, consider starring the repo!`,
-  )
-
   p.outro(color.green("oMoMoMoMo... Enjoy!"))
 
   if (config.hasClaude || config.hasGemini || config.hasCopilot) {
