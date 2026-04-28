@@ -83,7 +83,6 @@ export interface AccountServiceInterface {
   readonly login: (url: string) => Effect.Effect<Login, AccountError>
   readonly poll: (input: Login) => Effect.Effect<PollResult, AccountError>
   readonly refreshToken: (accountID: AccountID) => Effect.Effect<AccessToken, AccountError>
-  readonly sync: () => Effect.Effect<void, AccountError>
 }
 
 export const Service = Context.GenericTag<AccountServiceInterface>("@account/Account")
@@ -299,7 +298,6 @@ export const layer = Layer.effect(
         ),
       )
 
-    const sync = Effect.void
 
     return {
       active,
@@ -312,7 +310,6 @@ export const layer = Layer.effect(
       login,
       poll,
       refreshToken,
-      sync,
     } as unknown as AccountServiceInterface
   }),
 )

@@ -1,9 +1,25 @@
-import { Duration, Effect, Option, Cause } from "effect"
+import { Cause, Duration, Effect, Option } from "effect"
 
-import { Service as Account, defaultLayer } from "../../features/account"
-import { createSpinner, intro, logInfo, openBrowser, outro, selectWorkspaceEffect } from "./ui"
-import { AccountError, PollResult, PollSuccess } from "../../features/account"
-import type { AccountInfo, AccountID, WorkspaceID } from "../../features/account"
+import type {
+  AccountID,
+  AccountInfo,
+  WorkspaceID,
+} from "../../features/account"
+import {
+  AccountError,
+  defaultLayer,
+  PollResult,
+  PollSuccess,
+  Service as Account,
+} from "../../features/account"
+import {
+  createSpinner,
+  intro,
+  logInfo,
+  openBrowser,
+  outro,
+  selectWorkspaceEffect,
+} from "./ui"
 
 const selectWorkspaceAfterLogin = Effect.gen(function* () {
   const service = yield* Account
@@ -14,9 +30,9 @@ const selectWorkspaceAfterLogin = Effect.gen(function* () {
     return
   }
 
-  const active = yield* service.active().pipe(
-    Effect.catchAll(() => Effect.succeed(Option.none())),
-  )
+  const active = yield* service
+    .active()
+    .pipe(Effect.catchAll(() => Effect.succeed(Option.none())))
 
   const activeOpt = Option.map(active, (a: AccountInfo) => ({
     id: a.id as unknown as AccountID,
@@ -28,12 +44,13 @@ const selectWorkspaceAfterLogin = Effect.gen(function* () {
   if (Option.isSome(selected)) {
     const choice = selected.value
     yield* service.use(choice.accountID, Option.some(choice.workspaceID))
-    yield* service.sync()
   }
 })
 
-export const loginEffect = (url: string): Effect.Effect<void, AccountError, never> =>
-  (Effect.gen(function* () {
+export const loginEffect = (
+  url: string,
+): Effect.Effect<void, AccountError, never> =>
+  Effect.gen(function* () {
     const service = yield* Account
 
     yield* intro("Log in")
@@ -60,21 +77,29 @@ export const loginEffect = (url: string): Effect.Effect<void, AccountError, neve
     const result = yield* pollLoop(login.interval).pipe(
       Effect.timeout(Duration.seconds(login.expiry)),
       Effect.catchTags({
-        TimeoutException: () => Effect.succeed({ _tag: "PollExpired" } as PollResult),
+        TimeoutException: () =>
+          Effect.succeed({ _tag: "PollExpired" } as PollResult),
       }),
     )
 
     if (result._tag === "PollSuccess") {
-      yield* Effect.sync(() => spinner.stop("Logged in as " + (result as PollSuccess).email))
+      yield* Effect.sync(() =>
+        spinner.stop("Logged in as " + (result as PollSuccess).email),
+      )
       yield* selectWorkspaceAfterLogin
     } else if (result._tag === "PollExpired") {
       yield* Effect.sync(() => spinner.stop("Device code expired", 1))
     } else if (result._tag === "PollDenied") {
       yield* Effect.sync(() => spinner.stop("Authorization denied", 1))
     } else if (result._tag === "PollError") {
-      yield* Effect.sync(() => spinner.stop("Error: " + String((result as { cause: unknown }).cause), 1))
+      yield* Effect.sync(() =>
+        spinner.stop(
+          "Error: " + String((result as { cause: unknown }).cause),
+          1,
+        ),
+      )
     }
-  }) as unknown as Effect.Effect<void, AccountError, never>)
+  }) as unknown as Effect.Effect<void, AccountError, never>
 
 export async function login(url: string): Promise<number> {
   const result = await Effect.runPromiseExit(
