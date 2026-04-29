@@ -1,27 +1,20 @@
 import z from "zod"
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: JsonValue }
-  | JsonValue[]
-
-const JsonValue: z.ZodType<JsonValue> = z.lazy(() =>
+const JsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
     z.string(),
     z.number(),
     z.boolean(),
     z.null(),
-    z.array(JsonValue),
-    z.record(z.string(), JsonValue),
+    z.array(JsonValueSchema),
+    z.record(z.string(), JsonValueSchema),
   ]),
 )
 
 const Cost = z.object({
   input: z.number(),
   output: z.number(),
+  reasoning: z.number().optional(),
   cache_read: z.number().optional(),
   cache_write: z.number().optional(),
   context_over_200k: z
@@ -38,11 +31,12 @@ export const Model = z.object({
   id: z.string(),
   name: z.string(),
   family: z.string().optional(),
-  release_date: z.string(),
-  attachment: z.boolean(),
-  reasoning: z.boolean(),
-  temperature: z.boolean(),
-  tool_call: z.boolean(),
+  release_date: z.string().optional(),
+  last_updated: z.string().optional(),
+  attachment: z.boolean().optional(),
+  reasoning: z.boolean().optional(),
+  temperature: z.boolean().optional(),
+  tool_call: z.boolean().optional(),
   interleaved: z
     .union([
       z.literal(true),
@@ -74,7 +68,7 @@ export const Model = z.object({
             cost: Cost.optional(),
             provider: z
               .object({
-                body: z.record(z.string(), JsonValue).optional(),
+                body: z.record(z.string(), JsonValueSchema).optional(),
                 headers: z.record(z.string(), z.string()).optional(),
               })
               .optional(),
@@ -84,6 +78,9 @@ export const Model = z.object({
     })
     .optional(),
   status: z.enum(["alpha", "beta", "deprecated"]).optional(),
+  structured_output: z.boolean().optional(),
+  knowledge: z.string().optional(),
+  open_weights: z.boolean().optional(),
   provider: z
     .object({ npm: z.string().optional(), api: z.string().optional() })
     .optional(),
@@ -91,12 +88,12 @@ export const Model = z.object({
 export type Model = z.infer<typeof Model>
 
 export const Provider = z.object({
-  api: z.string().optional(),
+  id: z.string(),
   name: z.string(),
   env: z.array(z.string()),
-  id: z.string(),
+  api: z.string().optional(),
   npm: z.string().optional(),
+  doc: z.string().optional(),
   models: z.record(z.string(), Model),
 })
-
 export type Provider = z.infer<typeof Provider>

@@ -5,6 +5,7 @@ import { getLocalVersion } from "./get-local-version"
 import { doctor } from "./doctor"
 import { refreshModelCapabilities } from "./refresh-model-capabilities"
 import { createAccountCommand } from "./account"
+import { createModelCommand } from "./model"
 import { createMcpOAuthCommand } from "./mcp-oauth"
 import { ensureMigrated } from "../features/database/ensure-migrated"
 import type { RunOptions } from "./run"
@@ -208,6 +209,7 @@ program
 
 program.addCommand(createMcpOAuthCommand())
 program.addCommand(createAccountCommand())
+program.addCommand(createModelCommand())
 
 export async function runCli(): Promise<void> {
   await ensureMigrated()
