@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, primaryKey } from "drizzle-orm/sqlite-core"
+import { index, primaryKey, sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core"
 
 export const accounts = sqliteTable("accounts", {
   id: text("id").primaryKey(),
@@ -60,4 +60,24 @@ export const modelRecords = sqliteTable("models", {
   updatedAt: integer("updated_at").notNull(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.id, t.providerId, t.accountId] }),
+}))
+
+export const tokenUsages = sqliteTable("token_usages", {
+  id: text("id").primaryKey(),
+  recordedAt: integer("recorded_at").notNull(),
+  sessionID: text("session_id").notNull(),
+  messageID: text("message_id").notNull(),
+  agent: text("agent"),
+  providerID: text("provider_id").notNull(),
+  modelID: text("model_id").notNull(),
+  inputTokens: integer("input_tokens").notNull(),
+  outputTokens: integer("output_tokens").notNull(),
+  reasoningTokens: integer("reasoning_tokens").notNull().default(0),
+  cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+  cacheWriteTokens: integer("cache_write_tokens").notNull().default(0),
+  pushed: integer("pushed").notNull().default(0),
+  createdAt: integer("created_at").notNull(),
+}, (t) => ({
+  pushedIdx: index("token_usages_pushed_idx").on(t.pushed),
+  recordedAtIdx: index("token_usages_recorded_at_idx").on(t.recordedAt),
 }))

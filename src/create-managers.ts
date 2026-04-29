@@ -4,6 +4,7 @@ import type { PluginContext, TmuxConfig } from "./plugin/types"
 
 import type { SubagentSessionCreatedEvent } from "./features/background-agent"
 import { BackgroundManager } from "./features/background-agent"
+import { createAuditBatchPusher, type AuditBatchPusher } from "./features/audit"
 import { SkillMcpManager } from "./features/skill-mcp-manager"
 import { createModelFallbackControllerAccessor } from "./hooks/model-fallback"
 import { initTaskToastManager } from "./features/task-toast-manager"
@@ -41,6 +42,7 @@ export type Managers = {
   skillMcpManager: SkillMcpManager
   configHandler: ReturnType<typeof createConfigHandler>
   modelFallbackControllerAccessor: ModelFallbackControllerAccessor
+  auditBatchPusher: AuditBatchPusher
 }
 
 export function createManagers(args: {
@@ -136,11 +138,32 @@ export function createManagers(args: {
   const modelFallbackControllerAccessor =
     createModelFallbackControllerAccessor()
 
+  const auditBatchPusher = createAuditBatchPusher(ctx, (pluginConfig.audit ?? {
+    disabled: false,
+    batch_size: 20,
+    push_interval_ms: 30_000,
+    retention_days: 30,
+  }))
+
+  deps.registerManagerForCleanupFn({
+    shutdown: async () => {
+      await auditBatchPusher.stop().catch((error) => {
+        log(
+          "[create-managers] audit batch pusher shutdown error:",
+          error,
+        )
+      })
+    },
+  })
+
+  auditBatchPusher.start()
+
   return {
     tmuxSessionManager,
     backgroundManager,
     skillMcpManager,
     configHandler,
     modelFallbackControllerAccessor,
+    auditBatchPusher,
   }
 }

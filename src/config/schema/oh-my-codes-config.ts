@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { AnyMcpNameSchema } from "../../mcp/types"
+import { AuditConfigSchema } from "./audit"
 import { BuiltinSkillNameSchema } from "./agent-names"
 import { AgentDefinitionsConfigSchema } from "./agent-definitions"
 import { AgentOverridesSchema } from "./agent-overrides"
@@ -66,6 +67,7 @@ export const OhMyCodesConfigSchema = z.object({
   model_capabilities: ModelCapabilitiesConfigSchema.optional(),
   openclaw: OpenClawConfigSchema.optional(),
   babysitting: BabysittingConfigSchema.optional(),
+  audit: AuditConfigSchema.optional(),
   git_master: GitMasterConfigSchema.default({
     commit_footer: true,
     include_co_authored_by: true,

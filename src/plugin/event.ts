@@ -383,6 +383,11 @@ export function createEventHandler(args: {
       hooks.autoSlashCommand?.event,
       input,
     )
+    await runEventHookSafely(
+      "auditTokenTracker",
+      hooks.auditTokenTracker?.event,
+      input,
+    )
   }
 
   const recentSyntheticIdles = new Map<string, number>()

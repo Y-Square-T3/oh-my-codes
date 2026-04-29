@@ -6,6 +6,7 @@ import type { PluginContext } from "../types"
 import {
   createAgentUsageReminderHook,
   createAnthropicContextWindowLimitRecoveryHook,
+  createAuditTokenTrackerHook,
   createAutoUpdateCheckerHook,
   createContextWindowMonitorHook,
   createDelegateTaskRetryHook,
@@ -70,6 +71,7 @@ export type SessionHooks = {
   taskResumeInfo: ReturnType<typeof createTaskResumeInfoHook> | null
   anthropicEffort: ReturnType<typeof createAnthropicEffortHook> | null
   runtimeFallback: ReturnType<typeof createRuntimeFallbackHook> | null
+  auditTokenTracker: ReturnType<typeof createAuditTokenTrackerHook> | null
 }
 
 export function createSessionHooks(args: {
@@ -320,6 +322,15 @@ export function createSessionHooks(args: {
       )
     : null
 
+  const isAuditEnabled =
+    pluginConfig.audit?.disabled !== true
+
+  const auditTokenTracker = isHookEnabled("audit-token-tracker") && isAuditEnabled
+    ? safeHook("audit-token-tracker", () =>
+        createAuditTokenTrackerHook({ ctx, pluginConfig }),
+      )
+    : null
+
   return {
     contextWindowMonitor,
     preemptiveCompaction,
@@ -344,5 +355,6 @@ export function createSessionHooks(args: {
     taskResumeInfo,
     anthropicEffort,
     runtimeFallback,
+    auditTokenTracker,
   }
 }

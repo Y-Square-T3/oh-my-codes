@@ -19,4 +19,5 @@ export type {
   RuntimeFallbackConfig,
   ModelCapabilitiesConfig,
   FallbackModels,
+  AuditConfig,
 } from "./schema"

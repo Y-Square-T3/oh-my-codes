@@ -5904,6 +5904,40 @@
       ],
       "additionalProperties": false
     },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "disabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "batch_size": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "push_interval_ms": {
+          "default": 30000,
+          "type": "integer",
+          "minimum": 5000,
+          "maximum": 300000
+        },
+        "retention_days": {
+          "default": 30,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 365
+        }
+      },
+      "required": [
+        "disabled",
+        "batch_size",
+        "push_interval_ms",
+        "retention_days"
+      ],
+      "additionalProperties": false
+    },
     "git_master": {
       "default": {
         "commit_footer": true,
