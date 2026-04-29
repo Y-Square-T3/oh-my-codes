@@ -38,20 +38,22 @@ CREATE TABLE `models` (
 	`cost_cache_write` real DEFAULT 0,
 	`limit_context` integer,
 	`limit_output` integer,
-	`account_id` text,
+	`account_id` text NOT NULL,
 	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
+	`updated_at` integer NOT NULL,
+	PRIMARY KEY (`id`, `provider_id`, `account_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `providers` (
-	`id` text PRIMARY KEY NOT NULL,
+	`id` text NOT NULL,
 	`name` text NOT NULL,
 	`api` text,
 	`npm` text,
 	`doc` text,
 	`env_vars` text NOT NULL,
-	`account_id` text,
+	`account_id` text NOT NULL,
 	`last_fetched_at` integer,
 	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
+	`updated_at` integer NOT NULL,
+	PRIMARY KEY (`id`, `account_id`)
 );

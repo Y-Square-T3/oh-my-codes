@@ -148,7 +148,7 @@ export const layer = Layer.effect(
                 updatedAt: p.updatedAt,
               })
               .onConflictDoUpdate({
-                target: providers.id,
+                target: [providers.id, providers.accountId],
                 set: {
                   name: p.name,
                   api: p.api,
@@ -216,7 +216,7 @@ export const layer = Layer.effect(
                 updatedAt: m.updatedAt,
               })
               .onConflictDoUpdate({
-                target: [modelRecords.id, modelRecords.providerId],
+                target: [modelRecords.id, modelRecords.providerId, modelRecords.accountId],
                 set: {
                   name: m.name,
                   family: m.family,

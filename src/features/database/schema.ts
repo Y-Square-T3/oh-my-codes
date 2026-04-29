@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core"
+import { sqliteTable, text, integer, real, primaryKey } from "drizzle-orm/sqlite-core"
 
 export const accounts = sqliteTable("accounts", {
   id: text("id").primaryKey(),
@@ -16,17 +16,19 @@ export const accountState = sqliteTable("account_state", {
 })
 
 export const providers = sqliteTable("providers", {
-  id: text("id").primaryKey(),
+  id: text("id").notNull(),
   name: text("name").notNull(),
   api: text("api"),
   npm: text("npm"),
   doc: text("doc"),
   envVars: text("env_vars").notNull(),
-  accountId: text("account_id"),
+  accountId: text("account_id").notNull(),
   lastFetchedAt: integer("last_fetched_at"),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
-})
+}, (t) => ({
+  pk: primaryKey({ columns: [t.id, t.accountId] }),
+}))
 
 export const modelRecords = sqliteTable("models", {
   id: text("id").notNull(),
@@ -53,7 +55,9 @@ export const modelRecords = sqliteTable("models", {
   costCacheWrite: real("cost_cache_write").default(0),
   limitContext: integer("limit_context"),
   limitOutput: integer("limit_output"),
-  accountId: text("account_id"),
+  accountId: text("account_id").notNull(),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
-})
+}, (t) => ({
+  pk: primaryKey({ columns: [t.id, t.providerId, t.accountId] }),
+}))
