@@ -28,15 +28,6 @@ Follow the prompts to configure your subscriptions. See the [Installation Guide]
 Anonymous telemetry is enabled by default to help improve install and runtime reliability. It uses PostHog with a hashed installation identifier, never the raw hostname, and can be disabled with `OMO_SEND_ANONYMOUS_TELEMETRY=0` or `OMO_DISABLE_POSTHOG=1`. See [Privacy Policy](docs/legal/privacy-policy.md) and [Terms of Service](docs/legal/terms-of-service.md).
 
 ---
-
-## Skip This README
-
-We're past the era of reading docs. Just paste this into your agent:
-
-```
-Read this and tell me why it's not just another boilerplate: https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/README.md
-```
-
 ## Highlights
 
 ### 🪄 `ultrawork`
