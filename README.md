@@ -11,24 +11,17 @@ Install OmO. Type `ultrawork`. Done.
 
 ## Installation
 
-### For Humans
-
-Copy and paste this prompt to your LLM agent (Claude Code, AmpCode, Cursor, etc.):
-
-```
-Install and configure oh-my-codes by following the instructions here:
-https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/docs/guide/installation.md
-```
-
-Or read the [Installation Guide](docs/guide/installation.md), but seriously, let an agent do it. Humans fat-finger configs.
-
-### For LLM Agents
-
-Fetch the installation guide and follow it:
+Run the interactive installer:
 
 ```bash
-curl -s https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/refs/heads/dev/docs/guide/installation.md
+npx oh-my-codes install
+# or
+bunx oh-my-codes install
+# or
+yarn dlx oh-my-codes install
 ```
+
+Follow the prompts to configure your subscriptions. See the [Installation Guide](docs/guide/installation.md) for details.
 
 **Note**: Use the published package and binary name `oh-my-codes`. Plugin config files use `oh-my-codes.json` or `oh-my-codes.jsonc`.
 
@@ -244,7 +237,7 @@ See full [Features Documentation](docs/reference/features.md).
 - **Model Fallbacks**: `fallback_models` can mix plain model strings with per-fallback object settings in the same array
 - **File Prompts**: Load prompts from files with `file://` support in agent configurations
 - **Session Recovery**: Automatic recovery from session errors, context window limits, and API failures
-- **Model Setup**: Agent-model matching is built into the [Installation Guide](docs/guide/installation.md#step-5-understand-your-model-setup)
+- **Model Setup**: Agent-model matching is built into the [Installation Guide](docs/guide/installation.md)
 
 ## Configuration
 
