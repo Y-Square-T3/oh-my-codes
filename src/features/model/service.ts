@@ -1,15 +1,18 @@
-import { Effect, Layer, Option, Context } from "effect"
+import { Context, Effect, Layer, Option } from "effect"
 
 import * as Account from "../account"
 import * as Repo from "./repo"
 import { fetchApiJson, ModelApiError } from "./api"
-import { transformProvider, transformModel } from "./transformer"
+import { transformModel, transformProvider } from "./transformer"
 import { type ModelRow } from "./schema"
 import { type AccountID } from "../account/schema"
 
 export class ModelServiceError extends Error {
   readonly _tag = "ModelServiceError"
-  constructor(readonly message: string, readonly cause?: unknown) {
+  constructor(
+    readonly message: string,
+    readonly cause?: unknown,
+  ) {
     super(message)
     this.name = "ModelServiceError"
   }
@@ -60,19 +63,31 @@ export interface ClearResult {
 }
 
 export interface ModelServiceInterface {
-  readonly list: (providerId?: string) => Effect.Effect<ListResult, ModelServiceError>
-  readonly refresh: () => Effect.Effect<RefreshResult, ModelServiceError | ModelApiError>
-  readonly clear: (providerId?: string) => Effect.Effect<ClearResult, ModelServiceError>
+  readonly list: (
+    providerId?: string,
+  ) => Effect.Effect<ListResult, ModelServiceError>
+  readonly refresh: () => Effect.Effect<
+    RefreshResult,
+    ModelServiceError | ModelApiError
+  >
+  readonly clear: (
+    providerId?: string,
+  ) => Effect.Effect<ClearResult, ModelServiceError>
 }
 
 export const Service = Context.GenericTag<ModelServiceInterface>("@model/Model")
 
 const parseModalities = (input: string | null): string[] => {
   if (!input) return []
-  try { return JSON.parse(input) } catch { return [] }
+  try {
+    return JSON.parse(input)
+  } catch {
+    return []
+  }
 }
 
-const fromDbBool = (v: number | null): boolean | null => v === null ? null : v === 1
+const fromDbBool = (v: number | null): boolean | null =>
+  v === null ? null : v === 1
 
 const mapModelRow = (row: ModelRow, providerId: string): ModelInfo => ({
   id: row.id,
@@ -93,11 +108,11 @@ const mapModelRow = (row: ModelRow, providerId: string): ModelInfo => ({
   releaseDate: row.releaseDate ?? null,
 })
 
-const liftError = <A, E>(effect: Effect.Effect<A, E>): Effect.Effect<A, ModelServiceError> =>
+const liftError = <A, E>(
+  effect: Effect.Effect<A, E>,
+): Effect.Effect<A, ModelServiceError> =>
   effect.pipe(
-    Effect.catchAll((e: E) =>
-      Effect.fail(new ModelServiceError(String(e), e))
-    ),
+    Effect.catchAll((e: E) => Effect.fail(new ModelServiceError(String(e), e))),
   )
 
 export const layer = Layer.effect(
@@ -109,9 +124,9 @@ export const layer = Layer.effect(
     const list = (providerId?: string) =>
       Effect.gen(function* () {
         const accountOpt = yield* liftError(
-          accountSvc.active().pipe(
-            Effect.catchAll(() => Effect.succeed(Option.none())),
-          ),
+          accountSvc
+            .active()
+            .pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
         )
 
         if (Option.isNone(accountOpt)) {
@@ -128,9 +143,9 @@ export const layer = Layer.effect(
 
         const providers = yield* liftError(
           providerId
-            ? repo.listProviders(accountId).pipe(
-                Effect.map((ps) => ps.filter((p) => p.id === providerId)),
-              )
+            ? repo
+                .listProviders(accountId)
+                .pipe(Effect.map((ps) => ps.filter((p) => p.id === providerId)))
             : repo.listProviders(accountId),
         )
 
@@ -144,7 +159,9 @@ export const layer = Layer.effect(
 
         const allModels: ModelInfo[] = []
         for (const p of providers) {
-          const models = yield* liftError(repo.listModels({ providerId: p.id, accountId }))
+          const models = yield* liftError(
+            repo.listModels({ providerId: p.id, accountId }),
+          )
           for (const m of models) {
             allModels.push(mapModelRow(m, p.id))
           }
@@ -165,47 +182,59 @@ export const layer = Layer.effect(
     const refresh = () =>
       Effect.gen(function* () {
         const accountOpt = yield* liftError(
-          accountSvc.active().pipe(
-            Effect.catchAll(() => Effect.succeed(Option.none())),
-          ),
+          accountSvc
+            .active()
+            .pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
         )
 
         if (Option.isNone(accountOpt)) {
-          return yield* Effect.fail(new ModelServiceError("No account logged in. Run `account login` first."))
+          return yield* Effect.fail(
+            new ModelServiceError(
+              "No account logged in. Run `account login` first.",
+            ),
+          )
         }
 
         const account = Option.getOrThrow(accountOpt)
         const accountId = account.id as AccountID
 
         const tokenOpt = yield* liftError(
-          accountSvc.token(accountId).pipe(
-            Effect.catchAll(() => Effect.succeed(Option.none())),
-          ),
+          accountSvc
+            .token(accountId)
+            .pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
         )
 
         if (Option.isNone(tokenOpt)) {
-          return yield* Effect.fail(new ModelServiceError("Failed to get access token"))
+          return yield* Effect.fail(
+            new ModelServiceError("Failed to get access token"),
+          )
         }
 
         const token = Option.getOrThrow(tokenOpt)
 
         const apiData = yield* Effect.tryPromise({
           try: () => fetchApiJson(account.url, accountId, token),
-          catch: (e) => e instanceof ModelApiError
-            ? e
-            : new ModelApiError("GET", `${account.url}/models/api.json`, String(e)),
+          catch: (e) =>
+            e instanceof ModelApiError
+              ? e
+              : new ModelApiError(
+                  "GET",
+                  `${account.url}/models/api.json`,
+                  String(e),
+                ),
         })
 
         const transformedProviders = Object.entries(apiData).map(([id, p]) =>
-          transformProvider(id, p, accountId)
+          transformProvider(id, p, accountId),
         )
 
-        const transformedModels: ReturnType<typeof transformModel>[] = []
-        for (const [providerId, provider] of Object.entries(apiData)) {
-          for (const [modelId, model] of Object.entries(provider.models)) {
-            transformedModels.push(transformModel(providerId, modelId, model, accountId))
-          }
-        }
+        const transformedModels = Object.entries(apiData)
+          .map(([providerId, provider]) =>
+            Object.entries(provider.models).map(([modelId, model]) =>
+              transformModel(providerId, modelId, model, accountId),
+            ),
+          )
+          .flat()
 
         yield* liftError(repo.upsertProviders(transformedProviders))
         yield* liftError(repo.upsertModels(transformedModels))
@@ -219,13 +248,15 @@ export const layer = Layer.effect(
     const clear = (providerId?: string) =>
       Effect.gen(function* () {
         const accountOpt = yield* liftError(
-          accountSvc.active().pipe(
-            Effect.catchAll(() => Effect.succeed(Option.none())),
-          ),
+          accountSvc
+            .active()
+            .pipe(Effect.catchAll(() => Effect.succeed(Option.none()))),
         )
 
         if (Option.isNone(accountOpt)) {
-          return yield* Effect.fail(new ModelServiceError("No account logged in"))
+          return yield* Effect.fail(
+            new ModelServiceError("No account logged in"),
+          )
         }
 
         const account = Option.getOrThrow(accountOpt)
@@ -240,13 +271,20 @@ export const layer = Layer.effect(
 
         if (!providerId) {
           yield* liftError(repo.deleteProviderByAccountId(accountId))
-          return { modelsDeleted: filteredModels.length, providersDeleted: 0 } satisfies ClearResult
+          return {
+            modelsDeleted: filteredModels.length,
+            providersDeleted: 0,
+          } satisfies ClearResult
         }
 
         const remainingModels = yield* liftError(repo.listModels({ accountId }))
         const providersToCheck = yield* liftError(repo.listProviders(accountId))
-        const providersWithModels = new Set(remainingModels.map((m) => m.providerId))
-        const providersToDelete = providersToCheck.filter((p) => !providersWithModels.has(p.id))
+        const providersWithModels = new Set(
+          remainingModels.map((m) => m.providerId),
+        )
+        const providersToDelete = providersToCheck.filter(
+          (p) => !providersWithModels.has(p.id),
+        )
         for (const _p of providersToDelete) {
           yield* liftError(repo.deleteProviderByAccountId(accountId))
         }
