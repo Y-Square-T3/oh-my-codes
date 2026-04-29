@@ -1,4 +1,7 @@
 #!/usr/bin/env bun
 import { runCli } from "./cli-program"
 
-await runCli()
+runCli().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
