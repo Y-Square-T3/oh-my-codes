@@ -1,26 +1,18 @@
-import { Database } from "bun:sqlite"
-import { resolveDbPath } from "../features/database/database"
+import { Effect, Cause, Option, Layer } from "effect"
+import * as Account from "../features/account"
+import {
+  Service as ModelService,
+  defaultLayer as modelDefaultLayer,
+  ModelRepoService,
+  type ModelServiceInterface,
+} from "../features/model"
 import { log } from "../shared"
+import type { AccountID } from "../features/account/schema"
+import type { ProviderRow, ModelRow } from "../features/model/schema"
 
 type AccountProviderConfigDeps = {
   config: Record<string, unknown>
-}
-
-type ModelRow = {
-  id: string
-  provider_id: string
-  limit_context: number | null
-  modalities_input: string | null
-  modalities_output: string | null
-  attachment: number | null
-  reasoning: number | null
-  tool_call: number | null
-  structured_output: number | null
-  temperature: number | null
-  open_weights: number | null
-  interleaved_field: string | null
-  family: string | null
-  knowledge: string | null
+  layer?: Layer.Layer<never, never>
 }
 
 function parseJsonArray(value: string | null): string[] | null {
@@ -35,12 +27,12 @@ function parseJsonArray(value: string | null): string[] | null {
 function buildModelConfig(row: ModelRow): Record<string, unknown> {
   const modelConfig: Record<string, unknown> = {}
 
-  if (row.limit_context != null) {
-    modelConfig.limit = { context: row.limit_context }
+  if (row.limitContext != null) {
+    modelConfig.limit = { context: row.limitContext }
   }
 
-  const inputModalities = parseJsonArray(row.modalities_input)
-  const outputModalities = parseJsonArray(row.modalities_output)
+  const inputModalities = parseJsonArray(row.modalitiesInput)
+  const outputModalities = parseJsonArray(row.modalitiesOutput)
   if (inputModalities || outputModalities) {
     const modalities: Record<string, string[] | undefined> = {}
     if (inputModalities) modalities.input = inputModalities
@@ -51,10 +43,10 @@ function buildModelConfig(row: ModelRow): Record<string, unknown> {
   const capabilities: Record<string, unknown> = {}
   if (row.attachment === 1) capabilities.attachment = true
   if (row.reasoning === 1) capabilities.reasoning = true
-  if (row.tool_call === 1) capabilities.tool_call = true
-  if (row.structured_output === 1) capabilities.structured_output = true
+  if (row.toolCall === 1) capabilities.tool_call = true
+  if (row.structuredOutput === 1) capabilities.structured_output = true
   if (row.temperature === 1) capabilities.temperature = true
-  if (row.open_weights === 1) capabilities.open_weights = true
+  if (row.openWeights === 1) capabilities.open_weights = true
 
   if (inputModalities?.includes("image")) {
     capabilities.input = { image: true }
@@ -64,84 +56,89 @@ function buildModelConfig(row: ModelRow): Record<string, unknown> {
     modelConfig.capabilities = capabilities
   }
 
-  if (row.interleaved_field) {
-    modelConfig.interleaved = { field: row.interleaved_field }
+  if (row.interleavedField) {
+    modelConfig.interleaved = { field: row.interleavedField }
   }
 
   return modelConfig
 }
 
-export function applyAccountProviderConfig(
+function buildAccountProviderConfig(
+  providers: ProviderRow[],
+  models: ModelRow[],
+): Record<string, unknown> {
+  const modelsByProvider = new Map<string, ModelRow[]>()
+  for (const model of models) {
+    const existing = modelsByProvider.get(model.providerId) || []
+    existing.push(model)
+    modelsByProvider.set(model.providerId, existing)
+  }
+
+  const accountProviders: Record<string, unknown> = {}
+  for (const provider of providers) {
+    const providerModels = modelsByProvider.get(provider.id) || []
+    const modelConfigs: Record<string, unknown> = {}
+
+    for (const model of providerModels) {
+      modelConfigs[model.id] = buildModelConfig(model)
+    }
+
+    accountProviders[provider.id] = {
+      models: modelConfigs,
+    }
+  }
+
+  return accountProviders
+}
+
+export async function applyAccountProviderConfig(
   deps: AccountProviderConfigDeps,
-): void {
-  const dbPath = resolveDbPath()
-  const db = new Database(dbPath)
+): Promise<void> {
+  const effectiveLayer = deps.layer ?? modelDefaultLayer
 
-  try {
-    const accountState = db
-      .prepare(
-        "SELECT active_account_id FROM account_state WHERE id = 1",
-      )
-      .get() as { active_account_id: string | null } | undefined
+  const result = await Effect.runPromiseExit(
+    (doApplyAccountProviderConfig(deps) as any).pipe(
+      Effect.provide(effectiveLayer),
+    ),
+  )
 
-    if (!accountState?.active_account_id) {
+  if (result._tag === "Failure") {
+    log(`Account provider config failed: ${Cause.pretty(result.cause)}`)
+  }
+}
+
+function doApplyAccountProviderConfig(
+  deps: AccountProviderConfigDeps,
+) {
+  return Effect.gen(function* () {
+    const accountSvc = yield* Account.Service
+    const accountOpt = yield* accountSvc.active()
+
+    if (Option.isNone(accountOpt)) {
       log("No active account, skipping account provider config")
       return
     }
 
-    const accountId = accountState.active_account_id
+    const account = accountOpt.value
+    const modelRepo = yield* ModelRepoService
+    const providers = yield* modelRepo.listProviders(account.id as AccountID)
 
-    const providers = db
-      .prepare("SELECT id, name FROM providers WHERE account_id = ?")
-      .all(accountId) as Array<{ id: string; name: string }>
-
-    if (!providers.length) {
-      log(`No providers found for account ${accountId}`)
+    if (providers.length === 0) {
+      log(`No providers found for account ${account.id}`)
       return
     }
 
-    const models = db
-      .prepare(
-        "SELECT id, provider_id, limit_context, modalities_input, " +
-          "modalities_output, attachment, reasoning, tool_call, " +
-          "structured_output, temperature, open_weights, interleaved_field " +
-          "FROM models WHERE account_id = ?",
-      )
-      .all(accountId) as ModelRow[]
+    const models = yield* modelRepo.listModels({
+      accountId: account.id as AccountID,
+    })
 
-    const modelsByProvider = new Map<string, ModelRow[]>()
-    for (const model of models) {
-      const existing = modelsByProvider.get(model.provider_id) || []
-      existing.push(model)
-      modelsByProvider.set(model.provider_id, existing)
-    }
+    const providerConfig = buildAccountProviderConfig(providers, models)
 
-    const accountProviders: Record<string, unknown> = {}
-    for (const provider of providers) {
-      const providerModels = modelsByProvider.get(provider.id) || []
-      const modelConfigs: Record<string, unknown> = {}
-
-      for (const model of providerModels) {
-        modelConfigs[model.id] = buildModelConfig(model)
-      }
-
-      accountProviders[provider.id] = {
-        models: modelConfigs,
-      }
-    }
-
-    const existingProviders = deps.config.provider as
-      | Record<string, unknown>
-      | undefined
-    deps.config.provider = {
-      ...accountProviders,
-      ...existingProviders,
-    }
+    const existing = deps.config.provider as Record<string, unknown> | undefined
+    deps.config.provider = { ...providerConfig, ...existing }
 
     log(
-      `Applied account provider config: ${providers.length} providers, ${models.length} models for account ${accountId}`,
+      `Applied account provider config: ${providers.length} providers, ${models.length} models for account ${account.id}`,
     )
-  } finally {
-    db.close()
-  }
+  })
 }

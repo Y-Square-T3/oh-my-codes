@@ -1,127 +1,115 @@
 /// <reference types="bun-types" />
 
-import { Database } from "bun:sqlite"
-import { describe, expect, mock, test } from "bun:test"
+import { Effect, Layer, Option } from "effect"
+import { describe, expect, test } from "bun:test"
+import { Service as Account, defaultLayer as accountDefaultLayer } from "../features/account"
+import { ModelRepoService, modelRepoDefaultLayer } from "../features/model"
 import { applyAccountProviderConfig } from "./account-provider-config-handler"
 
-const mockDbInstances: Database[] = []
+const testAccountId = "test-account-id" as any
 
-function createMockDatabase() {
-  const db = {
-    prepare: mock((query: string) => {
-      if (query.includes("account_state")) {
-        return {
-          get: () => ({ active_account_id: "test-account-id" }),
-        }
-      }
-      if (query.includes("SELECT id, name FROM providers")) {
-        return {
-          all: () => [
-            { id: "anthropic", name: "Anthropic" },
-            { id: "openai", name: "OpenAI" },
-          ],
-        }
-      }
-      if (query.includes("FROM models")) {
-        return {
-          all: () => [
-            {
-              id: "claude-sonnet-4-20250514",
-              provider_id: "anthropic",
-              limit_context: 200000,
-              modalities_input: '["text", "image"]',
-              modalities_output: '["text"]',
-              attachment: 1,
-              reasoning: 1,
-              tool_call: 1,
-              structured_output: 1,
-              temperature: 1,
-              open_weights: 0,
-              interleaved_field: null,
-              family: "claude",
-              knowledge: null,
-            },
-            {
-              id: "gpt-5",
-              provider_id: "openai",
-              limit_context: 100000,
-              modalities_input: '["text"]',
-              modalities_output: '["text"]',
-              attachment: 0,
-              reasoning: 1,
-              tool_call: 1,
-              structured_output: 0,
-              temperature: 1,
-              open_weights: 0,
-              interleaved_field: null,
-              family: null,
-              knowledge: null,
-            },
-          ],
-        }
-      }
-      return { all: () => [] }
-    }),
-    close: mock(() => {}),
-  } as unknown as Database
-  mockDbInstances.push(db)
-  return db
+const mockAccountServiceNoActive = Layer.succeed(Account, {
+  active: () => Effect.succeed(Option.none()),
+})
+
+const mockAccountServiceWithAccount = Layer.succeed(Account, {
+  active: () =>
+    Effect.succeed(
+      Option.some({
+        id: testAccountId,
+        email: "test@example.com",
+        url: "https://example.com",
+        activeWorkspaceId: Option.none(),
+      }),
+    ),
+})
+
+const mockModelRepoEmpty = Layer.succeed(ModelRepoService, {
+  listProviders: () => Effect.succeed([]),
+  listModels: () => Effect.succeed([]),
+})
+
+const testProviders = [
+  { id: "anthropic", name: "Anthropic" },
+  { id: "openai", name: "OpenAI" },
+] as const
+
+const testModels = [
+  {
+    id: "claude-sonnet-4-20250514",
+    providerId: "anthropic",
+    limitContext: 200000,
+    modalitiesInput: '["text", "image"]',
+    modalitiesOutput: '["text"]',
+    attachment: 1,
+    reasoning: 1,
+    toolCall: 1,
+    structuredOutput: 1,
+    temperature: 1,
+    openWeights: 0,
+    interleavedField: null,
+    family: "claude",
+    knowledge: null,
+  },
+  {
+    id: "gpt-5",
+    providerId: "openai",
+    limitContext: 100000,
+    modalitiesInput: '["text"]',
+    modalitiesOutput: '["text"]',
+    attachment: 0,
+    reasoning: 1,
+    toolCall: 1,
+    structuredOutput: 0,
+    temperature: 1,
+    openWeights: 0,
+    interleavedField: null,
+    family: null,
+    knowledge: null,
+  },
+] as const
+
+const mockModelRepoWithData = Layer.succeed(ModelRepoService, {
+  listProviders: () => Effect.succeed([...testProviders]),
+  listModels: () => Effect.succeed([...testModels]),
+})
+
+function makeTestLayer(
+  accountMock: typeof mockAccountServiceNoActive,
+  repoMock: typeof mockModelRepoEmpty,
+) {
+  return Layer.mergeAll(
+    accountDefaultLayer,
+    modelRepoDefaultLayer,
+    accountMock,
+    repoMock,
+  )
 }
 
 describe("applyAccountProviderConfig", () => {
-  test("does not modify config when no active account", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: mock(() => {
-        const db = {
-          prepare: mock(() => ({
-            get: () => ({ active_account_id: null }),
-          })),
-          close: mock(() => {}),
-        } as unknown as Database
-        mockDbInstances.push(db)
-        return db
-      }),
-    }))
+  test("does not modify config when no active account", async () => {
+    const layer = makeTestLayer(mockAccountServiceNoActive, mockModelRepoEmpty)
 
     const config: Record<string, unknown> = { provider: { existing: {} } }
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     expect(config.provider).toEqual({ existing: {} })
   })
 
-  test("does not modify config when no providers for account", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: mock(() => {
-        const db = {
-          prepare: mock((query: string) => {
-            if (query.includes("account_state")) {
-              return { get: () => ({ active_account_id: "test-account" }) }
-            }
-            if (query.includes("SELECT id, name FROM providers")) {
-              return { all: () => [] }
-            }
-            return { all: () => [] }
-          }),
-          close: mock(() => {}),
-        } as unknown as Database
-        mockDbInstances.push(db)
-        return db
-      }),
-    }))
+  test("does not modify config when no providers for account", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoEmpty)
 
     const config: Record<string, unknown> = { provider: { existing: {} } }
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     expect(config.provider).toEqual({ existing: {} })
   })
 
-  test("injects provider config from database", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("injects provider config from database", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     expect(config.provider).toBeDefined()
     const provider = config.provider as Record<string, unknown>
@@ -129,13 +117,11 @@ describe("applyAccountProviderConfig", () => {
     expect(provider["openai"]).toBeDefined()
   })
 
-  test("maps context limits correctly", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("maps context limits correctly", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
@@ -145,13 +131,11 @@ describe("applyAccountProviderConfig", () => {
     expect(claudeModel["limit"]).toEqual({ context: 200000 })
   })
 
-  test("maps modalities correctly", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("maps modalities correctly", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
@@ -163,13 +147,11 @@ describe("applyAccountProviderConfig", () => {
     expect(modalities["output"]).toEqual(["text"])
   })
 
-  test("maps all capabilities correctly", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("maps all capabilities correctly", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
@@ -185,13 +167,11 @@ describe("applyAccountProviderConfig", () => {
     expect(capabilities["open_weights"]).toBeUndefined()
   })
 
-  test("detects image capability from modalities", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("detects image capability from modalities", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
@@ -203,10 +183,8 @@ describe("applyAccountProviderConfig", () => {
     expect(input["image"]).toBe(true)
   })
 
-  test("existing config overrides account config", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: createMockDatabase,
-    }))
+  test("existing config overrides account config", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {
       provider: {
@@ -219,7 +197,7 @@ describe("applyAccountProviderConfig", () => {
         },
       },
     }
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
@@ -229,50 +207,34 @@ describe("applyAccountProviderConfig", () => {
     expect(claudeModel["limit"]).toEqual({ context: 999999 })
   })
 
-  test("handles invalid JSON in modalities gracefully", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: mock(() => {
-        const db = {
-          prepare: mock((query: string) => {
-            if (query.includes("account_state")) {
-              return { get: () => ({ active_account_id: "test-account" }) }
-            }
-            if (query.includes("SELECT id, name FROM providers")) {
-              return { all: () => [{ id: "test", name: "Test" }] }
-            }
-            if (query.includes("FROM models")) {
-              return {
-                all: () => [
-                  {
-                    id: "model-1",
-                    provider_id: "test",
-                    limit_context: 100,
-                    modalities_input: "invalid-json",
-                    modalities_output: null,
-                    attachment: 0,
-                    reasoning: 0,
-                    tool_call: 0,
-                    structured_output: 0,
-                    temperature: 0,
-                    open_weights: 0,
-                    interleaved_field: null,
-                    family: null,
-                    knowledge: null,
-                  },
-                ],
-              }
-            }
-            return { all: () => [] }
-          }),
-          close: mock(() => {}),
-        } as unknown as Database
-        mockDbInstances.push(db)
-        return db
-      }),
-    }))
+  test("handles invalid JSON in modalities gracefully", async () => {
+    const invalidJsonRepo = Layer.succeed(ModelRepoService, {
+      listProviders: () =>
+        Effect.succeed([{ id: "test", name: "Test" } as const]),
+      listModels: () =>
+        Effect.succeed([
+          {
+            id: "model-1",
+            providerId: "test",
+            limitContext: 100,
+            modalitiesInput: "invalid-json",
+            modalitiesOutput: null,
+            attachment: 0,
+            reasoning: 0,
+            toolCall: 0,
+            structuredOutput: 0,
+            temperature: 0,
+            openWeights: 0,
+            interleavedField: null,
+            family: null,
+            knowledge: null,
+          },
+        ] as const),
+    })
+    const layer = makeTestLayer(mockAccountServiceWithAccount, invalidJsonRepo)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const testProvider = provider["test"] as Record<string, unknown>
@@ -283,50 +245,34 @@ describe("applyAccountProviderConfig", () => {
     expect(model1["modalities"]).toBeUndefined()
   })
 
-  test("maps interleaved field correctly", () => {
-    mock.module("bun:sqlite", () => ({
-      Database: mock(() => {
-        const db = {
-          prepare: mock((query: string) => {
-            if (query.includes("account_state")) {
-              return { get: () => ({ active_account_id: "test-account" }) }
-            }
-            if (query.includes("SELECT id, name FROM providers")) {
-              return { all: () => [{ id: "test", name: "Test" }] }
-            }
-            if (query.includes("FROM models")) {
-              return {
-                all: () => [
-                  {
-                    id: "model-reasoning",
-                    provider_id: "test",
-                    limit_context: 1000,
-                    modalities_input: null,
-                    modalities_output: null,
-                    attachment: 0,
-                    reasoning: 1,
-                    tool_call: 0,
-                    structured_output: 0,
-                    temperature: 0,
-                    open_weights: 0,
-                    interleaved_field: "reasoning_content",
-                    family: null,
-                    knowledge: null,
-                  },
-                ],
-              }
-            }
-            return { all: () => [] }
-          }),
-          close: mock(() => {}),
-        } as unknown as Database
-        mockDbInstances.push(db)
-        return db
-      }),
-    }))
+  test("maps interleaved field correctly", async () => {
+    const interleavedRepo = Layer.succeed(ModelRepoService, {
+      listProviders: () =>
+        Effect.succeed([{ id: "test", name: "Test" } as const]),
+      listModels: () =>
+        Effect.succeed([
+          {
+            id: "model-reasoning",
+            providerId: "test",
+            limitContext: 1000,
+            modalitiesInput: null,
+            modalitiesOutput: null,
+            attachment: 0,
+            reasoning: 1,
+            toolCall: 0,
+            structuredOutput: 0,
+            temperature: 0,
+            openWeights: 0,
+            interleavedField: "reasoning_content",
+            family: null,
+            knowledge: null,
+          },
+        ] as const),
+    })
+    const layer = makeTestLayer(mockAccountServiceWithAccount, interleavedRepo)
 
     const config: Record<string, unknown> = {}
-    applyAccountProviderConfig({ config })
+    await applyAccountProviderConfig({ config, layer })
 
     const provider = config.provider as Record<string, unknown>
     const testProvider = provider["test"] as Record<string, unknown>
