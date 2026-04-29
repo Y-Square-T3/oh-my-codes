@@ -28,18 +28,25 @@ program
 program
   .command("install")
   .description("Install and configure oh-my-codes with interactive setup")
+  .option(
+    "--skip-login",
+    "Skip the account login prompt",
+  )
   .addHelpText(
     "after",
     `
 Examples:
   $ bunx oh-my-codes install
+  $ bunx oh-my-codes install --skip-login
 
 Model providers are auto-detected from your existing OpenCode authentication.
 You can configure providers later in ~/.config/opencode/oh-my-codes.jsonc.
 `,
   )
-  .action(async () => {
-    const exitCode = await runTuiInstaller(VERSION)
+  .action(async (options) => {
+    const exitCode = await runTuiInstaller(VERSION, {
+      skipLogin: options.skipLogin,
+    })
     process.exit(exitCode)
   })
 

@@ -3,6 +3,7 @@ import * as p from "@clack/prompts"
 import * as configManager from "./config-manager"
 import * as tuiInstallPrompts from "./tui-install-prompts"
 import { runTuiInstaller } from "./tui-installer"
+import { hasAnyAccount } from "./account/check-account-exists"
 
 function createMockSpinner(): ReturnType<typeof p.spinner> {
   return {
@@ -132,7 +133,7 @@ describe("runTuiInstaller", () => {
     ]
 
     // when
-    const result = await runTuiInstaller("3.16.0")
+    const result = await runTuiInstaller("3.16.0", { skipLogin: true })
 
     // then
     expect(result).toBe(0)
@@ -140,5 +141,86 @@ describe("runTuiInstaller", () => {
     for (const spy of restoreSpies) {
       spy.mockRestore()
     }
+  })
+
+  describe("with --skip-login", () => {
+    function createBaseMocks() {
+      return [
+        spyOn(p, "spinner").mockReturnValue(createMockSpinner()),
+        spyOn(p, "intro").mockImplementation(() => undefined),
+        spyOn(p.log, "info").mockImplementation(() => undefined),
+        spyOn(p.log, "warn").mockImplementation(() => undefined),
+        spyOn(p.log, "success").mockImplementation(() => undefined),
+        spyOn(p.log, "message").mockImplementation(() => undefined),
+        spyOn(p, "note").mockImplementation(() => undefined),
+        spyOn(p, "outro").mockImplementation(() => undefined),
+        spyOn(configManager, "detectCurrentConfig").mockReturnValue({
+          isInstalled: false,
+          installedVersion: null,
+          hasClaude: false,
+          isMax20: false,
+          hasOpenAI: false,
+          hasGemini: false,
+          hasCopilot: false,
+          hasOpencodeZen: false,
+          hasZaiCodingPlan: false,
+          hasKimiForCoding: false,
+          hasOpencodeGo: false,
+          hasVercelAiGateway: false,
+        }),
+        spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(true),
+        spyOn(configManager, "getOpenCodeVersion").mockResolvedValue("1.4.0"),
+        spyOn(configManager, "addPluginToOpenCodeConfig").mockResolvedValue({
+          success: true,
+          configPath: "/tmp/opencode.jsonc",
+        }),
+        spyOn(configManager, "writeOmoConfig").mockReturnValue({
+          success: true,
+          configPath: "/tmp/oh-my-codes.jsonc",
+        }),
+      ]
+    }
+
+    it("#given no accounts exist #when skipLogin is true #then login prompt is not shown", async () => {
+      // given
+      const restoreSpies = createBaseMocks()
+      const hasAccountsSpy = spyOn(hasAnyAccount, "hasAnyAccount").mockResolvedValue(false)
+      const confirmSpy = spyOn(p, "confirm")
+
+      // when
+      const result = await runTuiInstaller("3.16.0", { skipLogin: true })
+
+      // then
+      expect(result).toBe(0)
+      expect(hasAccountsSpy).not.toHaveBeenCalled()
+      expect(confirmSpy).not.toHaveBeenCalled()
+
+      for (const spy of restoreSpies) {
+        spy.mockRestore()
+      }
+      hasAccountsSpy.mockRestore()
+      confirmSpy.mockRestore()
+    })
+
+    it("#given accounts exist #when skipLogin is true #then login prompt is not shown", async () => {
+      // given
+      const restoreSpies = createBaseMocks()
+      const hasAccountsSpy = spyOn(hasAnyAccount, "hasAnyAccount").mockResolvedValue(true)
+      const confirmSpy = spyOn(p, "confirm")
+
+      // when
+      const result = await runTuiInstaller("3.16.0", { skipLogin: true })
+
+      // then
+      expect(result).toBe(0)
+      expect(hasAccountsSpy).not.toHaveBeenCalled()
+      expect(confirmSpy).not.toHaveBeenCalled()
+
+      for (const spy of restoreSpies) {
+        spy.mockRestore()
+      }
+      hasAccountsSpy.mockRestore()
+      confirmSpy.mockRestore()
+    })
   })
 })
