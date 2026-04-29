@@ -1,14 +1,16 @@
-CREATE TABLE `providers` (
+CREATE TABLE `account_state` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`active_account_id` text,
+	`active_workspace_id` text
+);
+--> statement-breakpoint
+CREATE TABLE `accounts` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`api` text,
-	`npm` text,
-	`doc` text,
-	`env_vars` text NOT NULL,
-	`account_id` text,
-	`last_fetched_at` integer,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL
+	`email` text NOT NULL,
+	`url` text NOT NULL,
+	`access_token` text NOT NULL,
+	`refresh_token` text NOT NULL,
+	`token_expiry` integer
 );
 --> statement-breakpoint
 CREATE TABLE `models` (
@@ -38,6 +40,18 @@ CREATE TABLE `models` (
 	`limit_output` integer,
 	`account_id` text,
 	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
-	PRIMARY KEY (`id`, `provider_id`)
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `providers` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`api` text,
+	`npm` text,
+	`doc` text,
+	`env_vars` text NOT NULL,
+	`account_id` text,
+	`last_fetched_at` integer,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
 );
