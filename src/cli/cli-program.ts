@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import { install } from "./install"
+import { runTuiInstaller } from "./tui-installer"
 import { run } from "./run"
 import { getLocalVersion } from "./get-local-version"
 import { doctor } from "./doctor"
@@ -38,7 +38,7 @@ You can configure providers later in ~/.config/opencode/oh-my-codes.jsonc.
 `,
   )
   .action(async () => {
-    const exitCode = await install()
+    const exitCode = await runTuiInstaller(VERSION)
     process.exit(exitCode)
   })
 
