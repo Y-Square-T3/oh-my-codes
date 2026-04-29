@@ -66,7 +66,7 @@ describe("runTuiInstaller", () => {
     const outroSpy = spyOn(p, "outro").mockImplementation(() => undefined)
 
     // when
-    const result = await runTuiInstaller({ tui: true }, "3.16.0")
+    const result = await runTuiInstaller("3.16.0")
 
     // then
     expect(result).toBe(1)
@@ -132,7 +132,7 @@ describe("runTuiInstaller", () => {
     ]
 
     // when
-    const result = await runTuiInstaller({ tui: true }, "3.16.0")
+    const result = await runTuiInstaller("3.16.0")
 
     // then
     expect(result).toBe(0)
