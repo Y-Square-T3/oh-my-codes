@@ -15,6 +15,12 @@ type AccountProviderConfigDeps = {
   layer?: Layer.Layer<never, never>
 }
 
+type AccountCredentials = {
+  apiKey: string
+  baseURL: string
+  workspaceId: string | null
+}
+
 function parseJsonArray(value: string | null): string[] | null {
   if (!value) return null
   try {
@@ -63,9 +69,10 @@ function buildModelConfig(row: ModelRow): Record<string, unknown> {
   return modelConfig
 }
 
-function buildAccountProviderConfig(
+export function buildAccountProviderConfig(
   providers: ProviderRow[],
   models: ModelRow[],
+  credentials: AccountCredentials,
 ): Record<string, unknown> {
   const modelsByProvider = new Map<string, ModelRow[]>()
   for (const model of models) {
@@ -83,9 +90,21 @@ function buildAccountProviderConfig(
       modelConfigs[model.id] = buildModelConfig(model)
     }
 
-    accountProviders[provider.id] = {
+    const providerEntry: Record<string, unknown> = {
+      apiKey: credentials.apiKey,
+      baseURL: credentials.baseURL,
       models: modelConfigs,
     }
+
+    if (credentials.workspaceId) {
+      providerEntry.options = {
+        headers: {
+          "x-workspace-id": credentials.workspaceId,
+        },
+      }
+    }
+
+    accountProviders[provider.id] = providerEntry
   }
 
   return accountProviders
@@ -94,7 +113,7 @@ function buildAccountProviderConfig(
 export async function applyAccountProviderConfig(
   deps: AccountProviderConfigDeps,
 ): Promise<void> {
-  const effectiveLayer = deps.layer ?? modelDefaultLayer
+  const effectiveLayer = deps.layer ?? Layer.empty
 
   const result = await Effect.runPromiseExit(
     (doApplyAccountProviderConfig(deps) as any).pipe(
@@ -112,14 +131,14 @@ function doApplyAccountProviderConfig(
 ) {
   return Effect.gen(function* () {
     const accountSvc = yield* Account.Service
-    const accountOpt = yield* accountSvc.active()
+    const accountOpt = yield* accountSvc.activeWithToken()
 
     if (Option.isNone(accountOpt)) {
       log("No active account, skipping account provider config")
       return
     }
 
-    const account = accountOpt.value
+    const { account, accessToken } = accountOpt.value
     const modelRepo = yield* ModelRepoService
     const providers = yield* modelRepo.listProviders(account.id as AccountID)
 
@@ -132,7 +151,11 @@ function doApplyAccountProviderConfig(
       accountId: account.id as AccountID,
     })
 
-    const providerConfig = buildAccountProviderConfig(providers, models)
+    const providerConfig = buildAccountProviderConfig(providers, models, {
+      apiKey: accessToken,
+      baseURL: account.url,
+      workspaceId: account.activeWorkspaceId,
+    })
 
     const existing = deps.config.provider as Record<string, unknown> | undefined
     deps.config.provider = { ...providerConfig, ...existing }

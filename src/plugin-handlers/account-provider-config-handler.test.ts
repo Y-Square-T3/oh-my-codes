@@ -10,6 +10,7 @@ const testAccountId = "test-account-id" as any
 
 const mockAccountServiceNoActive = Layer.succeed(Account, {
   active: () => Effect.succeed(Option.none()),
+  activeWithToken: () => Effect.succeed(Option.none()),
 })
 
 const mockAccountServiceWithAccount = Layer.succeed(Account, {
@@ -19,7 +20,43 @@ const mockAccountServiceWithAccount = Layer.succeed(Account, {
         id: testAccountId,
         email: "test@example.com",
         url: "https://example.com",
-        activeWorkspaceId: Option.none(),
+        activeWorkspaceId: null,
+      }),
+    ),
+  activeWithToken: () =>
+    Effect.succeed(
+      Option.some({
+        account: {
+          id: testAccountId,
+          email: "test@example.com",
+          url: "https://example.com",
+          activeWorkspaceId: "test-workspace-id",
+        },
+        accessToken: "test-access-token",
+      }),
+    ),
+})
+
+const mockAccountServiceWithAccountNoWorkspace = Layer.succeed(Account, {
+  active: () =>
+    Effect.succeed(
+      Option.some({
+        id: testAccountId,
+        email: "test@example.com",
+        url: "https://example.com",
+        activeWorkspaceId: null,
+      }),
+    ),
+  activeWithToken: () =>
+    Effect.succeed(
+      Option.some({
+        account: {
+          id: testAccountId,
+          email: "test@example.com",
+          url: "https://example.com",
+          activeWorkspaceId: null,
+        },
+        accessToken: "test-access-token-no-workspace",
       }),
     ),
 })
@@ -280,5 +317,71 @@ describe("applyAccountProviderConfig", () => {
     const model1 = models["model-reasoning"] as Record<string, unknown>
 
     expect(model1["interleaved"]).toEqual({ field: "reasoning_content" })
+  })
+
+  test("injects apiKey, baseURL, and x-workspace-id header into provider config", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
+
+    const config: Record<string, unknown> = {}
+    await applyAccountProviderConfig({ config, layer })
+
+    const provider = config.provider as Record<string, unknown>
+    const anthropic = provider["anthropic"] as Record<string, unknown>
+
+    expect(anthropic["apiKey"]).toBe("test-access-token")
+    expect(anthropic["baseURL"]).toBe("https://example.com")
+    expect((anthropic["options"] as Record<string, unknown>)["headers"]).toEqual({
+      "x-workspace-id": "test-workspace-id",
+    })
+  })
+
+  test("does not add x-workspace-id header when activeWorkspaceId is null", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccountNoWorkspace, mockModelRepoWithData)
+
+    const config: Record<string, unknown> = {}
+    await applyAccountProviderConfig({ config, layer })
+
+    const provider = config.provider as Record<string, unknown>
+    const anthropic = provider["anthropic"] as Record<string, unknown>
+
+    expect(anthropic["apiKey"]).toBe("test-access-token-no-workspace")
+    expect(anthropic["baseURL"]).toBe("https://example.com")
+    expect(anthropic["options"]).toBeUndefined()
+  })
+
+  test("user config overrides are preserved via spread order", async () => {
+    const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
+
+    const config: Record<string, unknown> = {
+      provider: {
+        anthropic: {
+          apiKey: "user-api-key",
+          baseURL: "https://user.example.com",
+          options: {
+            headers: {
+              "x-workspace-id": "user-workspace",
+            },
+          },
+          models: {
+            "claude-sonnet-4-20250514": {
+              limit: { context: 999999 },
+            },
+          },
+        },
+      },
+    }
+    await applyAccountProviderConfig({ config, layer })
+
+    const provider = config.provider as Record<string, unknown>
+    const anthropic = provider["anthropic"] as Record<string, unknown>
+
+    expect(anthropic["apiKey"]).toBe("user-api-key")
+    expect(anthropic["baseURL"]).toBe("https://user.example.com")
+    expect((anthropic["options"] as Record<string, unknown>)["headers"]).toEqual({
+      "x-workspace-id": "user-workspace",
+    })
+    const models = anthropic["models"] as Record<string, unknown>
+    const claudeModel = models["claude-sonnet-4-20250514"] as Record<string, unknown>
+    expect(claudeModel["limit"]).toEqual({ context: 999999 })
   })
 })

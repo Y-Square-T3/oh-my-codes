@@ -74,6 +74,7 @@ const decodeSchema = <A, I>(schema: S.Schema<A, I, never>, errorMsg: string) =>
 
 export interface AccountServiceInterface {
   readonly active: () => Effect.Effect<Option.Option<AccountInfoSchema>, AccountError>
+  readonly activeWithToken: () => Effect.Effect<Option.Option<{ account: AccountInfoSchema; accessToken: AccessToken }>, AccountError>
   readonly list: () => Effect.Effect<AccountInfoSchema[], AccountError>
   readonly workspacesByAccount: () => Effect.Effect<AccountWorkspace[], AccountError>
   readonly remove: (accountID: AccountID) => Effect.Effect<void, AccountError>
@@ -175,6 +176,25 @@ export const layer = Layer.effect(
           Effect.fail(serviceError("Failed to get active account", e.cause)),
         ),
       )
+
+    const activeWithToken = (): Effect.Effect<
+      Option.Option<{ account: AccountInfoSchema; accessToken: AccessToken }>,
+      AccountError,
+      never
+    > =>
+      Effect.gen(function* () {
+        const accountOpt = yield* active()
+        if (Option.isNone(accountOpt)) return Option.none()
+
+        const account = accountOpt.value
+        const resolved = yield* resolveAccess(account.id)
+        if (Option.isNone(resolved)) return Option.none()
+
+        return Option.some({
+          account,
+          accessToken: resolved.value.accessToken,
+        })
+      })
 
     const list = () =>
       repo.list().pipe(
@@ -301,6 +321,7 @@ export const layer = Layer.effect(
 
     return {
       active,
+      activeWithToken,
       list,
       workspacesByAccount,
       remove,

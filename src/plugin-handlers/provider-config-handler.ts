@@ -2,6 +2,8 @@ import type { ModelCacheState, VisionCapableModel } from "../plugin-state"
 import { setVisionCapableModelsCache } from "../shared/vision-capable-models-cache"
 
 type ProviderConfig = {
+  apiKey?: string
+  baseURL?: string
   options?: { headers?: Record<string, string> }
   models?: Record<string, ProviderModelConfig>
 }
