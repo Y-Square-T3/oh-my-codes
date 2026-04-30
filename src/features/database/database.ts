@@ -65,8 +65,10 @@ const createDefaultLayer = (dbPath?: string) =>
       migrate: () =>
         Effect.try({
           try: () => migrate(db, { migrationsFolder: MIGRATIONS_DIR }),
-          catch: (cause) =>
-            new DatabaseQueryError("Database migration failed", cause),
+          catch: (cause) => {
+            console.error(cause)
+            return new DatabaseQueryError("Database migration failed", cause)
+          },
         }),
       close: () => Effect.sync(() => sqlite.close()),
     }
