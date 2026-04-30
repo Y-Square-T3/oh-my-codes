@@ -18,6 +18,7 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./package.json": "./package.json",
     "./schema.json": "./dist/oh-my-codes.schema.json"
   },
   "scripts": {
