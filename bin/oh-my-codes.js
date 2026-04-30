@@ -88,6 +88,9 @@ function main() {
   const packageBaseName = getPackageBaseName()
   const avx2Supported = supportsAvx2()
 
+  const packageRoot = dirname(require.resolve("oh-my-codes/package.json"))
+  process.env.OH_MY_CODES_ROOT = packageRoot
+
   let packageCandidates
   try {
     packageCandidates = getPlatformPackageCandidates({
