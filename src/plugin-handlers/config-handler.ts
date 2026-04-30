@@ -26,6 +26,7 @@ export function createConfigHandler(deps: ConfigHandlerDeps) {
     const formatterConfig = config.formatter
 
     setAdditionalAllowedMcpEnvVars(pluginConfig.mcp_env_allowlist ?? [])
+    log("[config-handler] start apply account provider config")
     await applyAccountProviderConfig({ config })
     applyProviderConfig({ config, modelCacheState })
     clearFormatterCache()
