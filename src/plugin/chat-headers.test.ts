@@ -107,6 +107,53 @@ describe("createChatHeadersHandler", () => {
     expect(output.headers["x-initiator"]).toBeUndefined()
   })
 
+  test("sets x-session-id for all providers including non-copilot", async () => {
+    const handler = createChatHeadersHandler({
+      ctx: { client: { session: { message: async () => ({ data: { parts: [{ type: "text", text: "normal" }] } }) } } } as never,
+    })
+    const output: { headers: Record<string, string> } = { headers: {} }
+
+    await handler(
+      {
+        sessionID: "ses_abc123",
+        provider: { id: "openai" },
+        message: { id: "msg_x", role: "user" },
+      },
+      output,
+    )
+
+    expect(output.headers["x-session-id"]).toBe("ses_abc123")
+  })
+
+  test("sets x-session-id alongside x-initiator for copilot internal messages", async () => {
+    const handler = createChatHeadersHandler({
+      ctx: {
+        client: {
+          session: {
+            message: async () => ({
+              data: {
+                parts: [{ type: "text", text: `note\n${OMO_INTERNAL_INITIATOR_MARKER}` }],
+              },
+            }),
+          },
+        },
+      } as never,
+    })
+    const output: { headers: Record<string, string> } = { headers: {} }
+
+    await handler(
+      {
+        sessionID: "ses_xyz789",
+        provider: { id: "github-copilot" },
+        message: { id: "msg_y", role: "user" },
+      },
+      output,
+    )
+
+    expect(output.headers["x-session-id"]).toBe("ses_xyz789")
+    expect(output.headers["x-initiator"]).toBe("agent")
+  })
+
   test("skips x-initiator override when model uses @ai-sdk/github-copilot", async () => {
     const handler = createChatHeadersHandler({
       ctx: {

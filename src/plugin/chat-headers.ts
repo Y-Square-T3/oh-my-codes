@@ -134,6 +134,8 @@ export function createChatHeadersHandler(args: {
     if (!normalizedInput) return
     if (!isChatHeadersOutput(output)) return
 
+    output.headers["x-session-id"] = normalizedInput.sessionID
+
     if (!isCopilotProvider(normalizedInput.provider.id)) return
 
     // Do not override x-initiator when @ai-sdk/github-copilot is active.
