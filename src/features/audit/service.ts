@@ -43,33 +43,23 @@ const toPayload = (
   records: TokenUsageRecord[],
 ): {
   usages: Array<{
-    id: string
-    recorded_at: string
-    session_id: string
-    message_id: string
-    agent: string | null
-    provider_id: string
-    model_id: string
-    input_tokens: number
-    output_tokens: number
+    model: string
+    prompt_tokens: number
+    completion_tokens: number
     reasoning_tokens: number
-    cache_read_tokens: number
-    cache_write_tokens: number
+    request_id: string
+    session_id: string | null
+    created_at: string
   }>
 } => ({
   usages: records.map((r) => ({
-    id: r.id,
-    recorded_at: new Date(r.recordedAt).toISOString(),
-    session_id: r.sessionID,
-    message_id: r.messageID,
-    agent: r.agent,
-    provider_id: r.providerID,
-    model_id: r.modelID,
-    input_tokens: r.inputTokens,
-    output_tokens: r.outputTokens,
+    model: r.modelID,
+    prompt_tokens: r.inputTokens,
+    completion_tokens: r.outputTokens,
     reasoning_tokens: r.reasoningTokens,
-    cache_read_tokens: r.cacheReadTokens,
-    cache_write_tokens: r.cacheWriteTokens,
+    request_id: r.id,
+    session_id: r.sessionID,
+    created_at: new Date(r.recordedAt).toISOString(),
   })),
 })
 
@@ -157,7 +147,7 @@ function createAuditService(
 
       const payload = toPayload(records)
 
-      const pushUrl = `${account.url}/v2/token-usages/batch-push`
+      const pushUrl = `${account.url}/token-usages/batch`
       let pushSuccess = false
       try {
         const response = yield* Effect.tryPromise({
