@@ -5,6 +5,7 @@
 import { spawnSync } from "node:child_process"
 import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
+import { dirname, join } from "node:path"
 import { getPlatformPackageCandidates, getBinaryPath } from "./platform.js"
 
 const require = createRequire(import.meta.url)
