@@ -163,8 +163,8 @@ jobs:
         run: |
           bun build src/index.ts --outdir dist --target bun --format esm --external @ast-grep/napi
           bun build src/cli/index.ts --outdir dist/cli --target bun --format esm --external @ast-grep/napi
-          bunx tsc --emitDeclarationOnly
           bun run build:migrations
+          bunx tsc --emitDeclarationOnly
           bun run build:schema
 
       - name: Publish oh-my-codes
