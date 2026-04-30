@@ -145,7 +145,27 @@ function createAuditService(
         return { pushedCount: 0, failedCount: 0, ids: [] } as PushResult
       }
 
-      const payload = toPayload(records)
+      const loggedInModels = yield* Effect.tryPromise({
+        try: () =>
+          db.db.query.modelRecords.findMany({
+            where: eq(Db.schema.modelRecords.accountId, state.activeAccountId!),
+          }),
+        catch: (cause) => new Error("Failed to fetch logged-in models", { cause }),
+      })
+
+      const loggedInModelIds = new Set(loggedInModels.map((m) => m.id))
+      const filteredRecords = records.filter((r) => !loggedInModelIds.has(r.modelID))
+      const filteredCount = records.length - filteredRecords.length
+
+      if (filteredCount > 0) {
+        log("[audit] Filtered out records with logged-in model IDs", { filteredCount })
+      }
+
+      if (filteredRecords.length === 0) {
+        return { pushedCount: 0, failedCount: 0, ids: [] } as PushResult
+      }
+
+      const payload = toPayload(filteredRecords)
 
       const pushUrl = `${account.url}/token-usages/batch`
       let pushSuccess = false
@@ -172,7 +192,7 @@ function createAuditService(
 
       if (pushSuccess) {
         yield* repo.markPushed(records.map((rec) => rec.id))
-        log("[audit] Batch push succeeded", { count: records.length })
+        log("[audit] Batch push succeeded", { count: filteredRecords.length })
 
         const beforeTimestamp =
           Date.now() - retentionDays * 24 * 60 * 60 * 1000
@@ -183,9 +203,9 @@ function createAuditService(
       }
 
       return {
-        pushedCount: pushSuccess ? records.length : 0,
-        failedCount: pushSuccess ? 0 : records.length,
-        ids: records.map((rec) => rec.id),
+        pushedCount: pushSuccess ? filteredRecords.length : 0,
+        failedCount: pushSuccess ? 0 : filteredRecords.length,
+        ids: filteredRecords.map((rec) => rec.id),
       } as PushResult
     }).pipe(
       Effect.catchAll((cause) => {
