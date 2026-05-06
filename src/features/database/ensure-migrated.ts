@@ -31,6 +31,8 @@ const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
     ? join(dirname(currentFile), "migrations")
     : join(dirname(dirname(currentFile)), "migrations")
 
+console.error(pc.red(`dir: ${MIGRATIONS_DIR}`))
+
 function migrationError(err: unknown): void {
   const message = err instanceof Error ? err.message : String(err)
   console.error(pc.red("error: database migration failed"))
