@@ -3,6 +3,7 @@ import * as Account from "../features/account"
 import {
   Service as ModelService,
   defaultLayer as modelDefaultLayer,
+  modelRepoDefaultLayer,
   ModelRepoService,
   type ModelServiceInterface,
 } from "../features/model"
@@ -113,7 +114,8 @@ export function buildAccountProviderConfig(
 export async function applyAccountProviderConfig(
   deps: AccountProviderConfigDeps,
 ): Promise<void> {
-  const effectiveLayer = deps.layer ?? Layer.empty
+  const effectiveLayer = deps.layer
+    ?? Layer.mergeAll(Account.defaultLayer, modelRepoDefaultLayer)
 
   const result = await Effect.runPromiseExit(
     (doApplyAccountProviderConfig(deps) as any).pipe(
