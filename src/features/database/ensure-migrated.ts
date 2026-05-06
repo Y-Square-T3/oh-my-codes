@@ -52,6 +52,8 @@ export async function ensureMigrated(): Promise<void> {
     mkdirSync(dbDir, { recursive: true })
   }
 
+  console.log(`add db path: ${dbPath}`)
+
   const sqlite = new BunDatabase(dbPath)
   const db = drizzle(sqlite)
 
