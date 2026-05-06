@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes-linux-arm64",
-  "version": "3.17.22",
+  "version": "3.17.23",
   "description": "Platform-specific binary for oh-my-codes (linux-arm64)",
   "license": "MIT",
   "repository": {
