@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes-linux-x64-musl-baseline",
-  "version": "3.17.25",
+  "version": "3.17.26",
   "description": "Platform-specific binary for oh-my-codes (linux-x64-musl-baseline, no AVX2)",
   "license": "MIT",
   "repository": {
