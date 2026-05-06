@@ -27,7 +27,7 @@
     "build:all": "bun run build && bun run build:binaries",
     "build:binaries": "bun run script/build-binaries.ts",
     "build:schema": "bun run script/build-schema.ts",
-    "build:migrations": "cp -R src/features/database/migrations dist/migrations 2>/dev/null || true",
+    "build:migrations": "rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
     "build:model-capabilities": "bun run script/build-model-capabilities.ts",
     "clean": "rm -rf dist",
     "prepare": "bun run build",
