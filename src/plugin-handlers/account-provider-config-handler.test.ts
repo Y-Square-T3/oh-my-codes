@@ -319,7 +319,7 @@ describe("applyAccountProviderConfig", () => {
     expect(model1["interleaved"]).toEqual({ field: "reasoning_content" })
   })
 
-  test("injects apiKey, baseURL, and x-workspace-id header into provider config", async () => {
+  test("injects apiKey, baseURL, and x-workspace-id header into provider config options", async () => {
     const layer = makeTestLayer(mockAccountServiceWithAccount, mockModelRepoWithData)
 
     const config: Record<string, unknown> = {}
@@ -328,8 +328,9 @@ describe("applyAccountProviderConfig", () => {
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
 
-    expect(anthropic["apiKey"]).toBe("test-access-token")
-    expect(anthropic["baseURL"]).toBe("https://example.com")
+    expect(anthropic["apiKey"]).toBeUndefined()
+    expect((anthropic["options"] as Record<string, unknown>)["apiKey"]).toBe("test-access-token")
+    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com")
     expect((anthropic["options"] as Record<string, unknown>)["headers"]).toEqual({
       "x-workspace-id": "test-workspace-id",
     })
@@ -344,9 +345,10 @@ describe("applyAccountProviderConfig", () => {
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
 
-    expect(anthropic["apiKey"]).toBe("test-access-token-no-workspace")
-    expect(anthropic["baseURL"]).toBe("https://example.com")
-    expect(anthropic["options"]).toBeUndefined()
+    expect(anthropic["apiKey"]).toBeUndefined()
+    expect((anthropic["options"] as Record<string, unknown>)["apiKey"]).toBe("test-access-token-no-workspace")
+    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com")
+    expect((anthropic["options"] as Record<string, unknown>)["headers"]).toBeUndefined()
   })
 
   test("user config overrides are preserved via spread order", async () => {
@@ -355,9 +357,9 @@ describe("applyAccountProviderConfig", () => {
     const config: Record<string, unknown> = {
       provider: {
         anthropic: {
-          apiKey: "user-api-key",
-          baseURL: "https://user.example.com",
           options: {
+            apiKey: "user-api-key",
+            baseURL: "https://user.example.com",
             headers: {
               "x-workspace-id": "user-workspace",
             },
@@ -375,8 +377,9 @@ describe("applyAccountProviderConfig", () => {
     const provider = config.provider as Record<string, unknown>
     const anthropic = provider["anthropic"] as Record<string, unknown>
 
-    expect(anthropic["apiKey"]).toBe("user-api-key")
-    expect(anthropic["baseURL"]).toBe("https://user.example.com")
+    expect(anthropic["apiKey"]).toBeUndefined()
+    expect((anthropic["options"] as Record<string, unknown>)["apiKey"]).toBe("user-api-key")
+    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://user.example.com")
     expect((anthropic["options"] as Record<string, unknown>)["headers"]).toEqual({
       "x-workspace-id": "user-workspace",
     })

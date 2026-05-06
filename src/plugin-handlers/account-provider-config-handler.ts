@@ -92,18 +92,20 @@ export function buildAccountProviderConfig(
     }
 
     const providerEntry: Record<string, unknown> = {
-      apiKey: credentials.apiKey,
-      baseURL: credentials.baseURL,
       models: modelConfigs,
     }
 
+    const options: Record<string, unknown> = {}
+    options.apiKey = credentials.apiKey
+    if (credentials.baseURL) {
+      options.baseURL = credentials.baseURL
+    }
     if (credentials.workspaceId) {
-      providerEntry.options = {
-        headers: {
-          "x-workspace-id": credentials.workspaceId,
-        },
+      options.headers = {
+        "x-workspace-id": credentials.workspaceId,
       }
     }
+    providerEntry.options = options
 
     accountProviders[provider.id] = providerEntry
   }
