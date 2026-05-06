@@ -35,7 +35,7 @@ jobs:
   # - Uploads compressed artifacts for the publish job
   # =============================================================================
   build:
-    runs-on: ${{ startsWith(matrix.platform, 'windows-') && 'windows-latest' || startsWith(matrix.platform, 'darwin-') && 'macos-latest' || 'ubuntu-latest' }}
+    runs-on: 'ubuntu-latest'
     defaults:
       run:
         shell: bash
@@ -210,7 +210,7 @@ jobs:
               OUTPUT="packages/${PLATFORM}/bin/oh-my-codes"
             fi
 
-            bun run build:binaries
+            bun build --compile --minify --sourcemap --bytecode --target=$TARGET src/cli/index.ts --outfile=$OUTPUT
 
             echo "Built binary:"
             ls -lh "$OUTPUT"
