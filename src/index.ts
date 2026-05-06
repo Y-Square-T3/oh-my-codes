@@ -1,3 +1,5 @@
+import { createRequire } from "node:module"
+import { dirname } from "node:path"
 import { initConfigContext } from "./cli/config-manager/config-context"
 import type { Hooks, Plugin, PluginModule } from "@opencode-ai/plugin"
 
@@ -23,6 +25,10 @@ import {
 } from "./shared/external-plugin-detector"
 import { startBackgroundCheck as startTmuxCheck } from "./tools/interactive-bash"
 import { createPluginPostHog, getPostHogDistinctId } from "./shared/posthog"
+
+const require_local = createRequire(import.meta.url)
+const packageRoot = dirname(require_local.resolve("oh-my-codes/package.json"))
+process.env.OH_MY_CODES_ROOT = packageRoot
 
 const serverPlugin: Plugin = async (input, _options): Promise<Hooks> => {
   initConfigContext("opencode", null)
