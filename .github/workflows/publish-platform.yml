@@ -210,7 +210,7 @@ jobs:
               OUTPUT="packages/${PLATFORM}/bin/oh-my-codes"
             fi
 
-            bun build src/cli/index.ts --compile --minify --sourcemap --bytecode --target=$TARGET --outfile=$OUTPUT
+            bun build --compile --minify --sourcemap --bytecode --target=$TARGET src/cli/index.ts --outfile=$OUTPUT
 
             echo "Built binary:"
             ls -lh "$OUTPUT"
