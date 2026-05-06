@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes-windows-x64-baseline",
-  "version": "3.17.17",
+  "version": "3.17.18",
   "description": "Platform-specific binary for oh-my-codes (windows-x64-baseline, no AVX2)",
   "license": "MIT",
   "repository": {
