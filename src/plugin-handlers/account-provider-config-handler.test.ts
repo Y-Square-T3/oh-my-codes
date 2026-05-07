@@ -330,7 +330,7 @@ describe("applyAccountProviderConfig", () => {
 
     expect(anthropic["apiKey"]).toBeUndefined()
     expect((anthropic["options"] as Record<string, unknown>)["apiKey"]).toBe("test-access-token")
-    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com")
+    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com/api/v2")
     expect((anthropic["options"] as Record<string, unknown>)["headers"]).toEqual({
       "x-workspace-id": "test-workspace-id",
     })
@@ -347,7 +347,7 @@ describe("applyAccountProviderConfig", () => {
 
     expect(anthropic["apiKey"]).toBeUndefined()
     expect((anthropic["options"] as Record<string, unknown>)["apiKey"]).toBe("test-access-token-no-workspace")
-    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com")
+    expect((anthropic["options"] as Record<string, unknown>)["baseURL"]).toBe("https://example.com/api/v2")
     expect((anthropic["options"] as Record<string, unknown>)["headers"]).toBeUndefined()
   })
 
