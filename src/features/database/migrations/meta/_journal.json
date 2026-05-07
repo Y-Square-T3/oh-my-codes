@@ -15,6 +15,13 @@
       "when": 1745932800000,
       "tag": "0001_audit_token_usages",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1746633600000,
+      "tag": "0002_add_message_id_unique_index",
+      "breakpoints": true
     }
   ]
 }
