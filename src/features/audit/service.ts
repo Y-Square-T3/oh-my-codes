@@ -54,7 +54,7 @@ const toPayload = (
     prompt_tokens: r.inputTokens,
     completion_tokens: r.outputTokens,
     reasoning_tokens: r.reasoningTokens,
-    request_id: r.id,
+    request_id: r.messageID,
     session_id: r.sessionID,
     created_at: new Date(r.recordedAt).toISOString(),
   }))
