@@ -1,15 +1,9 @@
-import { Effect, Cause, Option, Layer } from "effect"
+import { Cause, Effect, Layer, Option } from "effect"
 import * as Account from "../features/account"
-import {
-  Service as ModelService,
-  defaultLayer as modelDefaultLayer,
-  modelRepoDefaultLayer,
-  ModelRepoService,
-  type ModelServiceInterface,
-} from "../features/model"
+import { modelRepoDefaultLayer, ModelRepoService } from "../features/model"
 import { log } from "../shared"
 import type { AccountID } from "../features/account/schema"
-import type { ProviderRow, ModelRow } from "../features/model/schema"
+import type { ModelRow, ProviderRow } from "../features/model/schema"
 
 type AccountProviderConfigDeps = {
   config: Record<string, unknown>
@@ -116,8 +110,8 @@ export function buildAccountProviderConfig(
 export async function applyAccountProviderConfig(
   deps: AccountProviderConfigDeps,
 ): Promise<void> {
-  const effectiveLayer = deps.layer
-    ?? Layer.mergeAll(Account.defaultLayer, modelRepoDefaultLayer)
+  const effectiveLayer =
+    deps.layer ?? Layer.mergeAll(Account.defaultLayer, modelRepoDefaultLayer)
 
   const result = await Effect.runPromiseExit(
     (doApplyAccountProviderConfig(deps) as any).pipe(
@@ -130,9 +124,7 @@ export async function applyAccountProviderConfig(
   }
 }
 
-function doApplyAccountProviderConfig(
-  deps: AccountProviderConfigDeps,
-) {
+function doApplyAccountProviderConfig(deps: AccountProviderConfigDeps) {
   return Effect.gen(function* () {
     const accountSvc = yield* Account.Service
     const accountOpt = yield* accountSvc.activeWithToken()
@@ -157,7 +149,7 @@ function doApplyAccountProviderConfig(
 
     const providerConfig = buildAccountProviderConfig(providers, models, {
       apiKey: accessToken,
-      baseURL: account.url,
+      baseURL: `${account.url.replace(/\/$/, "")}/api/v2`,
       workspaceId: account.activeWorkspaceId,
     })
 
