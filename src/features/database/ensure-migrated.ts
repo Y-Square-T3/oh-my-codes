@@ -22,14 +22,9 @@ function resolveDbPath(): string {
 }
 
 const currentFile = fileURLToPath(import.meta.url)
-const isInSource =
-  currentFile.includes("/src/") || currentFile.includes("\\src\\")
-
 const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
   ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
-  : isInSource
-    ? join(dirname(currentFile), "migrations")
-    : join(dirname(dirname(currentFile)), "migrations")
+  : join(dirname(currentFile), "migrations")
 
 console.error(pc.red(`dir: ${MIGRATIONS_DIR}`))
 

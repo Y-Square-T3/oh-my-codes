@@ -1,19 +1,16 @@
-import { join, dirname } from "node:path"
-import { mkdirSync, existsSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { existsSync, mkdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { Database as BunDatabase } from "bun:sqlite"
-import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
+import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite"
 import { migrate } from "drizzle-orm/bun-sqlite/migrator"
 import { Context, Effect, Layer } from "effect"
 import * as schema from "./schema"
 
 const currentFile = fileURLToPath(import.meta.url)
-const isInSource = currentFile.includes("/src/") || currentFile.includes("\\src\\")
 const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
   ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
-  : isInSource
-    ? join(dirname(currentFile), "migrations")
-    : join(dirname(dirname(currentFile)), "migrations")
+  : join(dirname(currentFile), "migrations")
 
 console.log(`dir: ${MIGRATIONS_DIR}`)
 
@@ -30,7 +27,8 @@ export class DatabaseQueryError extends Error {
 
 export function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
-  const xdgConfig = process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
+  const xdgConfig =
+    process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
   const configDir = envConfigDir ?? join(xdgConfig, "opencode")
 
   if (!existsSync(configDir)) {
