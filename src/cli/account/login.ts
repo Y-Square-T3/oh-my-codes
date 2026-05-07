@@ -20,6 +20,7 @@ import {
   outro,
   selectWorkspaceEffect,
 } from "./ui"
+import { refreshAfterLogin } from "./refresh-after-login"
 
 const selectWorkspaceAfterLogin = Effect.gen(function* () {
   const service = yield* Account
@@ -103,6 +104,7 @@ export async function login(url: string): Promise<number> {
   )
 
   if (result._tag === "Success") {
+    await refreshAfterLogin()
     return 0
   }
 

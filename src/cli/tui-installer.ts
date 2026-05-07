@@ -162,6 +162,7 @@ export async function runTuiInstaller(
           const exitCode = await login(serverUrl)
           if (exitCode === 0) {
             p.log.success("Successfully logged in!")
+            p.log.success("Model capabilities refreshed!")
           } else {
             p.log.warn("Login was not completed successfully.")
             p.log.info(
