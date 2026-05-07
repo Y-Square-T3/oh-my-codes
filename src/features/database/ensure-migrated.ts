@@ -26,8 +26,6 @@ const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
   ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
   : join(dirname(currentFile), "migrations")
 
-console.error(pc.red(`dir: ${MIGRATIONS_DIR}`))
-
 function migrationError(err: unknown): void {
   const message = err instanceof Error ? err.message : String(err)
   console.error(pc.red("error: database migration failed"))
@@ -46,8 +44,6 @@ export async function ensureMigrated(): Promise<void> {
   if (!existsSync(dbDir)) {
     mkdirSync(dbDir, { recursive: true })
   }
-
-  console.log(`add db path: ${dbPath}`)
 
   const sqlite = new BunDatabase(dbPath)
   const db = drizzle(sqlite)

@@ -12,8 +12,6 @@ const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
   ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
   : join(dirname(currentFile), "migrations")
 
-console.log(`dir: ${MIGRATIONS_DIR}`)
-
 export class DatabaseQueryError extends Error {
   readonly _tag = "DatabaseQueryError"
   constructor(
