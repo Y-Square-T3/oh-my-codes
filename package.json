@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
-    "oh-my-codes": "bin/oh-my-codes.js"
+    "oh-my-codes": "bin/oh-my-codes.js",
+    "omc": "bin/oh-my-codes.js"
   },
   "files": [
     "dist",
