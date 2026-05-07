@@ -127,6 +127,8 @@ function createAuditService(
         return { pushedCount: 0, failedCount: 0, ids: [] } as PushResult
       }
 
+      const workspaceId = state.activeWorkspaceId ?? undefined
+
       const account = yield* Effect.tryPromise({
         try: () =>
           db.db.query.accounts.findFirst({
@@ -170,14 +172,18 @@ function createAuditService(
       const pushUrl = `${account.url}/api/v2/token-usages/batch`
       let pushSuccess = false
       try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${account.accessToken}`,
+        }
+        if (workspaceId) {
+          headers["x-workspace-id"] = workspaceId
+        }
         const response = yield* Effect.tryPromise({
           try: () =>
             fetch(pushUrl, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${account.accessToken}`,
-              },
+              headers,
               body: JSON.stringify(payload),
             }),
           catch: (cause) => new Error("HTTP request failed", { cause }),
