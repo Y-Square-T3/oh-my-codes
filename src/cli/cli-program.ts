@@ -7,6 +7,7 @@ import { refreshModelCapabilities } from "./refresh-model-capabilities"
 import { createAccountCommand } from "./account"
 import { createModelCommand } from "./model"
 import { createMcpOAuthCommand } from "./mcp-oauth"
+import { runTokenUsages } from "./token-usages"
 import { ensureMigrated } from "../features/database/ensure-migrated"
 import type { RunOptions } from "./run"
 import type { GetLocalVersionOptions } from "./get-local-version/types"
@@ -203,6 +204,32 @@ program
       directory: options.directory,
       sourceUrl: options.sourceUrl,
       json: options.json ?? false,
+    })
+    process.exit(exitCode)
+  })
+
+program
+  .command("token-usages")
+  .alias("tu")
+  .description("View and push locally cached token usage data")
+  .argument("[action]", "Action: status (default) or push")
+  .option("--json", "Output in JSON format")
+  .option("--database <path>", "Path to database file")
+  .addHelpText(
+    "after",
+    `
+Examples:
+  $ bunx oh-my-codes token-usages           # Show local status
+  $ bunx oh-my-codes token-usages status    # Show unpushed count
+  $ bunx oh-my-codes token-usages push      # Push all cached usages
+  $ bunx oh-my-codes tu push --json         # Push with JSON output
+`,
+  )
+  .action(async (action, options) => {
+    const exitCode = await runTokenUsages({
+      action: action as "status" | "push" | undefined,
+      json: options.json ?? false,
+      dbPath: options.database,
     })
     process.exit(exitCode)
   })

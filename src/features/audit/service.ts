@@ -19,10 +19,9 @@ export interface AuditServiceInterface {
     batchSize: number,
     retentionDays: number,
   ) => Effect.Effect<PushResult, AuditError>
-  readonly cleanup: (
-    retentionDays: number,
-  ) => Effect.Effect<number, AuditError>
+  readonly cleanup: (retentionDays: number) => Effect.Effect<number, AuditError>
   readonly hasActiveAccount: () => Effect.Effect<boolean, AuditError>
+  readonly countUnpushed: () => Effect.Effect<number, AuditError>
 }
 
 export interface TokenUsageEvent {
@@ -92,10 +91,7 @@ function createAuditService(
       yield* repo.insert(record)
     }).pipe(
       Effect.catchAll((cause) => {
-        const err =
-          cause instanceof Error
-            ? cause
-            : new Error(String(cause))
+        const err = cause instanceof Error ? cause : new Error(String(cause))
         return Effect.fail(
           Object.assign(err, {
             _tag: "AuditServiceError" as const,
@@ -109,8 +105,8 @@ function createAuditService(
   const pushBatch = (
     batchSize: number,
     retentionDays: number,
-  ): Effect.Effect<PushResult, AuditError> =>
-    Effect.gen(function* () {
+  ): Effect.Effect<PushResult, AuditError> => {
+    return Effect.gen(function* () {
       const records = yield* repo.fetchUnpushed(batchSize)
       if (records.length === 0) {
         return { pushedCount: 0, failedCount: 0, ids: [] } as PushResult
@@ -123,8 +119,7 @@ function createAuditService(
           db.db.query.accountState.findFirst({
             where: eq(Db.schema.accountState.id, 1),
           }),
-        catch: (cause) =>
-          new Error("Failed to fetch account state", { cause }),
+        catch: (cause) => new Error("Failed to fetch account state", { cause }),
       })
 
       if (!state?.activeAccountId) {
@@ -150,15 +145,20 @@ function createAuditService(
           db.db.query.modelRecords.findMany({
             where: eq(Db.schema.modelRecords.accountId, state.activeAccountId!),
           }),
-        catch: (cause) => new Error("Failed to fetch logged-in models", { cause }),
+        catch: (cause) =>
+          new Error("Failed to fetch logged-in models", { cause }),
       })
 
       const loggedInModelIds = new Set(loggedInModels.map((m) => m.id))
-      const filteredRecords = records.filter((r) => !loggedInModelIds.has(r.modelID))
+      const filteredRecords = records.filter(
+        (r) => !loggedInModelIds.has(r.modelID),
+      )
       const filteredCount = records.length - filteredRecords.length
 
       if (filteredCount > 0) {
-        log("[audit] Filtered out records with logged-in model IDs", { filteredCount })
+        log("[audit] Filtered out records with logged-in model IDs", {
+          filteredCount,
+        })
       }
 
       if (filteredRecords.length === 0) {
@@ -171,14 +171,15 @@ function createAuditService(
       let pushSuccess = false
       try {
         const response = yield* Effect.tryPromise({
-          try: () => fetch(pushUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${account.accessToken}`,
-            },
-            body: JSON.stringify(payload),
-          }),
+          try: () =>
+            fetch(pushUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${account.accessToken}`,
+              },
+              body: JSON.stringify(payload),
+            }),
           catch: (cause) => new Error("HTTP request failed", { cause }),
         })
 
@@ -194,8 +195,7 @@ function createAuditService(
         yield* repo.markPushed(records.map((rec) => rec.id))
         log("[audit] Batch push succeeded", { count: filteredRecords.length })
 
-        const beforeTimestamp =
-          Date.now() - retentionDays * 24 * 60 * 60 * 1000
+        const beforeTimestamp = Date.now() - retentionDays * 24 * 60 * 60 * 1000
         const deleted = yield* repo.cleanupOldRecords(beforeTimestamp)
         if (deleted > 0) {
           log("[audit] Cleanup deleted records", { count: deleted })
@@ -217,15 +217,15 @@ function createAuditService(
         } as PushResult)
       }),
     )
+  }
 
-  const cleanup = (retentionDays: number): Effect.Effect<number, AuditError> => {
+  const cleanup = (
+    retentionDays: number,
+  ): Effect.Effect<number, AuditError> => {
     const beforeTimestamp = Date.now() - retentionDays * 24 * 60 * 60 * 1000
     return repo.cleanupOldRecords(beforeTimestamp).pipe(
       Effect.catchAll((cause) => {
-        const err =
-          cause instanceof Error
-            ? cause
-            : new Error(String(cause))
+        const err = cause instanceof Error ? cause : new Error(String(cause))
         return Effect.fail(
           Object.assign(err, {
             _tag: "AuditServiceError" as const,
@@ -240,7 +240,21 @@ function createAuditService(
   const hasActiveAccount = (): Effect.Effect<boolean, AuditError> =>
     repo.hasActiveAccount().pipe(Effect.catchAll(() => Effect.succeed(false)))
 
-  return { recordTokenUsage, pushBatch, cleanup, hasActiveAccount }
+  const countUnpushed = (): Effect.Effect<number, AuditError> =>
+    repo.countUnpushed().pipe(
+      Effect.catchAll((cause) => {
+        log("[audit] countUnpushed failed", { error: cause })
+        return Effect.succeed(0)
+      }),
+    )
+
+  return {
+    recordTokenUsage,
+    pushBatch,
+    cleanup,
+    hasActiveAccount,
+    countUnpushed,
+  }
 }
 
 export class AuditService {
@@ -265,6 +279,9 @@ export class AuditService {
 
   hasActiveAccount = (): Effect.Effect<boolean, AuditError> =>
     createAuditService(this.repo, this.db).hasActiveAccount()
+
+  countUnpushed = (): Effect.Effect<number, AuditError> =>
+    createAuditService(this.repo, this.db).countUnpushed()
 }
 
 export const Service = AuditRepo.Service
