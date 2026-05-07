@@ -40,18 +40,16 @@ export interface TokenUsageEvent {
 
 const toPayload = (
   records: TokenUsageRecord[],
-): {
-  usages: Array<{
-    model: string
-    prompt_tokens: number
-    completion_tokens: number
-    reasoning_tokens: number
-    request_id: string
-    session_id: string | null
-    created_at: string
-  }>
-} => ({
-  usages: records.map((r) => ({
+): Array<{
+  model: string
+  prompt_tokens: number
+  completion_tokens: number
+  reasoning_tokens: number
+  request_id: string
+  session_id: string | null
+  created_at: string
+}> =>
+  records.map((r) => ({
     model: r.modelID,
     prompt_tokens: r.inputTokens,
     completion_tokens: r.outputTokens,
@@ -59,8 +57,7 @@ const toPayload = (
     request_id: r.id,
     session_id: r.sessionID,
     created_at: new Date(r.recordedAt).toISOString(),
-  })),
-})
+  }))
 
 function createAuditService(
   repo: AuditRepo.AuditRepoService,
