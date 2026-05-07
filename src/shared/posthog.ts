@@ -41,7 +41,7 @@ function shouldDisablePostHog(): boolean {
     process.env.OMO_DISABLE_POSTHOG === "true" ||
     process.env.OMO_DISABLE_POSTHOG === "1"
   ) {
-    return false
+    return true
   }
 
   return isFalsy(process.env.OMO_SEND_ANONYMOUS_TELEMETRY?.trim().toLowerCase())
