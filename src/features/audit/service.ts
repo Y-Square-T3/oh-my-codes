@@ -167,7 +167,7 @@ function createAuditService(
 
       const payload = toPayload(filteredRecords)
 
-      const pushUrl = `${account.url}/token-usages/batch`
+      const pushUrl = `${account.url}/api/v2/token-usages/batch`
       let pushSuccess = false
       try {
         const response = yield* Effect.tryPromise({
