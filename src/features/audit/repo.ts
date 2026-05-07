@@ -10,7 +10,7 @@ import {
 import { tokenUsages } from "../database/schema"
 
 export interface AuditRepoService {
-  readonly insert: (record: TokenUsageRecord) => Effect.Effect<void, AuditRepoError>
+  readonly upsert: (record: TokenUsageRecord) => Effect.Effect<void, AuditRepoError>
   readonly fetchUnpushed: (limit: number) => Effect.Effect<TokenUsageRecord[], AuditRepoError>
   readonly markPushed: (ids: string[]) => Effect.Effect<void, AuditRepoError>
   readonly cleanupOldRecords: (beforeTimestamp: number) => Effect.Effect<number, AuditRepoError>
@@ -66,27 +66,46 @@ export const layer = Layer.effect(
     const database = yield* Db.Database
     yield* database.migrate()
 
-    const insert = (record: TokenUsageRecord) =>
+    const upsert = (record: TokenUsageRecord) =>
       Effect.tryPromise({
         try: () =>
-          database.db.insert(tokenUsages).values({
-            id: record.id,
-            recordedAt: record.recordedAt,
-            sessionID: record.sessionID,
-            messageID: record.messageID,
-            agent: record.agent,
-            providerID: record.providerID,
-            modelID: record.modelID,
-            inputTokens: record.inputTokens,
-            outputTokens: record.outputTokens,
-            reasoningTokens: record.reasoningTokens,
-            cacheReadTokens: record.cacheReadTokens,
-            cacheWriteTokens: record.cacheWriteTokens,
-            pushed: record.pushed ? 1 : 0,
-            createdAt: record.createdAt,
-          }),
-        catch: (cause) => new Error("Failed to insert audit record", { cause }),
-      }).pipe(mapAuditRepoError("insert"))
+          database.db
+            .insert(tokenUsages)
+            .values({
+              id: record.id,
+              recordedAt: record.recordedAt,
+              sessionID: record.sessionID,
+              messageID: record.messageID,
+              agent: record.agent,
+              providerID: record.providerID,
+              modelID: record.modelID,
+              inputTokens: record.inputTokens,
+              outputTokens: record.outputTokens,
+              reasoningTokens: record.reasoningTokens,
+              cacheReadTokens: record.cacheReadTokens,
+              cacheWriteTokens: record.cacheWriteTokens,
+              pushed: record.pushed ? 1 : 0,
+              createdAt: record.createdAt,
+            })
+            .onConflictDoUpdate({
+              target: tokenUsages.messageID,
+              set: {
+                recordedAt: record.recordedAt,
+                sessionID: record.sessionID,
+                agent: record.agent,
+                providerID: record.providerID,
+                modelID: record.modelID,
+                inputTokens: record.inputTokens,
+                outputTokens: record.outputTokens,
+                reasoningTokens: record.reasoningTokens,
+                cacheReadTokens: record.cacheReadTokens,
+                cacheWriteTokens: record.cacheWriteTokens,
+                pushed: record.pushed ? 1 : 0,
+                createdAt: record.createdAt,
+              },
+            }),
+        catch: (cause) => new Error("Failed to upsert audit record", { cause }),
+      }).pipe(mapAuditRepoError("upsert"))
 
     const fetchUnpushed = (limit: number) =>
       Effect.tryPromise({
@@ -158,7 +177,7 @@ export const layer = Layer.effect(
       )
 
     return {
-      insert,
+      upsert,
       fetchUnpushed,
       markPushed,
       cleanupOldRecords,

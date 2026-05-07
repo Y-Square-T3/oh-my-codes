@@ -85,7 +85,7 @@ function createAuditService(
         pushed: false,
         createdAt: now,
       }
-      yield* repo.insert(record)
+      yield* repo.upsert(record)
     }).pipe(
       Effect.catchAll((cause) => {
         const err = cause instanceof Error ? cause : new Error(String(cause))

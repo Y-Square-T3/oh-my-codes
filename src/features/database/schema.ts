@@ -1,4 +1,4 @@
-import { index, primaryKey, sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core"
+import { index, primaryKey, sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core"
 
 export const accounts = sqliteTable("accounts", {
   id: text("id").primaryKey(),
@@ -78,6 +78,7 @@ export const tokenUsages = sqliteTable("token_usages", {
   pushed: integer("pushed").notNull().default(0),
   createdAt: integer("created_at").notNull(),
 }, (t) => ({
+  messageIdIdx: uniqueIndex("token_usages_message_id_idx").on(t.messageID),
   pushedIdx: index("token_usages_pushed_idx").on(t.pushed),
   recordedAtIdx: index("token_usages_recorded_at_idx").on(t.recordedAt),
 }))
