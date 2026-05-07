@@ -331,6 +331,7 @@ export async function applyAgentConfig(params: {
     )
 
     params.config.agent = {
+      ...configAgent,
       ...agentConfig,
       ...Object.fromEntries(
         Object.entries(builtinAgents).filter(
@@ -397,7 +398,7 @@ export async function applyAgentConfig(params: {
       : {}
 
     params.config.agent = {
-      ...(params.config.agent as object),
+      ...configAgent,
       ...builtinAgents,
       // Precedence: later entries override earlier (project > global > user > plugin)
       ...filterDisabledAgents(filteredPluginAgents),
