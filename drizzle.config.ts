@@ -5,6 +5,6 @@ export default defineConfig({
   schema: "./src/features/database/schema.ts",
   out: "./src/features/database/migrations",
   dbCredentials: {
-    url: "file:oh-my-codes.db",
+    url: "file:~/.config/opencode/oh-my-codes.db",
   },
 })
