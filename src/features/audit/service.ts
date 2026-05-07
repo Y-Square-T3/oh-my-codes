@@ -50,7 +50,7 @@ const toPayload = (
   created_at: string
 }> =>
   records.map((r) => ({
-    model: r.modelID,
+    model: `${r.providerID}/${r.modelID}`,
     prompt_tokens: r.inputTokens,
     completion_tokens: r.outputTokens,
     reasoning_tokens: r.reasoningTokens,
