@@ -21,9 +21,11 @@ describe("agent-priority-order", () => {
       expect(Array.isArray(CANONICAL_CORE_AGENT_ORDER)).toBe(true)
     })
 
-    test("canonical order is exactly [sisyphus, hephaestus, prometheus, atlas]", () => {
+    test("canonical order is exactly [build, plan, sisyphus, hephaestus, prometheus, atlas]", () => {
       // then
       expect(CANONICAL_CORE_AGENT_ORDER).toEqual([
+        "build",
+        "plan",
         "sisyphus",
         "hephaestus",
         "prometheus",
@@ -31,9 +33,9 @@ describe("agent-priority-order", () => {
       ])
     })
 
-    test("canonical order length is exactly 4", () => {
+    test("canonical order length is exactly 6", () => {
       // then
-      expect(CANONICAL_CORE_AGENT_ORDER).toHaveLength(4)
+      expect(CANONICAL_CORE_AGENT_ORDER).toHaveLength(6)
     })
   })
 
@@ -204,22 +206,22 @@ describe("agent-priority-order", () => {
         expect(result[sisyphus]).toEqual({
           name: "sisyphus",
           mode: "primary",
-          order: 1,
+          order: 3,
         })
         expect(result[hephaestus]).toEqual({
           name: "hephaestus",
           mode: "primary",
-          order: 2,
+          order: 4,
         })
         expect(result[prometheus]).toEqual({
           name: "prometheus",
           mode: "primary",
-          order: 3,
+          order: 5,
         })
         expect(result[atlas]).toEqual({
           name: "atlas",
           mode: "primary",
-          order: 4,
+          order: 6,
         })
       })
 

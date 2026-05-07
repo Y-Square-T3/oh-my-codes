@@ -15,11 +15,11 @@ import {
   discoverUserClaudeSkills,
 } from "../features/opencode-skill-loader"
 import {
-  loadProjectAgents,
-  loadUserAgents,
+  loadAgentDefinitions,
   loadOpencodeGlobalAgents,
   loadOpencodeProjectAgents,
-  loadAgentDefinitions,
+  loadProjectAgents,
+  loadUserAgents,
   readOpencodeConfigAgents,
 } from "../features/claude-code-agent-loader"
 import type { PluginComponents } from "./plugin-components-loader"
@@ -397,6 +397,7 @@ export async function applyAgentConfig(params: {
       : {}
 
     params.config.agent = {
+      ...(params.config.agent as object),
       ...builtinAgents,
       // Precedence: later entries override earlier (project > global > user > plugin)
       ...filterDisabledAgents(filteredPluginAgents),

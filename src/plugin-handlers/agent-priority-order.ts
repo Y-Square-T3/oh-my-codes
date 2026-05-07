@@ -11,6 +11,8 @@ import { getAgentListDisplayName } from "../shared/agent-display-names"
  * See: src/plugin-handlers/AGENTS.md for architectural context.
  */
 export const CANONICAL_CORE_AGENT_ORDER = [
+  "build",
+  "plan",
   "sisyphus",
   "hephaestus",
   "prometheus",

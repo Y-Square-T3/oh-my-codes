@@ -392,9 +392,10 @@ describe("Plan agent demote behavior", () => {
     // #then
     const emittedCoreEntries = Object.entries(
       config.agent as Record<string, { name?: string }>,
-    ).slice(0, 4)
+    )
 
-    expect(emittedCoreEntries).toEqual([
+
+    expect(emittedCoreEntries.slice(2,6)).toEqual([
       [
         getAgentListDisplayName("sisyphus"),
         expect.objectContaining({ name: getAgentRuntimeName("sisyphus") }),
