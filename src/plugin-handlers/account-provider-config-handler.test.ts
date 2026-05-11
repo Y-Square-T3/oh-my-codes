@@ -165,7 +165,7 @@ describe("applyAccountProviderConfig", () => {
     const models = anthropic["models"] as Record<string, unknown>
     const claudeModel = models["claude-sonnet-4-20250514"] as Record<string, unknown>
 
-    expect(claudeModel["limit"]).toEqual({ context: 200000 })
+    expect(claudeModel["limit"]).toEqual({ context: 200000, output: 0 })
   })
 
   test("maps modalities correctly", async () => {
@@ -228,7 +228,7 @@ describe("applyAccountProviderConfig", () => {
         anthropic: {
           models: {
             "claude-sonnet-4-20250514": {
-              limit: { context: 999999 },
+              limit: { context: 999999, output: 0 },
             },
           },
         },
@@ -241,7 +241,7 @@ describe("applyAccountProviderConfig", () => {
     const models = anthropic["models"] as Record<string, unknown>
     const claudeModel = models["claude-sonnet-4-20250514"] as Record<string, unknown>
 
-    expect(claudeModel["limit"]).toEqual({ context: 999999 })
+    expect(claudeModel["limit"]).toEqual({ context: 999999, output: 0 })
   })
 
   test("handles invalid JSON in modalities gracefully", async () => {
@@ -278,7 +278,7 @@ describe("applyAccountProviderConfig", () => {
     const models = testProvider["models"] as Record<string, unknown>
     const model1 = models["model-1"] as Record<string, unknown>
 
-    expect(model1["limit"]).toEqual({ context: 100 })
+    expect(model1["limit"]).toEqual({ context: 100, output: 0 })
     expect(model1["modalities"]).toBeUndefined()
   })
 
@@ -366,7 +366,7 @@ describe("applyAccountProviderConfig", () => {
           },
           models: {
             "claude-sonnet-4-20250514": {
-              limit: { context: 999999 },
+              limit: { context: 999999, output: 0 },
             },
           },
         },
@@ -385,6 +385,6 @@ describe("applyAccountProviderConfig", () => {
     })
     const models = anthropic["models"] as Record<string, unknown>
     const claudeModel = models["claude-sonnet-4-20250514"] as Record<string, unknown>
-    expect(claudeModel["limit"]).toEqual({ context: 999999 })
+    expect(claudeModel["limit"]).toEqual({ context: 999999, output: 0 })
   })
 })
