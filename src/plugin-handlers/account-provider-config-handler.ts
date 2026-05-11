@@ -28,8 +28,11 @@ function parseJsonArray(value: string | null): string[] | null {
 function buildModelConfig(row: ModelRow): Record<string, unknown> {
   const modelConfig: Record<string, unknown> = {}
 
-  if (row.limitContext != null) {
-    modelConfig.limit = { context: row.limitContext }
+  if (row.limitContext != null || row.limitOutput != null) {
+    modelConfig.limit = {
+      context: row.limitContext ?? 0,
+      output: row.limitOutput ?? 0,
+    }
   }
 
   const inputModalities = parseJsonArray(row.modalitiesInput)
