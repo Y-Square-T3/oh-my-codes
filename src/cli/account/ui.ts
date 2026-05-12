@@ -145,12 +145,11 @@ export const select = <T>(
 
 export const openBrowser = (url: string): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
-    // Browser opening is fire-and-forget
-    const command =
-      process.platform === "win32"
-        ? `cmd /c start "" "${url}"`
-        : process.platform === "darwin"
-          ? `open "${url}"`
-          : `xdg-open "${url}"`
-    void Bun.spawn(["sh", "-c", command])
+    if (process.platform === "win32") {
+      void Bun.spawn(["cmd", "/c", "start", "", url])
+    } else if (process.platform === "darwin") {
+      void Bun.spawn(["open", url])
+    } else {
+      void Bun.spawn(["xdg-open", url])
+    }
   })
