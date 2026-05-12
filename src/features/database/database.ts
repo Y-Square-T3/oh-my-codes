@@ -50,7 +50,7 @@ export const Database = Context.GenericTag<DatabaseService>("@account/Database")
 const createDefaultLayer = (dbPath?: string) =>
   Layer.sync(Database, () => {
     const path = dbPath ?? resolveDbPath()
-    const dir = path.substring(0, path.lastIndexOf("/"))
+    const dir = dirname(path)
 
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })

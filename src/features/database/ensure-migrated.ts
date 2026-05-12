@@ -40,7 +40,7 @@ function migrationError(err: unknown): void {
 export async function ensureMigrated(): Promise<void> {
   const dbPath = resolveDbPath()
 
-  const dbDir = dbPath.substring(0, dbPath.lastIndexOf("/"))
+  const dbDir = dirname(dbPath)
   if (!existsSync(dbDir)) {
     mkdirSync(dbDir, { recursive: true })
   }
