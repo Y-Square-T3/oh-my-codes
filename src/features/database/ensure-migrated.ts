@@ -1,4 +1,5 @@
 import { dirname, join } from "node:path"
+import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
 import { existsSync, mkdirSync } from "node:fs"
 import pc from "picocolors"
@@ -11,7 +12,7 @@ const SUPPORT_URL = "https://github.com/Y-Square-T3/oh-my-codes/issues"
 function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
   const xdgConfig =
-    process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
+    process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config")
   const configDir = envConfigDir ?? join(xdgConfig, "opencode")
 
   if (!existsSync(configDir)) {

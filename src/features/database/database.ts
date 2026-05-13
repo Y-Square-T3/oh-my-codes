@@ -1,4 +1,5 @@
 import { dirname, join } from "node:path"
+import { homedir } from "node:os"
 import { existsSync, mkdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { Database as BunDatabase } from "bun:sqlite"
@@ -26,7 +27,7 @@ export class DatabaseQueryError extends Error {
 export function resolveDbPath(): string {
   const envConfigDir = process.env.OPENCODE_CONFIG_DIR?.trim()
   const xdgConfig =
-    process.env.XDG_CONFIG_HOME ?? join(process.env.HOME ?? "", ".config")
+    process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config")
   const configDir = envConfigDir ?? join(xdgConfig, "opencode")
 
   if (!existsSync(configDir)) {
