@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes",
-  "version": "4.1.0",
+  "version": "3.18.9",
   "description": "The Best AI Agent Harness",
   "type": "module",
   "packageManager": "yarn@4.15.0",
@@ -70,10 +70,10 @@
     "zod": "^4.4.3"
   },
   "optionalDependencies": {
-    "oh-my-codes-darwin-arm64": "4.1.0",
-    "oh-my-codes-darwin-x64": "4.1.0",
-    "oh-my-codes-linux-x64": "4.1.0",
-    "oh-my-codes-windows-x64": "4.1.0"
+    "oh-my-codes-darwin-arm64": "3.18.9",
+    "oh-my-codes-darwin-x64": "3.18.9",
+    "oh-my-codes-linux-x64": "3.18.9",
+    "oh-my-codes-windows-x64": "3.18.9"
   },
   "pkg": {
     "assets": [
