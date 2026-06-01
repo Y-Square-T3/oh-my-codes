@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes",
-  "version": "3.18.12",
+  "version": "3.18.15",
   "description": "The Best AI Agent Harness",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
@@ -85,9 +85,9 @@
     ]
   },
   "optionalDependencies": {
-    "oh-my-codes-darwin-arm64": "3.18.12",
-    "oh-my-codes-darwin-x64": "3.18.12",
-    "oh-my-codes-linux-x64": "3.18.12",
-    "oh-my-codes-windows-x64": "3.18.12"
+    "oh-my-codes-darwin-arm64": "*",
+    "oh-my-codes-darwin-x64": "*",
+    "oh-my-codes-linux-x64": "*",
+    "oh-my-codes-windows-x64": "*"
   }
 }
