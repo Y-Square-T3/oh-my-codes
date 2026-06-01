@@ -2,6 +2,8 @@
   "name": "oh-my-codes",
   "version": "3.18.11",
   "description": "The Best AI Agent Harness",
+  "main": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "packageManager": "yarn@4.15.0",
   "bin": {
@@ -22,7 +24,7 @@
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",
-    "build": "esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3 && rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=node --external:@opencode-ai/plugin && esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3 && rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
     "build:binaries": "node scripts/build-binaries.mjs",
     "build:all": "yarn build && yarn build:binaries",
     "postinstall": "node postinstall.mjs",
