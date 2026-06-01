@@ -5,6 +5,9 @@
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "packageManager": "yarn@4.15.0",
   "bin": {
     "oh-my-codes": "bin/oh-my-codes.js",
@@ -82,9 +85,9 @@
     ]
   },
   "optionalDependencies": {
-    "oh-my-codes-darwin-arm64": "3.18.11",
-    "oh-my-codes-darwin-x64": "3.18.11",
-    "oh-my-codes-linux-x64": "3.18.11",
-    "oh-my-codes-windows-x64": "3.18.11"
+    "oh-my-codes-darwin-arm64": "workspace:*",
+    "oh-my-codes-darwin-x64": "workspace:*",
+    "oh-my-codes-linux-x64": "workspace:*",
+    "oh-my-codes-windows-x64": "workspace:*"
   }
 }
