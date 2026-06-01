@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts"
 import color from "picocolors"
+import { addPluginToOpenCodeConfig } from "./config-manager"
 import { hasAnyAccount } from "./account/check-account-exists"
 import { login } from "./account/login"
 
@@ -52,6 +53,16 @@ export async function runTuiInstaller(version: string, options?: TuiInstallerOpt
         p.log.info(`You can log in later with: ${color.cyan("bunx oh-my-codes account login <server-url>")}`)
       }
     }
+  }
+
+  p.log.info("Registering oh-my-codes in OpenCode configuration...")
+
+  const pluginResult = await addPluginToOpenCodeConfig()
+  if (pluginResult.success) {
+    p.log.success(`oh-my-codes@latest added to ${pluginResult.configPath}`)
+  } else {
+    p.log.warn(`Failed to register plugin: ${pluginResult.error}`)
+    p.log.info(`You can manually add "oh-my-codes@latest" to the "plugin" array in ${pluginResult.configPath}`)
   }
 
   return 0
