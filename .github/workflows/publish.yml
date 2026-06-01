@@ -137,7 +137,14 @@ jobs:
             mv tmp.json "packages/${platform}/package.json"
           done
 
-          jq --arg v "$VERSION" '.optionalDependencies = ((.optionalDependencies // {}) | to_entries | map(.value = $v) | from_entries)' package.json > tmp.json && mv tmp.json package.json
+          jq --arg v "$VERSION" '
+            .optionalDependencies = {
+              "oh-my-codes-darwin-arm64": $v,
+              "oh-my-codes-darwin-x64": $v,
+              "oh-my-codes-linux-x64": $v,
+              "oh-my-codes-windows-x64": $v
+            }
+          ' package.json > tmp.json && mv tmp.json package.json
 
       - name: Build main package
         if: steps.check.outputs.skip != 'true'
@@ -203,7 +210,14 @@ jobs:
             mv tmp.json "packages/${platform}/package.json"
           done
 
-          jq --arg v "$VERSION" '.optionalDependencies = ((.optionalDependencies // {}) | to_entries | map(.value = $v) | from_entries)' package.json > tmp.json && mv tmp.json package.json
+          jq --arg v "$VERSION" '
+            .optionalDependencies = {
+              "oh-my-codes-darwin-arm64": $v,
+              "oh-my-codes-darwin-x64": $v,
+              "oh-my-codes-linux-x64": $v,
+              "oh-my-codes-windows-x64": $v
+            }
+          ' package.json > tmp.json && mv tmp.json package.json
 
       - name: Commit version bump
         env:

@@ -2342,42 +2342,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oh-my-codes-darwin-arm64@npm:3.18.9":
-  version: 3.18.9
-  resolution: "oh-my-codes-darwin-arm64@npm:3.18.9"
-  bin:
-    oh-my-codes: bin/oh-my-codes
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"oh-my-codes-darwin-x64@npm:3.18.9":
-  version: 3.18.9
-  resolution: "oh-my-codes-darwin-x64@npm:3.18.9"
-  bin:
-    oh-my-codes: bin/oh-my-codes
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"oh-my-codes-linux-x64@npm:3.18.9":
-  version: 3.18.9
-  resolution: "oh-my-codes-linux-x64@npm:3.18.9"
-  bin:
-    oh-my-codes: bin/oh-my-codes
-  conditions: os=linux & cpu=x64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"oh-my-codes-windows-x64@npm:3.18.9":
-  version: 3.18.9
-  resolution: "oh-my-codes-windows-x64@npm:3.18.9"
-  bin:
-    oh-my-codes: bin/oh-my-codes.exe
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "oh-my-codes@workspace:.":
   version: 0.0.0-use.local
   resolution: "oh-my-codes@workspace:."
@@ -2395,24 +2359,11 @@ __metadata:
     drizzle-orm: "npm:^0.45.2"
     effect: "npm:^3.21.2"
     esbuild: "npm:^0.25.0"
-    oh-my-codes-darwin-arm64: "npm:3.18.9"
-    oh-my-codes-darwin-x64: "npm:3.18.9"
-    oh-my-codes-linux-x64: "npm:3.18.9"
-    oh-my-codes-windows-x64: "npm:3.18.9"
     picocolors: "npm:^1.1.1"
     prettier: "npm:^3.8.3"
     tsx: "npm:^4.21.0"
     typescript: "npm:^6.0.3"
     zod: "npm:^4.4.3"
-  dependenciesMeta:
-    oh-my-codes-darwin-arm64:
-      optional: true
-    oh-my-codes-darwin-x64:
-      optional: true
-    oh-my-codes-linux-x64:
-      optional: true
-    oh-my-codes-windows-x64:
-      optional: true
   bin:
     oh-my-codes: bin/oh-my-codes.js
     omc: bin/oh-my-codes.js
