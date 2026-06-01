@@ -1,10 +1,10 @@
 import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { existsSync, mkdirSync } from "node:fs"
+import { DatabaseSync } from "node:sqlite"
 import { fileURLToPath } from "node:url"
-import SqliteDatabase from "better-sqlite3"
-import { type BetterSQLite3Database, drizzle } from "drizzle-orm/better-sqlite3"
-import { migrate } from "drizzle-orm/better-sqlite3/migrator"
+import { type NodeSQLiteDatabase, drizzle } from "drizzle-orm/node-sqlite"
+import { migrate } from "drizzle-orm/node-sqlite/migrator"
 import { Context, Effect, Layer } from "effect"
 import * as schema from "./schema"
 
@@ -13,9 +13,9 @@ function getMigrationsDir(): string {
     return join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
   }
   if (typeof import.meta?.url !== "undefined") {
-    return join(dirname(dirname(fileURLToPath(import.meta.url))), "migrations")
+    return join(dirname(fileURLToPath(import.meta.url)), "migrations")
   }
-  return join(dirname(dirname(__filename)), "migrations")
+  return join(dirname(__filename), "migrations")
 }
 
 const MIGRATIONS_DIR = getMigrationsDir()
@@ -47,8 +47,8 @@ export function resolveDbPath(): string {
 export { schema }
 
 export interface DatabaseService {
-  readonly db: BetterSQLite3Database<typeof schema>
-  readonly sqlite: SqliteDatabase.Database
+  readonly db: NodeSQLiteDatabase<typeof schema>
+  readonly sqlite: DatabaseSync
   readonly migrate: () => Effect.Effect<void, DatabaseQueryError>
   readonly close: () => Effect.Effect<void>
 }
@@ -64,8 +64,10 @@ const createDefaultLayer = (dbPath?: string) =>
       mkdirSync(dir, { recursive: true })
     }
 
-    const sqlite = new SqliteDatabase(path)
-    const db = drizzle(sqlite, { schema })
+    const sqlite = new DatabaseSync(path, {
+      enableForeignKeyConstraints: true,
+    })
+    const db = drizzle({ client: sqlite, schema })
 
     return {
       db,

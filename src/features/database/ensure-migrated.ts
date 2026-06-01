@@ -2,10 +2,10 @@ import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
 import { existsSync, mkdirSync } from "node:fs"
+import { DatabaseSync } from "node:sqlite"
+import { drizzle } from "drizzle-orm/node-sqlite"
+import { migrate } from "drizzle-orm/node-sqlite/migrator"
 import pc from "picocolors"
-import SqliteDatabase from "better-sqlite3"
-import { drizzle } from "drizzle-orm/better-sqlite3"
-import { migrate } from "drizzle-orm/better-sqlite3/migrator"
 
 const SUPPORT_URL = "https://github.com/Y-Square-T3/oh-my-codes/issues"
 
@@ -26,9 +26,9 @@ function getMigrationsDir(): string {
     return join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
   }
   if (typeof import.meta?.url !== "undefined") {
-    return join(dirname(dirname(fileURLToPath(import.meta.url))), "migrations")
+    return join(dirname(fileURLToPath(import.meta.url)), "migrations")
   }
-  return join(dirname(dirname(__filename)), "migrations")
+  return join(dirname(__filename), "migrations")
 }
 
 const MIGRATIONS_DIR = getMigrationsDir()
@@ -49,8 +49,10 @@ export async function ensureMigrated(): Promise<void> {
     mkdirSync(dbDir, { recursive: true })
   }
 
-  const sqlite = new SqliteDatabase(dbPath)
-  const db = drizzle(sqlite)
+  const sqlite = new DatabaseSync(dbPath, {
+    enableForeignKeyConstraints: true,
+  })
+  const db = drizzle({ client: sqlite })
 
   try {
     migrate(db, { migrationsFolder: MIGRATIONS_DIR })

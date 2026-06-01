@@ -93,11 +93,13 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
 
       yield* db.migrate()
 
-      const state = yield* Effect.tryPromise({
+      const state = yield* Effect.try({
         try: () =>
-          db.db.query.accountState.findFirst({
-            where: eq(Db.schema.accountState.id, 1),
-          }),
+          db.db
+            .select()
+            .from(Db.schema.accountState)
+            .where(eq(Db.schema.accountState.id, 1))
+            .get(),
         catch: (cause) => new Error("Failed to fetch account state", { cause }),
       })
 
@@ -108,11 +110,13 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
 
       const workspaceId = state.activeWorkspaceId ?? undefined
 
-      const account = yield* Effect.tryPromise({
+      const account = yield* Effect.try({
         try: () =>
-          db.db.query.accounts.findFirst({
-            where: eq(Db.schema.accounts.id, state.activeAccountId!),
-          }),
+          db.db
+            .select()
+            .from(Db.schema.accounts)
+            .where(eq(Db.schema.accounts.id, state.activeAccountId!))
+            .get(),
         catch: (cause) => new Error("Failed to fetch account", { cause }),
       })
 
@@ -121,11 +125,13 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
         return { pushedCount: 0, failedCount: 0, ids: [] } as PushResult
       }
 
-      const loggedInModels = yield* Effect.tryPromise({
+      const loggedInModels = yield* Effect.try({
         try: () =>
-          db.db.query.modelRecords.findMany({
-            where: eq(Db.schema.modelRecords.accountId, state.activeAccountId!),
-          }),
+          db.db
+            .select()
+            .from(Db.schema.modelRecords)
+            .where(eq(Db.schema.modelRecords.accountId, state.activeAccountId!))
+            .all(),
         catch: (cause) => new Error("Failed to fetch logged-in models", { cause }),
       })
 

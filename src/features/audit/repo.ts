@@ -61,15 +61,30 @@ export const layer = Layer.effect(
     yield* database.migrate()
 
     const upsert = (record: TokenUsageRecord) =>
-      Effect.tryPromise({
-        try: () =>
-          database.db
-            .insert(tokenUsages)
-            .values({
-              id: record.id,
+      Effect.promise(() =>
+        database.db
+          .insert(tokenUsages)
+          .values({
+            id: record.id,
+            recordedAt: record.recordedAt,
+            sessionID: record.sessionID,
+            messageID: record.messageID,
+            agent: record.agent,
+            providerID: record.providerID,
+            modelID: record.modelID,
+            inputTokens: record.inputTokens,
+            outputTokens: record.outputTokens,
+            reasoningTokens: record.reasoningTokens,
+            cacheReadTokens: record.cacheReadTokens,
+            cacheWriteTokens: record.cacheWriteTokens,
+            pushed: record.pushed ? 1 : 0,
+            createdAt: record.createdAt,
+          })
+          .onConflictDoUpdate({
+            target: tokenUsages.messageID,
+            set: {
               recordedAt: record.recordedAt,
               sessionID: record.sessionID,
-              messageID: record.messageID,
               agent: record.agent,
               providerID: record.providerID,
               modelID: record.modelID,
@@ -80,36 +95,20 @@ export const layer = Layer.effect(
               cacheWriteTokens: record.cacheWriteTokens,
               pushed: record.pushed ? 1 : 0,
               createdAt: record.createdAt,
-            })
-            .onConflictDoUpdate({
-              target: tokenUsages.messageID,
-              set: {
-                recordedAt: record.recordedAt,
-                sessionID: record.sessionID,
-                agent: record.agent,
-                providerID: record.providerID,
-                modelID: record.modelID,
-                inputTokens: record.inputTokens,
-                outputTokens: record.outputTokens,
-                reasoningTokens: record.reasoningTokens,
-                cacheReadTokens: record.cacheReadTokens,
-                cacheWriteTokens: record.cacheWriteTokens,
-                pushed: record.pushed ? 1 : 0,
-                createdAt: record.createdAt,
-              },
-            }),
-        catch: (cause) => new Error("Failed to upsert audit record", { cause }),
-      }).pipe(mapAuditRepoError("upsert"))
+            },
+          }),
+      ).pipe(mapAuditRepoError("upsert"))
 
     const fetchUnpushed = (limit: number) =>
-      Effect.tryPromise({
+      Effect.try({
         try: () =>
           database.db
             .select()
             .from(tokenUsages)
             .where(eq(tokenUsages.pushed, 0))
             .limit(limit)
-            .orderBy(tokenUsages.recordedAt),
+            .orderBy(tokenUsages.recordedAt)
+            .all(),
         catch: (cause) => new Error("Failed to fetch unpushed records", { cause }),
       }).pipe(
         Effect.map((rows) => rows.map(decodeRecord)),
@@ -117,7 +116,7 @@ export const layer = Layer.effect(
       )
 
     const markPushed = (ids: string[]) =>
-      Effect.tryPromise(async () => {
+      Effect.promise(async () => {
         if (ids.length === 0) return
         await database.db
           .update(tokenUsages)
@@ -127,20 +126,20 @@ export const layer = Layer.effect(
               ids.map((id) => sql`${id}`),
               sql`, `,
             )})`,
-          ).run()
+          )
       }).pipe(mapAuditRepoError("markPushed"))
 
     const cleanupOldRecords = (beforeTimestamp: number) =>
-      Effect.tryPromise({
-        try: async () => {
-          const result = await database.db
+      Effect.try({
+        try: () => {
+          database.db
             .delete(tokenUsages)
             .where(and(eq(tokenUsages.pushed, 1), lte(tokenUsages.recordedAt, beforeTimestamp)))
-            .run()
           return database.db
             .select({ count: sql<number>`count(*)` })
             .from(tokenUsages)
             .where(eq(tokenUsages.pushed, 1))
+            .all()
         },
         catch: (cause) => new Error("Failed to cleanup old records", { cause }),
       }).pipe(
@@ -149,12 +148,13 @@ export const layer = Layer.effect(
       )
 
     const countUnpushed = () =>
-      Effect.tryPromise({
+      Effect.try({
         try: () =>
           database.db
             .select({ count: sql<number>`count(*)` })
             .from(tokenUsages)
-            .where(eq(tokenUsages.pushed, 0)),
+            .where(eq(tokenUsages.pushed, 0))
+            .all(),
         catch: (cause) => new Error("Failed to count unpushed records", { cause }),
       }).pipe(
         Effect.map((rows) => rows[0]?.count ?? 0),
@@ -162,11 +162,13 @@ export const layer = Layer.effect(
       )
 
     const hasActiveAccount = () =>
-      Effect.tryPromise({
+      Effect.try({
         try: () =>
-          database.db.query.accountState.findFirst({
-            where: eq(Db.schema.accountState.id, 1),
-          }),
+          database.db
+            .select()
+            .from(Db.schema.accountState)
+            .where(eq(Db.schema.accountState.id, 1))
+            .get(),
         catch: (cause) => new Error("Failed to check active account", { cause }),
       }).pipe(
         Effect.map((state) => state?.activeAccountId != null),

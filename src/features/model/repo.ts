@@ -207,7 +207,7 @@ export const layer = Layer.effect(
     const deleteByAccountId = (accountId: AccountID) =>
       Effect.tryPromise({
         try: async () => {
-          await database.db.delete(modelRecords).where(eq(modelRecords.accountId, accountId)).run()
+          await database.db.delete(modelRecords).where(eq(modelRecords.accountId, accountId))
         },
         catch: (cause) => new Db.DatabaseQueryError("Failed to delete models", cause),
       }).pipe(
@@ -222,7 +222,7 @@ export const layer = Layer.effect(
     const deleteProviderByAccountId = (accountId: AccountID) =>
       Effect.tryPromise({
         try: async () => {
-          await database.db.delete(providers).where(eq(providers.accountId, accountId)).run()
+          await database.db.delete(providers).where(eq(providers.accountId, accountId))
         },
         catch: (cause) => new Db.DatabaseQueryError("Failed to delete providers", cause),
       }).pipe(

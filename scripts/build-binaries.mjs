@@ -56,7 +56,7 @@ async function buildBundle() {
 
   mkdirSync(join(rootDir, "dist", "cli"), { recursive: true })
 
-  const cmd = `npx esbuild ${ENTRY_POINT} --bundle --platform=node --outfile=${BUNDLED_ENTRY} --format=cjs --external:better-sqlite3 --external:@ast-grep/napi`
+  const cmd = `npx esbuild ${ENTRY_POINT} --bundle --platform=node --outfile=${BUNDLED_ENTRY} --format=cjs --external:@ast-grep/napi`
   run(cmd)
 
   if (!existsSync(join(rootDir, BUNDLED_ENTRY))) {
