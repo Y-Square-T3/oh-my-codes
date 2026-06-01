@@ -22,7 +22,7 @@
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",
-    "build": "esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3",
+    "build": "esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3 && rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
     "build:binaries": "node scripts/build-binaries.mjs",
     "build:all": "yarn build && yarn build:binaries",
     "postinstall": "node postinstall.mjs",
@@ -67,5 +67,15 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
     "zod": "^4.4.3"
+  },
+  "pkg": {
+    "assets": [
+      "dist/migrations/**/*",
+      "node_modules/better-sqlite3/build/Release/**/*",
+      "node_modules/better-sqlite3/package.json"
+    ],
+    "targets": [
+      "node24"
+    ]
   }
 }

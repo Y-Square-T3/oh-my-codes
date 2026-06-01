@@ -8,10 +8,17 @@ import { migrate } from "drizzle-orm/better-sqlite3/migrator"
 import { Context, Effect, Layer } from "effect"
 import * as schema from "./schema"
 
-const currentFile = fileURLToPath(import.meta.url)
-const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
-  ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
-  : join(dirname(currentFile), "migrations")
+function getMigrationsDir(): string {
+  if (process.env.OH_MY_CODES_ROOT) {
+    return join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
+  }
+  if (typeof import.meta?.url !== "undefined") {
+    return join(dirname(dirname(fileURLToPath(import.meta.url))), "migrations")
+  }
+  return join(dirname(dirname(__filename)), "migrations")
+}
+
+const MIGRATIONS_DIR = getMigrationsDir()
 
 export class DatabaseQueryError extends Error {
   readonly _tag = "DatabaseQueryError"

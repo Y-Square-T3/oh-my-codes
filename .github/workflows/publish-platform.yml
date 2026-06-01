@@ -131,8 +131,9 @@ jobs:
             mkdir -p packages/${PLATFORM}/bin
 
             npx esbuild src/cli/index.ts --bundle --platform=node --outfile=dist/cli/bundle-for-pkg.js --format=cjs --external:better-sqlite3
+            rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations
 
-            npx pkg dist/cli/bundle-for-pkg.js --target $TARGET --output $OUTPUT --compress GZip
+            npx pkg dist/cli/bundle-for-pkg.js -c package.json --target $TARGET --output $OUTPUT --compress GZip
 
             echo "Built binary:"
             ls -lh "$OUTPUT"

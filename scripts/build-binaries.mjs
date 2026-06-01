@@ -77,7 +77,7 @@ async function buildPlatform(platform) {
   try {
     mkdirSync(join(rootDir, "packages", platform.dir, "bin"), { recursive: true })
 
-    const cmd = `npx pkg ${BUNDLED_ENTRY} --target ${platform.target} --output ${absOutfile} --compress GZip`
+    const cmd = `npx pkg ${BUNDLED_ENTRY} -c ${join(rootDir, "package.json")} --target ${platform.target} --output ${absOutfile} --compress GZip`
     run(cmd)
 
     if (!existsSync(absOutfile)) {

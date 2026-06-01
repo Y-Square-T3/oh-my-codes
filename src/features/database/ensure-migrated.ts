@@ -21,10 +21,17 @@ function resolveDbPath(): string {
   return join(configDir, "oh-my-codes.db")
 }
 
-const currentFile = fileURLToPath(import.meta.url)
-const MIGRATIONS_DIR = process.env.OH_MY_CODES_ROOT
-  ? join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
-  : join(dirname(currentFile), "migrations")
+function getMigrationsDir(): string {
+  if (process.env.OH_MY_CODES_ROOT) {
+    return join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
+  }
+  if (typeof import.meta?.url !== "undefined") {
+    return join(dirname(dirname(fileURLToPath(import.meta.url))), "migrations")
+  }
+  return join(dirname(dirname(__filename)), "migrations")
+}
+
+const MIGRATIONS_DIR = getMigrationsDir()
 
 function migrationError(err: unknown): void {
   const message = err instanceof Error ? err.message : String(err)
