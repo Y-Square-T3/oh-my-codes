@@ -1,3 +1,4 @@
+import { execFile } from "child_process"
 import { Effect, Option } from "effect"
 import type { Option as ClackOption } from "@clack/prompts"
 import * as p from "@clack/prompts"
@@ -30,14 +31,7 @@ export const createSpinner = (): {
   const spinner = p.spinner()
   return {
     start: (msg: string) => Effect.sync(() => spinner.start(msg)),
-    stop: (msg: string, exitCode = 0) =>
-      Effect.sync(() => {
-        if (exitCode === 0) {
-          spinner.stop(msg)
-        } else {
-          spinner.stop(msg, exitCode)
-        }
-      }),
+    stop: (msg: string, _exitCode = 0) => Effect.sync(() => spinner.stop(msg)),
   }
 }
 
@@ -139,10 +133,10 @@ export const select = <T>(options: ClackOption<T>[], message: string): Effect.Ef
 export const openBrowser = (url: string): Effect.Effect<void, never, never> =>
   Effect.sync(() => {
     if (process.platform === "win32") {
-      void Bun.spawn(["cmd", "/c", "start", "", url])
+      void execFile("cmd", ["/c", "start", "", url])
     } else if (process.platform === "darwin") {
-      void Bun.spawn(["open", url])
+      void execFile("open", [url])
     } else {
-      void Bun.spawn(["xdg-open", url])
+      void execFile("xdg-open", [url])
     }
   })
