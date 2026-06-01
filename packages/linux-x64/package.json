@@ -1,14 +1,22 @@
 {
   "name": "oh-my-codes-linux-x64",
-  "version": "3.18.10",
+  "version": "3.18.11",
   "description": "Platform binary for oh-my-codes (linux-x64)",
   "license": "SUL-1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Y-Square-T3/oh-my-codes"
   },
-  "os": ["linux"],
-  "cpu": ["x64"],
-  "libc": ["glibc"],
-  "files": ["bin"]
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "files": [
+    "bin"
+  ]
 }

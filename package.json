@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes",
-  "version": "3.18.10",
+  "version": "3.18.11",
   "description": "The Best AI Agent Harness",
   "type": "module",
   "packageManager": "yarn@4.15.0",
@@ -78,5 +78,11 @@
     "targets": [
       "node24"
     ]
+  },
+  "optionalDependencies": {
+    "oh-my-codes-darwin-arm64": "3.18.11",
+    "oh-my-codes-darwin-x64": "3.18.11",
+    "oh-my-codes-linux-x64": "3.18.11",
+    "oh-my-codes-windows-x64": "3.18.11"
   }
 }
