@@ -117,20 +117,17 @@ export const layer = Layer.effect(
       )
 
     const markPushed = (ids: string[]) =>
-      Effect.tryPromise({
-        try: () => {
-          if (ids.length === 0) return Promise.resolve()
-          return database.db
-            .update(tokenUsages)
-            .set({ pushed: 1 })
-            .where(
-              sql`${tokenUsages.id} IN (${sql.join(
-                ids.map((id) => sql`${id}`),
-                sql`, `,
-              )})`,
-            )
-        },
-        catch: (cause) => new Error("Failed to mark records as pushed", { cause }),
+      Effect.tryPromise(async () => {
+        if (ids.length === 0) return
+        await database.db
+          .update(tokenUsages)
+          .set({ pushed: 1 })
+          .where(
+            sql`${tokenUsages.id} IN (${sql.join(
+              ids.map((id) => sql`${id}`),
+              sql`, `,
+            )})`,
+          ).run()
       }).pipe(mapAuditRepoError("markPushed"))
 
     const cleanupOldRecords = (beforeTimestamp: number) =>
