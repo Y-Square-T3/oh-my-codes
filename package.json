@@ -69,6 +69,12 @@
     "typescript": "^6.0.3",
     "zod": "^4.4.3"
   },
+  "optionalDependencies": {
+    "oh-my-codes-darwin-arm64": "4.1.0",
+    "oh-my-codes-darwin-x64": "4.1.0",
+    "oh-my-codes-linux-x64": "4.1.0",
+    "oh-my-codes-windows-x64": "4.1.0"
+  },
   "pkg": {
     "assets": [
       "dist/migrations/**/*",
