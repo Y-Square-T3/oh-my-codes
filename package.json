@@ -1,23 +1,68 @@
 {
   "name": "oh-my-codes",
-  "version": "0.1.0",
+  "version": "0.4.0",
+  "description": "The Best AI Agent Harness",
+  "type": "module",
   "packageManager": "yarn@4.15.0",
+  "bin": {
+    "oh-my-codes": "bin/oh-my-codes.js",
+    "omc": "bin/oh-my-codes.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "postinstall.mjs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "dev": "tsx src/cli/index.ts",
+    "build": "esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3",
+    "build:binaries": "node scripts/build-binaries.mjs",
+    "build:all": "yarn build && yarn build:binaries",
+    "postinstall": "node postinstall.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "oracle",
+    "librarian",
+    "agents",
+    "ai",
+    "llm"
+  ],
+  "author": "YeonGyu-Kim",
+  "license": "SUL-1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Y-Square-T3/oh-my-codes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Y-Square-T3/oh-my-codes/issues"
+  },
+  "homepage": "https://github.com/Y-Square-T3/oh-my-codes#readme",
   "dependencies": {
     "@clack/prompts": "^1.5.0",
     "@opencode-ai/plugin": "^1.15.10",
     "@opencode-ai/sdk": "^1.15.10",
     "better-sqlite3": "^12.10.0",
     "commander": "^15.0.0",
+    "detect-libc": "^2.0.0",
     "drizzle-orm": "^0.45.2",
     "effect": "^3.21.2",
     "picocolors": "^1.1.1"
   },
-  "scripts": {
-    "dev": "tsx src/cli/index.ts"
-  },
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "@yao-pkg/pkg": "^6.0.0",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.25.0",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",

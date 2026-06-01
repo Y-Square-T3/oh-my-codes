@@ -17,3 +17,12 @@ node_modules
 .pnp.*
 
 .idea
+
+# Build artifacts
+dist/
+
+# Platform-specific binaries (built in CI, tracked via .gitkeep)
+packages/darwin-arm64/bin/oh-my-codes*
+packages/darwin-x64/bin/oh-my-codes*
+packages/linux-x64/bin/oh-my-codes*
+packages/windows-x64/bin/oh-my-codes*

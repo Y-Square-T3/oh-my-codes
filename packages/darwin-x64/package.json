@@ -1,0 +1,16 @@
+{
+  "name": "oh-my-codes-darwin-x64",
+  "version": "0.1.0",
+  "description": "Platform-specific binary for oh-my-codes (darwin-x64)",
+  "license": "SUL-1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Y-Square-T3/oh-my-codes"
+  },
+  "os": ["darwin"],
+  "cpu": ["x64"],
+  "files": ["bin"],
+  "bin": {
+    "oh-my-codes": "./bin/oh-my-codes"
+  }
+}
