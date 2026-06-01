@@ -61,7 +61,6 @@
     "detect-libc": "^2.0.0",
     "drizzle-orm": "^0.45.2",
     "effect": "^3.21.2",
-    "jsonc-parser": "^3.3.1",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
