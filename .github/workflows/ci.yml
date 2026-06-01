@@ -2,16 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [master, dev]
+    branches: [main, dev]
   pull_request:
-    branches: [master, dev]
+    branches: [main, dev]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  block-master-pr:
+  block-main-pr:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
@@ -19,10 +19,10 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
-          if [ "$BASE_REF" = "master" ]; then
-            echo "::error::PRs to master branch are not allowed. Please target the 'dev' branch instead."
+          if [ "$BASE_REF" = "main" ]; then
+            echo "::error::PRs to main branch are not allowed. Please target the 'dev' branch instead."
             echo ""
-            echo "PULL REQUESTS TO MASTER ARE BLOCKED"
+            echo "PULL REQUESTS TO MAIN ARE BLOCKED"
             echo ""
             echo "All PRs must target the 'dev' branch."
             echo "Please close this PR and create a new one targeting 'dev'."
