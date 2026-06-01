@@ -1158,6 +1158,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"better-sqlite3@npm:>=9.3.0":
+  version: 12.10.0
+  resolution: "better-sqlite3@npm:12.10.0"
+  dependencies:
+    bindings: "npm:^1.5.0"
+    node-gyp: "npm:latest"
+    prebuild-install: "npm:^7.1.1"
+  checksum: 10c0/b269792c1e456201b16fb9abd1e3fa9284d7710929f991899cebbb61e56dc3703673be29dadcb2f4a2d02961c49145f53d7d7b13b7b47298c033ec9de524f34f
+  languageName: node
+  linkType: hard
+
+"bindings@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "bindings@npm:1.5.0"
+  dependencies:
+    file-uri-to-path: "npm:1.0.0"
+  checksum: 10c0/3dab2491b4bb24124252a91e656803eac24292473e56554e35bbfe3cc1875332cfa77600c3bac7564049dc95075bf6fcc63a4609920ff2d64d0fe405fcf0d4ba
+  languageName: node
+  linkType: hard
+
 "bl@npm:^4.0.3":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
@@ -1938,6 +1958,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-uri-to-path@npm:1.0.0":
+  version: 1.0.0
+  resolution: "file-uri-to-path@npm:1.0.0"
+  checksum: 10c0/3b545e3a341d322d368e880e1c204ef55f1d45cdea65f7efc6c6ce9e0c4d22d802d5629320eb779d006fe59624ac17b0e848d83cc5af7cd101f206cb704f5519
+  languageName: node
+  linkType: hard
+
 "find-my-way-ts@npm:^0.1.6":
   version: 0.1.6
   resolution: "find-my-way-ts@npm:0.1.6"
@@ -2364,6 +2391,7 @@ __metadata:
     "@opencode-ai/sdk": "npm:^1.15.10"
     "@types/node": "npm:^22.15.0"
     "@yao-pkg/pkg": "npm:^6.0.0"
+    better-sqlite3: "npm:>=9.3.0"
     commander: "npm:^15.0.0"
     detect-libc: "npm:^2.0.0"
     drizzle-kit: "npm:^0.31.10"

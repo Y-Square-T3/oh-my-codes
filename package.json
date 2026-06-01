@@ -56,6 +56,7 @@
     "@clack/prompts": "^1.5.0",
     "@opencode-ai/plugin": "^1.15.10",
     "@opencode-ai/sdk": "^1.15.10",
+    "better-sqlite3": ">=9.3.0",
     "commander": "^15.0.0",
     "detect-libc": "^2.0.0",
     "drizzle-orm": "1.0.0-rc.2",
