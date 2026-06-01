@@ -1,11 +1,17 @@
-import type { AuditConfig } from "../../config"
-import type { PluginContext } from "../../plugin/types"
 import type { AuditServiceInterface } from "./service"
 import { AuditService } from "./service"
 import * as AuditRepo from "./repo"
 import * as Db from "../database"
 import { Effect } from "effect"
-import { log } from "../../shared"
+import { log } from "../log/logger"
+import { PluginContext } from "../../types"
+
+const DefaultConfig = {
+  push_interval_ms: 30_000,
+  batch_size: 20,
+  retention_days: 30,
+  disabled: false,
+}
 
 export interface AuditBatchPusher {
   readonly start: () => void
@@ -13,7 +19,10 @@ export interface AuditBatchPusher {
   readonly forcePush: () => Promise<void>
 }
 
-export function createAuditBatchPusher(_ctx: PluginContext, config: AuditConfig): AuditBatchPusher {
+export function createAuditBatchPusher(
+  _ctx: PluginContext,
+  config: typeof DefaultConfig = DefaultConfig,
+): AuditBatchPusher {
   let timer: ReturnType<typeof setInterval> | null = null
   let service: AuditServiceInterface | null = null
 

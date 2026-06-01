@@ -1538,6 +1538,7 @@ __metadata:
     effect: "npm:^3.21.2"
     picocolors: "npm:^1.1.1"
     prettier: "npm:^3.8.3"
+    tsx: "npm:^4.21.0"
     typescript: "npm:^6.0.3"
     zod: "npm:^4.4.3"
   languageName: unknown
