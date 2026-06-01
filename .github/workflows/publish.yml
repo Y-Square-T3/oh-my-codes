@@ -137,6 +137,15 @@ jobs:
             mv tmp.json "packages/${platform}/package.json"
           done
 
+      - name: Build main package
+        if: steps.check.outputs.skip != 'true'
+        run: yarn build
+
+      - name: Set fixed optionalDependencies before publish
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
           jq --arg v "$VERSION" '
             .optionalDependencies = {
               "oh-my-codes-darwin-arm64": $v,
@@ -146,16 +155,14 @@ jobs:
             }
           ' package.json > tmp.json && mv tmp.json package.json
 
-      - name: Build main package
-        if: steps.check.outputs.skip != 'true'
-        run: yarn build
-
       - name: Publish oh-my-codes
         if: steps.check.outputs.skip != 'true'
         env:
           DIST_TAG: ${{ steps.version.outputs.dist_tag }}
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
         run: |
+          jq 'del(.workspaces)' package.json > tmp.json && mv tmp.json package.json
+
           if [ -n "$DIST_TAG" ]; then
             npm publish --access public --tag "$DIST_TAG"
           else
@@ -209,15 +216,6 @@ jobs:
             jq --arg v "$VERSION" '.version = $v' "packages/${platform}/package.json" > tmp.json
             mv tmp.json "packages/${platform}/package.json"
           done
-
-          jq --arg v "$VERSION" '
-            .optionalDependencies = {
-              "oh-my-codes-darwin-arm64": $v,
-              "oh-my-codes-darwin-x64": $v,
-              "oh-my-codes-linux-x64": $v,
-              "oh-my-codes-windows-x64": $v
-            }
-          ' package.json > tmp.json && mv tmp.json package.json
 
       - name: Commit version bump
         env:
