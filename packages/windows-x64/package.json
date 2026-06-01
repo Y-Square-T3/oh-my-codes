@@ -1,22 +1,13 @@
 {
   "name": "oh-my-codes-windows-x64",
   "version": "3.18.10",
-  "description": "Platform-specific binary for oh-my-codes (windows-x64)",
+  "description": "Platform binary for oh-my-codes (windows-x64)",
   "license": "SUL-1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Y-Square-T3/oh-my-codes"
   },
-  "os": [
-    "win32"
-  ],
-  "cpu": [
-    "x64"
-  ],
-  "files": [
-    "bin"
-  ],
-  "bin": {
-    "oh-my-codes": "./bin/oh-my-codes.exe"
-  }
+  "os": ["win32"],
+  "cpu": ["x64"],
+  "files": ["bin"]
 }
