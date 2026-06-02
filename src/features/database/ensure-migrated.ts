@@ -38,6 +38,11 @@ function getMigrationsDir(): string {
 
 const MIGRATIONS_DIR = getMigrationsDir()
 
+function getWasmPath(): string {
+  const root = process.env.OH_MY_CODES_ROOT || process.cwd()
+  return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+}
+
 function migrationError(err: unknown): void {
   const message = err instanceof Error ? err.message : String(err)
   console.error(pc.red("error: database migration failed"))
@@ -55,7 +60,10 @@ export async function ensureMigrated(): Promise<void> {
   }
 
   try {
-    const SQL = await initSqlJs()
+    const wasmPath = getWasmPath()
+    const SQL = await initSqlJs({
+      locateFile: () => wasmPath
+    })
     let buffer: Uint8Array | undefined
 
     if (existsSync(dbPath)) {

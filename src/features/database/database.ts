@@ -61,8 +61,16 @@ export interface DatabaseService {
 
 export const Database = Context.GenericTag<DatabaseService>("@account/Database")
 
+function getWasmPath(): string {
+  const root = process.env.OH_MY_CODES_ROOT || process.cwd()
+  return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+}
+
 async function createSqlJsInstance(dbPath: string) {
-  const SQL = await initSqlJs()
+  const wasmPath = getWasmPath()
+  const SQL = await initSqlJs({
+    locateFile: () => wasmPath
+  })
   let buffer: Uint8Array | undefined
 
   if (existsSync(dbPath)) {
