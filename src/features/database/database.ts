@@ -2,14 +2,12 @@ import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
-import { createRequire } from "node:module"
 import initSqlJs, { type Database as SqlJsDatabase } from "sql.js"
 import { type SQLJsDatabase, drizzle } from "drizzle-orm/sql-js"
 import { migrate } from "drizzle-orm/sql-js/migrator"
 import { Context, Effect, Layer } from "effect"
 import * as schema from "./schema"
-
-const require = createRequire(import.meta.url)
+import { require } from "../../utils/require"
 
 function getMigrationsDir(): string {
   if (process.env.OH_MY_CODES_ROOT) {
