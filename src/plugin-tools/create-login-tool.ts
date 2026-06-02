@@ -3,42 +3,13 @@ import { Cause, Duration, Effect, Option } from "effect"
 import { tool, type ToolDefinition } from "@opencode-ai/plugin"
 import type { PluginContext } from "../types"
 import * as Account from "../features/account"
-import * as Model from "../features/model"
 import { PollResult, PollSuccess, Login } from "../features/account/schema"
 import { log } from "../features/log/logger"
+import { type Result, showToast, runRefreshModels } from "./shared"
 
 type LoginToolArgs = {
   url?: string
 }
-
-async function showToast(ctx: PluginContext, message: string, variant: "success" | "error" | "warning"): Promise<void> {
-  try {
-    await ctx.client.tui.showToast({
-      body: { message, variant },
-    })
-  } catch (err) {
-    log("[omc-login] Failed to show toast", { error: err })
-  }
-}
-
-async function runRefreshModels(): Promise<string | null> {
-  const exit = await Effect.runPromiseExit(
-    Effect.gen(function* () {
-      const modelSvc = yield* Model.Service
-      const result = yield* modelSvc.refresh()
-      return `Refreshed ${result.providers} providers, ${result.models} models`
-    }).pipe(Effect.provide(Model.defaultLayer)),
-  )
-
-  if (exit._tag === "Success") {
-    return exit.value
-  }
-  const cause = Cause.pretty(exit.cause)
-  log("[omc-login] Model refresh failed", { error: cause })
-  return null
-}
-
-type Result<T> = { ok: true; value: T } | { ok: false; error: string }
 
 async function runInitLogin(url: string): Promise<Result<Login>> {
   const exit = await Effect.runPromiseExit(
@@ -95,6 +66,50 @@ async function runPoll(login: Login): Promise<Result<string>> {
   return { ok: false, error: Cause.pretty(exit.cause) }
 }
 
+async function runGetWorkspaces(): Promise<Result<{ list: string; totalCount: number; firstWorkspaceName: string | null }>> {
+  const exit = await Effect.runPromiseExit(
+    Effect.gen(function* () {
+      const accountSvc = yield* Account.Service
+      const groups = yield* accountSvc.workspacesByAccount()
+
+      const active = yield* accountSvc.active().pipe(Effect.catchAll(() => Effect.succeed(Option.none())))
+      const activeAccountId = Option.map(active, (a) => a.id)
+
+      const lines: string[] = []
+      let count = 0
+      let firstName: string | null = null
+
+      for (const group of groups) {
+        for (const ws of group.workspaces) {
+          count++
+          if (firstName === null) firstName = ws.name
+          const isActive =
+            Option.isSome(activeAccountId) &&
+            activeAccountId.value === group.account.id &&
+            group.account.activeWorkspaceId === ws.id
+          const marker = isActive ? " (active)" : ""
+          lines.push(`${count}. ${ws.name} (${group.account.email}, ${group.account.url})${marker}`)
+        }
+      }
+
+      if (count === 0) {
+        return { list: "No workspaces found.", totalCount: 0, firstWorkspaceName: null }
+      }
+
+      return {
+        list: `Available workspaces:\n${lines.join("\n")}`,
+        totalCount: count,
+        firstWorkspaceName: firstName,
+      }
+    }).pipe(Effect.provide(Account.defaultLayer)),
+  )
+
+  if (exit._tag === "Success") {
+    return { ok: true, value: exit.value }
+  }
+  return { ok: false, error: Cause.pretty(exit.cause) }
+}
+
 async function runSelectFirstWorkspace(): Promise<Result<boolean>> {
   const exit = await Effect.runPromiseExit(
     Effect.gen(function* () {
@@ -122,60 +137,20 @@ async function runSelectFirstWorkspace(): Promise<Result<boolean>> {
   return { ok: false, error: Cause.pretty(exit.cause) }
 }
 
-async function runGetWorkspacesList(): Promise<Result<{ list: string; totalCount: number }>> {
-  const exit = await Effect.runPromiseExit(
-    Effect.gen(function* () {
-      const accountSvc = yield* Account.Service
-      const groups = yield* accountSvc.workspacesByAccount()
-
-      const active = yield* accountSvc.active().pipe(Effect.catchAll(() => Effect.succeed(Option.none())))
-      const activeAccountId = Option.map(active, (a) => a.id)
-
-      const lines: string[] = []
-      let count = 0
-
-      for (const group of groups) {
-        for (const ws of group.workspaces) {
-          count++
-          const isActive =
-            Option.isSome(activeAccountId) &&
-            activeAccountId.value === group.account.id &&
-            group.account.activeWorkspaceId === ws.id
-          const marker = isActive ? " (active)" : ""
-          lines.push(`${count}. ${ws.name} (${group.account.email}, ${group.account.url})${marker}`)
-        }
-      }
-
-      if (count === 0) {
-        return { list: "No workspaces found.", totalCount: 0 }
-      }
-
-      return {
-        list: `Available workspaces:\n${lines.join("\n")}`,
-        totalCount: count,
-      }
-    }).pipe(Effect.provide(Account.defaultLayer)),
-  )
-
-  if (exit._tag === "Success") {
-    return { ok: true, value: exit.value }
-  }
-  return { ok: false, error: Cause.pretty(exit.cause) }
-}
-
 export function createLoginTool(ctx: PluginContext): ToolDefinition {
   return tool({
     description:
-      "Login to an OMC (oh-my-codes) account using device code flow. Provide the server URL to authenticate. This will open your browser for authentication.",
+      "Login to an OMC (oh-my-codes) account using device code flow. If no URL is provided, ask the user for their OMC server URL first. This will open a browser for authentication.",
     args: {
       url: tool.schema
         .string()
-        .describe("The OMC server URL (e.g. https://server.omc.ai). Required for login."),
+        .optional()
+        .describe("The OMC server URL (e.g. https://server.omc.ai). If not provided, ask the user for it."),
     },
     async execute(args: LoginToolArgs): Promise<string> {
       const serverUrl = args.url
-      if (!serverUrl) {
-        return "Please provide a server URL. Usage: /omc-login <url>"
+      if (!serverUrl || serverUrl.trim() === "") {
+        return "MISSING_URL: Please ask the user for their OMC server URL before proceeding with login."
       }
 
       await showToast(ctx, "Starting OMC login...", "warning")
@@ -183,7 +158,7 @@ export function createLoginTool(ctx: PluginContext): ToolDefinition {
       const loginInitResult = await runInitLogin(serverUrl)
       if (!loginInitResult.ok) {
         await showToast(ctx, "Login failed", "error")
-        return `Login failed: ${loginInitResult.error}`
+        return `LOGIN_FAILED: ${loginInitResult.error}`
       }
 
       const loginInfo = loginInitResult.value
@@ -215,41 +190,32 @@ export function createLoginTool(ctx: PluginContext): ToolDefinition {
       const pollResult = await runPoll(loginInfo)
       if (!pollResult.ok) {
         await showToast(ctx, "Login failed", "error")
-        return `Authentication failed: ${pollResult.error}`
+        return `AUTH_FAILED: ${pollResult.error}`
       }
 
       const email = pollResult.value
       await showToast(ctx, `Logged in as ${email}`, "success")
 
-      const workspaceSelectResult = await runSelectFirstWorkspace()
-      if (!workspaceSelectResult.ok) {
-        log("[omc-login] Workspace auto-select failed", { error: workspaceSelectResult.error })
+      const workspaceResult = await runGetWorkspaces()
+
+      if (workspaceResult.ok && workspaceResult.value.totalCount === 1 && workspaceResult.value.firstWorkspaceName) {
+        await runSelectFirstWorkspace()
+        await runRefreshModels()
+        return `LOGIN_SUCCESS: Successfully logged in as ${email}.\nWorkspace auto-selected: ${workspaceResult.value.firstWorkspaceName}.\n\nThe user is now ready to use OMC.`
       }
 
-      const refreshMsg = await runRefreshModels()
+      await runRefreshModels()
 
-      const listResult = await runGetWorkspacesList()
-      if (!listResult.ok) {
-        log("[omc-login] Failed to get workspace list", { error: listResult.error })
+      if (!workspaceResult.ok) {
+        log("[omc-login] Failed to get workspace list", { error: workspaceResult.error })
+        return `LOGIN_SUCCESS: Successfully logged in as ${email}.\n\nHowever, failed to retrieve workspaces: ${workspaceResult.error}\nPlease ask the user to run /omc-switch to select a workspace.`
       }
 
-      const parts: string[] = [
-        `Successfully logged in as ${email}`,
-      ]
-
-      if (refreshMsg) {
-        parts.push(refreshMsg)
+      if (workspaceResult.value.totalCount === 0) {
+        return `LOGIN_SUCCESS: Successfully logged in as ${email}.\n\nNo workspaces found for this account.`
       }
 
-      if (listResult.ok && listResult.value.totalCount > 1) {
-        parts.push("\nYou have multiple workspaces. To switch:")
-        parts.push(listResult.value.list)
-        parts.push("\nUsage: /omc-switch <workspace-name or email or number>")
-      } else if (listResult.ok && listResult.value.totalCount === 1) {
-        parts.push(`\nAuto-selected workspace: ${listResult.value.list.split("\n")[1]}`)
-      }
-
-      return parts.join("\n\n")
+      return `LOGIN_SUCCESS: Successfully logged in as ${email}.\n\n${workspaceResult.value.list}\n\nPlease ask the user which workspace they would like to use, then call the omc-switch tool with their selection.`
     },
   })
 }

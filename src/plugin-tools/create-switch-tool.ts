@@ -2,9 +2,9 @@ import { Cause, Effect, Option } from "effect"
 import { tool, type ToolDefinition } from "@opencode-ai/plugin"
 import type { PluginContext } from "../types"
 import * as Account from "../features/account"
-import * as Model from "../features/model"
 import { AccountID, WorkspaceID } from "../features/account/schema"
 import { log } from "../features/log/logger"
+import { type Result, showToast, runRefreshModels } from "./shared"
 
 type SwitchToolArgs = {
   id?: string
@@ -62,31 +62,15 @@ async function getWorkspaceEntries(): Promise<Result<WorkspaceEntry[]>> {
 
 function formatWorkspaceList(entries: WorkspaceEntry[]): string {
   if (entries.length === 0) {
-    return "No workspaces found. Please login first with /omc-login <url>."
+    return "NO_WORKSPACES: No workspaces found. The user needs to login first with /omc-login."
   }
 
   const lines = entries.map((e) => {
-    const marker = e.isActive ? " ← active" : ""
-    return `${e.index}. ${e.name} [${e.workspaceId}]${marker}`
+    const marker = e.isActive ? " <- ACTIVE" : ""
+    return `${e.index}. ${e.name} [${e.email}]${marker}`
   })
 
-  return `Available workspaces:\n${lines.join("\n")}\n\nSwitch by number or workspace ID:\n/omc-switch <number>`
-}
-
-async function refreshModels(): Promise<string | null> {
-  const exit = await Effect.runPromiseExit(
-    Effect.gen(function* () {
-      const modelSvc = yield* Model.Service
-      const result = yield* modelSvc.refresh()
-      return `Refreshed ${result.providers} providers, ${result.models} models`
-    }).pipe(Effect.provide(Model.defaultLayer)),
-  )
-
-  if (exit._tag === "Success") {
-    return exit.value
-  }
-  log("[omc-switch] Model refresh failed", { error: Cause.pretty(exit.cause) })
-  return null
+  return `WORKSPACE_LIST:\n${lines.join("\n")}\n\nPlease ask the user which workspace to switch to (by number or name).`
 }
 
 async function switchTo(entry: WorkspaceEntry): Promise<Result<string>> {
@@ -103,12 +87,10 @@ async function switchTo(entry: WorkspaceEntry): Promise<Result<string>> {
   return { ok: false, error: Cause.pretty(exit.cause) }
 }
 
-type Result<T> = { ok: true; value: T } | { ok: false; error: string }
-
 export function createSwitchTool(ctx: PluginContext): ToolDefinition {
   return tool({
     description:
-      "Switch between OMC workspaces. Run without arguments to list all workspaces with numbers, then use /omc-switch <number> or <workspace-id> to switch.",
+      "Switch between OMC workspaces. Call without arguments to list all workspaces, then call again with the user's selection (number or workspace ID).",
     args: {
       id: tool.schema
         .string()
@@ -118,7 +100,7 @@ export function createSwitchTool(ctx: PluginContext): ToolDefinition {
     async execute(args: SwitchToolArgs): Promise<string> {
       const entriesResult = await getWorkspaceEntries()
       if (!entriesResult.ok) {
-        return `Failed to load workspaces: ${entriesResult.error}`
+        return `ERROR: Failed to load workspaces: ${entriesResult.error}`
       }
 
       const entries = entriesResult.value
@@ -140,18 +122,20 @@ export function createSwitchTool(ctx: PluginContext): ToolDefinition {
       }
 
       if (!selected) {
-        return `"${trimmed}" is not a valid workspace number or ID.\n\n${formatWorkspaceList(entries)}`
+        return `INVALID_SELECTION: "${trimmed}" is not a valid workspace number or ID.\n\n${formatWorkspaceList(entries)}`
       }
 
       const switchResult = await switchTo(selected)
 
       if (!switchResult.ok) {
-        return `Failed to switch workspace: ${switchResult.error}`
+        return `SWITCH_FAILED: ${switchResult.error}`
       }
 
-      const refreshMsg = await refreshModels()
+      const refreshMsg = await runRefreshModels()
 
-      const parts = [switchResult.value]
+      await showToast(ctx, `Switched to ${selected.name}`, "success")
+
+      const parts = [`SWITCH_SUCCESS: ${switchResult.value}`]
       if (refreshMsg) {
         parts.push(refreshMsg)
       }

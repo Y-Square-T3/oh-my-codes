@@ -32,14 +32,39 @@ const serverPlugin: Plugin = async (input): Promise<Hooks> => {
       if (!cmd["omc-login"]) {
         cmd["omc-login"] = {
           description: "Login to an OMC account",
-          template: "Use the omc-login tool to authenticate with your OMC account server.",
+          template: `You are helping the user login to their OMC (oh-my-codes) account.
+
+$ARGUMENTS may contain the server URL. Follow these steps:
+
+1. If $ARGUMENTS is empty or does not look like a valid URL, ask the user for their OMC server URL (e.g. https://server.omc.ai).
+2. Once you have the URL, call the omc-login tool with it.
+3. Based on the response:
+   - If it starts with MISSING_URL: ask the user for their server URL and retry.
+   - If it starts with LOGIN_FAILED or AUTH_FAILED: inform the user of the error.
+   - If it starts with LOGIN_SUCCESS and says workspace was auto-selected: confirm success, the user is ready.
+   - If it starts with LOGIN_SUCCESS and lists workspaces: present the workspace options and ask the user which one to use.
+4. If the user selects a workspace, call the omc-switch tool with their selection (number or name).
+5. Confirm the final state to the user.`,
         }
       }
 
       if (!cmd["omc-switch"]) {
         cmd["omc-switch"] = {
           description: "Switch OMC workspace",
-          template: "Use the omc-switch tool to switch between your OMC workspaces.",
+          template: `You are helping the user switch their active OMC workspace.
+
+$ARGUMENTS may contain a workspace number or name. Follow these steps:
+
+1. If $ARGUMENTS is empty, call the omc-switch tool without arguments to list all available workspaces.
+2. If $ARGUMENTS has a value, call the omc-switch tool with it as the id argument.
+3. Based on the response:
+   - If it starts with NO_WORKSPACES: inform the user they need to login first with /omc-login.
+   - If it starts with WORKSPACE_LIST: present the workspace options to the user and ask which one to switch to.
+   - If it starts with INVALID_SELECTION: show the error and list again, ask user to pick a valid option.
+   - If it starts with SWITCH_FAILED: inform the user of the error.
+   - If it starts with SWITCH_SUCCESS: confirm the switch was successful.
+4. If the user makes a selection from the list, call omc-switch with their selection (number).
+5. Confirm the final state to the user.`,
         }
       }
     },
