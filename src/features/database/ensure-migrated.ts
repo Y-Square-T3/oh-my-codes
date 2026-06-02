@@ -2,10 +2,13 @@ import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import pc from "picocolors"
 import initSqlJs from "sql.js"
 import { drizzle } from "drizzle-orm/sql-js"
 import { migrate } from "drizzle-orm/sql-js/migrator"
+
+const require = createRequire(import.meta.url)
 
 const SUPPORT_URL = "https://github.com/Y-Square-T3/oh-my-codes/issues"
 
@@ -39,8 +42,12 @@ function getMigrationsDir(): string {
 const MIGRATIONS_DIR = getMigrationsDir()
 
 function getWasmPath(): string {
-  const root = process.env.OH_MY_CODES_ROOT || process.cwd()
-  return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+  try {
+    return require.resolve("sql.js/dist/sql-wasm.wasm")
+  } catch {
+    const root = process.env.OH_MY_CODES_ROOT || process.cwd()
+    return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+  }
 }
 
 function migrationError(err: unknown): void {

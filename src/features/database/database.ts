@@ -2,11 +2,14 @@ import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
+import { createRequire } from "node:module"
 import initSqlJs, { type Database as SqlJsDatabase } from "sql.js"
 import { type SQLJsDatabase, drizzle } from "drizzle-orm/sql-js"
 import { migrate } from "drizzle-orm/sql-js/migrator"
 import { Context, Effect, Layer } from "effect"
 import * as schema from "./schema"
+
+const require = createRequire(import.meta.url)
 
 function getMigrationsDir(): string {
   if (process.env.OH_MY_CODES_ROOT) {
@@ -62,8 +65,12 @@ export interface DatabaseService {
 export const Database = Context.GenericTag<DatabaseService>("@account/Database")
 
 function getWasmPath(): string {
-  const root = process.env.OH_MY_CODES_ROOT || process.cwd()
-  return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+  try {
+    return require.resolve("sql.js/dist/sql-wasm.wasm")
+  } catch {
+    const root = process.env.OH_MY_CODES_ROOT || process.cwd()
+    return join(root, "node_modules/sql.js/dist/sql-wasm.wasm")
+  }
 }
 
 async function createSqlJsInstance(dbPath: string) {
