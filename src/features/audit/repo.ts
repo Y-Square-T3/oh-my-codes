@@ -164,10 +164,15 @@ export const layer = Layer.effect(
 
     const hasActiveAccount = () =>
       Effect.tryPromise({
-        try: () =>
-          database.db.query.accountState.findFirst({
-            where: eq(Db.schema.accountState.id, 1),
-          }),
+        try: async () => {
+          const rows = await database.db
+            .select()
+            .from(Db.schema.accountState)
+            .where(eq(Db.schema.accountState.id, 1))
+            .limit(1)
+
+          return rows[0] ?? null
+        },
         catch: (cause) => new Error("Failed to check active account", { cause }),
       }).pipe(
         Effect.map((state) => state?.activeAccountId != null),

@@ -66,27 +66,38 @@ export const layer = Layer.effect(
 
     const active = () =>
       Effect.gen(function* () {
-        const stateOpt = yield* Effect.tryPromise({
+        const stateRows = yield* Effect.tryPromise({
           try: () =>
-            database.db.query.accountState.findFirst({
-              where: eq(Db.schema.accountState.id, 1),
-            }),
+            database.db
+              .select()
+              .from(Db.schema.accountState)
+              .where(eq(Db.schema.accountState.id, 1))
+              .limit(1),
           catch: (cause) => new Db.DatabaseQueryError("Failed to read account state", cause),
         }).pipe(mapDbError("Failed to read account state"))
+
+        const stateOpt = stateRows[0] ?? null
 
         if (!stateOpt) return Option.none()
         if (!stateOpt.activeAccountId) return Option.none()
 
         const activeAccountId = stateOpt.activeAccountId
 
-        const accountOpt = yield* Effect.tryPromise({
+        const accountRows = yield* Effect.tryPromise({
           try: () =>
-            database.db.query.accounts.findFirst({
-              where: eq(Db.schema.accounts.id, activeAccountId),
-              columns: { id: true, email: true, url: true },
-            }),
+            database.db
+              .select({
+                id: Db.schema.accounts.id,
+                email: Db.schema.accounts.email,
+                url: Db.schema.accounts.url,
+              })
+              .from(Db.schema.accounts)
+              .where(eq(Db.schema.accounts.id, activeAccountId))
+              .limit(1),
           catch: (cause) => new Db.DatabaseQueryError("Failed to read account", cause),
         }).pipe(mapDbError("Failed to read account"))
+
+        const accountOpt = accountRows[0] ?? null
 
         if (!accountOpt) return Option.none()
 
@@ -96,10 +107,14 @@ export const layer = Layer.effect(
     const list = () =>
       Effect.tryPromise({
         try: () =>
-          database.db.query.accounts.findMany({
-            orderBy: (accounts) => asc(accounts.email),
-            columns: { id: true, email: true, url: true },
-          }),
+          database.db
+            .select({
+              id: Db.schema.accounts.id,
+              email: Db.schema.accounts.email,
+              url: Db.schema.accounts.url,
+            })
+            .from(Db.schema.accounts)
+            .orderBy(asc(Db.schema.accounts.email)),
         catch: (cause) => new Db.DatabaseQueryError("Failed to list accounts", cause),
       }).pipe(
         Effect.map((rows) => rows.map((row) => decodeAccountInfo(row, null))),
@@ -156,10 +171,15 @@ export const layer = Layer.effect(
 
     const getRow = (accountID: AccountID) =>
       Effect.tryPromise({
-        try: () =>
-          database.db.query.accounts.findFirst({
-            where: eq(Db.schema.accounts.id, accountID),
-          }),
+        try: async () => {
+          const rows = await database.db
+            .select()
+            .from(Db.schema.accounts)
+            .where(eq(Db.schema.accounts.id, accountID))
+            .limit(1)
+
+          return rows[0] ?? null
+        },
         catch: (cause) => new Db.DatabaseQueryError("Failed to get account row", cause),
       }).pipe(
         Effect.map((row) =>

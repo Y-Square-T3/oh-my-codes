@@ -93,13 +93,17 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
 
       yield* db.migrate()
 
-      const state = yield* Effect.tryPromise({
+      const stateRows = yield* Effect.tryPromise({
         try: () =>
-          db.db.query.accountState.findFirst({
-            where: eq(Db.schema.accountState.id, 1),
-          }),
+          db.db
+            .select()
+            .from(Db.schema.accountState)
+            .where(eq(Db.schema.accountState.id, 1))
+            .limit(1),
         catch: (cause) => new Error("Failed to fetch account state", { cause }),
       })
+
+      const state = stateRows[0] ?? null
 
       if (!state?.activeAccountId) {
         log("[audit] No active account, skipping batch push")
@@ -108,13 +112,20 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
 
       const workspaceId = state.activeWorkspaceId ?? undefined
 
-      const account = yield* Effect.tryPromise({
-        try: () =>
-          db.db.query.accounts.findFirst({
-            where: eq(Db.schema.accounts.id, state.activeAccountId!),
-          }),
+      const accountRows = yield* Effect.tryPromise({
+        try: async () => {
+          const rows = await db.db
+            .select()
+            .from(Db.schema.accounts)
+            .where(eq(Db.schema.accounts.id, state.activeAccountId!))
+            .limit(1)
+
+          return rows[0] ?? null
+        },
         catch: (cause) => new Error("Failed to fetch account", { cause }),
       })
+
+      const account = accountRows
 
       if (!account) {
         log("[audit] Account not found, skipping batch push")
@@ -123,9 +134,10 @@ function createAuditService(repo: AuditRepo.AuditRepoService, db: Db.DatabaseSer
 
       const loggedInModels = yield* Effect.tryPromise({
         try: () =>
-          db.db.query.modelRecords.findMany({
-            where: eq(Db.schema.modelRecords.accountId, state.activeAccountId!),
-          }),
+          db.db
+            .select()
+            .from(Db.schema.modelRecords)
+            .where(eq(Db.schema.modelRecords.accountId, state.activeAccountId!)),
         catch: (cause) => new Error("Failed to fetch logged-in models", { cause }),
       })
 
