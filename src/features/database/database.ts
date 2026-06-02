@@ -1,4 +1,4 @@
-import { basename, dirname, join } from "node:path"
+import { dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
@@ -14,10 +14,11 @@ function getMigrationsDir(): string {
   }
   if (typeof import.meta?.url !== "undefined") {
     const fileDir = dirname(fileURLToPath(import.meta.url))
-    if (basename(fileDir) === "dist") {
-      return join(fileDir, "migrations")
+    const siblingMigrations = join(fileDir, "migrations")
+    if (existsSync(siblingMigrations)) {
+      return siblingMigrations
     }
-    return join(dirname(fileDir), "migrations")
+    return join(fileDir, "migrations")
   }
   return join(dirname(dirname(__filename)), "migrations")
 }
