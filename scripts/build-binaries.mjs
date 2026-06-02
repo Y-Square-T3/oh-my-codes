@@ -3,7 +3,7 @@
 // Build platform-specific binaries for CLI distribution using @yao-pkg/pkg
 
 import { execSync } from "node:child_process"
-import { copyFileSync, existsSync, mkdirSync } from "node:fs"
+import { existsSync, mkdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -64,18 +64,6 @@ async function buildBundle() {
   }
 
   console.log("   Bundle created successfully")
-
-  // Copy sql-wasm.wasm to dist/cli for pkg bundling
-  console.log("\n   Copying sql-wasm.wasm...")
-  const wasmSrc = join(rootDir, "node_modules/sql.js/dist/sql-wasm.wasm")
-  const wasmDst = join(rootDir, "dist/cli/sql-wasm.wasm")
-
-  if (!existsSync(wasmSrc)) {
-    throw new Error(`WASM file not found at ${wasmSrc}`)
-  }
-
-  copyFileSync(wasmSrc, wasmDst)
-  console.log("   sql-wasm.wasm copied successfully")
 }
 
 async function buildPlatform(platform) {
