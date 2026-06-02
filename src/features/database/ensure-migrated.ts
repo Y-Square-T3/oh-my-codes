@@ -1,11 +1,11 @@
-import { dirname, join } from "node:path"
+import { basename, dirname, join } from "node:path"
 import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
-import { existsSync, mkdirSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import pc from "picocolors"
-import SqliteDatabase from "better-sqlite3"
-import { drizzle } from "drizzle-orm/better-sqlite3"
-import { migrate } from "drizzle-orm/better-sqlite3/migrator"
+import initSqlJs from "sql.js"
+import { drizzle } from "drizzle-orm/sql-js"
+import { migrate } from "drizzle-orm/sql-js/migrator"
 
 const SUPPORT_URL = "https://github.com/Y-Square-T3/oh-my-codes/issues"
 
@@ -26,7 +26,11 @@ function getMigrationsDir(): string {
     return join(process.env.OH_MY_CODES_ROOT, "dist", "migrations")
   }
   if (typeof import.meta?.url !== "undefined") {
-    return join(dirname(dirname(fileURLToPath(import.meta.url))), "migrations")
+    const fileDir = dirname(fileURLToPath(import.meta.url))
+    if (basename(fileDir) === "dist") {
+      return join(fileDir, "migrations")
+    }
+    return join(dirname(fileDir), "migrations")
   }
   return join(dirname(dirname(__filename)), "migrations")
 }
@@ -49,15 +53,22 @@ export async function ensureMigrated(): Promise<void> {
     mkdirSync(dbDir, { recursive: true })
   }
 
-  const sqlite = new SqliteDatabase(dbPath)
-  const db = drizzle(sqlite)
-
   try {
+    const SQL = await initSqlJs()
+    let buffer: Uint8Array | undefined
+
+    if (existsSync(dbPath)) {
+      buffer = readFileSync(dbPath)
+    }
+
+    const sqlite = new SQL.Database(buffer)
+    const db = drizzle(sqlite)
+
     migrate(db, { migrationsFolder: MIGRATIONS_DIR })
+    writeFileSync(dbPath, sqlite.export())
+    sqlite.close()
   } catch (err) {
     migrationError(err)
     process.exit(1)
-  } finally {
-    sqlite.close()
   }
 }

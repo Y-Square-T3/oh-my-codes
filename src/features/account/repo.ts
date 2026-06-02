@@ -124,6 +124,12 @@ export const layer = Layer.effect(
           try: () => database.db.delete(Db.schema.accounts).where(eq(Db.schema.accounts.id, accountID)),
           catch: (cause) => new Db.DatabaseQueryError("Failed to delete account", cause),
         }).pipe(mapDbError("Failed to delete account"))
+
+        yield* database.flush().pipe(
+          Effect.catchAll((cause) =>
+            Effect.fail(new AccountRepoError({ message: "Failed to flush database", cause: cause instanceof Error ? cause.cause : cause })),
+          ),
+        )
       })
 
     const use = (accountID: AccountID, workspaceID: Option.Option<WorkspaceID>) => {
@@ -145,7 +151,7 @@ export const layer = Layer.effect(
               },
             }),
         catch: (cause) => new Db.DatabaseQueryError("Failed to update active workspace", cause),
-      }).pipe(Effect.asVoid, mapDbError("Failed to update active workspace"))
+      }).pipe(Effect.asVoid, Effect.tap(() => database.flush()), mapDbError("Failed to update active workspace"))
     }
 
     const getRow = (accountID: AccountID) =>
@@ -188,7 +194,7 @@ export const layer = Layer.effect(
             })
             .where(eq(Db.schema.accounts.id, input.accountID)),
         catch: (cause) => new Db.DatabaseQueryError("Failed to persist token", cause),
-      }).pipe(Effect.asVoid, mapDbError("Failed to persist token"))
+      }).pipe(Effect.asVoid, Effect.tap(() => database.flush()), mapDbError("Failed to persist token"))
 
     const persistAccount = (input: {
       id: AccountID
@@ -221,7 +227,7 @@ export const layer = Layer.effect(
               },
             }),
         catch: (cause) => new Db.DatabaseQueryError("Failed to persist account", cause),
-      }).pipe(Effect.asVoid, mapDbError("Failed to persist account"))
+      }).pipe(Effect.asVoid, Effect.tap(() => database.flush()), mapDbError("Failed to persist account"))
 
     return {
       active,

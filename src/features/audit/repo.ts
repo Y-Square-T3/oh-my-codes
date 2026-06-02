@@ -99,7 +99,7 @@ export const layer = Layer.effect(
               },
             }),
         catch: (cause) => new Error("Failed to upsert audit record", { cause }),
-      }).pipe(mapAuditRepoError("upsert"))
+      }).pipe(Effect.tap(() => database.flush()), mapAuditRepoError("upsert"))
 
     const fetchUnpushed = (limit: number) =>
       Effect.tryPromise({
@@ -128,7 +128,7 @@ export const layer = Layer.effect(
               sql`, `,
             )})`,
           ).run()
-      }).pipe(mapAuditRepoError("markPushed"))
+      }).pipe(Effect.tap(() => database.flush()), mapAuditRepoError("markPushed"))
 
     const cleanupOldRecords = (beforeTimestamp: number) =>
       Effect.tryPromise({
@@ -145,6 +145,7 @@ export const layer = Layer.effect(
         catch: (cause) => new Error("Failed to cleanup old records", { cause }),
       }).pipe(
         Effect.map((rows) => rows[0]?.count ?? 0),
+        Effect.tap(() => database.flush()),
         mapAuditRepoError("cleanupOldRecords"),
       )
 

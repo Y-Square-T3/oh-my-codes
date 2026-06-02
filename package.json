@@ -27,7 +27,7 @@
   },
   "scripts": {
     "dev": "tsx src/cli/index.ts",
-    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=node --external:@opencode-ai/plugin && esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:better-sqlite3 && rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm --platform=node --external:@opencode-ai/plugin --external:sql.js && esbuild src/cli/index.ts --bundle --outfile=dist/cli/index.mjs --format=esm --platform=node --external:sql.js && rm -rf dist/migrations && cp -R src/features/database/migrations dist/migrations",
     "build:binaries": "node scripts/build-binaries.mjs",
     "build:all": "yarn build && yarn build:binaries",
     "postinstall": "node postinstall.mjs",
@@ -56,15 +56,14 @@
     "@clack/prompts": "^1.5.0",
     "@opencode-ai/plugin": "^1.15.10",
     "@opencode-ai/sdk": "^1.15.10",
-    "better-sqlite3": "^12.10.0",
     "commander": "^15.0.0",
     "detect-libc": "^2.0.0",
     "drizzle-orm": "^0.45.2",
     "effect": "^3.21.2",
-    "picocolors": "^1.1.1"
+    "picocolors": "^1.1.1",
+    "sql.js": "^1.14.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.9.1",
     "@yao-pkg/pkg": "^6.0.0",
     "drizzle-kit": "^0.31.10",
@@ -77,8 +76,7 @@
   "pkg": {
     "assets": [
       "dist/migrations/**/*",
-      "node_modules/better-sqlite3/build/Release/**/*",
-      "node_modules/better-sqlite3/package.json"
+      "node_modules/sql.js/dist/sql-wasm.wasm"
     ],
     "targets": [
       "node24"

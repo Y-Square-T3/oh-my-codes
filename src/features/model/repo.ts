@@ -120,6 +120,7 @@ export const layer = Layer.effect(
         },
       }).pipe(
         Effect.asVoid,
+        Effect.tap(() => database.flush()),
         Effect.catchAll((cause: unknown) =>
           cause instanceof Db.DatabaseQueryError
             ? Effect.fail(new ModelRepoError("Failed to upsert providers", cause.cause))
@@ -197,6 +198,7 @@ export const layer = Layer.effect(
         },
       }).pipe(
         Effect.asVoid,
+        Effect.tap(() => database.flush()),
         Effect.catchAll((cause: unknown) =>
           cause instanceof Db.DatabaseQueryError
             ? Effect.fail(new ModelRepoError("Failed to upsert models", cause.cause))
@@ -212,6 +214,7 @@ export const layer = Layer.effect(
         catch: (cause) => new Db.DatabaseQueryError("Failed to delete models", cause),
       }).pipe(
         Effect.asVoid,
+        Effect.tap(() => database.flush()),
         Effect.catchAll((cause: unknown) =>
           cause instanceof Db.DatabaseQueryError
             ? Effect.fail(new ModelRepoError("Failed to delete models", cause.cause))
@@ -227,6 +230,7 @@ export const layer = Layer.effect(
         catch: (cause) => new Db.DatabaseQueryError("Failed to delete providers", cause),
       }).pipe(
         Effect.asVoid,
+        Effect.tap(() => database.flush()),
         Effect.catchAll((cause: unknown) =>
           cause instanceof Db.DatabaseQueryError
             ? Effect.fail(new ModelRepoError("Failed to delete providers", cause.cause))
