@@ -113,7 +113,7 @@ export function createSwitchTool(ctx: PluginContext): ToolDefinition {
       const asNumber = Number(trimmed)
       let selected: WorkspaceEntry | undefined
 
-      if (!isNaN(asNumber)) {
+      if (!isNaN(asNumber) && Number.isInteger(asNumber)) {
         selected = entries.find((e) => e.index === asNumber)
       }
 
