@@ -6,6 +6,7 @@ import { recordTokenUsage } from "./hooks/audit-token-tracker"
 import { createLoginTool } from "./plugin-tools/create-login-tool"
 import { createSwitchTool } from "./plugin-tools/create-switch-tool"
 import { log } from "./features/log/logger"
+import { createAuditBatchPusher } from "./features/audit"
 
 const require_local = createRequire(import.meta.url)
 const packageRoot = dirname(require_local.resolve("oh-my-codes/package.json"))
@@ -14,7 +15,14 @@ process.env.OH_MY_CODES_ROOT = packageRoot
 const serverPlugin: Plugin = async (input): Promise<Hooks> => {
   log("[oh-my-codes] ENTRY - plugin loading", { directory: input.directory })
 
+  const auditBatchPusher = createAuditBatchPusher(input)
+  auditBatchPusher.start()
+
   return {
+    dispose: async () => {
+      await auditBatchPusher.stop()
+    },
+
     tool: {
       "omc-login": createLoginTool(input),
       "omc-switch": createSwitchTool(input),
