@@ -8,8 +8,3 @@ pub struct DaemonConfig {
     pub data_dir: Option<String>,
     pub auth_token: Option<String>,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct RepoConfig {
-    pub path: String,
-}

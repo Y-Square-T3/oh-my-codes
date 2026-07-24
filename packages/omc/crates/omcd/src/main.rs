@@ -69,22 +69,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             data_dir: args.data_dir,
             auth_token: args.auth_token,
         },
-        repos: Vec::new(),
     };
     config.merge(&overrides);
 
     let resolved = config.resolve_daemon();
 
-    let storage = Arc::new(MemoryStorage::new());
-    let state = Arc::new(DaemonState::new(config, storage));
-
     let data_path = PathBuf::from(&resolved.data_dir);
     std::fs::create_dir_all(&data_path)?;
     let surreal = SurrealStorage::new_rocksdb(&data_path.join("omc.db")).await?;
-    let surreal_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(surreal);
-    state
-        .add_message_store("default".to_string(), surreal_store)
-        .await;
+    let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(surreal);
+    let storage = Arc::new(MemoryStorage::new());
+
+    let state = Arc::new(DaemonState::new(config, storage, message_store));
 
     let pid_path = omc_core::config::paths::default_pid_path();
     let _pid_file = PidFile::new(&pid_path);

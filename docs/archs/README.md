@@ -2,7 +2,7 @@
 
 ## Overview
 
-oh-my-codes is a Rust-based daemon and CLI tool for managing code repositories with an embedded SurrealDB database.
+oh-my-codes is a Rust-based daemon and CLI tool with an embedded SurrealDB database.
 
 ## Components
 
@@ -20,9 +20,9 @@ oh-my-codes is a Rust-based daemon and CLI tool for managing code repositories w
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        CLI (omc)                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │  Config  │  │   Repo   │  │  Health  │  │  Daemon  │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                  │
+│  │  Config  │  │  Health  │  │  Daemon  │                  │
+│  └──────────┘  └──────────┘  └──────────┘                  │
 └─────────────────────────────────────────────────────────────┘
                             │ HTTP/Unix Socket
                             ▼
@@ -31,7 +31,7 @@ oh-my-codes is a Rust-based daemon and CLI tool for managing code repositories w
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │              HTTP Server (omc-server)                 │  │
 │  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │  │
-│  │  │ Health  │ │ Config  │ │  Repo   │ │ Channel │   │  │
+│  │  │ Health  │ │ Config  │ │ Channel │ │ Message │   │  │
 │  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘   │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                            │                                │

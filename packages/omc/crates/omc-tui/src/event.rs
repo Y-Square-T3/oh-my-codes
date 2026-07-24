@@ -1,14 +1,11 @@
 use crossterm::event::{Event, KeyEvent};
 use tokio::sync::mpsc;
 
-use omc_core::config::RepoConfig;
 use omc_core::types::{Channel, Message};
 
 pub enum AppEvent {
     Key(KeyEvent),
     Tick,
-    #[allow(dead_code)]
-    ReposLoaded(Vec<RepoConfig>),
     #[allow(dead_code)]
     ChannelsLoaded(Vec<Channel>),
     #[allow(dead_code)]

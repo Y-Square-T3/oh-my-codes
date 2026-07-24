@@ -143,49 +143,20 @@ impl OmcClient {
         self.request("GET", "/config/path", None).await
     }
 
-    pub async fn repo_list(&self) -> Result<RepoListResponse> {
-        self.request("GET", "/repos", None).await
-    }
-
-    pub async fn repo_add(&self, path: &str) -> Result<RepoAddResponse> {
-        let body = serde_json::to_vec(&RepoAddRequest {
-            path: path.to_string(),
-        })
-        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
-        self.request("POST", "/repos", Some(&body)).await
-    }
-
-    pub async fn repo_remove(&self, path: &str) -> Result<RepoRemoveResponse> {
-        let body = serde_json::to_vec(&RepoRemoveRequest {
-            path: path.to_string(),
-        })
-        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
-        self.request("DELETE", "/repos", Some(&body)).await
-    }
-
-    pub async fn create_channel(
-        &self,
-        repo_path: &str,
-        name: &str,
-    ) -> Result<CreateChannelResponse> {
+    pub async fn create_channel(&self, name: &str) -> Result<CreateChannelResponse> {
         let body = serde_json::to_vec(&CreateChannelRequest {
             name: name.to_string(),
         })
         .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
-        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
-        self.request("POST", &format!("/repos/{encoded}/channels"), Some(&body))
-            .await
+        self.request("POST", "/channels", Some(&body)).await
     }
 
-    pub async fn list_channels(&self, repo_path: &str) -> Result<ChannelsResponse> {
-        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
-        self.request("GET", &format!("/repos/{encoded}/channels"), None)
-            .await
+    pub async fn list_channels(&self) -> Result<ChannelsResponse> {
+        self.request("GET", "/channels", None).await
     }
 
     pub async fn send_message(
         &self,
-        repo_path: &str,
         channel_id: &str,
         content: &str,
     ) -> Result<SendMessageResponse> {
@@ -193,10 +164,9 @@ impl OmcClient {
             content: content.to_string(),
         })
         .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
-        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
         self.request(
             "POST",
-            &format!("/repos/{encoded}/channels/{channel_id}/messages"),
+            &format!("/channels/{channel_id}/messages"),
             Some(&body),
         )
         .await
@@ -204,12 +174,10 @@ impl OmcClient {
 
     pub async fn get_messages(
         &self,
-        repo_path: &str,
         channel_id: &str,
         limit: Option<usize>,
         before: Option<&str>,
     ) -> Result<MessagesResponse> {
-        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
         let mut query = Vec::new();
         if let Some(l) = limit {
             query.push(format!("limit={l}"));
@@ -222,11 +190,7 @@ impl OmcClient {
         } else {
             format!("?{}", query.join("&"))
         };
-        self.request(
-            "GET",
-            &format!("/repos/{encoded}/channels/{channel_id}/messages{qs}"),
-            None,
-        )
-        .await
+        self.request("GET", &format!("/channels/{channel_id}/messages{qs}"), None)
+            .await
     }
 }

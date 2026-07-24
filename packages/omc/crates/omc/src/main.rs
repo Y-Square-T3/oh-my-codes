@@ -17,7 +17,6 @@ struct Cli {
 enum Commands {
     Daemon(DaemonCommand),
     Config(ConfigCommand),
-    Repo(RepoCommand),
     Health,
 }
 
@@ -46,19 +45,6 @@ struct ConfigCommand {
 enum ConfigAction {
     Show,
     Path,
-}
-
-#[derive(Parser)]
-struct RepoCommand {
-    #[command(subcommand)]
-    action: RepoAction,
-}
-
-#[derive(Subcommand)]
-enum RepoAction {
-    Add { path: String },
-    List,
-    Remove { path: String },
 }
 
 #[tokio::main]
@@ -99,20 +85,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             ConfigAction::Path => {
                 let resp = client.config_path().await?;
-                println!("{}", serde_json::to_string_pretty(&resp)?);
-            }
-        },
-        Some(Commands::Repo(cmd)) => match cmd.action {
-            RepoAction::Add { path } => {
-                let resp = client.repo_add(&path).await?;
-                println!("{}", serde_json::to_string_pretty(&resp)?);
-            }
-            RepoAction::List => {
-                let resp = client.repo_list().await?;
-                println!("{}", serde_json::to_string_pretty(&resp)?);
-            }
-            RepoAction::Remove { path } => {
-                let resp = client.repo_remove(&path).await?;
                 println!("{}", serde_json::to_string_pretty(&resp)?);
             }
         },

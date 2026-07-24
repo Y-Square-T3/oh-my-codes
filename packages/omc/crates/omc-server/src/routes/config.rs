@@ -16,7 +16,6 @@ pub async fn handler(State(state): State<Arc<DaemonState>>) -> axum::Json<Config
             data_dir: resolved.data_dir,
             auth_token: resolved.auth_token,
         },
-        repos: config.repos,
     })
 }
 

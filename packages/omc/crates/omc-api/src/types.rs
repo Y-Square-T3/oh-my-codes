@@ -1,4 +1,3 @@
-use omc_core::config::RepoConfig;
 use omc_core::types::{Channel, Message};
 use serde::{Deserialize, Serialize};
 
@@ -25,40 +24,12 @@ pub struct ResolvedDaemonConfigJson {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigResponse {
     pub daemon: ResolvedDaemonConfigJson,
-    pub repos: Vec<RepoConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigPathResponse {
     pub user: String,
     pub project: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepoListResponse {
-    pub repos: Vec<RepoConfig>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepoAddRequest {
-    pub path: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepoAddResponse {
-    pub status: String,
-    pub path: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepoRemoveRequest {
-    pub path: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepoRemoveResponse {
-    pub status: String,
-    pub path: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

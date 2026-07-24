@@ -1,5 +1,5 @@
 use crate::config::paths;
-use crate::config::types::{DaemonConfig, RepoConfig};
+use crate::config::types::DaemonConfig;
 use crate::error::OmcError;
 use std::path::Path;
 
@@ -7,8 +7,6 @@ use std::path::Path;
 pub struct OmcConfig {
     #[serde(default)]
     pub daemon: DaemonConfig,
-    #[serde(default)]
-    pub repos: Vec<RepoConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -73,11 +71,6 @@ impl OmcConfig {
         }
         if other.daemon.auth_token.is_some() {
             self.daemon.auth_token = other.daemon.auth_token.clone();
-        }
-        for repo in &other.repos {
-            if !self.repos.iter().any(|r| r.path == repo.path) {
-                self.repos.push(repo.clone());
-            }
         }
     }
 

@@ -1,10 +1,8 @@
 use crossterm::event::KeyEvent;
 use omc_api::client::OmcClient;
-use omc_core::config::RepoConfig;
 use omc_core::types::{Channel, Message};
 
 pub enum Focus {
-    Repos,
     Channels,
     Chat,
     Input,
@@ -18,10 +16,8 @@ pub enum InputMode {
 #[allow(dead_code)]
 pub struct App {
     pub client: OmcClient,
-    pub repos: Vec<RepoConfig>,
     pub channels: Vec<Channel>,
     pub messages: Vec<Message>,
-    pub selected_repo: usize,
     pub selected_channel: usize,
     pub focus: Focus,
     pub input_mode: InputMode,
@@ -35,12 +31,10 @@ impl App {
     pub fn new(client: OmcClient) -> Self {
         Self {
             client,
-            repos: Vec::new(),
             channels: Vec::new(),
             messages: Vec::new(),
-            selected_repo: 0,
             selected_channel: 0,
-            focus: Focus::Repos,
+            focus: Focus::Channels,
             input_mode: InputMode::Normal,
             input: String::new(),
             chat_scroll: 0,
@@ -77,11 +71,6 @@ impl App {
                     self.input_mode = InputMode::Insert;
                 }
                 KeyCode::Char('j') | KeyCode::Down => match self.focus {
-                    Focus::Repos => {
-                        if self.selected_repo < self.repos.len().saturating_sub(1) {
-                            self.selected_repo += 1;
-                        }
-                    }
                     Focus::Channels => {
                         if self.selected_channel < self.channels.len().saturating_sub(1) {
                             self.selected_channel += 1;
@@ -93,9 +82,6 @@ impl App {
                     _ => {}
                 },
                 KeyCode::Char('k') | KeyCode::Up => match self.focus {
-                    Focus::Repos => {
-                        self.selected_repo = self.selected_repo.saturating_sub(1);
-                    }
                     Focus::Channels => {
                         self.selected_channel = self.selected_channel.saturating_sub(1);
                     }
@@ -106,15 +92,13 @@ impl App {
                 },
                 KeyCode::Char('h') | KeyCode::Left => {
                     self.focus = match self.focus {
-                        Focus::Channels => Focus::Repos,
                         Focus::Chat => Focus::Channels,
                         Focus::Input => Focus::Chat,
-                        _ => Focus::Repos,
+                        _ => Focus::Channels,
                     };
                 }
                 KeyCode::Char('l') | KeyCode::Right => {
                     self.focus = match self.focus {
-                        Focus::Repos => Focus::Channels,
                         Focus::Channels => Focus::Chat,
                         Focus::Chat => Focus::Input,
                         _ => Focus::Input,

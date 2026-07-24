@@ -33,9 +33,6 @@ async fn run_loop(
                     }
                 }
                 event::AppEvent::Tick => {}
-                event::AppEvent::ReposLoaded(repos) => {
-                    app.repos = repos;
-                }
                 event::AppEvent::ChannelsLoaded(channels) => {
                     app.channels = channels;
                 }
