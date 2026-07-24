@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use omc_api::client::OmcClient;
 use omc_core::config::OmcConfig;
 use omc_service::{create_service_manager, find_omcd_binary};
@@ -72,7 +72,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match cli.command {
         None => {
-            omc_tui::run(client).await?;
+            let mut cmd = Cli::command();
+            cmd.print_help()?;
+            println!();
+            return Ok(());
         }
         Some(Commands::Health) => {
             let resp = client.health().await?;
