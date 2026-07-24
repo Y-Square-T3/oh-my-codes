@@ -1,0 +1,13 @@
+[package]
+name = "omc"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+omc-core = { workspace = true }
+omc-api = { workspace = true }
+omc-service = { workspace = true }
+omc-tui = { workspace = true }
+clap = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }

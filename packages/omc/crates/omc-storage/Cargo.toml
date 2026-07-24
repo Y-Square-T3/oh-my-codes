@@ -1,0 +1,19 @@
+[package]
+name = "omc-storage"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+omc-core = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+surrealdb = { workspace = true }
+ulid = { workspace = true }
+chrono = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

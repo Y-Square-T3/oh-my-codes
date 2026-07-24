@@ -1,0 +1,11 @@
+{
+  "name": "omc-root",
+  "packageManager": "yarn@4.15.0",
+  "workspaces": [
+    "packages/omc",
+    "packages/omc/dist/*"
+  ],
+  "scripts": {
+    "omc": "yarn workspace oh-my-codes"
+  }
+}

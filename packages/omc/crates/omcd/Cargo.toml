@@ -1,0 +1,14 @@
+[package]
+name = "omcd"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+omc-core = { workspace = true }
+omc-api = { workspace = true }
+omc-storage = { workspace = true }
+omc-server = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

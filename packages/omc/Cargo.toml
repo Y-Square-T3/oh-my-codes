@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/omc",
+    "crates/omcd",
+    "crates/omc-core",
+    "crates/omc-api",
+    "crates/omc-storage",
+    "crates/omc-server",
+    "crates/omc-service",
+    "crates/omc-tui",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace.dependencies]
+omc-core = { path = "crates/omc-core" }
+omc-api = { path = "crates/omc-api" }
+omc-storage = { path = "crates/omc-storage" }
+omc-server = { path = "crates/omc-server" }
+omc-service = { path = "crates/omc-service" }
+omc-tui = { path = "crates/omc-tui" }
+
+axum = "0.8"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "2"
+uuid = { version = "1", features = ["v4"] }
+async-trait = "0.1"
+
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+hyper = { version = "1", features = ["client", "http1", "http2"] }
+hyper-util = { version = "0.1", features = ["client", "client-legacy", "http1", "http2", "tokio"] }
+http-body-util = "0.1"
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+axum-test = "17"
+dirs = "6"
+libc = "0.2"
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+unicode-width = "0.2"
+surrealdb = { version = "2", features = ["kv-mem", "kv-rocksdb"] }
+ulid = { version = "1", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }

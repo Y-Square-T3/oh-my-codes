@@ -1,0 +1,13 @@
+[package]
+name = "omc-tui"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+omc-core = { workspace = true }
+omc-api = { workspace = true }
+ratatui = { workspace = true }
+crossterm = { workspace = true }
+tokio = { workspace = true }
+unicode-width = { workspace = true }
+chrono = { workspace = true }

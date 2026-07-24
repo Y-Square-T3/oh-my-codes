@@ -1,0 +1,24 @@
+[package]
+name = "omc-api"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+omc-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+hyper = { workspace = true }
+hyper-util = { workspace = true }
+http-body-util = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+http = "1"
+
+[target.'cfg(unix)'.dependencies]
+tokio = { workspace = true, features = ["net"] }
+
+[dev-dependencies]
+axum-test = { workspace = true }
+omc-storage = { workspace = true }
+omc-server = { workspace = true }

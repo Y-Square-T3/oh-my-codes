@@ -1,0 +1,319 @@
+name: omc-release
+run-name: "omc-release ${{ inputs.version || inputs.bump }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Bump major, minor, or patch"
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: "Override version (e.g., 1.0.0-beta.1). Takes precedence over bump."
+        required: false
+        type: string
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  calculate-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      dist_tag: ${{ steps.version.outputs.dist_tag }}
+    steps:
+      - name: Calculate version
+        id: version
+        env:
+          RAW_VERSION: ${{ inputs.version }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          VERSION="$RAW_VERSION"
+          if [ -z "$VERSION" ]; then
+            RESPONSE=$(curl -sf https://registry.npmjs.org/oh-my-codes/latest 2>/dev/null || echo '{}')
+            PREV=$(echo "$RESPONSE" | jq -r '.version // "0.0.0"' 2>/dev/null || echo "0.0.0")
+            if [ -z "$PREV" ] || [ "$PREV" = "null" ]; then PREV="0.0.0"; fi
+            BASE="${PREV%%-*}"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+            case "$BUMP" in
+              major) VERSION="$((MAJOR+1)).0.0" ;;
+              minor) VERSION="${MAJOR}.$((MINOR+1)).0" ;;
+              *) VERSION="${MAJOR}.${MINOR}.$((PATCH+1))" ;;
+            esac
+          fi
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$ ]]; then
+            echo "::error::Invalid version: $VERSION"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          if [[ "$VERSION" == *"-"* ]]; then
+            DIST_TAG=$(printf '%s' "$VERSION" | cut -d'-' -f2 | cut -d'.' -f1)
+            if ! [[ "$DIST_TAG" =~ ^[a-z][a-z0-9-]*$ ]]; then
+              echo "::error::Invalid dist_tag: $DIST_TAG"
+              exit 1
+            fi
+            echo "dist_tag=${DIST_TAG:-next}" >> $GITHUB_OUTPUT
+          else
+            echo "dist_tag=" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Version: $VERSION"
+
+  build:
+    needs: [calculate-version]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            targets:
+              - aarch64-apple-darwin
+              - x86_64-apple-darwin
+          - os: ubuntu-latest
+            targets:
+              - x86_64-unknown-linux-gnu
+              - aarch64-unknown-linux-gnu
+          - os: windows-latest
+            targets:
+              - x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Cargo workspace version
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            SED_IN=(-i '')
+          else
+            SED_IN=(-i)
+          fi
+          sed "${SED_IN[@]}" "s/^\([[:space:]]*\)version = \".*\"/\1version = \"${VERSION}\"/" packages/omc/Cargo.toml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ join(matrix.targets, ',') }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/omc
+
+      - name: Setup Linux cross-compile
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "PKG_CONFIG_ALLOW_CROSS=1" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
+
+      - name: Build binaries
+        run: |
+          for target in ${{ join(matrix.targets, ' ') }}; do
+            ./packages/omc/scripts/build-binary.sh "$target"
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.os }}
+          path: packages/omc/dist/*/bin/*
+
+  publish:
+    needs: [calculate-version, build]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ needs.calculate-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          path: packages/omc/dist-artifacts
+          merge-multiple: true
+
+      - name: Reorganize artifacts
+        run: |
+          for platform in darwin-arm64 darwin-x64 linux-arm64 linux-x64 win32-x64; do
+            src="packages/omc/dist-artifacts/${platform}/bin"
+            dst="packages/omc/dist/${platform}/bin"
+            if [ -d "$src" ]; then
+              mkdir -p "$dst"
+              cp -f "$src/"* "$dst/"
+              chmod +x "$dst/"* 2>/dev/null || true
+            fi
+          done
+          rm -rf packages/omc/dist-artifacts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Check if already published
+        id: check
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/oh-my-codes/${VERSION}")
+          if [ "$STATUS" = "200" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "oh-my-codes@${VERSION} already published"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update versions
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          jq --arg v "$VERSION" '.version = $v' packages/omc/package.json > tmp.json && mv tmp.json packages/omc/package.json
+
+          for platform in darwin-arm64 darwin-x64 linux-arm64 linux-x64 win32-x64; do
+            jq --arg v "$VERSION" '.version = $v' "packages/omc/dist/${platform}/package.json" > tmp.json
+            mv tmp.json "packages/omc/dist/${platform}/package.json"
+          done
+
+      - name: Set fixed optionalDependencies
+        if: steps.check.outputs.skip != 'true'
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          jq --arg v "$VERSION" '
+            .optionalDependencies = {
+              "oh-my-codes-darwin-arm64": $v,
+              "oh-my-codes-darwin-x64": $v,
+              "oh-my-codes-linux-arm64": $v,
+              "oh-my-codes-linux-x64": $v,
+              "oh-my-codes-win32-x64": $v
+            }
+          ' packages/omc/package.json > tmp.json && mv tmp.json packages/omc/package.json
+
+      - name: Publish platform packages
+        if: steps.check.outputs.skip != 'true'
+        env:
+          DIST_TAG: ${{ needs.calculate-version.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for platform in darwin-arm64 darwin-x64 linux-arm64 linux-x64 win32-x64; do
+            (
+              cd "packages/omc/dist/${platform}"
+              if [ -n "$DIST_TAG" ]; then
+                npm publish --access public --tag "$DIST_TAG" || echo "Already published"
+              else
+                npm publish --access public || echo "Already published"
+              fi
+            )
+          done
+
+      - name: Publish main package
+        if: steps.check.outputs.skip != 'true'
+        env:
+          DIST_TAG: ${{ needs.calculate-version.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/omc
+          jq 'del(.workspaces)' package.json > tmp.json && mv tmp.json package.json
+
+          if [ -n "$DIST_TAG" ]; then
+            npm publish --access public --tag "$DIST_TAG"
+          else
+            npm publish --access public
+          fi
+
+  release:
+    needs: [calculate-version, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate changelog
+        run: |
+          node scripts/generate-changelog.mjs > /tmp/changelog.md
+          cat /tmp/changelog.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply release version to source tree
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          jq --arg v "$VERSION" '.version = $v' packages/omc/package.json > tmp.json && mv tmp.json packages/omc/package.json
+
+          for platform in darwin-arm64 darwin-x64 linux-arm64 linux-x64 win32-x64; do
+            jq --arg v "$VERSION" '.version = $v' "packages/omc/dist/${platform}/package.json" > tmp.json
+            mv tmp.json "packages/omc/dist/${platform}/package.json"
+          done
+
+          sed -i "s/^\([[:space:]]*\)version = \".*\"/\1version = \"${VERSION}\"/" packages/omc/Cargo.toml
+
+      - name: Update lock files
+        run: |
+          cargo generate-lockfile --manifest-path packages/omc/Cargo.toml
+          yarn install --mode update-lockfile
+
+      - name: Commit version bump
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add packages/omc/package.json packages/omc/dist/*/package.json packages/omc/Cargo.toml packages/omc/Cargo.lock yarn.lock
+          git diff --cached --quiet || git commit -m "release: v${VERSION}"
+
+      - name: Create release tag
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+        run: |
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag v${VERSION} already exists"
+            exit 1
+          fi
+          git tag "v${VERSION}"
+
+      - name: Push release state
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin HEAD
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub release
+        env:
+          VERSION: ${{ needs.calculate-version.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "v${VERSION}" >/dev/null 2>&1 || \
+            gh release create "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/changelog.md

@@ -1,0 +1,44 @@
+name: omc-ci
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: omc-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+        working-directory: packages/omc
+
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/omc
+
+      - name: Lint
+        run: cargo clippy --workspace --all-targets -- -D warnings
+        working-directory: packages/omc
+
+      - name: Test
+        run: cargo test --workspace
+        working-directory: packages/omc

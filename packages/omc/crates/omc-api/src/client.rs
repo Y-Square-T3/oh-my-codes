@@ -1,0 +1,232 @@
+use crate::types::*;
+use omc_core::error::{OmcError, Result};
+use serde::de::DeserializeOwned;
+
+#[derive(Clone)]
+pub struct OmcClient {
+    endpoint: ClientEndpoint,
+}
+
+#[derive(Clone)]
+enum ClientEndpoint {
+    #[cfg(unix)]
+    Unix(String),
+    Http(String),
+}
+
+impl OmcClient {
+    #[cfg(unix)]
+    pub fn connect_unix(socket_path: &str) -> Self {
+        Self {
+            endpoint: ClientEndpoint::Unix(socket_path.to_string()),
+        }
+    }
+
+    pub fn connect_http(base_url: &str) -> Self {
+        Self {
+            endpoint: ClientEndpoint::Http(base_url.to_string()),
+        }
+    }
+
+    async fn request<T: DeserializeOwned>(
+        &self,
+        method: &str,
+        path: &str,
+        body: Option<&[u8]>,
+    ) -> Result<T> {
+        let body_bytes = body.unwrap_or(b"{}");
+        self.request_raw(method, path, body_bytes, "application/json")
+            .await
+    }
+
+    async fn request_raw<T: DeserializeOwned>(
+        &self,
+        method: &str,
+        path: &str,
+        body: &[u8],
+        content_type: &str,
+    ) -> Result<T> {
+        let response_bytes = match &self.endpoint {
+            #[cfg(unix)]
+            ClientEndpoint::Unix(socket_path) => {
+                use http::Uri;
+                use hyper::body::Bytes;
+                use hyper::header::{CONTENT_LENGTH, CONTENT_TYPE, HOST};
+                use hyper_util::rt::TokioIo;
+
+                let uri: Uri = path
+                    .parse()
+                    .map_err(|e| OmcError::Api(format!("Invalid URI: {e}")))?;
+
+                let stream = tokio::net::UnixStream::connect(socket_path)
+                    .await
+                    .map_err(|e| OmcError::Api(format!("Failed to connect: {e}")))?;
+                let io = TokioIo::new(stream);
+
+                let (mut sender, conn) = hyper::client::conn::http1::handshake(io)
+                    .await
+                    .map_err(|e| OmcError::Api(format!("Handshake failed: {e}")))?;
+
+                tokio::spawn(async move {
+                    if let Err(err) = conn.await {
+                        tracing::error!("Connection error: {}", err);
+                    }
+                });
+
+                let req = hyper::Request::builder()
+                    .method(method)
+                    .uri(uri)
+                    .header(HOST, "localhost")
+                    .header(CONTENT_TYPE, content_type)
+                    .header(CONTENT_LENGTH, body.len())
+                    .body(http_body_util::Full::new(Bytes::copy_from_slice(body)))
+                    .map_err(|e| OmcError::Api(format!("Request build error: {e}")))?;
+
+                let response = sender
+                    .send_request(req)
+                    .await
+                    .map_err(|e| OmcError::Api(format!("Request failed: {e}")))?;
+
+                let status = response.status();
+                let body = http_body_util::BodyExt::collect(response.into_body())
+                    .await
+                    .map_err(|e| OmcError::Api(format!("Body read error: {e}")))?
+                    .to_bytes();
+
+                if !status.is_success() {
+                    let err_body = String::from_utf8_lossy(&body);
+                    return Err(OmcError::Api(format!("HTTP {status}: {err_body}")));
+                }
+
+                body.to_vec()
+            }
+            ClientEndpoint::Http(base_url) => {
+                let client = reqwest::Client::new();
+                let url = format!("{base_url}{path}");
+
+                let resp = match method {
+                    "GET" => client.get(&url).send().await,
+                    "POST" => client.post(&url).body(body.to_vec()).send().await,
+                    "DELETE" => client.delete(&url).send().await,
+                    _ => return Err(OmcError::Api(format!("Unsupported method: {method}"))),
+                }
+                .map_err(|e| OmcError::Api(format!("Request failed: {e}")))?;
+
+                let status = resp.status();
+                let resp_body = resp
+                    .bytes()
+                    .await
+                    .map_err(|e| OmcError::Api(format!("Body read error: {e}")))?;
+
+                if !status.is_success() {
+                    let err_body = String::from_utf8_lossy(&resp_body);
+                    return Err(OmcError::Api(format!("HTTP {status}: {err_body}")));
+                }
+
+                resp_body.to_vec()
+            }
+        };
+
+        serde_json::from_slice(&response_bytes)
+            .map_err(|e| OmcError::Api(format!("Failed to parse response: {e}")))
+    }
+
+    pub async fn health(&self) -> Result<HealthResponse> {
+        self.request("GET", "/health", None).await
+    }
+
+    pub async fn config(&self) -> Result<ConfigResponse> {
+        self.request("GET", "/config", None).await
+    }
+
+    pub async fn config_path(&self) -> Result<ConfigPathResponse> {
+        self.request("GET", "/config/path", None).await
+    }
+
+    pub async fn repo_list(&self) -> Result<RepoListResponse> {
+        self.request("GET", "/repos", None).await
+    }
+
+    pub async fn repo_add(&self, path: &str) -> Result<RepoAddResponse> {
+        let body = serde_json::to_vec(&RepoAddRequest {
+            path: path.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request("POST", "/repos", Some(&body)).await
+    }
+
+    pub async fn repo_remove(&self, path: &str) -> Result<RepoRemoveResponse> {
+        let body = serde_json::to_vec(&RepoRemoveRequest {
+            path: path.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request("DELETE", "/repos", Some(&body)).await
+    }
+
+    pub async fn create_channel(
+        &self,
+        repo_path: &str,
+        name: &str,
+    ) -> Result<CreateChannelResponse> {
+        let body = serde_json::to_vec(&CreateChannelRequest {
+            name: name.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
+        self.request("POST", &format!("/repos/{encoded}/channels"), Some(&body))
+            .await
+    }
+
+    pub async fn list_channels(&self, repo_path: &str) -> Result<ChannelsResponse> {
+        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
+        self.request("GET", &format!("/repos/{encoded}/channels"), None)
+            .await
+    }
+
+    pub async fn send_message(
+        &self,
+        repo_path: &str,
+        channel_id: &str,
+        content: &str,
+    ) -> Result<SendMessageResponse> {
+        let body = serde_json::to_vec(&SendMessageRequest {
+            content: content.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
+        self.request(
+            "POST",
+            &format!("/repos/{encoded}/channels/{channel_id}/messages"),
+            Some(&body),
+        )
+        .await
+    }
+
+    pub async fn get_messages(
+        &self,
+        repo_path: &str,
+        channel_id: &str,
+        limit: Option<usize>,
+        before: Option<&str>,
+    ) -> Result<MessagesResponse> {
+        let encoded = omc_core::path_encode::encode_repo_path(repo_path);
+        let mut query = Vec::new();
+        if let Some(l) = limit {
+            query.push(format!("limit={l}"));
+        }
+        if let Some(b) = before {
+            query.push(format!("before={b}"));
+        }
+        let qs = if query.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", query.join("&"))
+        };
+        self.request(
+            "GET",
+            &format!("/repos/{encoded}/channels/{channel_id}/messages{qs}"),
+            None,
+        )
+        .await
+    }
+}
