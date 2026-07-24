@@ -18,14 +18,16 @@ pub enum AppEvent {
 }
 
 pub fn spawn_event_loop(tx: mpsc::UnboundedSender<AppEvent>) {
-    std::thread::spawn(move || loop {
-        if crossterm::event::poll(std::time::Duration::from_millis(250)).unwrap_or(false)
-            && let Ok(Event::Key(key)) = crossterm::event::read()
-            && tx.send(AppEvent::Key(key)).is_err()
-        {
-            break;
-        } else if tx.send(AppEvent::Tick).is_err() {
-            break;
+    std::thread::spawn(move || {
+        loop {
+            if crossterm::event::poll(std::time::Duration::from_millis(250)).unwrap_or(false)
+                && let Ok(Event::Key(key)) = crossterm::event::read()
+                && tx.send(AppEvent::Key(key)).is_err()
+            {
+                break;
+            } else if tx.send(AppEvent::Tick).is_err() {
+                break;
+            }
         }
     });
 }
