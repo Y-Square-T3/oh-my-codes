@@ -12,6 +12,7 @@
     "omc": "bin/omc"
   },
   "files": [
+    "README.md",
     "bin/omc",
     "bin/omcd"
   ]

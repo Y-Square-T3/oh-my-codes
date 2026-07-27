@@ -114,6 +114,10 @@ jobs:
         if: steps.check.outputs.skip != 'true'
         run: yarn oc build
 
+      - name: Copy README
+        if: steps.check.outputs.skip != 'true'
+        run: cp README.md packages/omc-opencode/README.md
+
       - name: Publish
         if: steps.check.outputs.skip != 'true'
         env:

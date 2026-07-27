@@ -67,6 +67,7 @@
 - Publishes platform packages + main package to npm as `oh-my-codes`.
 - Creates a git tag (`v<version>`) and GitHub release with auto-generated changelog.
 - Changelog generation script: `scripts/generate-changelog.mjs`.
+- During release, the root `README.md` is copied into each platform package in `packages/omc/dist/<platform>/` and into `packages/omc-opencode/` before publishing.
 
 ## Conventions
 
