@@ -8,10 +8,10 @@
     "x64"
   ],
   "bin": {
-    "lco": "bin/lco.exe"
+    "omc": "bin/omc.exe"
   },
   "files": [
-    "bin/lco.exe",
-    "bin/lcod.exe"
+    "bin/omc.exe",
+    "bin/omcd.exe"
   ]
 }
