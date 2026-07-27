@@ -193,4 +193,56 @@ impl OmcClient {
         self.request("GET", &format!("/channels/{channel_id}/messages{qs}"), None)
             .await
     }
+
+    pub async fn account_login(&self, url: &str) -> Result<LoginResponse> {
+        let body = serde_json::to_vec(&LoginRequest {
+            url: url.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request("POST", "/account/login", Some(&body)).await
+    }
+
+    pub async fn account_poll(&self, req: &PollRequest) -> Result<PollResponse> {
+        let body =
+            serde_json::to_vec(req).map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request("POST", "/account/poll", Some(&body)).await
+    }
+
+    pub async fn account_active(&self) -> Result<ActiveResponse> {
+        self.request("GET", "/account/active", None).await
+    }
+
+    pub async fn account_list(&self) -> Result<ListResponse> {
+        self.request("GET", "/account/list", None).await
+    }
+
+    pub async fn account_switch(&self, account_id: &str, workspace_id: &str) -> Result<()> {
+        let body = serde_json::to_vec(&SwitchRequest {
+            account_id: account_id.to_string(),
+            workspace_id: workspace_id.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request::<serde_json::Value>("POST", "/account/switch", Some(&body))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn account_remove(&self, account_id: &str) -> Result<()> {
+        let body = serde_json::to_vec(&RemoveRequest {
+            account_id: account_id.to_string(),
+        })
+        .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request::<serde_json::Value>("POST", "/account/remove", Some(&body))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn account_workspaces(&self, account_id: &str) -> Result<WorkspacesResponse> {
+        self.request(
+            "GET",
+            &format!("/account/workspaces?account_id={account_id}"),
+            None,
+        )
+        .await
+    }
 }

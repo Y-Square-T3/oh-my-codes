@@ -1,8 +1,12 @@
 use clap::Parser;
 use omc_core::config::OmcConfig;
 use omc_server::DaemonState;
+use omc_server::account_service::AccountService;
+use omc_server::server_client::OmcServerClient;
+use omc_storage::account_store::AccountStore;
 use omc_storage::memory::MemoryStorage;
-use omc_storage::surreal::SurrealStorage;
+use omc_storage::surreal::{SurrealAccountStore, SurrealStorage, SurrealWorkspaceStore};
+use omc_storage::workspace_store::WorkspaceStore;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -77,10 +81,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_path = PathBuf::from(&resolved.data_dir);
     std::fs::create_dir_all(&data_path)?;
     let surreal = SurrealStorage::new_rocksdb(&data_path.join("omc.db")).await?;
+    let db = surreal.db();
     let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(surreal);
     let storage = Arc::new(MemoryStorage::new());
 
-    let state = Arc::new(DaemonState::new(config, storage, message_store));
+    let account_store: Arc<dyn AccountStore> = Arc::new(SurrealAccountStore::new(db.clone()));
+    let workspace_store: Arc<dyn WorkspaceStore> = Arc::new(SurrealWorkspaceStore::new(db));
+    let server_client = OmcServerClient::new();
+    let account_service = Arc::new(AccountService::new(
+        account_store,
+        workspace_store,
+        server_client,
+    ));
+
+    let state = Arc::new(DaemonState::new(
+        config,
+        storage,
+        message_store,
+        account_service,
+    ));
 
     let pid_path = omc_core::config::paths::default_pid_path();
     let _pid_file = PidFile::new(&pid_path);

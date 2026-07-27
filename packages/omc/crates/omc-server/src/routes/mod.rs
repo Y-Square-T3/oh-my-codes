@@ -1,3 +1,4 @@
+pub mod account;
 pub mod channels;
 pub mod config;
 pub mod health;
@@ -5,7 +6,7 @@ pub mod messages;
 
 use crate::DaemonState;
 use axum::Router;
-use axum::routing::get;
+use axum::routing::{get, post};
 use std::sync::Arc;
 
 pub fn create_router(_auth_token: Option<String>, daemon_state: Arc<DaemonState>) -> Router {
@@ -22,6 +23,13 @@ pub fn create_router(_auth_token: Option<String>, daemon_state: Arc<DaemonState>
             "/channels/{channel_id}/messages",
             get(messages::list_handler).post(messages::send_handler),
         )
+        .route("/account/login", post(account::login_handler))
+        .route("/account/poll", post(account::poll_handler))
+        .route("/account/active", get(account::active_handler))
+        .route("/account/list", get(account::list_handler))
+        .route("/account/switch", post(account::switch_handler))
+        .route("/account/remove", post(account::remove_handler))
+        .route("/account/workspaces", get(account::workspaces_handler))
         .with_state(daemon_state)
 }
 

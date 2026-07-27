@@ -12,6 +12,10 @@ pub enum OmcError {
     Config(String),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("Auth error: {0}")]
+    Auth(String),
+    #[error("Token expired")]
+    TokenExpired,
     #[error("Internal error: {0}")]
     Internal(String),
 }
