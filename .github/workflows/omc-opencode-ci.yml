@@ -1,0 +1,39 @@
+name: omc-opencode-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "../../packages/omc-opencode/**"
+
+concurrency:
+  group: omc-opencode-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Typecheck
+        run: yarn oc typecheck
+
+      - name: Lint
+        run: yarn oc lint
+
+      - name: Format check
+        run: yarn oc fmt:check
+
+      - name: Test
+        run: yarn oc test

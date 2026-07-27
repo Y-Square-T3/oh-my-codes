@@ -3,9 +3,11 @@
   "packageManager": "yarn@4.15.0",
   "workspaces": [
     "packages/omc",
-    "packages/omc/dist/*"
+    "packages/omc/dist/*",
+    "packages/omc-opencode"
   ],
   "scripts": {
-    "omc": "yarn workspace oh-my-codes"
+    "omc": "yarn workspace oh-my-codes",
+    "oc": "yarn workspace oh-my-codes-opencode"
   }
 }
