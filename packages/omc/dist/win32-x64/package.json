@@ -8,6 +8,7 @@
     "x64"
   ],
   "bin": {
+    "oh-my-codes": "bin/omc.exe",
     "omc": "bin/omc.exe"
   },
   "files": [
