@@ -8,7 +8,6 @@ members = [
     "crates/omc-storage",
     "crates/omc-server",
     "crates/omc-service",
-    "crates/omc-tui",
 ]
 
 [workspace.package]
@@ -21,7 +20,6 @@ omc-api = { path = "crates/omc-api" }
 omc-storage = { path = "crates/omc-storage" }
 omc-server = { path = "crates/omc-server" }
 omc-service = { path = "crates/omc-service" }
-omc-tui = { path = "crates/omc-tui" }
 
 axum = "0.8"
 clap = { version = "4", features = ["derive"] }
@@ -43,9 +41,6 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 axum-test = "17"
 dirs = "6"
 libc = "0.2"
-ratatui = "0.29"
-crossterm = { version = "0.28", features = ["event-stream"] }
-unicode-width = "0.2"
 surrealdb = { version = "2", features = ["kv-mem", "kv-rocksdb"] }
 ulid = { version = "1", features = ["serde"] }
 chrono = { version = "0.4", features = ["serde"] }

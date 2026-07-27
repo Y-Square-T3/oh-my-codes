@@ -11,7 +11,6 @@ oh-my-codes is a Rust-based daemon and CLI tool with an embedded SurrealDB datab
 - **omc-storage**: Storage abstraction with SurrealDB embedded backend
 - **omc-server**: HTTP server (axum-based) with account service
 - **omc-service**: OS service management (launchd/systemd/Task Scheduler)
-- **omc-tui**: Terminal UI (ratatui-based)
 - **omc**: CLI binary
 - **omcd**: Daemon binary
 

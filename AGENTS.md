@@ -24,7 +24,6 @@
   - `omc-storage` — storage trait + SurrealDB embedded backend
   - `omc-server` — axum HTTP server + route handlers
   - `omc-service` — OS service management
-  - `omc-tui` — terminal UI
   - `omc` — CLI binary
   - `omcd` — daemon binary
 - Available scripts:
