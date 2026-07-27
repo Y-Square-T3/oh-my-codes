@@ -14,3 +14,5 @@ tokio = { workspace = true }
 dialoguer = { workspace = true }
 indicatif = { workspace = true }
 open = { workspace = true }
+console = { workspace = true }
+comfy-table = { workspace = true }

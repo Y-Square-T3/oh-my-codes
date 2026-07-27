@@ -355,14 +355,24 @@ impl AccountStore for SurrealAccountStore {
     }
 
     async fn set_active_workspace(&self, account_id: &str, workspace_id: &str) -> Result<()> {
-        let query = format!(
-            "UPDATE account SET active_workspace_id = '{workspace_id}' WHERE id = '{account_id}';"
-        );
-        let _result = self
+        let account: Option<SurrealAccount> = self
             .db
-            .query(&query)
+            .select(("account", account_id))
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to get account: {e}")))?;
+
+        let mut account = account
+            .ok_or_else(|| OmcError::Storage(format!("Account '{account_id}' not found")))?;
+
+        account.active_workspace_id = Some(workspace_id.to_string());
+
+        let _: Option<SurrealAccount> = self
+            .db
+            .upsert(("account", account_id))
+            .content(account)
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to set active workspace: {e}")))?;
+
         Ok(())
     }
 }

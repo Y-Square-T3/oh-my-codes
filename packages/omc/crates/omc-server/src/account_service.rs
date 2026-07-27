@@ -170,6 +170,21 @@ impl AccountService {
     }
 
     pub async fn switch(&self, account_id: &str, workspace_id: &str) -> Result<()> {
+        let account = self
+            .account_store
+            .get_account(account_id)
+            .await?
+            .ok_or_else(|| OmcError::NotFound(format!("Account '{account_id}' not found")))?;
+
+        let workspaces = self.workspace_store.list_workspaces(account_id).await?;
+        let workspace_exists = workspaces.iter().any(|w| w.id == workspace_id);
+        if !workspace_exists {
+            return Err(OmcError::NotFound(format!(
+                "Workspace '{workspace_id}' not found for account '{}'",
+                account.email
+            )));
+        }
+
         self.account_store
             .set_active_workspace(account_id, workspace_id)
             .await?;
