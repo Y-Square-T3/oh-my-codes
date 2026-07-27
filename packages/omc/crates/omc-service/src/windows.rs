@@ -107,10 +107,21 @@ impl ServiceManager for TaskSchedulerManager {
             return Ok(ServiceStatus::NotInstalled);
         }
         let stdout = String::from_utf8_lossy(&output.stdout);
-        if stdout.contains("Running") {
-            Ok(ServiceStatus::Running { pid: None })
-        } else {
-            Ok(ServiceStatus::Stopped)
+        if !stdout.contains("Running") {
+            return Ok(ServiceStatus::Stopped);
+        }
+        let tasklist = std::process::Command::new("tasklist")
+            .args(["/FI", "IMAGENAME eq omcd.exe", "/FO", "CSV", "/NH"])
+            .output()?;
+        let tasklist_stdout = String::from_utf8_lossy(&tasklist.stdout);
+        let pid = tasklist_stdout.lines().next().and_then(|line| {
+            line.split(',')
+                .nth(1)
+                .and_then(|p| p.trim_matches('"').parse::<u32>().ok())
+        });
+        match pid {
+            Some(p) => Ok(ServiceStatus::Running { pid: Some(p) }),
+            None => Ok(ServiceStatus::Stopped),
         }
     }
 }

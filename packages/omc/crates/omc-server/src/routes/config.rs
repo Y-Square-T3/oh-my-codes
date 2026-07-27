@@ -14,7 +14,6 @@ pub async fn handler(State(state): State<Arc<DaemonState>>) -> axum::Json<Config
             bind_port: resolved.bind_port,
             socket_path: resolved.socket_path,
             data_dir: resolved.data_dir,
-            auth_token: resolved.auth_token,
         },
     })
 }

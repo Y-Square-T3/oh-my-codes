@@ -15,7 +15,6 @@ pub struct ResolvedDaemonConfig {
     pub bind_port: u16,
     pub socket_path: String,
     pub data_dir: String,
-    pub auth_token: Option<String>,
 }
 
 impl OmcConfig {
@@ -69,9 +68,6 @@ impl OmcConfig {
         if other.daemon.data_dir.is_some() {
             self.daemon.data_dir = other.daemon.data_dir.clone();
         }
-        if other.daemon.auth_token.is_some() {
-            self.daemon.auth_token = other.daemon.auth_token.clone();
-        }
     }
 
     pub fn save_to_file(&self, path: &Path) -> Result<(), OmcError> {
@@ -103,7 +99,6 @@ impl OmcConfig {
                 .data_dir
                 .clone()
                 .unwrap_or_else(|| paths::default_data_dir().to_string_lossy().to_string()),
-            auth_token: self.daemon.auth_token.clone(),
         }
     }
 }

@@ -148,9 +148,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 DaemonAction::Status => {
                     let status = manager.status().map_err(|e| e.to_string())?;
                     match status {
-                        omc_service::ServiceStatus::Running { pid } => {
-                            println!("Daemon is running (pid: {:?})", pid)
-                        }
+                        omc_service::ServiceStatus::Running { pid } => match pid {
+                            Some(p) => println!("Daemon is running (pid: {p})"),
+                            None => println!("Daemon is running"),
+                        },
                         omc_service::ServiceStatus::Stopped => println!("Daemon is stopped"),
                         omc_service::ServiceStatus::NotInstalled => {
                             println!("Daemon is not installed")

@@ -120,10 +120,23 @@ impl ServiceManager for LaunchdManager {
             .args(["list", "com.oh-my-codes.omcd"])
             .output()?;
         let stdout = String::from_utf8_lossy(&output.stdout);
-        if stdout.contains("com.oh-my-codes.omcd") {
-            Ok(ServiceStatus::Running { pid: None })
-        } else {
-            Ok(ServiceStatus::Stopped)
+        if !stdout.contains("com.oh-my-codes.omcd") {
+            return Ok(ServiceStatus::Stopped);
+        }
+        let pid = stdout.lines().find_map(|line| {
+            let trimmed = line.trim();
+            if trimmed.contains("\"PID\"") {
+                trimmed
+                    .split('=')
+                    .nth(1)
+                    .and_then(|v| v.trim().trim_end_matches(';').trim().parse::<u32>().ok())
+            } else {
+                None
+            }
+        });
+        match pid {
+            Some(p) => Ok(ServiceStatus::Running { pid: Some(p) }),
+            None => Ok(ServiceStatus::Stopped),
         }
     }
 }

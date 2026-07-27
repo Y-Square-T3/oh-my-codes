@@ -27,9 +27,6 @@ struct Args {
 
     #[arg(long)]
     socket_path: Option<String>,
-
-    #[arg(long)]
-    auth_token: Option<String>,
 }
 
 struct PidFile(PathBuf);
@@ -71,7 +68,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             bind_port: args.bind_port,
             socket_path: args.socket_path,
             data_dir: args.data_dir,
-            auth_token: args.auth_token,
         },
     };
     config.merge(&overrides);

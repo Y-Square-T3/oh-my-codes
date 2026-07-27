@@ -18,7 +18,6 @@ pub struct ResolvedDaemonConfigJson {
     pub bind_port: u16,
     pub socket_path: String,
     pub data_dir: String,
-    pub auth_token: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

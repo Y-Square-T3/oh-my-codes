@@ -108,11 +108,25 @@ impl ServiceManager for SystemdManager {
         let output = std::process::Command::new("systemctl")
             .args(["--user", "is-active", "omcd.service"])
             .output()?;
-        let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        match stdout.as_str() {
-            "active" => Ok(ServiceStatus::Running { pid: None }),
-            "inactive" | "failed" => Ok(ServiceStatus::Stopped),
-            other => Ok(ServiceStatus::Unknown(other.to_string())),
+        let state = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        match state.as_str() {
+            "inactive" | "failed" => return Ok(ServiceStatus::Stopped),
+            "active" => {}
+            other => return Ok(ServiceStatus::Unknown(other.to_string())),
+        }
+        let pid_output = std::process::Command::new("systemctl")
+            .args(["--user", "show", "omcd.service", "--property=MainPID"])
+            .output()?;
+        let pid_stdout = String::from_utf8_lossy(&pid_output.stdout)
+            .trim()
+            .to_string();
+        let pid = pid_stdout
+            .strip_prefix("MainPID=")
+            .and_then(|v| v.parse::<u32>().ok())
+            .filter(|&p| p > 0);
+        match pid {
+            Some(p) => Ok(ServiceStatus::Running { pid: Some(p) }),
+            None => Ok(ServiceStatus::Stopped),
         }
     }
 }

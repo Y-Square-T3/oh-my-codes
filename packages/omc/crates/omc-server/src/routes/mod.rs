@@ -9,7 +9,7 @@ use axum::Router;
 use axum::routing::{get, post};
 use std::sync::Arc;
 
-pub fn create_router(_auth_token: Option<String>, daemon_state: Arc<DaemonState>) -> Router {
+pub fn create_router(daemon_state: Arc<DaemonState>) -> Router {
     Router::new()
         .route("/", get(root))
         .route("/health", get(health::handler))
