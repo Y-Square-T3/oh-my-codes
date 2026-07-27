@@ -952,7 +952,7 @@ checksum = "958c5d6ecf1f214b4c2bbbbf6ab9523a864bd136dcf71a7e8904799acfe1ad47"
 dependencies = [
  "crossterm",
  "unicode-segmentation",
- "unicode-width 0.2.0",
+ "unicode-width 0.2.2",
 ]
 
 [[package]]
@@ -973,7 +973,7 @@ dependencies = [
  "encode_unicode",
  "libc",
  "once_cell",
- "unicode-width 0.2.0",
+ "unicode-width 0.2.2",
  "windows-sys 0.59.0",
 ]
 
@@ -2143,7 +2143,7 @@ dependencies = [
  "console",
  "number_prefix",
  "portable-atomic",
- "unicode-width 0.2.0",
+ "unicode-width 0.2.2",
  "web-time",
 ]
 
@@ -2730,7 +2730,7 @@ dependencies = [
 
 [[package]]
 name = "omc"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "clap",
  "comfy-table",
@@ -2747,7 +2747,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "axum-test",
  "http",
@@ -2766,7 +2766,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "dirs",
  "serde",
@@ -2780,7 +2780,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "axum",
  "axum-test",
@@ -2801,7 +2801,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "dirs",
  "libc",
@@ -2811,7 +2811,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2827,7 +2827,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "clap",
  "omc-api",
@@ -5075,9 +5075,9 @@ checksum = "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af"
 
 [[package]]
 name = "unicode-width"
-version = "0.2.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fc81956842c57dac11422a97c3b8195a1ff727f06e85c84ed2e8aa277c9a0fd"
+checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
 
 [[package]]
 name = "unicode-xid"
