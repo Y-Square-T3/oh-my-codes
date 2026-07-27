@@ -2757,7 +2757,7 @@ dependencies = [
 
 [[package]]
 name = "omc"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "clap",
  "dialoguer",
@@ -2773,7 +2773,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "axum-test",
  "http",
@@ -2792,7 +2792,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "dirs",
  "serde",
@@ -2806,7 +2806,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "axum",
  "axum-test",
@@ -2827,7 +2827,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "dirs",
  "libc",
@@ -2837,7 +2837,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2853,7 +2853,7 @@ dependencies = [
 
 [[package]]
 name = "omc-tui"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "chrono",
  "crossterm",
@@ -2866,7 +2866,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "clap",
  "omc-api",
