@@ -8,7 +8,7 @@ use omc_service::{create_service_manager, find_omcd_binary};
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(name = "omc", about = "oh-my-codes CLI")]
+#[command(name = "omc", about = "oh-my-codes CLI", version)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,

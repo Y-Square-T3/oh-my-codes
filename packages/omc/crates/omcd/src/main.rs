@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 #[derive(Parser)]
-#[command(name = "omcd", about = "oh-my-codes daemon")]
+#[command(name = "omcd", about = "oh-my-codes daemon", version)]
 struct Args {
     #[arg(long)]
     config: Option<PathBuf>,
