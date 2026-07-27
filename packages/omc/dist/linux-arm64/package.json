@@ -8,10 +8,10 @@
     "arm64"
   ],
   "bin": {
-    "lco": "bin/lco"
+    "omc": "bin/omc"
   },
   "files": [
-    "bin/lco",
-    "bin/lcod"
+    "bin/omc",
+    "bin/omcd"
   ]
 }
