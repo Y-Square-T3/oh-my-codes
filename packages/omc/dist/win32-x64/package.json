@@ -1,0 +1,17 @@
+{
+  "name": "oh-my-codes-win32-x64",
+  "version": "4.1.1",
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "bin": {
+    "lco": "bin/lco.exe"
+  },
+  "files": [
+    "bin/lco.exe",
+    "bin/lcod.exe"
+  ]
+}

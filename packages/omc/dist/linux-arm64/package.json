@@ -1,0 +1,17 @@
+{
+  "name": "oh-my-codes-linux-arm64",
+  "version": "4.1.1",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "bin": {
+    "lco": "bin/lco"
+  },
+  "files": [
+    "bin/lco",
+    "bin/lcod"
+  ]
+}

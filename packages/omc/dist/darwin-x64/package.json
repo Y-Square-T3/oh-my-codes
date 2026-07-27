@@ -1,0 +1,17 @@
+{
+  "name": "oh-my-codes-darwin-x64",
+  "version": "4.1.1",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "bin": {
+    "lco": "bin/lco"
+  },
+  "files": [
+    "bin/lco",
+    "bin/lcod"
+  ]
+}
