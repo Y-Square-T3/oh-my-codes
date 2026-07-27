@@ -169,14 +169,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn login_effect(client: &OmcClient, url: &str) -> Result<(), Box<dyn std::error::Error>> {
     let resp = client.account_login(url).await?;
 
+    let full_url = format!("{}{}", url.trim_end_matches('/'), resp.verification_uri_complete);
+
     println!();
     println!("Open this URL in your browser:");
-    println!("  {}", resp.verification_uri_complete);
+    println!("  {}", full_url);
     println!();
     println!("Or enter code: {}", resp.user_code);
     println!();
 
-    let _ = open::that(&resp.verification_uri_complete);
+    let _ = open::that(&full_url);
 
     let pb = ProgressBar::new_spinner();
     pb.set_style(
