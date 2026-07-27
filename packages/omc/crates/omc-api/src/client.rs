@@ -245,4 +245,15 @@ impl OmcClient {
         )
         .await
     }
+
+    pub async fn models_list(&self, provider: Option<&str>) -> Result<ModelsListResponse> {
+        let qs = provider
+            .map(|p| format!("?provider={p}"))
+            .unwrap_or_default();
+        self.request("GET", &format!("/models{qs}"), None).await
+    }
+
+    pub async fn models_sync(&self) -> Result<ModelsSyncResponse> {
+        self.request("POST", "/models/sync", None).await
+    }
 }

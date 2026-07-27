@@ -1,9 +1,11 @@
 use crate::account_store::AccountStore;
 use crate::message_store::MessageStore;
+use crate::model_store::ModelStore;
 use crate::workspace_store::WorkspaceStore;
 use async_trait::async_trait;
 use omc_core::account::{Account, Workspace};
 use omc_core::error::{OmcError, Result};
+use omc_core::model::Provider;
 use omc_core::types::{Channel, Message};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -89,6 +91,10 @@ impl SurrealStorage {
             .map_err(|e| {
                 OmcError::Storage(format!("Failed to define active_account table: {e}"))
             })?;
+        let _result = db
+            .query("DEFINE TABLE IF NOT EXISTS provider SCHEMALESS;")
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to define provider table: {e}")))?;
         Ok(())
     }
 
@@ -436,6 +442,101 @@ impl WorkspaceStore for SurrealWorkspaceStore {
             .query(&query)
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to clear workspaces: {e}")))?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SurrealProvider {
+    #[serde(skip_serializing)]
+    #[allow(dead_code)]
+    id: RecordId,
+    provider_id: String,
+    name: String,
+    env: Vec<String>,
+    api: Option<String>,
+    npm: Option<String>,
+    doc: Option<String>,
+    models: Vec<omc_core::model::Model>,
+    account_id: String,
+    last_fetched_at: i64,
+}
+
+fn provider_record_key(provider_id: &str, account_id: &str) -> String {
+    format!("{provider_id}:{account_id}")
+}
+
+pub struct SurrealModelStore {
+    db: Arc<Surreal<Db>>,
+}
+
+impl SurrealModelStore {
+    pub fn new(db: Arc<Surreal<Db>>) -> Self {
+        Self { db }
+    }
+}
+
+#[async_trait]
+impl ModelStore for SurrealModelStore {
+    async fn list_providers(&self, account_id: &str) -> Result<Vec<Provider>> {
+        let query = format!("SELECT * FROM provider WHERE account_id = '{account_id}';");
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to list providers: {e}")))?;
+        let rows: Vec<SurrealProvider> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract providers: {e}")))?;
+        Ok(rows
+            .into_iter()
+            .map(|r| Provider {
+                id: r.provider_id,
+                name: r.name,
+                env: r.env,
+                api: r.api,
+                npm: r.npm,
+                doc: r.doc,
+                models: r.models,
+                account_id: r.account_id,
+                last_fetched_at: r.last_fetched_at,
+            })
+            .collect())
+    }
+
+    async fn replace_providers(&self, account_id: &str, providers: Vec<Provider>) -> Result<()> {
+        self.delete_providers(account_id).await?;
+        for p in providers {
+            let record_key = provider_record_key(&p.id, account_id);
+            let dto = SurrealProvider {
+                id: ("provider", record_key.as_str()).into(),
+                provider_id: p.id,
+                name: p.name,
+                env: p.env,
+                api: p.api,
+                npm: p.npm,
+                doc: p.doc,
+                models: p.models,
+                account_id: p.account_id,
+                last_fetched_at: p.last_fetched_at,
+            };
+            let _: Option<SurrealProvider> = self
+                .db
+                .create(("provider", record_key.as_str()))
+                .content(dto)
+                .await
+                .map_err(|e| OmcError::Storage(format!("Failed to insert provider: {e}")))?;
+        }
+        Ok(())
+    }
+
+    async fn delete_providers(&self, account_id: &str) -> Result<()> {
+        let query = format!("DELETE FROM provider WHERE account_id = '{account_id}';");
+        let _result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to delete providers: {e}")))?;
         Ok(())
     }
 }

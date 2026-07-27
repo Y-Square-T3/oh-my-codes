@@ -3,6 +3,7 @@ pub mod channels;
 pub mod config;
 pub mod health;
 pub mod messages;
+pub mod models;
 
 use crate::DaemonState;
 use axum::Router;
@@ -30,6 +31,8 @@ pub fn create_router(daemon_state: Arc<DaemonState>) -> Router {
         .route("/account/switch", post(account::switch_handler))
         .route("/account/remove", post(account::remove_handler))
         .route("/account/workspaces", get(account::workspaces_handler))
+        .route("/models", get(models::list_handler))
+        .route("/models/sync", post(models::sync_handler))
         .with_state(daemon_state)
 }
 

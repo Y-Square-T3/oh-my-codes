@@ -1,6 +1,8 @@
 use omc_core::account::Workspace;
 use omc_core::error::{OmcError, Result};
+use omc_core::model::Model;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 const CLIENT_ID: &str = "oh-my-codes";
 
@@ -84,6 +86,22 @@ struct WorkspaceResponse {
     is_admin: bool,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RemoteProvider {
+    pub id: String,
+    pub name: String,
+    pub env: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub api: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub npm: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub doc: Option<String>,
+    pub models: HashMap<String, Model>,
+}
+
+#[derive(Debug, Clone)]
 pub struct OmcServerClient {
     client: reqwest::Client,
 }
@@ -263,5 +281,30 @@ impl OmcServerClient {
                 is_admin: w.is_admin,
             })
             .collect())
+    }
+
+    pub async fn fetch_models(
+        &self,
+        server_url: &str,
+        access_token: &str,
+    ) -> Result<HashMap<String, RemoteProvider>> {
+        let url = format!("{server_url}/models/api.json");
+        let resp = self
+            .client
+            .get(&url)
+            .bearer_auth(access_token)
+            .send()
+            .await
+            .map_err(|e| OmcError::Api(format!("Failed to fetch models: {e}")))?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            return Err(OmcError::Api(format!(
+                "Fetch models failed ({status}): {text}"
+            )));
+        }
+        resp.json()
+            .await
+            .map_err(|e| OmcError::Api(format!("Failed to parse models response: {e}")))
     }
 }

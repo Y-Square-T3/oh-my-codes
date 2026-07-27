@@ -2,10 +2,13 @@ use clap::Parser;
 use omc_core::config::OmcConfig;
 use omc_server::DaemonState;
 use omc_server::account_service::AccountService;
+use omc_server::model_service::ModelService;
 use omc_server::server_client::OmcServerClient;
 use omc_storage::account_store::AccountStore;
 use omc_storage::memory::MemoryStorage;
-use omc_storage::surreal::{SurrealAccountStore, SurrealStorage, SurrealWorkspaceStore};
+use omc_storage::surreal::{
+    SurrealAccountStore, SurrealModelStore, SurrealStorage, SurrealWorkspaceStore,
+};
 use omc_storage::workspace_store::WorkspaceStore;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -82,11 +85,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage = Arc::new(MemoryStorage::new());
 
     let account_store: Arc<dyn AccountStore> = Arc::new(SurrealAccountStore::new(db.clone()));
-    let workspace_store: Arc<dyn WorkspaceStore> = Arc::new(SurrealWorkspaceStore::new(db));
+    let workspace_store: Arc<dyn WorkspaceStore> = Arc::new(SurrealWorkspaceStore::new(db.clone()));
+    let model_store: Arc<dyn omc_storage::model_store::ModelStore> =
+        Arc::new(SurrealModelStore::new(db));
     let server_client = OmcServerClient::new();
     let account_service = Arc::new(AccountService::new(
         account_store,
         workspace_store,
+        server_client.clone(),
+    ));
+    let model_service = Arc::new(ModelService::new(
+        model_store,
+        account_service.clone(),
         server_client,
     ));
 
@@ -95,6 +105,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         storage,
         message_store,
         account_service,
+        model_service,
     ));
 
     let pid_path = omc_core::config::paths::default_pid_path();

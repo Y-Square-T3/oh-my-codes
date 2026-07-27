@@ -154,3 +154,56 @@ pub struct RemoveRequest {
 pub struct WorkspacesResponse {
     pub workspaces: Vec<WorkspaceResponse>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModelsListQuery {
+    pub provider: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModelInfoResponse {
+    pub id: String,
+    pub provider_id: String,
+    pub name: String,
+    pub family: Option<String>,
+    pub reasoning: Option<bool>,
+    pub tool_call: Option<bool>,
+    pub attachment: Option<bool>,
+    pub temperature: Option<bool>,
+    pub open_weights: Option<bool>,
+    pub modalities_input: Vec<String>,
+    pub modalities_output: Vec<String>,
+    pub cost_input: f64,
+    pub cost_output: f64,
+    pub limit_context: Option<i64>,
+    pub limit_output: Option<i64>,
+    pub release_date: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderInfoResponse {
+    pub id: String,
+    pub name: String,
+    pub api: Option<String>,
+    pub npm: Option<String>,
+    pub model_count: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModelsListResponse {
+    pub providers: Vec<ProviderInfoResponse>,
+    pub models: Vec<ModelInfoResponse>,
+    pub account_email: Option<String>,
+    pub account_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModelsSyncResponse {
+    pub providers: usize,
+    pub models: usize,
+}

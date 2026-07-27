@@ -1,6 +1,7 @@
 pub mod account_store;
 pub mod memory;
 pub mod message_store;
+pub mod model_store;
 pub mod surreal;
 pub mod wal;
 pub mod workspace_store;

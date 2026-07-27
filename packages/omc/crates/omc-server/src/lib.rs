@@ -1,9 +1,11 @@
 pub mod account_service;
 pub mod error;
+pub mod model_service;
 pub mod routes;
 pub mod server_client;
 
 use crate::account_service::AccountService;
+use crate::model_service::ModelService;
 use omc_core::config::OmcConfig;
 use omc_storage::Storage;
 use omc_storage::message_store::MessageStore;
@@ -17,6 +19,7 @@ pub struct DaemonState {
     pub storage: Arc<dyn Storage>,
     pub message_store: Arc<dyn MessageStore>,
     pub account_service: Arc<AccountService>,
+    pub model_service: Arc<ModelService>,
 }
 
 impl DaemonState {
@@ -25,12 +28,14 @@ impl DaemonState {
         storage: Arc<dyn Storage>,
         message_store: Arc<dyn MessageStore>,
         account_service: Arc<AccountService>,
+        model_service: Arc<ModelService>,
     ) -> Self {
         Self {
             config: tokio::sync::RwLock::new(config),
             storage,
             message_store,
             account_service,
+            model_service,
         }
     }
 

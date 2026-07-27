@@ -24,6 +24,7 @@ enum Commands {
     Daemon(DaemonCommand),
     Config(ConfigCommand),
     Account(AccountCommand),
+    Model(ModelCommand),
     Health,
 }
 
@@ -67,6 +68,26 @@ enum AccountAction {
     Switch,
     List,
     Show,
+}
+
+#[derive(Parser)]
+struct ModelCommand {
+    #[command(subcommand)]
+    action: ModelAction,
+}
+
+#[derive(Subcommand)]
+enum ModelAction {
+    List {
+        #[arg(long)]
+        provider: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    Sync {
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[tokio::main]
@@ -128,6 +149,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             AccountAction::Show => {
                 show_effect(&client).await?;
+            }
+        },
+        Some(Commands::Model(cmd)) => match cmd.action {
+            ModelAction::List { provider, json } => {
+                model_list_effect(&client, provider.as_deref(), json).await?;
+            }
+            ModelAction::Sync { json } => {
+                model_sync_effect(&client, json).await?;
             }
         },
         Some(Commands::Daemon(cmd)) => {
@@ -276,6 +305,24 @@ async fn login_effect(client: &OmcClient, url: &str) -> Result<(), Box<dyn std::
                             style("✓").green().bold(),
                             style("Workspace set to"),
                             style(&ws.name).cyan().bold()
+                        );
+                    }
+                }
+
+                match client.models_sync().await {
+                    Ok(resp) => {
+                        println!(
+                            "  {} Synced {} models from {} providers",
+                            style("✓").green().bold(),
+                            resp.models,
+                            resp.providers
+                        );
+                    }
+                    Err(e) => {
+                        println!(
+                            "  {} {}",
+                            style("!").yellow().bold(),
+                            style(format!("Failed to sync models: {e}")).yellow()
                         );
                     }
                 }
@@ -597,5 +644,115 @@ async fn show_effect(client: &OmcClient) -> Result<(), Box<dyn std::error::Error
     }
 
     println!();
+    Ok(())
+}
+
+async fn model_list_effect(
+    client: &OmcClient,
+    provider: Option<&str>,
+    json: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let resp = client.models_list(provider).await?;
+
+    if json {
+        println!("{}", serde_json::to_string_pretty(&resp)?);
+        return Ok(());
+    }
+
+    if resp.providers.is_empty() {
+        println!(
+            "  {} {}",
+            style("!").yellow().bold(),
+            style("No models found. Run `omc model sync` to fetch models from your account.")
+                .yellow()
+        );
+        return Ok(());
+    }
+
+    if let Some(email) = &resp.account_email {
+        println!();
+        println!("  {}", style(format!("Models for: {email}")).bold());
+        if let Some(url) = &resp.account_url {
+            println!("  {}", style(url).dim());
+        }
+        println!();
+    }
+
+    for p in &resp.providers {
+        let provider_models: Vec<_> = resp
+            .models
+            .iter()
+            .filter(|m| m.provider_id == p.id)
+            .collect();
+
+        println!(
+            "  {} {}",
+            style(format!("{} ({})", p.name, p.id)).bold(),
+            style(format!("— {} models", provider_models.len())).dim()
+        );
+        println!("  {}", style("─".repeat(60)).dim());
+
+        if provider_models.is_empty() {
+            println!("  {}", style("(no models)").dim());
+        } else {
+            println!(
+                "  {}  {}  {}  {}  {}",
+                style("Model").dim(),
+                style("Family").dim(),
+                style("Reason").dim(),
+                style("Tool").dim(),
+                style("Context").dim()
+            );
+
+            for m in &provider_models {
+                let context = m
+                    .limit_context
+                    .map(|c| format!("{}k", c / 1000))
+                    .unwrap_or_else(|| "-".to_string());
+                let reasoning = if m.reasoning == Some(true) {
+                    style("yes").green().to_string()
+                } else {
+                    style("no").dim().to_string()
+                };
+                let tool = if m.tool_call == Some(true) {
+                    style("yes").green().to_string()
+                } else {
+                    style("no").dim().to_string()
+                };
+                println!(
+                    "  {:<12} {:<8} {:<6} {:<6} {}",
+                    m.name,
+                    m.family.as_deref().unwrap_or("-"),
+                    reasoning,
+                    tool,
+                    style(context).dim()
+                );
+            }
+        }
+
+        println!();
+    }
+
+    Ok(())
+}
+
+async fn model_sync_effect(
+    client: &OmcClient,
+    json: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let resp = client.models_sync().await?;
+
+    if json {
+        println!("{}", serde_json::to_string_pretty(&resp)?);
+        return Ok(());
+    }
+
+    println!(
+        "  {} Refreshed {} providers, {} models",
+        style("✓").green().bold(),
+        resp.providers,
+        resp.models
+    );
+
     Ok(())
 }
