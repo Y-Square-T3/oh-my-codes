@@ -13,6 +13,7 @@ pub struct ErrorResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ResolvedDaemonConfigJson {
     pub bind_addr: String,
     pub bind_port: u16,
@@ -67,6 +68,7 @@ pub struct LoginRequest {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LoginResponse {
     pub device_code: String,
     pub user_code: String,
@@ -77,6 +79,7 @@ pub struct LoginResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PollRequest {
     pub device_code: String,
     pub server_url: String,
@@ -102,6 +105,7 @@ pub enum PollResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AccountInfoResponse {
     pub id: String,
     pub email: String,
@@ -115,6 +119,7 @@ pub struct ActiveResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkspaceResponse {
     pub id: String,
     pub name: String,
@@ -133,12 +138,14 @@ pub struct ListResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SwitchRequest {
     pub account_id: String,
     pub workspace_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RemoveRequest {
     pub account_id: String,
 }

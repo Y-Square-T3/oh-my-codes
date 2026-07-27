@@ -5,11 +5,13 @@ use serde::{Deserialize, Serialize};
 const CLIENT_ID: &str = "oh-my-codes";
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct DeviceCodeRequest {
     client_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DeviceCodeResponse {
     pub device_code: String,
     pub user_code: String,
@@ -20,6 +22,7 @@ pub struct DeviceCodeResponse {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct DeviceTokenRequest {
     grant_type: String,
     device_code: String,
@@ -27,6 +30,7 @@ struct DeviceTokenRequest {
 }
 
 #[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct RefreshTokenRequest {
     grant_type: String,
     refresh_token: String,
@@ -34,6 +38,7 @@ struct RefreshTokenRequest {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DeviceTokenSuccess {
     pub access_token: String,
     pub refresh_token: String,
@@ -42,6 +47,7 @@ pub struct DeviceTokenSuccess {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct DeviceTokenError {
     error: String,
     error_description: Option<String>,
@@ -64,12 +70,14 @@ pub enum PollResult {
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserInfo {
     pub id: String,
     pub email: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct WorkspaceResponse {
     id: String,
     name: String,
@@ -140,9 +148,9 @@ impl OmcServerClient {
             .text()
             .await
             .map_err(|e| OmcError::Auth(format!("Failed to read poll response: {e}")))?;
-        if !status.is_success() {
-            let err: DeviceTokenError = serde_json::from_str(&text)
-                .map_err(|e| OmcError::Auth(format!("Failed to parse poll error response: {e}")))?;
+        if let Ok(err) = serde_json::from_str::<DeviceTokenError>(&text)
+            && !err.error.is_empty()
+        {
             return match err.error.as_str() {
                 "authorization_pending" => Ok(PollResult::Pending),
                 "slow_down" => Ok(PollResult::Slow),
@@ -152,6 +160,12 @@ impl OmcServerClient {
                     err.error_description.unwrap_or(err.error),
                 )),
             };
+        }
+        if !status.is_success() {
+            return Err(OmcError::Auth(format!(
+                "Token poll failed ({}): {}",
+                status, text
+            )));
         }
         let token: DeviceTokenSuccess = serde_json::from_str(&text)
             .map_err(|e| OmcError::Auth(format!("Failed to parse token response: {e}")))?;

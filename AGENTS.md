@@ -74,3 +74,8 @@
 - **Linter**: `cargo clippy --workspace --all-targets -- -D warnings`
 - CI enforces both on push to `main`.
 - **Tests**: Place all tests in `tests/` directory as integration tests. Do not use inline `#[cfg(test)] mod tests` in `src/` files. This ensures tests exercise the crate's public API and keeps source files focused on implementation.
+- **API Serialization**: All types that cross API boundaries (HTTP JSON) must use `camelCase` field names. Add `#[serde(rename_all = "camelCase")]` to all `Serialize`/`Deserialize` structs that are sent to or received from external APIs or the daemon API. Rust field names remain `snake_case`; serde handles the conversion. This applies to:
+  - External API types in `omc-server/src/server_client.rs` (communication with remote OMC server)
+  - Internal API types in `omc-api/src/types.rs` (CLI ↔ daemon communication)
+  - Route request/response types in `omc-server/src/routes/`
+  - Core types in `omc-core/src/types.rs` and `omc-core/src/account.rs` that cross API boundaries

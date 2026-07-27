@@ -1,4 +1,5 @@
 pub mod account_service;
+pub mod error;
 pub mod routes;
 pub mod server_client;
 
