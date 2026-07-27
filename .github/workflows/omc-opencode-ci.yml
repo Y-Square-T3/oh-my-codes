@@ -2,9 +2,7 @@ name: omc-opencode-ci
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "../../packages/omc-opencode/**"
+    branches: [ main ]
 
 concurrency:
   group: omc-opencode-ci-${{ github.ref }}
