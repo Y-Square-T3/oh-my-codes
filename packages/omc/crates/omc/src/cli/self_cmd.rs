@@ -48,10 +48,7 @@ async fn upgrade(check_only: bool) -> Result<(), Box<dyn std::error::Error>> {
     );
 
     if is_up_to_date(current_version, &latest_version) {
-        println!(
-            "  {} Already up to date",
-            style("✓").green().bold()
-        );
+        println!("  {} Already up to date", style("✓").green().bold());
         return Ok(());
     }
 
@@ -192,10 +189,7 @@ async fn upgrade_binary(latest_version: &str) -> Result<(), Box<dyn std::error::
         REPO, latest_version, archive_name
     );
 
-    println!(
-        "  {} Downloading...",
-        style("→").blue().bold()
-    );
+    println!("  {} Downloading...", style("→").blue().bold());
 
     let temp_dir = env::temp_dir().join(format!("omc-upgrade-{}", latest_version));
     fs::create_dir_all(&temp_dir)?;
@@ -203,26 +197,17 @@ async fn upgrade_binary(latest_version: &str) -> Result<(), Box<dyn std::error::
     let archive_path = temp_dir.join(&archive_name);
     download_with_progress(&download_url, &archive_path).await?;
 
-    println!(
-        "  {} Extracting...",
-        style("→").blue().bold()
-    );
+    println!("  {} Extracting...", style("→").blue().bold());
 
     extract_archive(&archive_path, &temp_dir)?;
 
-    println!(
-        "  {} Installing...",
-        style("→").blue().bold()
-    );
+    println!("  {} Installing...", style("→").blue().bold());
 
     replace_binaries(&temp_dir)?;
 
     fs::remove_dir_all(&temp_dir)?;
 
-    println!(
-        "  {} Upgrade complete!",
-        style("✓").green().bold()
-    );
+    println!("  {} Upgrade complete!", style("✓").green().bold());
     Ok(())
 }
 
@@ -309,7 +294,9 @@ fn extract_archive(archive: &Path, dest: &Path) -> Result<(), Box<dyn std::error
 
 fn replace_binaries(temp_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let current_exe = env::current_exe()?;
-    let install_dir = current_exe.parent().ok_or("Cannot determine install directory")?;
+    let install_dir = current_exe
+        .parent()
+        .ok_or("Cannot determine install directory")?;
 
     let exe_ext = if cfg!(windows) { ".exe" } else { "" };
 
