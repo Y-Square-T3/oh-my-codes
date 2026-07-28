@@ -47,7 +47,8 @@ impl ServiceManager for TaskSchedulerManager {
         crate::copy_binary(&config.binary_path, &self.binary_dest)?;
         let xml = self.generate_task_xml(&self.binary_dest);
         let xml_path = self.binary_dest.with_extension("xml");
-        std::fs::write(&xml_path, xml)?;
+        let bom = "\u{FEFF}";
+        std::fs::write(&xml_path, format!("{}{}", bom, xml))?;
         let output = std::process::Command::new("schtasks")
             .args([
                 "/Create",
