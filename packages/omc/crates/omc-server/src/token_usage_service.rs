@@ -151,18 +151,27 @@ impl TokenUsageService {
             loop {
                 tokio::select! {
                     _ = interval.tick() => {
-                        match self.push_batch(Some(batch_size)).await {
-                            Ok(result) => {
-                                if result.pushed_count > 0 {
-                                    tracing::info!(
-                                        "Auto-push: pushed {} records in {} batches",
-                                        result.pushed_count,
-                                        result.total_batches
-                                    );
+                        match self.store.count_unpushed().await {
+                            Ok(0) => {}
+                            Ok(count) => {
+                                tracing::debug!("Auto-push: {} unpushed records found", count);
+                                match self.push_batch(Some(batch_size)).await {
+                                    Ok(result) => {
+                                        if result.pushed_count > 0 {
+                                            tracing::info!(
+                                                "Auto-push: pushed {} records in {} batches",
+                                                result.pushed_count,
+                                                result.total_batches
+                                            );
+                                        }
+                                    }
+                                    Err(e) => {
+                                        tracing::warn!("Auto-push failed: {e}");
+                                    }
                                 }
                             }
                             Err(e) => {
-                                tracing::warn!("Auto-push failed: {e}");
+                                tracing::warn!("Auto-push count check failed: {e}");
                             }
                         }
                     }

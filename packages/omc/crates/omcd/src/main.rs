@@ -118,7 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token_usage_service.clone(),
     ));
 
-    let _auto_push_stop = token_usage_service.start_auto_push(30, 20);
+    let _auto_push_stop = token_usage_service.start_auto_push(300, 20);
 
     let pid_path = omc_core::config::paths::default_pid_path();
     let _pid_file = PidFile::new(&pid_path);
