@@ -2819,6 +2819,7 @@ name = "omc-service"
 version = "4.5.1"
 dependencies = [
  "dirs",
+ "encoding_rs",
  "libc",
  "tempfile",
  "thiserror 2.0.19",

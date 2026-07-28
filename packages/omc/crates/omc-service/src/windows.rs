@@ -26,7 +26,7 @@ impl TaskSchedulerManager {
 
     fn generate_task_xml(&self, binary_path: &std::path::Path) -> String {
         format!(
-            r#"<?xml version="1.0" encoding="UTF-16"?>
+            r#"<?xml version="1.0" encoding="UTF-8"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <Triggers>
     <LogonTrigger />
@@ -60,7 +60,7 @@ impl ServiceManager for TaskSchedulerManager {
             .output()?;
         if !output.status.success() {
             return Err(ServiceError::Other(
-                String::from_utf8_lossy(&output.stderr).to_string(),
+                decode_oem_output(&output.stderr),
             ));
         }
         let _ = std::fs::remove_file(&xml_path);
@@ -81,7 +81,7 @@ impl ServiceManager for TaskSchedulerManager {
             .output()?;
         if !output.status.success() {
             return Err(ServiceError::Other(
-                String::from_utf8_lossy(&output.stderr).to_string(),
+                decode_oem_output(&output.stderr),
             ));
         }
         Ok(())
@@ -93,7 +93,7 @@ impl ServiceManager for TaskSchedulerManager {
             .output()?;
         if !output.status.success() {
             return Err(ServiceError::Other(
-                String::from_utf8_lossy(&output.stderr).to_string(),
+                decode_oem_output(&output.stderr),
             ));
         }
         Ok(())
@@ -106,14 +106,14 @@ impl ServiceManager for TaskSchedulerManager {
         if !output.status.success() {
             return Ok(ServiceStatus::NotInstalled);
         }
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = decode_oem_output(&output.stdout);
         if !stdout.contains("Running") {
             return Ok(ServiceStatus::Stopped);
         }
         let tasklist = std::process::Command::new("tasklist")
             .args(["/FI", "IMAGENAME eq omcd.exe", "/FO", "CSV", "/NH"])
             .output()?;
-        let tasklist_stdout = String::from_utf8_lossy(&tasklist.stdout);
+        let tasklist_stdout = decode_oem_output(&tasklist.stdout);
         let pid = tasklist_stdout.lines().next().and_then(|line| {
             line.split(',')
                 .nth(1)
@@ -124,4 +124,50 @@ impl ServiceManager for TaskSchedulerManager {
             None => Ok(ServiceStatus::Stopped),
         }
     }
+}
+
+fn decode_oem_output(bytes: &[u8]) -> String {
+    let codepage = unsafe { GetOEMCP() };
+    let label = codepage_to_label(codepage);
+    match label.and_then(|l| encoding_rs::Encoding::for_label(l.as_bytes())) {
+        Some(encoding) => {
+            let (decoded, _, had_errors) = encoding.decode(bytes);
+            if had_errors {
+                String::from_utf8_lossy(bytes).into_owned()
+            } else {
+                decoded.into_owned()
+            }
+        }
+        None => String::from_utf8_lossy(bytes).into_owned(),
+    }
+}
+
+fn codepage_to_label(codepage: u32) -> Option<&'static str> {
+    match codepage {
+        437 => Some("ibm866"),
+        850 => Some("ibm866"),
+        866 => Some("ibm866"),
+        932 => Some("shift_jis"),
+        936 => Some("gbk"),
+        949 => Some("euc-kr"),
+        950 => Some("big5"),
+        1200 => Some("utf-16le"),
+        1201 => Some("utf-16be"),
+        1250 => Some("windows-1250"),
+        1251 => Some("windows-1251"),
+        1252 => Some("windows-1252"),
+        1253 => Some("windows-1253"),
+        1254 => Some("windows-1254"),
+        1255 => Some("windows-1255"),
+        1256 => Some("windows-1256"),
+        1257 => Some("windows-1257"),
+        1258 => Some("windows-1258"),
+        65001 => Some("utf-8"),
+        _ => None,
+    }
+}
+
+#[link(name = "kernel32")]
+unsafe extern "system" {
+    fn GetOEMCP() -> u32;
 }
