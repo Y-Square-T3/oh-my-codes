@@ -2737,6 +2737,7 @@ dependencies = [
  "comfy-table",
  "console",
  "dialoguer",
+ "dirs",
  "indicatif",
  "omc-api",
  "omc-core",

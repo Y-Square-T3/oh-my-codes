@@ -42,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::Model(cmd)) => cli::model::run(&client, cmd).await?,
         Some(Commands::TokenUsage(cmd)) => cli::token_usage::run(&client, cmd).await?,
         Some(Commands::Daemon(cmd)) => cli::daemon::run(cmd)?,
+        Some(Commands::Opencode(cmd)) => cli::opencode::run(cmd)?,
     }
 
     Ok(())

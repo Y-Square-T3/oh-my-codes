@@ -2,6 +2,7 @@ pub mod account;
 pub mod config;
 pub mod daemon;
 pub mod model;
+pub mod opencode;
 pub mod token_usage;
 pub mod ui;
 
@@ -25,6 +26,7 @@ pub enum Commands {
     Model(ModelCommand),
     #[command(alias = "tu")]
     TokenUsage(TokenUsageCommand),
+    Opencode(OpencodeCommand),
     Health,
 }
 
@@ -118,6 +120,18 @@ pub enum TokenUsageAction {
         #[arg(long)]
         json: bool,
     },
+}
+
+#[derive(Parser)]
+pub struct OpencodeCommand {
+    #[command(subcommand)]
+    pub action: OpencodeAction,
+}
+
+#[derive(Subcommand)]
+pub enum OpencodeAction {
+    Install,
+    Uninstall,
 }
 
 impl Cli {

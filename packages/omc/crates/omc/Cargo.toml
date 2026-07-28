@@ -16,3 +16,4 @@ open = { workspace = true }
 console = { workspace = true }
 comfy-table = { workspace = true }
 chrono = { workspace = true }
+dirs = { workspace = true }
