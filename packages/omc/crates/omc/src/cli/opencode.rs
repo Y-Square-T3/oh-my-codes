@@ -7,10 +7,17 @@ const PLUGIN_NAME: &str = "oh-my-codes-opencode";
 
 pub fn config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     let home_dir = dirs::home_dir().ok_or("could not determine home directory")?;
-    Ok(home_dir
-        .join(".config")
-        .join("opencode")
-        .join("opencode.json"))
+    let config_dir = home_dir.join(".config").join("opencode");
+    let jsonc_path = config_dir.join("opencode.jsonc");
+    let json_path = config_dir.join("opencode.json");
+
+    if jsonc_path.exists() {
+        Ok(jsonc_path)
+    } else if json_path.exists() {
+        Ok(json_path)
+    } else {
+        Ok(jsonc_path)
+    }
 }
 
 fn read_config(path: &PathBuf) -> Result<Option<serde_json::Value>, Box<dyn std::error::Error>> {
@@ -18,7 +25,8 @@ fn read_config(path: &PathBuf) -> Result<Option<serde_json::Value>, Box<dyn std:
         return Ok(None);
     }
     let content = fs::read_to_string(path)?;
-    let value: serde_json::Value = serde_json::from_str(&content)?;
+    let value: serde_json::Value =
+        jsonc_parser::parse_to_serde_value(&content, &Default::default())?;
     Ok(Some(value))
 }
 

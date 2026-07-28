@@ -19,3 +19,4 @@ comfy-table = { workspace = true }
 chrono = { workspace = true }
 dirs = { workspace = true }
 reqwest = { workspace = true }
+jsonc-parser = { workspace = true }

@@ -6,8 +6,9 @@ fn test_config_path_uses_dot_config() {
     let path_str = path.to_string_lossy();
 
     assert!(
-        path_str.ends_with(".config/opencode/opencode.json"),
-        "config path should end with .config/opencode/opencode.json, got: {path_str}"
+        path_str.ends_with(".config/opencode/opencode.jsonc")
+            || path_str.ends_with(".config/opencode/opencode.json"),
+        "config path should end with .config/opencode/opencode.jsonc or .json, got: {path_str}"
     );
 }
 
@@ -26,7 +27,10 @@ fn test_config_path_is_under_home() {
 fn test_config_path_structure() {
     let path = opencode::config_path().unwrap();
     let home = dirs::home_dir().expect("could not determine home directory");
-    let expected = home.join(".config").join("opencode").join("opencode.json");
+    let config_dir = home.join(".config").join("opencode");
 
-    assert_eq!(path, expected);
+    assert!(
+        path == config_dir.join("opencode.jsonc") || path == config_dir.join("opencode.json"),
+        "config path should be opencode.jsonc or opencode.json under {config_dir:?}, got: {path:?}"
+    );
 }
