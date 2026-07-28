@@ -3,6 +3,7 @@ pub mod config;
 pub mod daemon;
 pub mod model;
 pub mod opencode;
+pub mod self_cmd;
 pub mod token_usage;
 pub mod ui;
 
@@ -27,6 +28,8 @@ pub enum Commands {
     #[command(alias = "tu")]
     TokenUsage(TokenUsageCommand),
     Opencode(OpencodeCommand),
+    #[command(name = "self", alias = "s")]
+    SelfCmd(SelfCmd),
     Health,
 }
 
@@ -132,6 +135,22 @@ pub struct OpencodeCommand {
 pub enum OpencodeAction {
     Install,
     Uninstall,
+}
+
+#[derive(Parser)]
+#[command(name = "self")]
+pub struct SelfCmd {
+    #[command(subcommand)]
+    pub action: SelfAction,
+}
+
+#[derive(Subcommand)]
+pub enum SelfAction {
+    #[command(alias = "update")]
+    Upgrade {
+        #[arg(long)]
+        check: bool,
+    },
 }
 
 impl Cli {

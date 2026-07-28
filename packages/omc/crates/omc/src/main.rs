@@ -41,6 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::TokenUsage(cmd)) => omc::cli::token_usage::run(&client, cmd).await?,
         Some(Commands::Daemon(cmd)) => omc::cli::daemon::run(cmd)?,
         Some(Commands::Opencode(cmd)) => omc::cli::opencode::run(cmd)?,
+        Some(Commands::SelfCmd(cmd)) => omc::cli::self_cmd::run(cmd).await?,
     }
 
     Ok(())

@@ -2743,6 +2743,8 @@ dependencies = [
  "omc-core",
  "omc-service",
  "open",
+ "reqwest",
+ "serde",
  "serde_json",
  "tokio",
 ]
