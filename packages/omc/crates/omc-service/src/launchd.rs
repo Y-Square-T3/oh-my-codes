@@ -68,6 +68,14 @@ impl ServiceManager for LaunchdManager {
         crate::create_symlink(&config.binary_path, &self.symlink_path)?;
         let plist = self.generate_plist(&self.symlink_path);
         std::fs::write(&self.plist_path, plist)?;
+        let output = std::process::Command::new("launchctl")
+            .args(["load", "-w", &self.plist_path.to_string_lossy()])
+            .output()?;
+        if !output.status.success() {
+            return Err(ServiceError::Other(
+                String::from_utf8_lossy(&output.stderr).to_string(),
+            ));
+        }
         Ok(())
     }
 

@@ -54,6 +54,17 @@ impl ServiceManager for SystemdManager {
         crate::create_symlink(&config.binary_path, &self.symlink_path)?;
         let unit = self.generate_unit(&self.symlink_path);
         std::fs::write(&self.unit_path, unit)?;
+        let _ = std::process::Command::new("systemctl")
+            .args(["--user", "daemon-reload"])
+            .output();
+        let output = std::process::Command::new("systemctl")
+            .args(["--user", "enable", "omcd.service"])
+            .output()?;
+        if !output.status.success() {
+            return Err(ServiceError::Other(
+                String::from_utf8_lossy(&output.stderr).to_string(),
+            ));
+        }
         Ok(())
     }
 
