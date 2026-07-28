@@ -8,6 +8,7 @@ use tokio::sync::Notify;
 
 const DEFAULT_BATCH_SIZE: usize = 20;
 const DEFAULT_RETENTION_DAYS: i64 = 30;
+const MAX_LOOP_ITERATIONS: usize = 100;
 
 pub struct StatusResult {
     pub unpushed_count: usize,
@@ -68,8 +69,15 @@ impl TokenUsageService {
         let mut total_pushed = 0usize;
         let mut total_failed = 0usize;
         let mut total_batches = 0usize;
+        let mut iterations = 0usize;
 
         loop {
+            iterations += 1;
+            if iterations > MAX_LOOP_ITERATIONS {
+                tracing::error!("push_batch exceeded max iterations ({MAX_LOOP_ITERATIONS})");
+                break;
+            }
+
             let unpushed = self.store.find_unpushed(batch_size).await?;
             if unpushed.is_empty() {
                 break;

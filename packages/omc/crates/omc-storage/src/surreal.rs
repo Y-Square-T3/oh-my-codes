@@ -685,15 +685,25 @@ impl TokenUsageStore for SurrealTokenUsageStore {
         }
         let id_list = ids
             .iter()
-            .map(|id| format!("'{id}'"))
+            .map(|id| format!("token_usage:{id}"))
             .collect::<Vec<_>>()
             .join(", ");
         let query = format!("UPDATE token_usage SET pushed = true WHERE id IN [{id_list}];");
-        let _result = self
+        let mut result = self
             .db
             .query(&query)
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to mark pushed: {e}")))?;
+        let affected: Vec<serde_json::Value> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract mark_pushed result: {e}")))?;
+        if affected.len() != ids.len() {
+            tracing::warn!(
+                "mark_pushed expected to update {} records, but updated {}",
+                ids.len(),
+                affected.len()
+            );
+        }
         Ok(())
     }
 
