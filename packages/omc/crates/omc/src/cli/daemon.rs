@@ -4,8 +4,11 @@ use omc_service::{create_service_manager, find_omcd_binary};
 pub fn run(cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
     let manager = create_service_manager();
     match cmd.action {
-        DaemonAction::Install => {
-            let binary_path = find_omcd_binary().map_err(|e| e.to_string())?;
+        DaemonAction::Install { bin } => {
+            let binary_path = match bin {
+                Some(p) => p,
+                None => find_omcd_binary().map_err(|e| e.to_string())?,
+            };
             let config = omc_service::ServiceConfig { binary_path };
             manager.install(&config).map_err(|e| e.to_string())?;
             println!("Daemon installed successfully");

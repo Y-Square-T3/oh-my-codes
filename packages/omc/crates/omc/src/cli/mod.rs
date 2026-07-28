@@ -7,6 +7,8 @@ pub mod self_cmd;
 pub mod token_usage;
 pub mod ui;
 
+use std::path::PathBuf;
+
 use clap::{CommandFactory, Parser, Subcommand};
 
 #[derive(Parser)]
@@ -41,7 +43,10 @@ pub struct DaemonCommand {
 
 #[derive(Subcommand)]
 pub enum DaemonAction {
-    Install,
+    Install {
+        #[arg(long)]
+        bin: Option<PathBuf>,
+    },
     Uninstall,
     Start,
     Stop,

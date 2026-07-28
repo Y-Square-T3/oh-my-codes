@@ -694,7 +694,7 @@ impl TokenUsageStore for SurrealTokenUsageStore {
             .query(&query)
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to mark pushed: {e}")))?;
-        let affected: Vec<serde_json::Value> = result
+        let affected: Vec<SurrealTokenUsage> = result
             .take(0)
             .map_err(|e| OmcError::Storage(format!("Failed to extract mark_pushed result: {e}")))?;
         if affected.len() != ids.len() {
