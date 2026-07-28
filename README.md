@@ -37,6 +37,22 @@ CLI (omc)  ──HTTP/Unix Socket──▶  Daemon (omcd)  ──HTTPS──▶ 
 
 ## Installation
 
+### Script Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/main/scripts/install.sh | bash
+```
+
+This will download and install the latest release binaries to `/usr/local/bin`. You may be prompted for your password.
+
+To install a specific version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Y-Square-T3/oh-my-codes/main/scripts/install.sh | bash -s -- v4.0.8
+```
+
+### npm Install
+
 ```bash
 npm install oh-my-codes
 ```

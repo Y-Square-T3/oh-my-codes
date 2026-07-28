@@ -243,7 +243,7 @@ jobs:
           fi
 
   release:
-    needs: [calculate-version, publish]
+    needs: [calculate-version, publish, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -260,6 +260,30 @@ jobs:
         run: corepack enable
 
       - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binaries-*
+          path: packages/omc/dist-artifacts
+          merge-multiple: true
+
+      - name: Package release archives
+        run: |
+          mkdir -p /tmp/release-assets
+
+          for platform in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+            src="packages/omc/dist-artifacts/${platform}/bin"
+            if [ -d "$src" ]; then
+              tar -czf "/tmp/release-assets/omc-${platform}.tar.gz" -C "$src" omc omcd
+            fi
+          done
+
+          src="packages/omc/dist-artifacts/win32-x64/bin"
+          if [ -d "$src" ]; then
+            zip -j "/tmp/release-assets/omc-win32-x64.zip" "$src/omc.exe" "$src/omcd.exe"
+          fi
+
+          ls -la /tmp/release-assets/
 
       - name: Generate changelog
         run: |
@@ -308,3 +332,4 @@ jobs:
         run: |
           gh release view "v${VERSION}" >/dev/null 2>&1 || \
             gh release create "v${VERSION}" --title "v${VERSION}" --notes-file /tmp/changelog.md
+          gh release upload "v${VERSION}" /tmp/release-assets/* --clobber
