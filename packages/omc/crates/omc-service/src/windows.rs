@@ -24,7 +24,7 @@ impl TaskSchedulerManager {
         }
     }
 
-    fn generate_task_xml(&self, binary_path: &std::path::Path) -> String {
+    pub(crate) fn generate_task_xml(&self, binary_path: &std::path::Path) -> String {
         format!(
             r#"<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
