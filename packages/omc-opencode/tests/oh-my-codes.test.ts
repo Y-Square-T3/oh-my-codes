@@ -36,10 +36,12 @@ describe("OhMyCodesPlugin", () => {
     expect(typeof OhMyCodesPlugin).toBe("function")
   })
 
-  it("should return hooks with event handler", async () => {
+  it("should return hooks with event and config handlers", async () => {
     const hooks = await OhMyCodesPlugin(mockInput())
     expect(hooks).toHaveProperty("event")
     expect(typeof hooks.event).toBe("function")
+    expect(hooks).toHaveProperty("config")
+    expect(typeof hooks.config).toBe("function")
   })
 
   describe("V1 message.updated", () => {
@@ -274,6 +276,248 @@ describe("OhMyCodesPlugin", () => {
       await hooks.event!({ event: { type: "file.edited" } } as never)
       await hooks.event!({ event: { type: "plugin.added" } } as never)
       expect(fetchMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("config hook", () => {
+    const mockModelsResponse = {
+      providers: [
+        {
+          id: "anthropic",
+          name: "Anthropic",
+          api: "https://api.anthropic.com",
+          npm: null,
+          env: ["ANTHROPIC_API_KEY"],
+          modelCount: 1,
+        },
+      ],
+      models: [
+        {
+          id: "claude-sonnet-4-20250514",
+          providerId: "anthropic",
+          name: "Claude Sonnet 4",
+          family: "claude",
+          reasoning: true,
+          toolCall: true,
+          attachment: true,
+          temperature: true,
+          openWeights: false,
+          modalitiesInput: ["text", "image"],
+          modalitiesOutput: ["text"],
+          costInput: 3,
+          costOutput: 15,
+          limitContext: 200000,
+          limitOutput: 16384,
+          releaseDate: "2025-05-14",
+        },
+      ],
+      accountEmail: "test@example.com",
+      accountUrl: "https://api.omc.ai",
+    }
+
+    const mockCredentialsResponse = {
+      apiKey: "test-oauth-token",
+      baseUrl: "https://api.omc.ai/api/v2",
+      workspaceId: "ws-123",
+    }
+
+    it("should have config hook", async () => {
+      const hooks = await OhMyCodesPlugin(mockInput())
+      expect(hooks).toHaveProperty("config")
+      expect(typeof hooks.config).toBe("function")
+    })
+
+    it("should inject providers into config", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockModelsResponse),
+          })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCredentialsResponse),
+          })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const hooks = await OhMyCodesPlugin(mockInput())
+      const config: Record<string, unknown> = {}
+      await hooks.config!(config as never)
+
+      expect(config.provider).toBeDefined()
+      const providers = config.provider as Record<string, unknown>
+      expect(providers.anthropic).toBeDefined()
+
+      const anthropic = providers.anthropic as Record<string, unknown>
+      expect(anthropic.models).toBeDefined()
+      expect(anthropic.options).toBeDefined()
+
+      const models = anthropic.models as Record<string, unknown>
+      expect(models["claude-sonnet-4-20250514"]).toBeDefined()
+
+      const options = anthropic.options as Record<string, unknown>
+      expect(options.apiKey).toBe("test-oauth-token")
+      expect(options.baseURL).toBe("https://api.omc.ai/api/v2")
+      expect(options.headers).toEqual({ "x-workspace-id": "ws-123" })
+    })
+
+    it("should not override user's existing providers", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockModelsResponse),
+          })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCredentialsResponse),
+          })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const hooks = await OhMyCodesPlugin(mockInput())
+      const config: Record<string, unknown> = {
+        provider: {
+          anthropic: {
+            models: {},
+            options: { apiKey: "user-key" },
+          },
+        },
+      }
+      await hooks.config!(config as never)
+
+      const providers = config.provider as Record<string, unknown>
+      const anthropic = providers.anthropic as Record<string, unknown>
+      const options = anthropic.options as Record<string, unknown>
+      expect(options.apiKey).toBe("user-key")
+    })
+
+    it("should handle missing models gracefully", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({ ok: false, status: 500 })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCredentialsResponse),
+          })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const input = mockInput()
+      const hooks = await OhMyCodesPlugin(input)
+      const config: Record<string, unknown> = {}
+      await hooks.config!(config as never)
+
+      expect(config.provider).toBeUndefined()
+      expect(input.client.app.log).toHaveBeenCalled()
+    })
+
+    it("should handle missing credentials gracefully", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockModelsResponse),
+          })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({ ok: false, status: 401 })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const input = mockInput()
+      const hooks = await OhMyCodesPlugin(input)
+      const config: Record<string, unknown> = {}
+      await hooks.config!(config as never)
+
+      expect(config.provider).toBeUndefined()
+      expect(input.client.app.log).toHaveBeenCalled()
+    })
+
+    it("should skip injection when no providers available", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                providers: [],
+                models: [],
+                accountEmail: null,
+                accountUrl: null,
+              }),
+          })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCredentialsResponse),
+          })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const input = mockInput()
+      const hooks = await OhMyCodesPlugin(input)
+      const config: Record<string, unknown> = {}
+      await hooks.config!(config as never)
+
+      expect(config.provider).toBeUndefined()
+      expect(input.client.app.log).toHaveBeenCalled()
+    })
+
+    it("should build correct model config with capabilities", async () => {
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/models")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockModelsResponse),
+          })
+        }
+        if (url.includes("/account/credentials")) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve(mockCredentialsResponse),
+          })
+        }
+        return Promise.resolve({ ok: true })
+      })
+
+      const hooks = await OhMyCodesPlugin(mockInput())
+      const config: Record<string, unknown> = {}
+      await hooks.config!(config as never)
+
+      const providers = config.provider as Record<string, unknown>
+      const anthropic = providers.anthropic as Record<string, unknown>
+      const models = anthropic.models as Record<string, unknown>
+      const model = models["claude-sonnet-4-20250514"] as Record<
+        string,
+        unknown
+      >
+
+      expect(model.limit).toEqual({ context: 200000, output: 16384 })
+      expect(model.modalities).toEqual({
+        input: ["text", "image"],
+        output: ["text"],
+      })
+      expect(model.capabilities).toEqual({
+        attachment: true,
+        reasoning: true,
+        tool_call: true,
+        temperature: true,
+        input: { image: true },
+      })
     })
   })
 })

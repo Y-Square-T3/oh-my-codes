@@ -221,3 +221,31 @@ pub async fn workspaces_handler(
             .collect(),
     }))
 }
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CredentialsResponse {
+    pub api_key: String,
+    pub base_url: String,
+    pub workspace_id: Option<String>,
+}
+
+pub async fn credentials_handler(
+    State(state): State<Arc<DaemonState>>,
+) -> std::result::Result<Json<CredentialsResponse>, AppError> {
+    let (account, token) = state
+        .account_service
+        .active_with_token()
+        .await?
+        .ok_or_else(|| {
+            omc_core::error::OmcError::Auth(
+                "No active account. Run `omc account login` first.".into(),
+            )
+        })?;
+    let base_url = format!("{}/api/v2", account.url.trim_end_matches('/'));
+    Ok(Json(CredentialsResponse {
+        api_key: token,
+        base_url,
+        workspace_id: account.active_workspace_id,
+    }))
+}

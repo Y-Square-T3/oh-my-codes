@@ -32,6 +32,7 @@ pub fn create_router(daemon_state: Arc<DaemonState>) -> Router {
         .route("/account/switch", post(account::switch_handler))
         .route("/account/remove", post(account::remove_handler))
         .route("/account/workspaces", get(account::workspaces_handler))
+        .route("/account/credentials", get(account::credentials_handler))
         .route("/models", get(models::list_handler))
         .route("/models/sync", post(models::sync_handler))
         .route("/token-usage", post(token_usage::record_handler))

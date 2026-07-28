@@ -28,6 +28,7 @@ pub struct ProviderInfo {
     pub name: String,
     pub api: Option<String>,
     pub npm: Option<String>,
+    pub env: Vec<String>,
     pub model_count: usize,
 }
 
@@ -95,6 +96,7 @@ impl ModelService {
                 name: p.name.clone(),
                 api: p.api.clone(),
                 npm: p.npm.clone(),
+                env: p.env.clone(),
                 model_count,
             });
 

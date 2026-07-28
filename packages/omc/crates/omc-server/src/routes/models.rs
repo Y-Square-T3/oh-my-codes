@@ -38,6 +38,7 @@ pub struct ProviderInfoResponse {
     pub name: String,
     pub api: Option<String>,
     pub npm: Option<String>,
+    pub env: Vec<String>,
     pub model_count: usize,
 }
 
@@ -64,6 +65,7 @@ pub async fn list_handler(
                 name: p.name,
                 api: p.api,
                 npm: p.npm,
+                env: p.env,
                 model_count: p.model_count,
             })
             .collect(),
