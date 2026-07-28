@@ -1,7 +1,5 @@
-mod cli;
-
 use clap::Parser;
-use cli::{Cli, Commands};
+use omc::cli::{Cli, Commands};
 use omc_api::client::OmcClient;
 use omc_core::config::OmcConfig;
 
@@ -37,12 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let resp = client.health().await?;
             println!("{}", serde_json::to_string_pretty(&resp)?);
         }
-        Some(Commands::Config(cmd)) => cli::config::run(&client, cmd).await?,
-        Some(Commands::Account(cmd)) => cli::account::run(&client, cmd).await?,
-        Some(Commands::Model(cmd)) => cli::model::run(&client, cmd).await?,
-        Some(Commands::TokenUsage(cmd)) => cli::token_usage::run(&client, cmd).await?,
-        Some(Commands::Daemon(cmd)) => cli::daemon::run(cmd)?,
-        Some(Commands::Opencode(cmd)) => cli::opencode::run(cmd)?,
+        Some(Commands::Config(cmd)) => omc::cli::config::run(&client, cmd).await?,
+        Some(Commands::Account(cmd)) => omc::cli::account::run(&client, cmd).await?,
+        Some(Commands::Model(cmd)) => omc::cli::model::run(&client, cmd).await?,
+        Some(Commands::TokenUsage(cmd)) => omc::cli::token_usage::run(&client, cmd).await?,
+        Some(Commands::Daemon(cmd)) => omc::cli::daemon::run(cmd)?,
+        Some(Commands::Opencode(cmd)) => omc::cli::opencode::run(cmd)?,
     }
 
     Ok(())

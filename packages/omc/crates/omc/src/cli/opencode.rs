@@ -5,9 +5,12 @@ use super::{OpencodeAction, OpencodeCommand};
 
 const PLUGIN_NAME: &str = "oh-my-codes-opencode";
 
-fn config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
-    let config_dir = dirs::config_dir().ok_or("could not determine config directory")?;
-    Ok(config_dir.join("opencode").join("opencode.json"))
+pub fn config_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let home_dir = dirs::home_dir().ok_or("could not determine home directory")?;
+    Ok(home_dir
+        .join(".config")
+        .join("opencode")
+        .join("opencode.json"))
 }
 
 fn read_config(path: &PathBuf) -> Result<Option<serde_json::Value>, Box<dyn std::error::Error>> {
