@@ -207,3 +207,83 @@ pub struct ModelsSyncResponse {
     pub providers: usize,
     pub models: usize,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsageRecordRequest {
+    pub client: String,
+    pub session_id: String,
+    pub message_id: String,
+    pub provider_id: String,
+    pub model_id: String,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    #[serde(default)]
+    pub reasoning_tokens: i64,
+    #[serde(default)]
+    pub cache_read_tokens: i64,
+    #[serde(default)]
+    pub cache_write_tokens: i64,
+    #[serde(default)]
+    pub recorded_at: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsageStatusResponse {
+    pub unpushed_count: usize,
+    pub has_active_account: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsagePushResponse {
+    pub pushed_count: usize,
+    pub failed_count: usize,
+    pub total_batches: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsageRecordResponse {
+    pub id: String,
+    pub client: String,
+    pub session_id: String,
+    pub message_id: String,
+    pub provider_id: String,
+    pub model_id: String,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    pub reasoning_tokens: i64,
+    pub cache_read_tokens: i64,
+    pub cache_write_tokens: i64,
+    pub pushed: bool,
+    pub recorded_at: i64,
+    pub created_at: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsageListResponse {
+    pub records: Vec<TokenUsageRecordResponse>,
+    pub total: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UsageSummaryResponse {
+    pub provider_id: String,
+    pub model_id: String,
+    pub total_input: i64,
+    pub total_output: i64,
+    pub total_reasoning: i64,
+    pub total_cache_read: i64,
+    pub total_cache_write: i64,
+    pub request_count: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsageSummaryResponse {
+    pub items: Vec<UsageSummaryResponse>,
+}

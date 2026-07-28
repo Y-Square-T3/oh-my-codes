@@ -1,11 +1,13 @@
 use crate::account_store::AccountStore;
 use crate::message_store::MessageStore;
 use crate::model_store::ModelStore;
+use crate::token_usage_store::TokenUsageStore;
 use crate::workspace_store::WorkspaceStore;
 use async_trait::async_trait;
 use omc_core::account::{Account, Workspace};
 use omc_core::error::{OmcError, Result};
 use omc_core::model::Provider;
+use omc_core::token_usage::{TokenUsage, UsageSummary};
 use omc_core::types::{Channel, Message};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -95,6 +97,10 @@ impl SurrealStorage {
             .query("DEFINE TABLE IF NOT EXISTS provider SCHEMALESS;")
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to define provider table: {e}")))?;
+        let _result = db
+            .query("DEFINE TABLE IF NOT EXISTS token_usage SCHEMALESS;")
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to define token_usage table: {e}")))?;
         Ok(())
     }
 
@@ -538,5 +544,244 @@ impl ModelStore for SurrealModelStore {
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to delete providers: {e}")))?;
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SurrealTokenUsage {
+    #[serde(skip_serializing)]
+    id: RecordId,
+    client: String,
+    session_id: String,
+    message_id: String,
+    provider_id: String,
+    model_id: String,
+    input_tokens: i64,
+    output_tokens: i64,
+    reasoning_tokens: i64,
+    cache_read_tokens: i64,
+    cache_write_tokens: i64,
+    pushed: bool,
+    recorded_at: i64,
+    created_at: i64,
+}
+
+pub struct SurrealTokenUsageStore {
+    db: Arc<Surreal<Db>>,
+}
+
+impl SurrealTokenUsageStore {
+    pub fn new(db: Arc<Surreal<Db>>) -> Self {
+        Self { db }
+    }
+}
+
+#[async_trait]
+impl TokenUsageStore for SurrealTokenUsageStore {
+    async fn upsert(&self, usage: &TokenUsage) -> Result<()> {
+        let query = format!(
+            "SELECT * FROM token_usage WHERE message_id = '{}' LIMIT 1;",
+            usage.message_id
+        );
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to query token_usage: {e}")))?;
+        let existing: Option<SurrealTokenUsage> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract token_usage: {e}")))?;
+
+        if let Some(record) = existing {
+            let key = extract_id(&record.id)?;
+            let dto = SurrealTokenUsage {
+                id: ("token_usage", key.as_str()).into(),
+                client: usage.client.clone(),
+                session_id: usage.session_id.clone(),
+                message_id: usage.message_id.clone(),
+                provider_id: usage.provider_id.clone(),
+                model_id: usage.model_id.clone(),
+                input_tokens: usage.input_tokens,
+                output_tokens: usage.output_tokens,
+                reasoning_tokens: usage.reasoning_tokens,
+                cache_read_tokens: usage.cache_read_tokens,
+                cache_write_tokens: usage.cache_write_tokens,
+                pushed: usage.pushed,
+                recorded_at: usage.recorded_at,
+                created_at: usage.created_at,
+            };
+            let _: Option<SurrealTokenUsage> = self
+                .db
+                .upsert(("token_usage", key.as_str()))
+                .content(dto)
+                .await
+                .map_err(|e| OmcError::Storage(format!("Failed to update token_usage: {e}")))?;
+        } else {
+            let dto = SurrealTokenUsage {
+                id: ("token_usage", usage.id.as_str()).into(),
+                client: usage.client.clone(),
+                session_id: usage.session_id.clone(),
+                message_id: usage.message_id.clone(),
+                provider_id: usage.provider_id.clone(),
+                model_id: usage.model_id.clone(),
+                input_tokens: usage.input_tokens,
+                output_tokens: usage.output_tokens,
+                reasoning_tokens: usage.reasoning_tokens,
+                cache_read_tokens: usage.cache_read_tokens,
+                cache_write_tokens: usage.cache_write_tokens,
+                pushed: usage.pushed,
+                recorded_at: usage.recorded_at,
+                created_at: usage.created_at,
+            };
+            let _: Option<SurrealTokenUsage> = self
+                .db
+                .create(("token_usage", usage.id.as_str()))
+                .content(dto)
+                .await
+                .map_err(|e| OmcError::Storage(format!("Failed to create token_usage: {e}")))?;
+        }
+        Ok(())
+    }
+
+    async fn find_unpushed(&self, limit: usize) -> Result<Vec<TokenUsage>> {
+        let query = format!(
+            "SELECT * FROM token_usage WHERE pushed = false ORDER BY recorded_at ASC LIMIT {limit};"
+        );
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to query unpushed: {e}")))?;
+        let rows: Vec<SurrealTokenUsage> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract unpushed: {e}")))?;
+        Ok(rows.into_iter().map(surreal_to_token_usage).collect())
+    }
+
+    async fn count_unpushed(&self) -> Result<usize> {
+        let query = "SELECT count() AS count FROM token_usage WHERE pushed = false GROUP ALL;";
+        let mut result = self
+            .db
+            .query(query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to count unpushed: {e}")))?;
+        let rows: Vec<serde_json::Value> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract count: {e}")))?;
+        let count = rows
+            .first()
+            .and_then(|v| v.get("count"))
+            .and_then(|v| v.as_i64())
+            .unwrap_or(0) as usize;
+        Ok(count)
+    }
+
+    async fn mark_pushed(&self, ids: &[String]) -> Result<()> {
+        if ids.is_empty() {
+            return Ok(());
+        }
+        let id_list = ids
+            .iter()
+            .map(|id| format!("'{id}'"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let query = format!("UPDATE token_usage SET pushed = true WHERE id IN [{id_list}];");
+        let _result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to mark pushed: {e}")))?;
+        Ok(())
+    }
+
+    async fn list_recent(&self, limit: usize, offset: usize) -> Result<Vec<TokenUsage>> {
+        let query = format!(
+            "SELECT * FROM token_usage ORDER BY recorded_at DESC LIMIT {limit} START {offset};"
+        );
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to list recent: {e}")))?;
+        let rows: Vec<SurrealTokenUsage> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract recent: {e}")))?;
+        Ok(rows.into_iter().map(surreal_to_token_usage).collect())
+    }
+
+    async fn cleanup_old_pushed(&self, retention_days: i64) -> Result<usize> {
+        let cutoff = chrono::Utc::now().timestamp_millis() - (retention_days * 86_400_000);
+        let query = format!(
+            "DELETE FROM token_usage WHERE pushed = true AND recorded_at < {cutoff} RETURN BEFORE;"
+        );
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to cleanup: {e}")))?;
+        let rows: Vec<serde_json::Value> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract cleanup result: {e}")))?;
+        Ok(rows.len())
+    }
+
+    async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>> {
+        let where_clause = if let Some(d) = days {
+            let cutoff = chrono::Utc::now().timestamp_millis() - (d * 86_400_000);
+            format!("WHERE recorded_at >= {cutoff}")
+        } else {
+            String::new()
+        };
+        let query = format!(
+            "SELECT provider_id, model_id, \
+             math::sum(input_tokens) AS total_input, \
+             math::sum(output_tokens) AS total_output, \
+             math::sum(reasoning_tokens) AS total_reasoning, \
+             math::sum(cache_read_tokens) AS total_cache_read, \
+             math::sum(cache_write_tokens) AS total_cache_write, \
+             count() AS request_count \
+             FROM token_usage {where_clause} \
+             GROUP BY provider_id, model_id;"
+        );
+        let mut result = self
+            .db
+            .query(&query)
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to query summary: {e}")))?;
+        let rows: Vec<serde_json::Value> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract summary: {e}")))?;
+        Ok(rows
+            .into_iter()
+            .map(|v| UsageSummary {
+                provider_id: v["provider_id"].as_str().unwrap_or("").to_string(),
+                model_id: v["model_id"].as_str().unwrap_or("").to_string(),
+                total_input: v["total_input"].as_i64().unwrap_or(0),
+                total_output: v["total_output"].as_i64().unwrap_or(0),
+                total_reasoning: v["total_reasoning"].as_i64().unwrap_or(0),
+                total_cache_read: v["total_cache_read"].as_i64().unwrap_or(0),
+                total_cache_write: v["total_cache_write"].as_i64().unwrap_or(0),
+                request_count: v["request_count"].as_i64().unwrap_or(0),
+            })
+            .collect())
+    }
+}
+
+fn surreal_to_token_usage(s: SurrealTokenUsage) -> TokenUsage {
+    TokenUsage {
+        id: s.id.key().to_string(),
+        client: s.client,
+        session_id: s.session_id,
+        message_id: s.message_id,
+        provider_id: s.provider_id,
+        model_id: s.model_id,
+        input_tokens: s.input_tokens,
+        output_tokens: s.output_tokens,
+        reasoning_tokens: s.reasoning_tokens,
+        cache_read_tokens: s.cache_read_tokens,
+        cache_write_tokens: s.cache_write_tokens,
+        pushed: s.pushed,
+        recorded_at: s.recorded_at,
+        created_at: s.created_at,
     }
 }

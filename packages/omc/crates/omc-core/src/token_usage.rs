@@ -1,0 +1,33 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsage {
+    pub id: String,
+    pub client: String,
+    pub session_id: String,
+    pub message_id: String,
+    pub provider_id: String,
+    pub model_id: String,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    pub reasoning_tokens: i64,
+    pub cache_read_tokens: i64,
+    pub cache_write_tokens: i64,
+    pub pushed: bool,
+    pub recorded_at: i64,
+    pub created_at: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UsageSummary {
+    pub provider_id: String,
+    pub model_id: String,
+    pub total_input: i64,
+    pub total_output: i64,
+    pub total_reasoning: i64,
+    pub total_cache_read: i64,
+    pub total_cache_write: i64,
+    pub request_count: i64,
+}

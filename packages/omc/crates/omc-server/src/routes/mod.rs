@@ -4,6 +4,7 @@ pub mod config;
 pub mod health;
 pub mod messages;
 pub mod models;
+pub mod token_usage;
 
 use crate::DaemonState;
 use axum::Router;
@@ -33,6 +34,11 @@ pub fn create_router(daemon_state: Arc<DaemonState>) -> Router {
         .route("/account/workspaces", get(account::workspaces_handler))
         .route("/models", get(models::list_handler))
         .route("/models/sync", post(models::sync_handler))
+        .route("/token-usage", post(token_usage::record_handler))
+        .route("/token-usage/status", get(token_usage::status_handler))
+        .route("/token-usage/push", post(token_usage::push_handler))
+        .route("/token-usage/list", get(token_usage::list_handler))
+        .route("/token-usage/summary", get(token_usage::summary_handler))
         .with_state(daemon_state)
 }
 

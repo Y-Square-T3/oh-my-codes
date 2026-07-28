@@ -3,9 +3,11 @@ pub mod error;
 pub mod model_service;
 pub mod routes;
 pub mod server_client;
+pub mod token_usage_service;
 
 use crate::account_service::AccountService;
 use crate::model_service::ModelService;
+use crate::token_usage_service::TokenUsageService;
 use omc_core::config::OmcConfig;
 use omc_storage::Storage;
 use omc_storage::message_store::MessageStore;
@@ -20,6 +22,7 @@ pub struct DaemonState {
     pub message_store: Arc<dyn MessageStore>,
     pub account_service: Arc<AccountService>,
     pub model_service: Arc<ModelService>,
+    pub token_usage_service: Arc<TokenUsageService>,
 }
 
 impl DaemonState {
@@ -29,6 +32,7 @@ impl DaemonState {
         message_store: Arc<dyn MessageStore>,
         account_service: Arc<AccountService>,
         model_service: Arc<ModelService>,
+        token_usage_service: Arc<TokenUsageService>,
     ) -> Self {
         Self {
             config: tokio::sync::RwLock::new(config),
@@ -36,6 +40,7 @@ impl DaemonState {
             message_store,
             account_service,
             model_service,
+            token_usage_service,
         }
     }
 

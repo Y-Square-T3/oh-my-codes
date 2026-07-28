@@ -307,4 +307,48 @@ impl OmcServerClient {
             .await
             .map_err(|e| OmcError::Api(format!("Failed to parse models response: {e}")))
     }
+
+    pub async fn push_token_usages(
+        &self,
+        server_url: &str,
+        access_token: &str,
+        workspace_id: Option<&str>,
+        payload: &[TokenUsagePayload],
+    ) -> Result<()> {
+        let url = format!("{server_url}/api/v2/token-usages/batch");
+        let mut req = self
+            .client
+            .post(&url)
+            .bearer_auth(access_token)
+            .json(payload);
+        if let Some(ws_id) = workspace_id {
+            req = req.header("x-workspace-id", ws_id);
+        }
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| OmcError::Api(format!("Failed to push token usages: {e}")))?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            return Err(OmcError::Api(format!(
+                "Push token usages failed ({status}): {text}"
+            )));
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenUsagePayload {
+    pub model: String,
+    pub prompt_tokens: i64,
+    pub completion_tokens: i64,
+    pub reasoning_tokens: i64,
+    pub cache_read_tokens: i64,
+    pub cache_write_tokens: i64,
+    pub request_id: String,
+    pub session_id: String,
+    pub created_at: String,
 }

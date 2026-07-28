@@ -256,4 +256,50 @@ impl OmcClient {
     pub async fn models_sync(&self) -> Result<ModelsSyncResponse> {
         self.request("POST", "/models/sync", None).await
     }
+
+    pub async fn token_usage_record(&self, req: &TokenUsageRecordRequest) -> Result<()> {
+        let body =
+            serde_json::to_vec(req).map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
+        self.request::<serde_json::Value>("POST", "/token-usage", Some(&body))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn token_usage_status(&self) -> Result<TokenUsageStatusResponse> {
+        self.request("GET", "/token-usage/status", None).await
+    }
+
+    pub async fn token_usage_push(&self) -> Result<TokenUsagePushResponse> {
+        self.request("POST", "/token-usage/push", None).await
+    }
+
+    pub async fn token_usage_list(
+        &self,
+        limit: Option<usize>,
+        offset: Option<usize>,
+    ) -> Result<TokenUsageListResponse> {
+        let mut query = Vec::new();
+        if let Some(l) = limit {
+            query.push(format!("limit={l}"));
+        }
+        if let Some(o) = offset {
+            query.push(format!("offset={o}"));
+        }
+        let qs = if query.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", query.join("&"))
+        };
+        self.request("GET", &format!("/token-usage/list{qs}"), None)
+            .await
+    }
+
+    pub async fn token_usage_summary(
+        &self,
+        days: Option<i64>,
+    ) -> Result<TokenUsageSummaryResponse> {
+        let qs = days.map(|d| format!("?days={d}")).unwrap_or_default();
+        self.request("GET", &format!("/token-usage/summary{qs}"), None)
+            .await
+    }
 }

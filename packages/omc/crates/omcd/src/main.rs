@@ -4,11 +4,14 @@ use omc_server::DaemonState;
 use omc_server::account_service::AccountService;
 use omc_server::model_service::ModelService;
 use omc_server::server_client::OmcServerClient;
+use omc_server::token_usage_service::TokenUsageService;
 use omc_storage::account_store::AccountStore;
 use omc_storage::memory::MemoryStorage;
 use omc_storage::surreal::{
-    SurrealAccountStore, SurrealModelStore, SurrealStorage, SurrealWorkspaceStore,
+    SurrealAccountStore, SurrealModelStore, SurrealStorage, SurrealTokenUsageStore,
+    SurrealWorkspaceStore,
 };
+use omc_storage::token_usage_store::TokenUsageStore;
 use omc_storage::workspace_store::WorkspaceStore;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -87,7 +90,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let account_store: Arc<dyn AccountStore> = Arc::new(SurrealAccountStore::new(db.clone()));
     let workspace_store: Arc<dyn WorkspaceStore> = Arc::new(SurrealWorkspaceStore::new(db.clone()));
     let model_store: Arc<dyn omc_storage::model_store::ModelStore> =
-        Arc::new(SurrealModelStore::new(db));
+        Arc::new(SurrealModelStore::new(db.clone()));
+    let token_usage_store: Arc<dyn TokenUsageStore> = Arc::new(SurrealTokenUsageStore::new(db));
     let server_client = OmcServerClient::new();
     let account_service = Arc::new(AccountService::new(
         account_store,
@@ -96,6 +100,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
     let model_service = Arc::new(ModelService::new(
         model_store,
+        account_service.clone(),
+        server_client.clone(),
+    ));
+    let token_usage_service = Arc::new(TokenUsageService::new(
+        token_usage_store,
         account_service.clone(),
         server_client,
     ));
@@ -106,7 +115,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         message_store,
         account_service,
         model_service,
+        token_usage_service.clone(),
     ));
+
+    let _auto_push_stop = token_usage_service.start_auto_push(30, 20);
 
     let pid_path = omc_core::config::paths::default_pid_path();
     let _pid_file = PidFile::new(&pid_path);

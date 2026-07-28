@@ -3,6 +3,7 @@ pub mod memory;
 pub mod message_store;
 pub mod model_store;
 pub mod surreal;
+pub mod token_usage_store;
 pub mod wal;
 pub mod workspace_store;
 
