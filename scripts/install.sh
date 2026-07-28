@@ -77,6 +77,8 @@ download_and_install() {
   fi
 
   echo "✓ omc and omcd installed to ${INSTALL_DIR}"
+  trap - EXIT
+  rm -rf "$temp_dir"
 }
 
 main() {
