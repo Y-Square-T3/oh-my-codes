@@ -14,9 +14,11 @@ pub async fn run(
     {
         TokenUsageAction::Status { json } => token_usage_status_effect(client, json).await,
         TokenUsageAction::Push { json } => token_usage_push_effect(client, json).await,
-        TokenUsageAction::List { limit, json } => {
-            token_usage_list_effect(client, limit, json).await
-        }
+        TokenUsageAction::List {
+            limit,
+            offset,
+            json,
+        } => token_usage_list_effect(client, limit, offset, json).await,
         TokenUsageAction::Summary { days, json } => {
             token_usage_summary_effect(client, days, json).await
         }
@@ -96,9 +98,10 @@ async fn token_usage_push_effect(
 async fn token_usage_list_effect(
     client: &OmcClient,
     limit: Option<usize>,
+    offset: Option<usize>,
     json: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let resp = client.token_usage_list(limit, None).await?;
+    let resp = client.token_usage_list(limit, offset).await?;
 
     if json {
         println!("{}", serde_json::to_string_pretty(&resp)?);
@@ -110,18 +113,23 @@ async fn token_usage_list_effect(
         return Ok(());
     }
 
+    let effective_offset = offset.unwrap_or(0);
+    let page_start = effective_offset + 1;
+    let page_end = effective_offset + resp.records.len();
+
     let mut table = Table::new();
     table
         .set_header(vec![
             Cell::new("").set_alignment(CellAlignment::Center),
             Cell::new("Client"),
+            Cell::new("Agent"),
             Cell::new("Model"),
             Cell::new("Input"),
             Cell::new("Output"),
             Cell::new("Reason"),
             Cell::new("Time"),
         ])
-        .set_width(90);
+        .set_width(100);
 
     for r in &resp.records {
         let status_cell = if r.pushed {
@@ -130,6 +138,7 @@ async fn token_usage_list_effect(
             ui::inactive_cell()
         };
 
+        let agent_display = r.agent.as_deref().unwrap_or("-");
         let model_display = ui::truncate_model(&r.model_id, 20);
 
         let time_display = chrono::DateTime::from_timestamp_millis(r.recorded_at)
@@ -139,6 +148,7 @@ async fn token_usage_list_effect(
         table.add_row(vec![
             status_cell,
             Cell::new(&r.client),
+            Cell::new(agent_display),
             ui::cyan_cell(&model_display),
             Cell::new(r.input_tokens),
             Cell::new(r.output_tokens),
@@ -157,10 +167,19 @@ async fn token_usage_list_effect(
         style("pending").dim()
     );
     println!(
-        "  {} {} records",
-        style("Total:").dim(),
+        "  {} {}–{} of {} records",
+        style("Showing").dim(),
+        style(page_start).cyan(),
+        style(page_end).cyan(),
         style(resp.total).cyan()
     );
+    if page_end < resp.total {
+        println!(
+            "  {} {}",
+            style("Hint:").dim(),
+            style(format!("use --offset {page_end} to see more")).dim()
+        );
+    }
     println!();
 
     Ok(())

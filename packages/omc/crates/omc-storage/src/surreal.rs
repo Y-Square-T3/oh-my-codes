@@ -712,6 +712,23 @@ impl TokenUsageStore for SurrealTokenUsageStore {
         Ok(rows.into_iter().map(surreal_to_token_usage).collect())
     }
 
+    async fn count_all(&self) -> Result<usize> {
+        let mut result = self
+            .db
+            .query("SELECT count() AS count FROM token_usage;")
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to count all: {e}")))?;
+        let rows: Vec<serde_json::Value> = result
+            .take(0)
+            .map_err(|e| OmcError::Storage(format!("Failed to extract count: {e}")))?;
+        let count = rows
+            .first()
+            .and_then(|v| v.get("count"))
+            .and_then(|v| v.as_i64())
+            .unwrap_or(0) as usize;
+        Ok(count)
+    }
+
     async fn cleanup_old_pushed(&self, retention_days: i64) -> Result<usize> {
         let cutoff = chrono::Utc::now().timestamp_millis() - (retention_days * 86_400_000);
         let query = format!(

@@ -158,7 +158,7 @@ pub async fn list_handler(
     let limit = query.limit.unwrap_or(50);
     let offset = query.offset.unwrap_or(0);
     let records = state.token_usage_service.list_recent(limit, offset).await?;
-    let total = records.len();
+    let total = state.token_usage_service.count_all().await?;
     let response_records = records.into_iter().map(to_record_response).collect();
     Ok(Json(TokenUsageListResponse {
         records: response_records,

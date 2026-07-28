@@ -126,6 +126,10 @@ impl TokenUsageService {
         self.store.list_recent(limit, offset).await
     }
 
+    pub async fn count_all(&self) -> Result<usize> {
+        self.store.count_all().await
+    }
+
     pub async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>> {
         self.store.summary(days).await
     }

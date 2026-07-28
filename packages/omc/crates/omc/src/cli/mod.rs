@@ -115,6 +115,8 @@ pub enum TokenUsageAction {
         #[arg(long)]
         limit: Option<usize>,
         #[arg(long)]
+        offset: Option<usize>,
+        #[arg(long)]
         json: bool,
     },
     Summary {

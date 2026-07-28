@@ -58,14 +58,24 @@ impl OmcClient {
                     .parse()
                     .map_err(|e| OmcError::Api(format!("Invalid URI: {e}")))?;
 
-                let stream = tokio::net::UnixStream::connect(socket_path)
-                    .await
-                    .map_err(|e| OmcError::Api(format!("Failed to connect: {e}")))?;
+                let connect_timeout = std::time::Duration::from_secs(5);
+                let stream = tokio::time::timeout(
+                    connect_timeout,
+                    tokio::net::UnixStream::connect(socket_path),
+                )
+                .await
+                .map_err(|_| OmcError::Api("Daemon connection timed out".to_string()))?
+                .map_err(|e| OmcError::Api(format!("Failed to connect: {e}")))?;
                 let io = TokioIo::new(stream);
 
-                let (mut sender, conn) = hyper::client::conn::http1::handshake(io)
-                    .await
-                    .map_err(|e| OmcError::Api(format!("Handshake failed: {e}")))?;
+                let handshake_timeout = std::time::Duration::from_secs(5);
+                let (mut sender, conn) = tokio::time::timeout(
+                    handshake_timeout,
+                    hyper::client::conn::http1::handshake(io),
+                )
+                .await
+                .map_err(|_| OmcError::Api("Daemon handshake timed out".to_string()))?
+                .map_err(|e| OmcError::Api(format!("Handshake failed: {e}")))?;
 
                 tokio::spawn(async move {
                     if let Err(err) = conn.await {
@@ -82,9 +92,10 @@ impl OmcClient {
                     .body(http_body_util::Full::new(Bytes::copy_from_slice(body)))
                     .map_err(|e| OmcError::Api(format!("Request build error: {e}")))?;
 
-                let response = sender
-                    .send_request(req)
+                let request_timeout = std::time::Duration::from_secs(30);
+                let response = tokio::time::timeout(request_timeout, sender.send_request(req))
                     .await
+                    .map_err(|_| OmcError::Api("Daemon request timed out".to_string()))?
                     .map_err(|e| OmcError::Api(format!("Request failed: {e}")))?;
 
                 let status = response.status();
@@ -101,7 +112,11 @@ impl OmcClient {
                 body.to_vec()
             }
             ClientEndpoint::Http(base_url) => {
-                let client = reqwest::Client::new();
+                let client = reqwest::Client::builder()
+                    .connect_timeout(std::time::Duration::from_secs(10))
+                    .timeout(std::time::Duration::from_secs(30))
+                    .build()
+                    .unwrap_or_else(|_| reqwest::Client::new());
                 let url = format!("{base_url}{path}");
 
                 let resp = match method {
