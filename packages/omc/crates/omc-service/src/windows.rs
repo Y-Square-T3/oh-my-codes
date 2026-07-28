@@ -59,9 +59,7 @@ impl ServiceManager for TaskSchedulerManager {
             ])
             .output()?;
         if !output.status.success() {
-            return Err(ServiceError::Other(
-                decode_oem_output(&output.stderr),
-            ));
+            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
         }
         let _ = std::fs::remove_file(&xml_path);
         Ok(())
@@ -80,9 +78,7 @@ impl ServiceManager for TaskSchedulerManager {
             .args(["/Run", "/TN", &self.task_name])
             .output()?;
         if !output.status.success() {
-            return Err(ServiceError::Other(
-                decode_oem_output(&output.stderr),
-            ));
+            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
         }
         Ok(())
     }
@@ -92,9 +88,7 @@ impl ServiceManager for TaskSchedulerManager {
             .args(["/End", "/TN", &self.task_name])
             .output()?;
         if !output.status.success() {
-            return Err(ServiceError::Other(
-                decode_oem_output(&output.stderr),
-            ));
+            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
         }
         Ok(())
     }
