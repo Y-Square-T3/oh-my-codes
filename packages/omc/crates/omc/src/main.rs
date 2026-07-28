@@ -746,44 +746,42 @@ async fn model_list_effect(
             style(format!("{} ({})", p.name, p.id)).bold(),
             style(format!("— {} models", provider_models.len())).dim()
         );
-        println!("  {}", style("─".repeat(60)).dim());
 
         if provider_models.is_empty() {
             println!("  {}", style("(no models)").dim());
         } else {
-            println!(
-                "  {}  {}  {}  {}  {}",
-                style("Model").dim(),
-                style("Family").dim(),
-                style("Reason").dim(),
-                style("Tool").dim(),
-                style("Context").dim()
-            );
+            let mut table = Table::new();
+            table
+                .set_header(vec!["Model", "Family", "Reason", "Tool", "Context"])
+                .set_width(80);
 
             for m in &provider_models {
                 let context = m
                     .limit_context
                     .map(|c| format!("{}k", c / 1000))
                     .unwrap_or_else(|| "-".to_string());
-                let reasoning = if m.reasoning == Some(true) {
-                    style("yes").green().to_string()
+                let reasoning_cell = if m.reasoning == Some(true) {
+                    Cell::new("yes").fg(TColor::Green)
                 } else {
-                    style("no").dim().to_string()
+                    Cell::new("no").fg(TColor::DarkGrey)
                 };
-                let tool = if m.tool_call == Some(true) {
-                    style("yes").green().to_string()
+                let tool_cell = if m.tool_call == Some(true) {
+                    Cell::new("yes").fg(TColor::Green)
                 } else {
-                    style("no").dim().to_string()
+                    Cell::new("no").fg(TColor::DarkGrey)
                 };
-                println!(
-                    "  {:<12} {:<8} {:<6} {:<6} {}",
-                    m.name,
-                    m.family.as_deref().unwrap_or("-"),
-                    reasoning,
-                    tool,
-                    style(context).dim()
-                );
+                let context_cell = Cell::new(&context).fg(TColor::DarkGrey);
+
+                table.add_row(vec![
+                    Cell::new(&m.name),
+                    Cell::new(m.family.as_deref().unwrap_or("-")),
+                    reasoning_cell,
+                    tool_cell,
+                    context_cell,
+                ]);
             }
+
+            println!("{table}");
         }
 
         println!();
