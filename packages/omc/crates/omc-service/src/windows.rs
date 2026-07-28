@@ -26,7 +26,7 @@ impl TaskSchedulerManager {
 
     fn generate_task_xml(&self, binary_path: &std::path::Path) -> String {
         format!(
-            r#"<?xml version="1.0" encoding="UTF-8"?>
+            r#"<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <Triggers>
     <LogonTrigger />
@@ -47,8 +47,10 @@ impl ServiceManager for TaskSchedulerManager {
         crate::copy_binary(&config.binary_path, &self.binary_dest)?;
         let xml = self.generate_task_xml(&self.binary_dest);
         let xml_path = self.binary_dest.with_extension("xml");
-        let bom = "\u{FEFF}";
-        std::fs::write(&xml_path, format!("{}{}", bom, xml))?;
+        let (encoded, _, _) = encoding_rs::UTF_16LE.encode(&xml);
+        let mut bytes = vec![0xFF, 0xFE];
+        bytes.extend_from_slice(&encoded);
+        std::fs::write(&xml_path, &bytes)?;
         let output = std::process::Command::new("schtasks")
             .args([
                 "/Create",
