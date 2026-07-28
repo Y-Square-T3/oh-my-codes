@@ -300,7 +300,7 @@ impl OmcServerClient {
             let status = resp.status();
             let text = resp.text().await.unwrap_or_default();
             return Err(OmcError::Api(format!(
-                "Fetch models failed ({status}): {text}"
+                "Fetch models failed for {url} ({status}): {text}"
             )));
         }
         resp.json()

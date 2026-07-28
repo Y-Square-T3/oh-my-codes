@@ -319,10 +319,15 @@ async fn login_effect(client: &OmcClient, url: &str) -> Result<(), Box<dyn std::
                         );
                     }
                     Err(e) => {
+                        let hint = if e.to_string().contains("HTTP 404") {
+                            " (the running daemon may be outdated; try `omc daemon stop && omc daemon start`)"
+                        } else {
+                            ""
+                        };
                         println!(
                             "  {} {}",
                             style("!").yellow().bold(),
-                            style(format!("Failed to sync models: {e}")).yellow()
+                            style(format!("Failed to sync models: {e}{hint}")).yellow()
                         );
                     }
                 }
