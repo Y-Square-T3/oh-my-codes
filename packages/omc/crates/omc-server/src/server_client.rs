@@ -344,7 +344,6 @@ impl OmcServerClient {
 }
 
 #[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct TokenUsagePayload {
     pub model: String,
     pub prompt_tokens: i64,
