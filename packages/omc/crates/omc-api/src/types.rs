@@ -214,6 +214,8 @@ pub struct TokenUsageRecordRequest {
     pub client: String,
     pub session_id: String,
     pub message_id: String,
+    #[serde(default)]
+    pub agent: Option<String>,
     pub provider_id: String,
     pub model_id: String,
     pub input_tokens: i64,
@@ -250,6 +252,7 @@ pub struct TokenUsageRecordResponse {
     pub client: String,
     pub session_id: String,
     pub message_id: String,
+    pub agent: Option<String>,
     pub provider_id: String,
     pub model_id: String,
     pub input_tokens: i64,

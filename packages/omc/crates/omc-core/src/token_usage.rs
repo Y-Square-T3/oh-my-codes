@@ -7,6 +7,7 @@ pub struct TokenUsage {
     pub client: String,
     pub session_id: String,
     pub message_id: String,
+    pub agent: Option<String>,
     pub provider_id: String,
     pub model_id: String,
     pub input_tokens: i64,

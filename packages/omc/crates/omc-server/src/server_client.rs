@@ -350,5 +350,6 @@ pub struct TokenUsagePayload {
     pub cache_write_tokens: i64,
     pub request_id: String,
     pub session_id: String,
+    pub agent: Option<String>,
     pub created_at: String,
 }

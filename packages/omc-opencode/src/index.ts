@@ -1,1 +1,1 @@
-export { ExamplePlugin } from "./plugins/example.js"
+export { OhMyCodesPlugin } from "./plugins/oh-my-codes.js"
