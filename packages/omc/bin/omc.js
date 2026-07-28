@@ -18,7 +18,7 @@ const key = archMap[plat]?.[arch]
 if (!key) throw new Error(`Unsupported platform: ${plat}/${arch}`)
 
 const ext = plat === 'win32' ? '.exe' : ''
-const platformDir = dirname(require.resolve(`oh-my-codes-${key}/package.json`))
+const platformDir = dirname(require.resolve(`@y-square-t3/oh-my-codes-${key}/package.json`))
 const binPath = join(platformDir, 'bin', `omc${ext}`)
 
 const { status } = spawnSync(binPath, process.argv.slice(2), { stdio: 'inherit' })

@@ -1298,6 +1298,51 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@y-square-t3/oh-my-codes-darwin-arm64@workspace:*, @y-square-t3/oh-my-codes-darwin-arm64@workspace:packages/omc/dist/darwin-arm64":
+  version: 0.0.0-use.local
+  resolution: "@y-square-t3/oh-my-codes-darwin-arm64@workspace:packages/omc/dist/darwin-arm64"
+  bin:
+    oh-my-codes: bin/omc
+    omc: bin/omc
+  languageName: unknown
+  linkType: soft
+
+"@y-square-t3/oh-my-codes-darwin-x64@workspace:*, @y-square-t3/oh-my-codes-darwin-x64@workspace:packages/omc/dist/darwin-x64":
+  version: 0.0.0-use.local
+  resolution: "@y-square-t3/oh-my-codes-darwin-x64@workspace:packages/omc/dist/darwin-x64"
+  bin:
+    oh-my-codes: bin/omc
+    omc: bin/omc
+  languageName: unknown
+  linkType: soft
+
+"@y-square-t3/oh-my-codes-linux-arm64@workspace:*, @y-square-t3/oh-my-codes-linux-arm64@workspace:packages/omc/dist/linux-arm64":
+  version: 0.0.0-use.local
+  resolution: "@y-square-t3/oh-my-codes-linux-arm64@workspace:packages/omc/dist/linux-arm64"
+  bin:
+    oh-my-codes: bin/omc
+    omc: bin/omc
+  languageName: unknown
+  linkType: soft
+
+"@y-square-t3/oh-my-codes-linux-x64@workspace:*, @y-square-t3/oh-my-codes-linux-x64@workspace:packages/omc/dist/linux-x64":
+  version: 0.0.0-use.local
+  resolution: "@y-square-t3/oh-my-codes-linux-x64@workspace:packages/omc/dist/linux-x64"
+  bin:
+    oh-my-codes: bin/omc
+    omc: bin/omc
+  languageName: unknown
+  linkType: soft
+
+"@y-square-t3/oh-my-codes-win32-x64@workspace:*, @y-square-t3/oh-my-codes-win32-x64@workspace:packages/omc/dist/win32-x64":
+  version: 0.0.0-use.local
+  resolution: "@y-square-t3/oh-my-codes-win32-x64@workspace:packages/omc/dist/win32-x64"
+  bin:
+    oh-my-codes: bin/omc.exe
+    omc: bin/omc.exe
+  languageName: unknown
+  linkType: soft
+
 "abbrev@npm:^5.0.0":
   version: 5.0.0
   resolution: "abbrev@npm:5.0.0"
@@ -2608,42 +2653,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oh-my-codes-darwin-arm64@workspace:*, oh-my-codes-darwin-arm64@workspace:packages/omc/dist/darwin-arm64":
-  version: 0.0.0-use.local
-  resolution: "oh-my-codes-darwin-arm64@workspace:packages/omc/dist/darwin-arm64"
-  bin:
-    oh-my-codes: bin/omc
-    omc: bin/omc
-  languageName: unknown
-  linkType: soft
-
-"oh-my-codes-darwin-x64@workspace:*, oh-my-codes-darwin-x64@workspace:packages/omc/dist/darwin-x64":
-  version: 0.0.0-use.local
-  resolution: "oh-my-codes-darwin-x64@workspace:packages/omc/dist/darwin-x64"
-  bin:
-    oh-my-codes: bin/omc
-    omc: bin/omc
-  languageName: unknown
-  linkType: soft
-
-"oh-my-codes-linux-arm64@workspace:*, oh-my-codes-linux-arm64@workspace:packages/omc/dist/linux-arm64":
-  version: 0.0.0-use.local
-  resolution: "oh-my-codes-linux-arm64@workspace:packages/omc/dist/linux-arm64"
-  bin:
-    oh-my-codes: bin/omc
-    omc: bin/omc
-  languageName: unknown
-  linkType: soft
-
-"oh-my-codes-linux-x64@workspace:*, oh-my-codes-linux-x64@workspace:packages/omc/dist/linux-x64":
-  version: 0.0.0-use.local
-  resolution: "oh-my-codes-linux-x64@workspace:packages/omc/dist/linux-x64"
-  bin:
-    oh-my-codes: bin/omc
-    omc: bin/omc
-  languageName: unknown
-  linkType: soft
-
 "oh-my-codes-opencode@workspace:packages/omc-opencode":
   version: 0.0.0-use.local
   resolution: "oh-my-codes-opencode@workspace:packages/omc-opencode"
@@ -2661,34 +2670,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"oh-my-codes-win32-x64@workspace:*, oh-my-codes-win32-x64@workspace:packages/omc/dist/win32-x64":
-  version: 0.0.0-use.local
-  resolution: "oh-my-codes-win32-x64@workspace:packages/omc/dist/win32-x64"
-  bin:
-    oh-my-codes: bin/omc.exe
-    omc: bin/omc.exe
-  languageName: unknown
-  linkType: soft
-
 "oh-my-codes@workspace:packages/omc":
   version: 0.0.0-use.local
   resolution: "oh-my-codes@workspace:packages/omc"
   dependencies:
-    oh-my-codes-darwin-arm64: "workspace:*"
-    oh-my-codes-darwin-x64: "workspace:*"
-    oh-my-codes-linux-arm64: "workspace:*"
-    oh-my-codes-linux-x64: "workspace:*"
-    oh-my-codes-win32-x64: "workspace:*"
+    "@y-square-t3/oh-my-codes-darwin-arm64": "workspace:*"
+    "@y-square-t3/oh-my-codes-darwin-x64": "workspace:*"
+    "@y-square-t3/oh-my-codes-linux-arm64": "workspace:*"
+    "@y-square-t3/oh-my-codes-linux-x64": "workspace:*"
+    "@y-square-t3/oh-my-codes-win32-x64": "workspace:*"
   dependenciesMeta:
-    oh-my-codes-darwin-arm64:
+    "@y-square-t3/oh-my-codes-darwin-arm64":
       optional: true
-    oh-my-codes-darwin-x64:
+    "@y-square-t3/oh-my-codes-darwin-x64":
       optional: true
-    oh-my-codes-linux-arm64:
+    "@y-square-t3/oh-my-codes-linux-arm64":
       optional: true
-    oh-my-codes-linux-x64:
+    "@y-square-t3/oh-my-codes-linux-x64":
       optional: true
-    oh-my-codes-win32-x64:
+    "@y-square-t3/oh-my-codes-win32-x64":
       optional: true
   bin:
     oh-my-codes: bin/omc.js

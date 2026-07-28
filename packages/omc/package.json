@@ -23,10 +23,10 @@
     "fmt:check": "cargo fmt --all --check"
   },
   "optionalDependencies": {
-    "oh-my-codes-darwin-arm64": "workspace:*",
-    "oh-my-codes-darwin-x64": "workspace:*",
-    "oh-my-codes-linux-arm64": "workspace:*",
-    "oh-my-codes-linux-x64": "workspace:*",
-    "oh-my-codes-win32-x64": "workspace:*"
+    "@y-square-t3/oh-my-codes-darwin-arm64": "workspace:*",
+    "@y-square-t3/oh-my-codes-darwin-x64": "workspace:*",
+    "@y-square-t3/oh-my-codes-linux-arm64": "workspace:*",
+    "@y-square-t3/oh-my-codes-linux-x64": "workspace:*",
+    "@y-square-t3/oh-my-codes-win32-x64": "workspace:*"
   }
 }
