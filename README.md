@@ -1,6 +1,7 @@
 [![omc-ci](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/omc-ci.yml/badge.svg)](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/omc-ci.yml)
 [![omc-opencode-ci](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/omc-opencode-ci.yml/badge.svg)](https://github.com/Y-Square-T3/oh-my-codes/actions/workflows/omc-opencode-ci.yml)
-[![npm version](https://img.shields.io/npm/v/oh-my-codes)](https://www.npmjs.com/package/oh-my-codes)
+[![npm oh-my-codes version](https://img.shields.io/npm/v/oh-my-codes)](https://www.npmjs.com/package/oh-my-codes)
+[![npm oh-my-codes-opencode version](https://img.shields.io/npm/v/oh-my-codes-opencode)](https://www.npmjs.com/package/oh-my-codes-opencode)
 [![license](https://img.shields.io/github/license/Y-Square-T3/oh-my-codes)](./LICENSE)
 
 # oh-my-codes
