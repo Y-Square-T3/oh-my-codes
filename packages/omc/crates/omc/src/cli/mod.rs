@@ -12,7 +12,12 @@ use std::path::PathBuf;
 use clap::{CommandFactory, Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "omc", about = "oh-my-codes CLI", version)]
+#[command(
+    name = "omc",
+    about = "oh-my-codes CLI",
+    version,
+    disable_help_subcommand = true
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
@@ -27,10 +32,10 @@ pub enum Commands {
     Config(ConfigCommand),
     Account(AccountCommand),
     Model(ModelCommand),
-    #[command(alias = "tu")]
+    #[command(visible_alias = "tu")]
     TokenUsage(TokenUsageCommand),
     Opencode(OpencodeCommand),
-    #[command(name = "self", alias = "s")]
+    #[command(name = "self", visible_alias = "s")]
     SelfCmd(SelfCmd),
     Health,
 }
