@@ -1,5 +1,6 @@
 use crate::{Result, ServiceConfig, ServiceError, ServiceManager, ServiceStatus};
 use std::ffi::OsString;
+use std::path::PathBuf;
 use std::time::Duration;
 use tracing::{debug, warn};
 use windows_service::service::{
@@ -10,6 +11,23 @@ use windows_service::service_manager::{ServiceManager as Scm, ServiceManagerAcce
 
 const SERVICE_NAME: &str = "omcd";
 const SERVICE_DISPLAY_NAME: &str = "OMC Daemon";
+
+fn quote_path_if_needed(path: &PathBuf) -> PathBuf {
+    let path_str = path.to_string_lossy();
+    if path_str.contains(' ') && !path_str.starts_with('"') {
+        PathBuf::from(format!("\"{}\"", path_str))
+    } else {
+        path.clone()
+    }
+}
+
+fn quote_string_if_needed(s: &str) -> OsString {
+    if s.contains(' ') && !s.starts_with('"') {
+        OsString::from(format!("\"{}\"", s))
+    } else {
+        OsString::from(s)
+    }
+}
 
 pub struct WindowsServiceManager;
 
@@ -75,23 +93,24 @@ impl ServiceManager for WindowsServiceManager {
 
         if let Some(ref data_dir) = config.data_dir {
             launch_arguments.push(OsString::from("--data-dir"));
-            launch_arguments.push(OsString::from(data_dir));
+            launch_arguments.push(quote_string_if_needed(data_dir));
         }
 
         if let Some(ref config_path) = config.config {
             launch_arguments.push(OsString::from("--config"));
-            launch_arguments.push(OsString::from(config_path));
+            launch_arguments.push(quote_string_if_needed(config_path));
         }
 
         debug!("Launch arguments: {:?}", launch_arguments);
 
+        let quoted_binary_path = quote_path_if_needed(&config.binary_path);
         let service_info = ServiceInfo {
             name: OsString::from(SERVICE_NAME),
             display_name: OsString::from(SERVICE_DISPLAY_NAME),
             service_type: ServiceType::OWN_PROCESS,
             start_type: ServiceStartType::AutoStart,
             error_control: ServiceErrorControl::Normal,
-            executable_path: config.binary_path.clone(),
+            executable_path: quoted_binary_path,
             launch_arguments,
             dependencies: vec![],
             account_name: None,
@@ -122,13 +141,11 @@ impl ServiceManager for WindowsServiceManager {
         };
 
         debug!("Updating service configuration");
-        service
-            .change_config(&service_info)
-            .map_err(|e| {
-                let err_msg = format!("Failed to update service configuration: {e}");
-                debug!("{err_msg}");
-                ServiceError::Other(err_msg)
-            })?;
+        service.change_config(&service_info).map_err(|e| {
+            let err_msg = format!("Failed to update service configuration: {e}");
+            debug!("{err_msg}");
+            ServiceError::Other(err_msg)
+        })?;
         debug!("Service configuration updated");
 
         debug!("Setting service description");
@@ -253,5 +270,62 @@ fn is_service_exists_error(e: &windows_service::Error) -> bool {
         io_err.raw_os_error() == Some(1073) // ERROR_SERVICE_EXISTS
     } else {
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_quote_path_without_spaces() {
+        let path = PathBuf::from(r"C:\Users\test\omcd.exe");
+        let quoted = quote_path_if_needed(&path);
+        assert_eq!(quoted, PathBuf::from(r"C:\Users\test\omcd.exe"));
+    }
+
+    #[test]
+    fn test_quote_path_with_spaces() {
+        let path = PathBuf::from(r"C:\Program Files\omcd.exe");
+        let quoted = quote_path_if_needed(&path);
+        assert_eq!(quoted, PathBuf::from(r#""C:\Program Files\omcd.exe""#));
+    }
+
+    #[test]
+    fn test_quote_path_already_quoted() {
+        let path = PathBuf::from(r#""C:\Program Files\omcd.exe""#);
+        let quoted = quote_path_if_needed(&path);
+        assert_eq!(quoted, PathBuf::from(r#""C:\Program Files\omcd.exe""#));
+    }
+
+    #[test]
+    fn test_quote_string_without_spaces() {
+        let s = "simple";
+        let quoted = quote_string_if_needed(s);
+        assert_eq!(quoted, OsString::from("simple"));
+    }
+
+    #[test]
+    fn test_quote_string_with_spaces() {
+        let s = r"C:\Program Files\omcd.exe";
+        let quoted = quote_string_if_needed(s);
+        assert_eq!(quoted, OsString::from(r#""C:\Program Files\omcd.exe""#));
+    }
+
+    #[test]
+    fn test_quote_string_already_quoted() {
+        let s = r#""C:\Program Files\omcd.exe""#;
+        let quoted = quote_string_if_needed(s);
+        assert_eq!(quoted, OsString::from(r#""C:\Program Files\omcd.exe""#));
+    }
+
+    #[test]
+    fn test_quote_path_with_user_appdata_spaces() {
+        let path = PathBuf::from(r"C:\Users\John Doe\AppData\Roaming\omc\data");
+        let quoted = quote_path_if_needed(&path);
+        assert_eq!(
+            quoted,
+            PathBuf::from(r#""C:\Users\John Doe\AppData\Roaming\omc\data""#)
+        );
     }
 }
