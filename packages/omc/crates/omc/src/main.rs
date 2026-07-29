@@ -7,7 +7,7 @@ use omc_core::config::OmcConfig;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cli = Cli::parse();
 
-    let config = OmcConfig::load(None)?;
+    let config = OmcConfig::load(None, false)?;
     let resolved = config.resolve_daemon();
 
     let client = if let Some(ref remote) = cli.remote {

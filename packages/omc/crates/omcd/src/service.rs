@@ -106,7 +106,7 @@ fn run_service(_arguments: Vec<OsString>) -> windows_service::Result<()> {
 
     tracing::info!("Starting daemon in service mode");
     rt.block_on(async {
-        if let Err(e) = crate::run_daemon(args, Some(shutdown_rx)).await {
+        if let Err(e) = crate::run_daemon(args, Some(shutdown_rx), true).await {
             tracing::error!("Daemon error: {e}");
         }
     });

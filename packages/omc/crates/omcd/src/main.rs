@@ -70,20 +70,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(windows)]
     {
         if args.service {
-            std::env::set_var("OMC_SERVICE_MODE", "1");
             return service::run().map_err(|e| format!("Service error: {e}").into());
         }
     }
 
     init_tracing();
-    run_daemon(args, None).await
+    run_daemon(args, None, false).await
 }
 
 pub(crate) async fn run_daemon(
     args: Args,
     external_shutdown: Option<watch::Receiver<()>>,
+    service_mode: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut config = OmcConfig::load(args.config.as_deref())?;
+    let mut config = OmcConfig::load(args.config.as_deref(), service_mode)?;
 
     let overrides = OmcConfig {
         daemon: omc_core::config::DaemonConfig {
@@ -95,7 +95,7 @@ pub(crate) async fn run_daemon(
     };
     config.merge(&overrides);
 
-    let resolved = config.resolve_daemon();
+    let resolved = config.resolve_daemon_with_mode(service_mode);
 
     let data_path = PathBuf::from(&resolved.data_dir);
     std::fs::create_dir_all(&data_path)?;
@@ -137,7 +137,7 @@ pub(crate) async fn run_daemon(
 
     let auto_push_stop = token_usage_service.start_auto_push(300, 20);
 
-    let pid_path = omc_core::config::paths::default_pid_path();
+    let pid_path = omc_core::config::paths::default_pid_path_with_mode(service_mode);
     let _pid_file = PidFile::new(&pid_path);
 
     tracing::info!("oh-my-codes daemon starting");

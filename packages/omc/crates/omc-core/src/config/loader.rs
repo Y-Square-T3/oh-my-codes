@@ -18,7 +18,8 @@ pub struct ResolvedDaemonConfig {
 }
 
 impl OmcConfig {
-    pub fn load(custom_path: Option<&Path>) -> Result<Self, OmcError> {
+    #[allow(unused_variables)]
+    pub fn load(custom_path: Option<&Path>, service_mode: bool) -> Result<Self, OmcError> {
         if let Some(path) = custom_path {
             return Self::load_from_file(path);
         }
@@ -32,6 +33,16 @@ impl OmcConfig {
 
         if let Some(project_config) = paths::find_project_config() {
             return Self::load_from_file(&project_config);
+        }
+
+        #[cfg(windows)]
+        {
+            if service_mode {
+                let service_config = paths::service_config_path();
+                if service_config.exists() {
+                    return Self::load_from_file(&service_config);
+                }
+            }
         }
 
         if let Some(user_config) = paths::user_config_path() {
@@ -81,7 +92,7 @@ impl OmcConfig {
             .map_err(|e| OmcError::Config(format!("Failed to write config file: {e}")))
     }
 
-    pub fn resolve_daemon(&self) -> ResolvedDaemonConfig {
+    pub fn resolve_daemon_with_mode(&self, service_mode: bool) -> ResolvedDaemonConfig {
         ResolvedDaemonConfig {
             bind_addr: self
                 .daemon
@@ -94,11 +105,15 @@ impl OmcConfig {
                 .socket_path
                 .clone()
                 .unwrap_or_else(paths::default_socket_path),
-            data_dir: self
-                .daemon
-                .data_dir
-                .clone()
-                .unwrap_or_else(|| paths::default_data_dir().to_string_lossy().to_string()),
+            data_dir: self.daemon.data_dir.clone().unwrap_or_else(|| {
+                paths::default_data_dir_with_mode(service_mode)
+                    .to_string_lossy()
+                    .to_string()
+            }),
         }
+    }
+
+    pub fn resolve_daemon(&self) -> ResolvedDaemonConfig {
+        self.resolve_daemon_with_mode(false)
     }
 }

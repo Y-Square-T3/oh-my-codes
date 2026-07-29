@@ -10,9 +10,7 @@ const PROGRAM_DATA_DIR: &str = "ProgramData";
 
 #[cfg(windows)]
 pub fn is_windows_service() -> bool {
-    std::env::var("OMC_SERVICE_MODE")
-        .map(|v| v == "1")
-        .unwrap_or(false)
+    false
 }
 
 #[cfg(not(windows))]
@@ -48,10 +46,11 @@ pub fn user_config_path() -> Option<PathBuf> {
     dirs::config_dir().map(|d| d.join(CONFIG_DIR_NAME))
 }
 
-pub fn default_data_dir() -> PathBuf {
+#[allow(unused_variables)]
+pub fn default_data_dir_with_mode(service_mode: bool) -> PathBuf {
     #[cfg(windows)]
     {
-        if is_windows_service() {
+        if service_mode {
             return service_data_dir();
         }
     }
@@ -61,10 +60,15 @@ pub fn default_data_dir() -> PathBuf {
         .join("data")
 }
 
-pub fn default_config_path() -> PathBuf {
+pub fn default_data_dir() -> PathBuf {
+    default_data_dir_with_mode(false)
+}
+
+#[allow(unused_variables)]
+pub fn default_config_path_with_mode(service_mode: bool) -> PathBuf {
     #[cfg(windows)]
     {
-        if is_windows_service() {
+        if service_mode {
             return service_config_path();
         }
     }
@@ -73,20 +77,29 @@ pub fn default_config_path() -> PathBuf {
         .join(CONFIG_FILE_NAME)
 }
 
+pub fn default_config_path() -> PathBuf {
+    default_config_path_with_mode(false)
+}
+
 pub fn default_socket_path() -> String {
     let dir = user_config_path().unwrap_or_else(|| PathBuf::from("."));
     dir.join(SOCKET_FILE_NAME).to_string_lossy().to_string()
 }
 
-pub fn default_pid_path() -> String {
+#[allow(unused_variables)]
+pub fn default_pid_path_with_mode(service_mode: bool) -> String {
     #[cfg(windows)]
     {
-        if is_windows_service() {
+        if service_mode {
             return service_pid_path().to_string_lossy().to_string();
         }
     }
     let dir = user_config_path().unwrap_or_else(|| PathBuf::from("."));
     dir.join("omcd.pid").to_string_lossy().to_string()
+}
+
+pub fn default_pid_path() -> String {
+    default_pid_path_with_mode(false)
 }
 
 pub fn find_project_config() -> Option<PathBuf> {
