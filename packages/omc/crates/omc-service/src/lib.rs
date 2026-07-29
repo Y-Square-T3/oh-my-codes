@@ -22,6 +22,8 @@ pub type Result<T> = std::result::Result<T, ServiceError>;
 
 pub struct ServiceConfig {
     pub binary_path: PathBuf,
+    pub data_dir: Option<String>,
+    pub config: Option<String>,
 }
 
 pub enum ServiceStatus {
@@ -45,7 +47,7 @@ pub fn create_service_manager() -> Box<dyn ServiceManager> {
     #[cfg(target_os = "linux")]
     return Box::new(systemd::SystemdManager::new());
     #[cfg(target_os = "windows")]
-    return Box::new(windows::TaskSchedulerManager::new());
+    return Box::new(windows::WindowsServiceManager::new());
     #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
     compile_error!("Unsupported platform for service management");
 }

@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 #[cfg(unix)]
 use tokio::net::UnixListener;
+use tokio::sync::watch;
 
 pub struct DaemonState {
     config: tokio::sync::RwLock<OmcConfig>,
@@ -51,6 +52,7 @@ impl DaemonState {
 
 pub async fn start_server(
     daemon_state: Arc<DaemonState>,
+    #[allow(unused_mut)] mut shutdown_rx: watch::Receiver<()>,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
     let resolved = daemon_state.config().await.resolve_daemon();
 
@@ -69,8 +71,6 @@ pub async fn start_server(
         let unix_listener = UnixListener::bind(&socket_path)?;
         tracing::info!("omcd listening on unix://{}", socket_path);
 
-        let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(());
-
         let mut unix_rx = shutdown_rx.clone();
         let app_clone = router.clone();
         let unix_handle = tokio::spawn(async move {
@@ -82,7 +82,7 @@ pub async fn start_server(
                 .ok();
         });
 
-        let mut tcp_rx = shutdown_rx.clone();
+        let mut tcp_rx = shutdown_rx;
         let tcp_handle = tokio::spawn(async move {
             axum::serve(tcp_listener, router)
                 .with_graceful_shutdown(async move {
@@ -92,46 +92,17 @@ pub async fn start_server(
                 .ok();
         });
 
-        drop(shutdown_rx);
-
-        shutdown_signal().await;
-        drop(shutdown_tx);
-
         let _ = tokio::join!(tcp_handle, unix_handle);
     }
 
     #[cfg(not(unix))]
     {
         axum::serve(tcp_listener, router)
-            .with_graceful_shutdown(shutdown_signal())
+            .with_graceful_shutdown(async move {
+                let _ = shutdown_rx.changed().await;
+            })
             .await?;
     }
 
     Ok(())
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("Failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
-            .expect("Failed to install SIGTERM handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    tracing::info!("Shutdown signal received");
 }

@@ -1,3 +1,6 @@
+#[cfg(windows)]
+mod service;
+
 use clap::Parser;
 use omc_core::config::OmcConfig;
 use omc_server::DaemonState;
@@ -15,24 +18,29 @@ use omc_storage::token_usage_store::TokenUsageStore;
 use omc_storage::workspace_store::WorkspaceStore;
 use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::sync::watch;
 
-#[derive(Parser)]
+#[derive(Parser, Clone)]
 #[command(name = "omcd", about = "oh-my-codes daemon", version)]
-struct Args {
+pub(crate) struct Args {
     #[arg(long)]
-    config: Option<PathBuf>,
+    pub(crate) config: Option<PathBuf>,
 
     #[arg(long)]
-    data_dir: Option<String>,
+    pub(crate) data_dir: Option<String>,
 
     #[arg(long)]
-    bind_addr: Option<String>,
+    pub(crate) bind_addr: Option<String>,
 
     #[arg(long)]
-    bind_port: Option<u16>,
+    pub(crate) bind_port: Option<u16>,
 
     #[arg(long)]
-    socket_path: Option<String>,
+    pub(crate) socket_path: Option<String>,
+
+    #[cfg(windows)]
+    #[arg(long)]
+    pub(crate) service: bool,
 }
 
 struct PidFile(PathBuf);
@@ -57,15 +65,21 @@ impl Drop for PidFile {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
-
     let args = Args::parse();
 
+    #[cfg(windows)]
+    if args.service {
+        return service::run().map_err(|e| format!("Service error: {e}").into());
+    }
+
+    init_tracing();
+    run_daemon(args, None).await
+}
+
+pub(crate) async fn run_daemon(
+    args: Args,
+    external_shutdown: Option<watch::Receiver<()>>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut config = OmcConfig::load(args.config.as_deref())?;
 
     let overrides = OmcConfig {
@@ -118,7 +132,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         token_usage_service.clone(),
     ));
 
-    let _auto_push_stop = token_usage_service.start_auto_push(300, 20);
+    let auto_push_stop = token_usage_service.start_auto_push(300, 20);
 
     let pid_path = omc_core::config::paths::default_pid_path();
     let _pid_file = PidFile::new(&pid_path);
@@ -127,7 +141,56 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Data directory: {}", resolved.data_dir);
     tracing::info!("Listening on {}:{}", resolved.bind_addr, resolved.bind_port);
 
-    omc_server::start_server(state).await?;
+    let shutdown_rx = match external_shutdown {
+        Some(rx) => rx,
+        None => {
+            let (shutdown_tx, shutdown_rx) = watch::channel(());
+            tokio::spawn(async move {
+                shutdown_signal().await;
+                let _ = shutdown_tx.send(());
+            });
+            shutdown_rx
+        }
+    };
+
+    omc_server::start_server(state, shutdown_rx).await?;
+
+    auto_push_stop.notify_waiters();
 
     Ok(())
+}
+
+pub(crate) fn init_tracing() {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+        )
+        .init();
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("Failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    tracing::info!("Shutdown signal received");
 }

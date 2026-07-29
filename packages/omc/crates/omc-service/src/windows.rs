@@ -1,170 +1,150 @@
 use crate::{Result, ServiceConfig, ServiceError, ServiceManager, ServiceStatus};
-use std::path::PathBuf;
+use std::ffi::OsString;
+use windows_service::service::{
+    ServiceAccess, ServiceControl, ServiceErrorControl, ServiceFailureActions,
+    ServiceFailureResetPeriod, ServiceInfo, ServiceStartType, ServiceState, ServiceType,
+};
+use windows_service::service_manager::{ServiceManager as Scm, ServiceManagerAccess};
 
-pub struct TaskSchedulerManager {
-    task_name: String,
-    binary_dest: PathBuf,
-}
+const SERVICE_NAME: &str = "omcd";
+const SERVICE_DISPLAY_NAME: &str = "OMC Daemon";
 
-impl Default for TaskSchedulerManager {
+pub struct WindowsServiceManager;
+
+impl Default for WindowsServiceManager {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl TaskSchedulerManager {
+impl WindowsServiceManager {
     pub fn new() -> Self {
-        let local_app_data = std::env::var("LOCALAPPDATA").unwrap_or_else(|_| ".".to_string());
-        let binary_dest = PathBuf::from(local_app_data)
-            .join("oh-my-codes")
-            .join("omcd.exe");
-        Self {
-            task_name: r"\oh-my-codes\omcd".to_string(),
-            binary_dest,
-        }
+        Self
     }
 
-    pub(crate) fn generate_task_xml(&self, binary_path: &std::path::Path) -> String {
-        format!(
-            r#"<?xml version="1.0" encoding="UTF-16"?>
-<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <Triggers>
-    <LogonTrigger />
-  </Triggers>
-  <Actions>
-    <Exec>
-      <Command>{}</Command>
-    </Exec>
-  </Actions>
-</Task>"#,
-            binary_path.display()
-        )
+    fn open_service(&self) -> Result<windows_service::service::Service> {
+        let manager_access = ServiceManagerAccess::CONNECT;
+        let manager = Scm::local_computer(None::<&str>, manager_access)
+            .map_err(|e| ServiceError::Other(format!("Failed to connect to SCM: {e}")))?;
+        manager
+            .open_service(
+                SERVICE_NAME,
+                ServiceAccess::QUERY_STATUS | ServiceAccess::START | ServiceAccess::STOP,
+            )
+            .map_err(|_| ServiceError::NotInstalled)
     }
 }
 
-impl ServiceManager for TaskSchedulerManager {
+impl ServiceManager for WindowsServiceManager {
     fn install(&self, config: &ServiceConfig) -> Result<()> {
-        crate::copy_binary(&config.binary_path, &self.binary_dest)?;
-        let xml = self.generate_task_xml(&self.binary_dest);
-        let xml_path = self.binary_dest.with_extension("xml");
-        let (encoded, _, _) = encoding_rs::UTF_16LE.encode(&xml);
-        let mut bytes = vec![0xFF, 0xFE];
-        bytes.extend_from_slice(&encoded);
-        std::fs::write(&xml_path, &bytes)?;
-        let output = std::process::Command::new("schtasks")
-            .args([
-                "/Create",
-                "/TN",
-                &self.task_name,
-                "/XML",
-                &xml_path.to_string_lossy(),
-                "/F",
-            ])
-            .output()?;
-        if !output.status.success() {
-            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
+        let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
+        let manager = Scm::local_computer(None::<&str>, manager_access)
+            .map_err(|e| ServiceError::Other(format!("Failed to connect to SCM: {e}")))?;
+
+        let mut launch_arguments: Vec<OsString> = vec![OsString::from("--service")];
+
+        if let Some(ref data_dir) = config.data_dir {
+            launch_arguments.push(OsString::from("--data-dir"));
+            launch_arguments.push(OsString::from(data_dir));
         }
-        let _ = std::fs::remove_file(&xml_path);
+
+        if let Some(ref config_path) = config.config {
+            launch_arguments.push(OsString::from("--config"));
+            launch_arguments.push(OsString::from(config_path));
+        }
+
+        let service_info = ServiceInfo {
+            name: OsString::from(SERVICE_NAME),
+            display_name: OsString::from(SERVICE_DISPLAY_NAME),
+            service_type: ServiceType::OWN_PROCESS,
+            start_type: ServiceStartType::Automatic,
+            error_control: ServiceErrorControl::Normal,
+            executable_path: config.binary_path.clone(),
+            launch_arguments,
+            dependencies: vec![],
+            account_name: None,
+            account_password: None,
+        };
+
+        let service = manager
+            .create_service(&service_info, ServiceAccess::CHANGE_CONFIG)
+            .map_err(|e| ServiceError::Other(format!("Failed to create service: {e}")))?;
+
+        service
+            .set_description("oh-my-codes daemon service")
+            .map_err(|e| ServiceError::Other(format!("Failed to set description: {e}")))?;
+
+        let failure_actions = ServiceFailureActions {
+            reset_period: ServiceFailureResetPeriod::Days(1),
+            reboot_message: None,
+            command: None,
+            actions: vec![
+                windows_service::service::ServiceAction {
+                    type_: windows_service::service::ServiceActionType::Restart,
+                    delay: std::time::Duration::from_secs(5),
+                },
+                windows_service::service::ServiceAction {
+                    type_: windows_service::service::ServiceActionType::Restart,
+                    delay: std::time::Duration::from_secs(10),
+                },
+                windows_service::service::ServiceAction {
+                    type_: windows_service::service::ServiceActionType::Restart,
+                    delay: std::time::Duration::from_secs(30),
+                },
+            ],
+        };
+
+        service
+            .set_failure_actions(failure_actions)
+            .map_err(|e| ServiceError::Other(format!("Failed to set failure actions: {e}")))?;
+
         Ok(())
     }
 
     fn uninstall(&self) -> Result<()> {
-        let _ = std::process::Command::new("schtasks")
-            .args(["/Delete", "/TN", &self.task_name, "/F"])
-            .output();
-        crate::remove_binary(&self.binary_dest)?;
+        let service = self.open_service()?;
+        service
+            .delete()
+            .map_err(|e| ServiceError::Other(format!("Failed to delete service: {e}")))?;
         Ok(())
     }
 
     fn start(&self) -> Result<()> {
-        let output = std::process::Command::new("schtasks")
-            .args(["/Run", "/TN", &self.task_name])
-            .output()?;
-        if !output.status.success() {
-            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
-        }
+        let service = self.open_service()?;
+        service
+            .start(&[] as &[OsString])
+            .map_err(|e| ServiceError::Other(format!("Failed to start service: {e}")))?;
         Ok(())
     }
 
     fn stop(&self) -> Result<()> {
-        let output = std::process::Command::new("schtasks")
-            .args(["/End", "/TN", &self.task_name])
-            .output()?;
-        if !output.status.success() {
-            return Err(ServiceError::Other(decode_oem_output(&output.stderr)));
-        }
+        let service = self.open_service()?;
+        service
+            .control(ServiceControl::Stop)
+            .map_err(|e| ServiceError::Other(format!("Failed to stop service: {e}")))?;
         Ok(())
     }
 
     fn status(&self) -> Result<ServiceStatus> {
-        let output = std::process::Command::new("schtasks")
-            .args(["/Query", "/TN", &self.task_name, "/FO", "LIST"])
-            .output()?;
-        if !output.status.success() {
-            return Ok(ServiceStatus::NotInstalled);
-        }
-        let stdout = decode_oem_output(&output.stdout);
-        if !stdout.contains("Running") {
-            return Ok(ServiceStatus::Stopped);
-        }
-        let tasklist = std::process::Command::new("tasklist")
-            .args(["/FI", "IMAGENAME eq omcd.exe", "/FO", "CSV", "/NH"])
-            .output()?;
-        let tasklist_stdout = decode_oem_output(&tasklist.stdout);
-        let pid = tasklist_stdout.lines().next().and_then(|line| {
-            line.split(',')
-                .nth(1)
-                .and_then(|p| p.trim_matches('"').parse::<u32>().ok())
-        });
-        match pid {
-            Some(p) => Ok(ServiceStatus::Running { pid: Some(p) }),
-            None => Ok(ServiceStatus::Stopped),
-        }
-    }
-}
-
-fn decode_oem_output(bytes: &[u8]) -> String {
-    let codepage = unsafe { GetOEMCP() };
-    let label = codepage_to_label(codepage);
-    match label.and_then(|l| encoding_rs::Encoding::for_label(l.as_bytes())) {
-        Some(encoding) => {
-            let (decoded, _, had_errors) = encoding.decode(bytes);
-            if had_errors {
-                String::from_utf8_lossy(bytes).into_owned()
-            } else {
-                decoded.into_owned()
+        let service = match self.open_service() {
+            Ok(s) => s,
+            Err(ServiceError::NotInstalled) => return Ok(ServiceStatus::NotInstalled),
+            Err(e) => return Err(e),
+        };
+        let status = service
+            .query_status()
+            .map_err(|e| ServiceError::Other(format!("Failed to query status: {e}")))?;
+        match status.current_state {
+            ServiceState::Running => Ok(ServiceStatus::Running {
+                pid: status.process_id,
+            }),
+            ServiceState::Stopped | ServiceState::StopPending | ServiceState::StartPending => {
+                Ok(ServiceStatus::Stopped)
             }
+            _ => Ok(ServiceStatus::Unknown(format!(
+                "{:?}",
+                status.current_state
+            ))),
         }
-        None => String::from_utf8_lossy(bytes).into_owned(),
     }
-}
-
-fn codepage_to_label(codepage: u32) -> Option<&'static str> {
-    match codepage {
-        437 => Some("ibm866"),
-        850 => Some("ibm866"),
-        866 => Some("ibm866"),
-        932 => Some("shift_jis"),
-        936 => Some("gbk"),
-        949 => Some("euc-kr"),
-        950 => Some("big5"),
-        1200 => Some("utf-16le"),
-        1201 => Some("utf-16be"),
-        1250 => Some("windows-1250"),
-        1251 => Some("windows-1251"),
-        1252 => Some("windows-1252"),
-        1253 => Some("windows-1253"),
-        1254 => Some("windows-1254"),
-        1255 => Some("windows-1255"),
-        1256 => Some("windows-1256"),
-        1257 => Some("windows-1257"),
-        1258 => Some("windows-1258"),
-        65001 => Some("utf-8"),
-        _ => None,
-    }
-}
-
-#[link(name = "kernel32")]
-unsafe extern "system" {
-    fn GetOEMCP() -> u32;
 }
