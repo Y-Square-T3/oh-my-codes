@@ -138,6 +138,22 @@ impl ServiceManager for WindowsServiceManager {
             ServiceError::Other(err_msg)
         })?;
 
+        let system_config_path = omc_core::config::paths::service_config_path();
+        if !system_config_path.exists() {
+            debug!(
+                "Creating default config file: {}",
+                system_config_path.display()
+            );
+            std::fs::write(&system_config_path, "{}").map_err(|e| {
+                let err_msg = format!(
+                    "Failed to create default config file {}: {e}",
+                    system_config_path.display()
+                );
+                debug!("{err_msg}");
+                ServiceError::Other(err_msg)
+            })?;
+        }
+
         let mut launch_arguments: Vec<OsString> = vec![OsString::from("--service")];
 
         launch_arguments.push(OsString::from("--data-dir"));
