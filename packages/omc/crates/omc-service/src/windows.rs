@@ -12,12 +12,12 @@ use windows_service::service_manager::{ServiceManager as Scm, ServiceManagerAcce
 const SERVICE_NAME: &str = "omcd";
 const SERVICE_DISPLAY_NAME: &str = "OMC Daemon";
 
-fn quote_path_if_needed(path: &PathBuf) -> PathBuf {
+fn quote_path_if_needed(path: &std::path::Path) -> PathBuf {
     let path_str = path.to_string_lossy();
     if path_str.contains(' ') && !path_str.starts_with('"') {
         PathBuf::from(format!("\"{}\"", path_str))
     } else {
-        path.clone()
+        path.to_path_buf()
     }
 }
 
@@ -29,6 +29,20 @@ fn quote_string_if_needed(s: &str) -> OsString {
     }
 }
 
+fn format_windows_service_error(context: &str, e: &windows_service::Error) -> String {
+    if let windows_service::Error::Winapi(io_err) = e {
+        let code = io_err.raw_os_error();
+        let mut msg = format!("{context}: {io_err}");
+        if code == Some(5) {
+            msg.push_str(
+                ". Administrator privileges are required; run the command as Administrator",
+            );
+        }
+        msg
+    } else {
+        format!("{context}: {e}")
+    }
+}
 pub struct WindowsServiceManager;
 
 impl Default for WindowsServiceManager {
@@ -49,7 +63,7 @@ impl WindowsServiceManager {
         debug!("Connecting to Service Control Manager");
         let manager_access = ServiceManagerAccess::CONNECT;
         let manager = Scm::local_computer(None::<&str>, manager_access).map_err(|e| {
-            let err_msg = format!("Failed to connect to SCM: {e}");
+            let err_msg = format_windows_service_error("Failed to connect to SCM", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -58,8 +72,17 @@ impl WindowsServiceManager {
             SERVICE_NAME, access
         );
         manager.open_service(SERVICE_NAME, access).map_err(|e| {
-            debug!("Service not found or access denied: {e}");
-            ServiceError::NotInstalled
+            if is_service_not_found_error(&e) {
+                debug!("Service '{}' is not installed", SERVICE_NAME);
+                ServiceError::NotInstalled
+            } else {
+                let err_msg = format_windows_service_error(
+                    &format!("Failed to open service '{}'", SERVICE_NAME),
+                    &e,
+                );
+                debug!("{err_msg}");
+                ServiceError::Other(err_msg)
+            }
         })
     }
 
@@ -78,7 +101,7 @@ impl ServiceManager for WindowsServiceManager {
         let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
         debug!("Connecting to SCM with CREATE_SERVICE access");
         let manager = Scm::local_computer(None::<&str>, manager_access).map_err(|e| {
-            let err_msg = format!("Failed to connect to SCM: {e}");
+            let err_msg = format_windows_service_error("Failed to connect to SCM", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -152,13 +175,14 @@ impl ServiceManager for WindowsServiceManager {
                 manager
                     .open_service(SERVICE_NAME, ServiceAccess::CHANGE_CONFIG)
                     .map_err(|e| {
-                        let err_msg = format!("Failed to open existing service: {e}");
+                        let err_msg =
+                            format_windows_service_error("Failed to open existing service", &e);
                         debug!("{err_msg}");
                         ServiceError::Other(err_msg)
                     })?
             }
             Err(e) => {
-                let err_msg = format!("Failed to create service: {e}");
+                let err_msg = format_windows_service_error("Failed to create service", &e);
                 debug!("{err_msg}");
                 return Err(ServiceError::Other(err_msg));
             }
@@ -166,7 +190,8 @@ impl ServiceManager for WindowsServiceManager {
 
         debug!("Updating service configuration");
         service.change_config(&service_info).map_err(|e| {
-            let err_msg = format!("Failed to update service configuration: {e}");
+            let err_msg =
+                format_windows_service_error("Failed to update service configuration", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -176,7 +201,7 @@ impl ServiceManager for WindowsServiceManager {
         service
             .set_description("oh-my-codes daemon service")
             .map_err(|e| {
-                let err_msg = format!("Failed to set description: {e}");
+                let err_msg = format_windows_service_error("Failed to set description", &e);
                 debug!("{err_msg}");
                 ServiceError::Other(err_msg)
             })?;
@@ -206,8 +231,10 @@ impl ServiceManager for WindowsServiceManager {
         match service.update_failure_actions(failure_actions) {
             Ok(()) => debug!("Failure recovery actions configured successfully"),
             Err(e) => {
+                let err_msg =
+                    format_windows_service_error("Failed to set failure recovery actions", &e);
                 warn!(
-                    "Failed to set failure recovery actions (non-fatal): {e}. \
+                    "{err_msg}. \
                      Service installed successfully but automatic restart on crash is disabled. \
                      You can configure recovery manually via services.msc."
                 );
@@ -226,7 +253,7 @@ impl ServiceManager for WindowsServiceManager {
 
         debug!("Deleting service");
         service.delete().map_err(|e| {
-            let err_msg = format!("Failed to delete service: {e}");
+            let err_msg = format_windows_service_error("Failed to delete service", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -238,7 +265,7 @@ impl ServiceManager for WindowsServiceManager {
         debug!("Starting service");
         let service = self.open_service()?;
         service.start(&[] as &[OsString]).map_err(|e| {
-            let err_msg = format!("Failed to start service: {e}");
+            let err_msg = format_windows_service_error("Failed to start service", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -250,7 +277,7 @@ impl ServiceManager for WindowsServiceManager {
         debug!("Stopping service");
         let service = self.open_service()?;
         service.stop().map_err(|e| {
-            let err_msg = format!("Failed to stop service: {e}");
+            let err_msg = format_windows_service_error("Failed to stop service", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -269,7 +296,7 @@ impl ServiceManager for WindowsServiceManager {
             Err(e) => return Err(e),
         };
         let status = service.query_status().map_err(|e| {
-            let err_msg = format!("Failed to query status: {e}");
+            let err_msg = format_windows_service_error("Failed to query status", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
@@ -292,6 +319,14 @@ impl ServiceManager for WindowsServiceManager {
 fn is_service_exists_error(e: &windows_service::Error) -> bool {
     if let windows_service::Error::Winapi(io_err) = e {
         io_err.raw_os_error() == Some(1073) // ERROR_SERVICE_EXISTS
+    } else {
+        false
+    }
+}
+
+fn is_service_not_found_error(e: &windows_service::Error) -> bool {
+    if let windows_service::Error::Winapi(io_err) = e {
+        io_err.raw_os_error() == Some(1060) // ERROR_SERVICE_DOES_NOT_EXIST
     } else {
         false
     }

@@ -44,7 +44,7 @@ impl OmcClient {
         method: &str,
         path: &str,
         body: &[u8],
-        content_type: &str,
+        _content_type: &str,
     ) -> Result<T> {
         let response_bytes = match &self.endpoint {
             #[cfg(unix)]
@@ -87,7 +87,7 @@ impl OmcClient {
                     .method(method)
                     .uri(uri)
                     .header(HOST, "localhost")
-                    .header(CONTENT_TYPE, content_type)
+                    .header(CONTENT_TYPE, _content_type)
                     .header(CONTENT_LENGTH, body.len())
                     .body(http_body_util::Full::new(Bytes::copy_from_slice(body)))
                     .map_err(|e| OmcError::Api(format!("Request build error: {e}")))?;
