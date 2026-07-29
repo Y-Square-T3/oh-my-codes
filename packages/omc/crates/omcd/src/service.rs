@@ -104,6 +104,18 @@ fn run_service(_arguments: Vec<OsString>) -> windows_service::Result<()> {
         args.bind_port
     );
 
+    tracing::debug!("Reporting Running to SCM");
+    status_handle.set_service_status(ServiceStatus {
+        service_type: SERVICE_TYPE,
+        current_state: ServiceState::Running,
+        controls_accepted: ServiceControlAccept::STOP,
+        exit_code: ServiceExitCode::Win32(0),
+        checkpoint: 0,
+        wait_hint: Duration::default(),
+        process_id: None,
+    })?;
+    tracing::debug!("Running reported");
+
     tracing::info!("Starting daemon in service mode");
     rt.block_on(async {
         if let Err(e) = crate::run_daemon(args, Some(shutdown_rx), true).await {
