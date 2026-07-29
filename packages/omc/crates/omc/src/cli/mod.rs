@@ -28,13 +28,13 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    Daemon(DaemonCommand),
-    Config(ConfigCommand),
     Account(AccountCommand),
     Model(ModelCommand),
     #[command(visible_alias = "tu")]
     TokenUsage(TokenUsageCommand),
     Opencode(OpencodeCommand),
+    Config(ConfigCommand),
+    Daemon(DaemonCommand),
     #[command(name = "self", visible_alias = "s")]
     SelfCmd(SelfCmd),
     Health,
