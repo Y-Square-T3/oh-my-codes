@@ -889,9 +889,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.8.1"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b023947811758c97c59bf9d1c188fd619ad4718dcaa767947df1cadb14f39f4"
+checksum = "157a8ba7b480713b56f4c09fd13fc3e0a22a5dfab8097ba61cbc5feef950788a"
 dependencies = [
  "glob",
  "libc",
@@ -2739,7 +2739,7 @@ dependencies = [
 
 [[package]]
 name = "omc"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "chrono",
  "clap",
@@ -2761,7 +2761,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "axum-test",
  "http",
@@ -2780,7 +2780,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "dirs",
  "serde",
@@ -2794,7 +2794,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "axum",
  "axum-test",
@@ -2816,7 +2816,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "dirs",
  "libc",
@@ -2829,7 +2829,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2845,7 +2845,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.5.11"
+version = "4.5.12"
 dependencies = [
  "clap",
  "omc-api",
@@ -4793,13 +4793,13 @@ dependencies = [
 
 [[package]]
 name = "tokio-macros"
-version = "2.7.1"
+version = "2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6328af13490e73a9b4694030fafd93f8c8c6a9dede33e821c3fc63eddf8042ba"
+checksum = "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.3",
 ]
 
 [[package]]
