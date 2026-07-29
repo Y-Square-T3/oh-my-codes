@@ -35,7 +35,7 @@ pub enum Commands {
     Opencode(OpencodeCommand),
     Config(ConfigCommand),
     Daemon(DaemonCommand),
-    #[command(name = "self", visible_alias = "s")]
+    #[command(name = "self")]
     SelfCmd(SelfCmd),
     Health,
 }
