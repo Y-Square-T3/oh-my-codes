@@ -74,12 +74,6 @@ impl ServiceManager for WindowsServiceManager {
     fn install(&self, config: &ServiceConfig) -> Result<()> {
         debug!("Starting service installation");
         debug!("Binary path: {}", config.binary_path.display());
-        if let Some(ref data_dir) = config.data_dir {
-            debug!("Data dir: {data_dir}");
-        }
-        if let Some(ref config_path) = config.config {
-            debug!("Config path: {config_path}");
-        }
 
         let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
         debug!("Connecting to SCM with CREATE_SERVICE access");
@@ -89,17 +83,47 @@ impl ServiceManager for WindowsServiceManager {
             ServiceError::Other(err_msg)
         })?;
 
+        let system_data_dir = omc_core::config::paths::service_data_dir();
+        let system_config_dir = omc_core::config::paths::service_config_path()
+            .parent()
+            .unwrap()
+            .to_path_buf();
+
+        debug!(
+            "Creating system data directory: {}",
+            system_data_dir.display()
+        );
+        std::fs::create_dir_all(&system_data_dir).map_err(|e| {
+            let err_msg = format!(
+                "Failed to create data directory {}: {e}",
+                system_data_dir.display()
+            );
+            debug!("{err_msg}");
+            ServiceError::Other(err_msg)
+        })?;
+
+        debug!(
+            "Creating system config directory: {}",
+            system_config_dir.display()
+        );
+        std::fs::create_dir_all(&system_config_dir).map_err(|e| {
+            let err_msg = format!(
+                "Failed to create config directory {}: {e}",
+                system_config_dir.display()
+            );
+            debug!("{err_msg}");
+            ServiceError::Other(err_msg)
+        })?;
+
         let mut launch_arguments: Vec<OsString> = vec![OsString::from("--service")];
 
-        if let Some(ref data_dir) = config.data_dir {
-            launch_arguments.push(OsString::from("--data-dir"));
-            launch_arguments.push(quote_string_if_needed(data_dir));
-        }
+        launch_arguments.push(OsString::from("--data-dir"));
+        launch_arguments.push(quote_string_if_needed(&system_data_dir.to_string_lossy()));
 
-        if let Some(ref config_path) = config.config {
-            launch_arguments.push(OsString::from("--config"));
-            launch_arguments.push(quote_string_if_needed(config_path));
-        }
+        launch_arguments.push(OsString::from("--config"));
+        launch_arguments.push(quote_string_if_needed(
+            &omc_core::config::paths::service_config_path().to_string_lossy(),
+        ));
 
         debug!("Launch arguments: {:?}", launch_arguments);
 

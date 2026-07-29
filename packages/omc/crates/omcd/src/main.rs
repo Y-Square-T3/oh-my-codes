@@ -68,8 +68,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     #[cfg(windows)]
-    if args.service {
-        return service::run().map_err(|e| format!("Service error: {e}").into());
+    {
+        if args.service {
+            std::env::set_var("OMC_SERVICE_MODE", "1");
+            return service::run().map_err(|e| format!("Service error: {e}").into());
+        }
     }
 
     init_tracing();

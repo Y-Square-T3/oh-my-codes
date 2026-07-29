@@ -5,15 +5,72 @@ const CONFIG_FILE_NAME: &str = "omc.json";
 const PROJECT_CONFIG_DIR_NAME: &str = ".omc";
 const SOCKET_FILE_NAME: &str = "omc.sock";
 
+#[cfg(windows)]
+const PROGRAM_DATA_DIR: &str = "ProgramData";
+
+#[cfg(windows)]
+pub fn is_windows_service() -> bool {
+    std::env::var("OMC_SERVICE_MODE")
+        .map(|v| v == "1")
+        .unwrap_or(false)
+}
+
+#[cfg(not(windows))]
+pub fn is_windows_service() -> bool {
+    false
+}
+
+#[cfg(windows)]
+pub fn service_data_dir() -> PathBuf {
+    PathBuf::from("C:\\")
+        .join(PROGRAM_DATA_DIR)
+        .join(CONFIG_DIR_NAME)
+        .join("data")
+}
+
+#[cfg(windows)]
+pub fn service_config_path() -> PathBuf {
+    PathBuf::from("C:\\")
+        .join(PROGRAM_DATA_DIR)
+        .join(CONFIG_DIR_NAME)
+        .join(CONFIG_FILE_NAME)
+}
+
+#[cfg(windows)]
+pub fn service_pid_path() -> PathBuf {
+    PathBuf::from("C:\\")
+        .join(PROGRAM_DATA_DIR)
+        .join(CONFIG_DIR_NAME)
+        .join("omcd.pid")
+}
+
 pub fn user_config_path() -> Option<PathBuf> {
     dirs::config_dir().map(|d| d.join(CONFIG_DIR_NAME))
 }
 
 pub fn default_data_dir() -> PathBuf {
+    #[cfg(windows)]
+    {
+        if is_windows_service() {
+            return service_data_dir();
+        }
+    }
     dirs::data_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join(CONFIG_DIR_NAME)
         .join("data")
+}
+
+pub fn default_config_path() -> PathBuf {
+    #[cfg(windows)]
+    {
+        if is_windows_service() {
+            return service_config_path();
+        }
+    }
+    user_config_path()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(CONFIG_FILE_NAME)
 }
 
 pub fn default_socket_path() -> String {
@@ -22,6 +79,12 @@ pub fn default_socket_path() -> String {
 }
 
 pub fn default_pid_path() -> String {
+    #[cfg(windows)]
+    {
+        if is_windows_service() {
+            return service_pid_path().to_string_lossy().to_string();
+        }
+    }
     let dir = user_config_path().unwrap_or_else(|| PathBuf::from("."));
     dir.join("omcd.pid").to_string_lossy().to_string()
 }

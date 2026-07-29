@@ -9,16 +9,10 @@ pub fn run(cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
                 Some(p) => p,
                 None => find_omcd_binary().map_err(|e| e.to_string())?,
             };
-            let data_dir = omc_core::config::paths::default_data_dir()
-                .to_string_lossy()
-                .into_owned();
-            let config_path = dirs::config_dir()
-                .map(|d| d.join("omc").join("omc.json"))
-                .and_then(|p| p.exists().then(|| p.to_string_lossy().into_owned()));
             let config = omc_service::ServiceConfig {
                 binary_path,
-                data_dir: Some(data_dir),
-                config: config_path,
+                data_dir: None,
+                config: None,
             };
             manager.install(&config).map_err(|e| e.to_string())?;
             println!("Daemon installed successfully");
