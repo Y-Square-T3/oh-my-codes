@@ -99,14 +99,37 @@ impl ServiceManager for WindowsServiceManager {
         };
 
         debug!("Creating service with CHANGE_CONFIG access");
-        let service = manager
-            .create_service(&service_info, ServiceAccess::CHANGE_CONFIG)
-            .map_err(|e| {
+        let service = match manager.create_service(&service_info, ServiceAccess::CHANGE_CONFIG) {
+            Ok(s) => {
+                debug!("Service created successfully");
+                s
+            }
+            Err(e) if is_service_exists_error(&e) => {
+                debug!("Service already exists (ERROR_SERVICE_EXISTS), opening existing service");
+                manager
+                    .open_service(SERVICE_NAME, ServiceAccess::CHANGE_CONFIG)
+                    .map_err(|e| {
+                        let err_msg = format!("Failed to open existing service: {e}");
+                        debug!("{err_msg}");
+                        ServiceError::Other(err_msg)
+                    })?
+            }
+            Err(e) => {
                 let err_msg = format!("Failed to create service: {e}");
+                debug!("{err_msg}");
+                return Err(ServiceError::Other(err_msg));
+            }
+        };
+
+        debug!("Updating service configuration");
+        service
+            .change_config(&service_info)
+            .map_err(|e| {
+                let err_msg = format!("Failed to update service configuration: {e}");
                 debug!("{err_msg}");
                 ServiceError::Other(err_msg)
             })?;
-        debug!("Service created successfully");
+        debug!("Service configuration updated");
 
         debug!("Setting service description");
         service
@@ -222,5 +245,13 @@ impl ServiceManager for WindowsServiceManager {
                 status.current_state
             ))),
         }
+    }
+}
+
+fn is_service_exists_error(e: &windows_service::Error) -> bool {
+    if let windows_service::Error::Winapi(io_err) = e {
+        io_err.raw_os_error() == Some(1073) // ERROR_SERVICE_EXISTS
+    } else {
+        false
     }
 }
