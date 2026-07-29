@@ -1,5 +1,6 @@
 #![cfg(windows)]
 
+use clap::Parser;
 use std::ffi::OsString;
 use std::sync::Arc;
 use std::time::Duration;
