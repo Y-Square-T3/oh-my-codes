@@ -1,7 +1,8 @@
 use crate::{Result, ServiceConfig, ServiceError, ServiceManager, ServiceStatus};
 use std::ffi::OsString;
+use std::time::Duration;
 use windows_service::service::{
-    ServiceAccess, ServiceControl, ServiceErrorControl, ServiceFailureActions,
+    ServiceAccess, ServiceAction, ServiceActionType, ServiceErrorControl, ServiceFailureActions,
     ServiceFailureResetPeriod, ServiceInfo, ServiceStartType, ServiceState, ServiceType,
 };
 use windows_service::service_manager::{ServiceManager as Scm, ServiceManagerAccess};
@@ -57,7 +58,7 @@ impl ServiceManager for WindowsServiceManager {
             name: OsString::from(SERVICE_NAME),
             display_name: OsString::from(SERVICE_DISPLAY_NAME),
             service_type: ServiceType::OWN_PROCESS,
-            start_type: ServiceStartType::Automatic,
+            start_type: ServiceStartType::AutoStart,
             error_control: ServiceErrorControl::Normal,
             executable_path: config.binary_path.clone(),
             launch_arguments,
@@ -75,27 +76,27 @@ impl ServiceManager for WindowsServiceManager {
             .map_err(|e| ServiceError::Other(format!("Failed to set description: {e}")))?;
 
         let failure_actions = ServiceFailureActions {
-            reset_period: ServiceFailureResetPeriod::Days(1),
-            reboot_message: None,
+            reset_period: ServiceFailureResetPeriod::After(Duration::from_secs(86400)),
+            reboot_msg: None,
             command: None,
-            actions: vec![
-                windows_service::service::ServiceAction {
-                    type_: windows_service::service::ServiceActionType::Restart,
-                    delay: std::time::Duration::from_secs(5),
+            actions: Some(vec![
+                ServiceAction {
+                    action_type: ServiceActionType::Restart,
+                    delay: Duration::from_secs(5),
                 },
-                windows_service::service::ServiceAction {
-                    type_: windows_service::service::ServiceActionType::Restart,
-                    delay: std::time::Duration::from_secs(10),
+                ServiceAction {
+                    action_type: ServiceActionType::Restart,
+                    delay: Duration::from_secs(10),
                 },
-                windows_service::service::ServiceAction {
-                    type_: windows_service::service::ServiceActionType::Restart,
-                    delay: std::time::Duration::from_secs(30),
+                ServiceAction {
+                    action_type: ServiceActionType::Restart,
+                    delay: Duration::from_secs(30),
                 },
-            ],
+            ]),
         };
 
         service
-            .set_failure_actions(failure_actions)
+            .update_failure_actions(failure_actions)
             .map_err(|e| ServiceError::Other(format!("Failed to set failure actions: {e}")))?;
 
         Ok(())
@@ -120,7 +121,7 @@ impl ServiceManager for WindowsServiceManager {
     fn stop(&self) -> Result<()> {
         let service = self.open_service()?;
         service
-            .control(ServiceControl::Stop)
+            .stop()
             .map_err(|e| ServiceError::Other(format!("Failed to stop service: {e}")))?;
         Ok(())
     }
