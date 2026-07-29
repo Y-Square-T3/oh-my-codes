@@ -114,9 +114,19 @@ impl TokenUsageService {
                     total_pushed += unpushed.len();
                 }
                 Err(e) => {
-                    tracing::error!("Failed to push batch: {e}");
-                    total_failed += unpushed.len();
-                    break;
+                    let err_str = e.to_string();
+                    if err_str.contains("duplicate") || err_str.contains("already exists") {
+                        tracing::warn!(
+                            "Batch contains duplicates on remote, marking as pushed: {e}"
+                        );
+                        let ids: Vec<String> = unpushed.iter().map(|u| u.id.clone()).collect();
+                        self.store.mark_pushed(&ids).await?;
+                        total_pushed += unpushed.len();
+                    } else {
+                        tracing::error!("Failed to push batch: {e}");
+                        total_failed += unpushed.len();
+                        break;
+                    }
                 }
             }
         }

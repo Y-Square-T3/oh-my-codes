@@ -101,6 +101,64 @@ impl SurrealStorage {
             .query("DEFINE TABLE IF NOT EXISTS token_usage SCHEMALESS;")
             .await
             .map_err(|e| OmcError::Storage(format!("Failed to define token_usage table: {e}")))?;
+
+        Self::deduplicate_token_usages(db).await?;
+
+        let _result = db
+            .query("DEFINE INDEX IF NOT EXISTS idx_token_usage_message_id ON token_usage FIELDS message_id UNIQUE;")
+            .await
+            .map_err(|e| OmcError::Storage(format!("Failed to define token_usage index: {e}")))?;
+
+        Ok(())
+    }
+
+    async fn deduplicate_token_usages(db: &Surreal<Db>) -> Result<()> {
+        let mut result = db.query("SELECT * FROM token_usage;").await.map_err(|e| {
+            OmcError::Storage(format!("Failed to query token_usage for dedup: {e}"))
+        })?;
+        let records: Vec<SurrealTokenUsage> = result.take(0).map_err(|e| {
+            OmcError::Storage(format!("Failed to extract token_usage for dedup: {e}"))
+        })?;
+
+        let mut by_message_id: std::collections::HashMap<String, Vec<&SurrealTokenUsage>> =
+            std::collections::HashMap::new();
+        for record in &records {
+            by_message_id
+                .entry(record.message_id.clone())
+                .or_default()
+                .push(record);
+        }
+
+        let mut ids_to_delete: Vec<String> = Vec::new();
+        for (_message_id, group) in by_message_id {
+            if group.len() <= 1 {
+                continue;
+            }
+            let mut sorted = group;
+            sorted.sort_by_key(|r| std::cmp::Reverse(r.recorded_at));
+            for duplicate in sorted.into_iter().skip(1) {
+                let key = extract_id(&duplicate.id)?;
+                ids_to_delete.push(key);
+            }
+        }
+
+        if !ids_to_delete.is_empty() {
+            tracing::info!(
+                "Deduplicating {} duplicate token_usage records",
+                ids_to_delete.len()
+            );
+            let id_list = ids_to_delete
+                .iter()
+                .map(|id| format!("token_usage:{id}"))
+                .collect::<Vec<_>>()
+                .join(", ");
+            let query = format!("DELETE {id_list};");
+            let _ = db
+                .query(&query)
+                .await
+                .map_err(|e| OmcError::Storage(format!("Failed to delete duplicates: {e}")))?;
+        }
+
         Ok(())
     }
 
@@ -636,12 +694,67 @@ impl TokenUsageStore for SurrealTokenUsageStore {
                 recorded_at: usage.recorded_at,
                 created_at: usage.created_at,
             };
-            let _: Option<SurrealTokenUsage> = self
+            let create_result: std::result::Result<Option<SurrealTokenUsage>, _> = self
                 .db
                 .create(("token_usage", usage.id.as_str()))
                 .content(dto)
-                .await
-                .map_err(|e| OmcError::Storage(format!("Failed to create token_usage: {e}")))?;
+                .await;
+
+            match create_result {
+                Ok(_) => {}
+                Err(e) => {
+                    let err_str = e.to_string();
+                    if err_str.contains("unique") || err_str.contains("duplicate") {
+                        let mut retry_result = self.db.query(&query).await.map_err(|e| {
+                            OmcError::Storage(format!("Failed to query token_usage on retry: {e}"))
+                        })?;
+                        let retry_existing: Option<SurrealTokenUsage> =
+                            retry_result.take(0).map_err(|e| {
+                                OmcError::Storage(format!(
+                                    "Failed to extract token_usage on retry: {e}"
+                                ))
+                            })?;
+                        if let Some(record) = retry_existing {
+                            let key = extract_id(&record.id)?;
+                            let retry_dto = SurrealTokenUsage {
+                                id: ("token_usage", key.as_str()).into(),
+                                client: usage.client.clone(),
+                                session_id: usage.session_id.clone(),
+                                message_id: usage.message_id.clone(),
+                                agent: usage.agent.clone(),
+                                provider_id: usage.provider_id.clone(),
+                                model_id: usage.model_id.clone(),
+                                input_tokens: usage.input_tokens,
+                                output_tokens: usage.output_tokens,
+                                reasoning_tokens: usage.reasoning_tokens,
+                                cache_read_tokens: usage.cache_read_tokens,
+                                cache_write_tokens: usage.cache_write_tokens,
+                                pushed: usage.pushed,
+                                recorded_at: usage.recorded_at,
+                                created_at: usage.created_at,
+                            };
+                            let _: Option<SurrealTokenUsage> = self
+                                .db
+                                .upsert(("token_usage", key.as_str()))
+                                .content(retry_dto)
+                                .await
+                                .map_err(|e| {
+                                    OmcError::Storage(format!(
+                                        "Failed to update token_usage on retry: {e}"
+                                    ))
+                                })?;
+                        } else {
+                            return Err(OmcError::Storage(format!(
+                                "Failed to create token_usage (unique constraint conflict, but record not found on retry): {e}"
+                            )));
+                        }
+                    } else {
+                        return Err(OmcError::Storage(format!(
+                            "Failed to create token_usage: {e}"
+                        )));
+                    }
+                }
+            }
         }
         Ok(())
     }
