@@ -883,9 +883,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "1.4.2"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6970f50e31d6fc17d3fa27329444bfa74e196cf62e95052a3f6fee181dba6425"
+checksum = "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
 dependencies = [
  "bytes",
  "itoa",
@@ -1393,7 +1393,7 @@ checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 
 [[package]]
 name = "omc"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "chrono",
  "clap",
@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "axum-test",
  "http",
@@ -1434,7 +1434,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "dirs",
  "serde",
@@ -1448,7 +1448,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "axum",
  "axum-test",
@@ -1470,7 +1470,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "dirs",
  "libc",
@@ -1483,7 +1483,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1499,7 +1499,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.5.13"
+version = "4.6.0"
 dependencies = [
  "clap",
  "omc-api",
@@ -1997,9 +1997,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.42"
+version = "0.23.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c54fcab019b409d04215d3a17cb438fd7fbf192ee61461f20f4fe18704bc138"
+checksum = "0283386ce02abc0151e1761d08802dfe86c173b0b494af5cbc086574e453da06"
 dependencies = [
  "once_cell",
  "ring",
