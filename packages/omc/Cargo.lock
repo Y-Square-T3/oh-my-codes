@@ -1393,7 +1393,7 @@ checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 
 [[package]]
 name = "omc"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "chrono",
  "clap",
@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "axum-test",
  "http",
@@ -1434,7 +1434,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "dirs",
  "serde",
@@ -1448,7 +1448,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "axum",
  "axum-test",
@@ -1470,7 +1470,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "dirs",
  "libc",
@@ -1483,7 +1483,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1499,7 +1499,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.6.0"
+version = "4.6.1"
 dependencies = [
  "clap",
  "omc-api",
