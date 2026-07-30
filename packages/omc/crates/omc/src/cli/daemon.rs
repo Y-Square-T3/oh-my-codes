@@ -16,6 +16,14 @@ pub fn run(cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
             };
             manager.install(&config).map_err(|e| e.to_string())?;
             println!("Daemon installed successfully");
+
+            let status = manager.status().map_err(|e| e.to_string())?;
+            if !matches!(status, omc_service::ServiceStatus::Running { .. }) {
+                match manager.start() {
+                    Ok(()) => println!("Daemon started"),
+                    Err(e) => eprintln!("Warning: failed to start daemon: {e}"),
+                }
+            }
         }
         DaemonAction::Uninstall => {
             manager.uninstall().map_err(|e| e.to_string())?;
