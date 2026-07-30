@@ -339,7 +339,7 @@ impl ServiceManager for WindowsServiceManager {
 
     fn status(&self) -> Result<ServiceStatus> {
         debug!("Querying service status");
-        let service = match self.open_service() {
+        let service = match self.open_service_with_access(ServiceAccess::QUERY_STATUS) {
             Ok(s) => s,
             Err(ServiceError::NotInstalled) => {
                 debug!("Service not installed");
