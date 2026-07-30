@@ -24,6 +24,9 @@ pub struct Cli {
 
     #[arg(long)]
     pub remote: Option<String>,
+
+    #[arg(long, hide = true)]
+    pub elevated: bool,
 }
 
 #[derive(Subcommand)]

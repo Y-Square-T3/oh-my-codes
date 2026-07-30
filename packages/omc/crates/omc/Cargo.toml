@@ -20,3 +20,6 @@ chrono = { workspace = true }
 dirs = { workspace = true }
 reqwest = { workspace = true }
 jsonc-parser = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Security", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading"] }
