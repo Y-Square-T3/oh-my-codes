@@ -1,7 +1,7 @@
 use crate::{Result, ServiceConfig, ServiceError, ServiceManager, ServiceStatus};
 use std::ffi::OsString;
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tracing::{debug, warn};
 use windows_service::service::{
     ServiceAccess, ServiceAction, ServiceActionType, ServiceErrorControl, ServiceFailureActions,
@@ -267,14 +267,50 @@ impl ServiceManager for WindowsServiceManager {
             ServiceAccess::QUERY_STATUS | ServiceAccess::STOP | ServiceAccess::DELETE,
         )?;
 
-        debug!("Deleting service");
-        service.delete().map_err(|e| {
-            let err_msg = format_windows_service_error("Failed to delete service", &e);
+        let status = service.query_status().map_err(|e| {
+            let err_msg = format_windows_service_error("Failed to query service status", &e);
             debug!("{err_msg}");
             ServiceError::Other(err_msg)
         })?;
-        debug!("Service deleted successfully");
-        Ok(())
+
+        match status.current_state {
+            ServiceState::Running | ServiceState::StartPending => {
+                debug!(
+                    "Service is {:?}, stopping before deletion",
+                    status.current_state
+                );
+                service.stop().map_err(|e| {
+                    let err_msg = format_windows_service_error("Failed to stop service", &e);
+                    debug!("{err_msg}");
+                    ServiceError::Other(err_msg)
+                })?;
+                wait_for_service_state(&service, ServiceState::Stopped, Duration::from_secs(30))?;
+                debug!("Service stopped");
+            }
+            ServiceState::StopPending => {
+                debug!("Service is already stopping, waiting");
+                wait_for_service_state(&service, ServiceState::Stopped, Duration::from_secs(30))?;
+                debug!("Service stopped");
+            }
+            _ => {}
+        }
+
+        debug!("Deleting service");
+        match service.delete() {
+            Ok(()) => {
+                debug!("Service marked for deletion successfully");
+                Ok(())
+            }
+            Err(e) if is_service_marked_for_deletion_error(&e) => {
+                debug!("Service already marked for deletion");
+                Ok(())
+            }
+            Err(e) => {
+                let err_msg = format_windows_service_error("Failed to delete service", &e);
+                debug!("{err_msg}");
+                Err(ServiceError::Other(err_msg))
+            }
+        }
     }
 
     fn start(&self) -> Result<()> {
@@ -345,6 +381,40 @@ fn is_service_not_found_error(e: &windows_service::Error) -> bool {
         io_err.raw_os_error() == Some(1060) // ERROR_SERVICE_DOES_NOT_EXIST
     } else {
         false
+    }
+}
+
+fn is_service_marked_for_deletion_error(e: &windows_service::Error) -> bool {
+    if let windows_service::Error::Winapi(io_err) = e {
+        io_err.raw_os_error() == Some(1072) // ERROR_SERVICE_MARKED_FOR_DELETION
+    } else {
+        false
+    }
+}
+
+fn wait_for_service_state(
+    service: &windows_service::service::Service,
+    target: ServiceState,
+    timeout: Duration,
+) -> Result<()> {
+    let start = Instant::now();
+    let poll_interval = Duration::from_millis(500);
+    loop {
+        let status = service.query_status().map_err(|e| {
+            let err_msg = format_windows_service_error("Failed to query service status", &e);
+            debug!("{err_msg}");
+            ServiceError::Other(err_msg)
+        })?;
+        if status.current_state == target {
+            return Ok(());
+        }
+        if start.elapsed() >= timeout {
+            return Err(ServiceError::Other(format!(
+                "Timed out waiting for service to reach {:?} state (current: {:?})",
+                target, status.current_state
+            )));
+        }
+        std::thread::sleep(poll_interval);
     }
 }
 
