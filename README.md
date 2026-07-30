@@ -12,7 +12,7 @@ A CLI + daemon system for managing AI model accounts, workspaces, and token usag
 
 - **OAuth 2.0 Device Code Flow** -- Browser-based authentication with automatic token refresh
 - **Multi-Account & Multi-Workspace** -- Switch between accounts and workspaces with interactive CLI pickers
-- **Background Daemon** -- OS-level service (launchd / systemd / Task Scheduler) with embedded SurrealDB storage
+- **Background Daemon** -- OS-level service (launchd / systemd / Task Scheduler) with embedded SQLite storage
 - **Model Discovery & Sync** -- List and sync available AI models from remote servers
 - **Token Usage Tracking** -- Track, push, and summarize token usage with daily reports
 - **Cross-Platform** -- Prebuilt binaries for macOS (arm64/x64), Linux (arm64/x64), and Windows (x64)
@@ -22,7 +22,7 @@ A CLI + daemon system for managing AI model accounts, workspaces, and token usag
 ```
 CLI (omc)  ──HTTP/Unix Socket──▶  Daemon (omcd)  ──HTTPS──▶  OMC Server
                                       │
-                                  SurrealDB (RocksDB)
+                                       SQLite
 ```
 
 | Component | Description |
@@ -31,7 +31,7 @@ CLI (omc)  ──HTTP/Unix Socket──▶  Daemon (omcd)  ──HTTPS──▶ 
 | `omcd` | Daemon binary -- state management, storage, and server proxy |
 | `omc-core` | Shared types, config, and error handling |
 | `omc-api` | HTTP client SDK for CLI-to-daemon communication |
-| `omc-storage` | Storage trait + SurrealDB embedded backend |
+| `omc-storage` | Storage trait + SQLite embedded backend |
 | `omc-server` | Axum HTTP server with route handlers |
 | `omc-service` | OS service management (launchd / systemd / Task Scheduler) |
 
@@ -156,7 +156,7 @@ oh-my-codes/
 │   │   │   ├── omcd/           # Daemon binary
 │   │   │   ├── omc-core/       # Shared types & config
 │   │   │   ├── omc-api/        # HTTP client SDK
-│   │   │   ├── omc-storage/    # SurrealDB storage backend
+│   │   │   ├── omc-storage/    # SQLite storage backend
 │   │   │   ├── omc-server/     # Axum HTTP server
 │   │   │   └── omc-service/    # OS service management
 │   │   ├── dist/               # Platform-specific packages

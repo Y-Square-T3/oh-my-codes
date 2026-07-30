@@ -2,13 +2,13 @@
 
 ## Overview
 
-oh-my-codes is a Rust-based daemon and CLI tool with an embedded SurrealDB database. It provides account management, workspace switching, and chat functionality.
+oh-my-codes is a Rust-based daemon and CLI tool with an embedded SQLite database. It provides account management, workspace switching, and chat functionality.
 
 ## Components
 
 - **omc-core**: Shared types, configuration, and error handling
 - **omc-api**: API types and HTTP client SDK
-- **omc-storage**: Storage abstraction with SurrealDB embedded backend
+- **omc-storage**: Storage abstraction with SQLite embedded backend
 - **omc-server**: HTTP server (axum-based) with account service
 - **omc-service**: OS service management (launchd/systemd/Task Scheduler)
 - **omc**: CLI binary
@@ -44,7 +44,7 @@ oh-my-codes is a Rust-based daemon and CLI tool with an embedded SurrealDB datab
 │  ┌──────────────────────────────────────────────────────────────────┐  │
 │  │                   Storage Layer (omc-storage)                     │  │
 │  │  ┌─────────────────┐  ┌─────────────────────────────────────┐   │  │
-│  │  │  MemoryStorage  │  │   SurrealDB (RocksDB)               │   │  │
+│  │  │  MemoryStorage  │  │   SQLite                            │   │  │
 │  │  │                 │  │  ┌─────────┐ ┌───────────────────┐  │   │  │
 │  │  │                 │  │  │ Account │ │ Workspace         │  │   │  │
 │  │  │                 │  │  └─────────┘ └───────────────────┘  │   │  │
@@ -67,7 +67,7 @@ oh-my-codes is a Rust-based daemon and CLI tool with an embedded SurrealDB datab
 
 1. CLI sends HTTP requests to daemon via Unix socket or TCP
 2. Daemon routes requests to appropriate handlers
-3. Handlers interact with storage layer (SurrealDB)
+3. Handlers interact with storage layer (SQLite)
 4. Results are serialized and returned to CLI
 
 ## Account System
@@ -91,8 +91,8 @@ Configuration is loaded from:
 
 ## Storage
 
-- **SurrealDB**: Embedded database using RocksDB backend
-- Data stored in `~/.local/share/omc/data/omc.db/`
+- **SQLite**: Embedded database
+- Data stored in `~/.local/share/omc/data/omc.db`
 - Tables:
   - `channel` - Chat channels
   - `message` - Chat messages

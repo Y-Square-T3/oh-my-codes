@@ -21,7 +21,7 @@
 - Workspace crates under `packages/omc/crates/`:
   - `omc-core` — shared types, config, errors
   - `omc-api` — API types + HTTP client SDK
-  - `omc-storage` — storage trait + SurrealDB embedded backend
+  - `omc-storage` — storage trait + SQLite embedded backend
   - `omc-server` — axum HTTP server + route handlers
   - `omc-service` — OS service management
   - `omc` — CLI binary

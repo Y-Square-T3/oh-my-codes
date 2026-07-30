@@ -8,7 +8,7 @@ omc-core = { workspace = true }
 async-trait = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-surrealdb = { workspace = true }
+sqlx = { workspace = true }
 ulid = { workspace = true }
 chrono = { workspace = true }
 serde_json = { workspace = true }

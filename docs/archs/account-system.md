@@ -46,7 +46,7 @@ The account system enables users to authenticate with the OMC server using OAuth
 │  │                   Storage Layer (omc-storage)                     │  │
 │  │  ┌─────────────────────┐  ┌─────────────────────────────────┐   │  │
 │  │  │  AccountStore       │  │  WorkspaceStore                 │   │  │
-│  │  │  (SurrealDB)        │  │  (SurrealDB)                    │   │  │
+│  │  │  (SQLite)           │  │  (SQLite)                       │   │  │
 │  │  └─────────────────────┘  └─────────────────────────────────┘   │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -64,39 +64,42 @@ The account system enables users to authenticate with the OMC server using OAuth
 
 ## Data Model
 
-### SurrealDB Schema
+### SQLite Schema
 
 ```sql
 -- Account table (stores credentials and metadata)
-DEFINE TABLE account SCHEMALESS;
--- Fields:
---   id: String (server user ID)
---   email: String
---   url: String (OMC server URL)
---   access_token: String
---   refresh_token: String
---   token_expiry: i64 (Unix timestamp)
---   active_workspace_id: Option<String>
+CREATE TABLE account (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    url TEXT NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    token_expiry INTEGER NOT NULL,
+    active_workspace_id TEXT
+);
 
 -- Workspace table (cached workspace data)
-DEFINE TABLE workspace SCHEMALESS;
--- Fields:
---   id: String (server workspace ID)
---   account_id: String (FK to account.id)
---   name: String
---   is_admin: bool
+CREATE TABLE workspace (
+    id TEXT PRIMARY KEY,
+    account_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    is_admin INTEGER NOT NULL,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
+CREATE INDEX idx_workspace_account ON workspace(account_id);
 
 -- Active account state (singleton)
-DEFINE TABLE active_account SCHEMALESS;
--- Fields:
---   id: String (always "active")
---   account_id: Option<String>
+CREATE TABLE active_account (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    account_id TEXT,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
 ```
 
 ### Domain Types (omc-core)
 
 ```rust
-// Full account with credentials (stored in SurrealDB)
+// Full account with credentials (stored in SQLite)
 pub struct Account {
     pub id: String,
     pub email: String,
@@ -170,7 +173,7 @@ pub struct Workspace {
      │                   │────────────────────>│
      │                   │  [{id, name}]       │
      │                   │<────────────────────│
-     │                   │  Store in SurrealDB │
+      │                   │  Store in SQLite    │
      │  {email}          │                     │
      │<──────────────────│                     │
      │                   │                     │
@@ -180,7 +183,7 @@ pub struct Workspace {
 
 - **Eager Refresh**: Tokens are refreshed 5 minutes before expiry (`EAGER_REFRESH_SECS = 300`)
 - **Auto-Refresh**: `resolve_token()` checks freshness and refreshes if needed
-- **Storage**: Tokens stored in plaintext in SurrealDB (future: OS keychain integration)
+- **Storage**: Tokens stored in plaintext in SQLite (future: OS keychain integration)
 
 ## Component Responsibilities
 
@@ -194,7 +197,7 @@ pub struct Workspace {
 
 - **account_store.rs**: `AccountStore` trait for account CRUD operations
 - **workspace_store.rs**: `WorkspaceStore` trait for workspace CRUD operations
-- **surreal.rs**: SurrealDB implementations (`SurrealAccountStore`, `SurrealWorkspaceStore`)
+- **sqlite.rs**: SQLite implementations (`SqliteAccountStore`, `SqliteWorkspaceStore`)
 
 ### omc-server
 
@@ -248,7 +251,7 @@ pub struct Workspace {
 ### omcd (Daemon)
 
 - **main.rs**: Wires up account stores and service
-  - Creates `SurrealAccountStore` and `SurrealWorkspaceStore`
+  - Creates `SqliteAccountStore` and `SqliteWorkspaceStore`
   - Creates `OmcServerClient` and `AccountService`
   - Passes `AccountService` to `DaemonState`
 
@@ -327,7 +330,7 @@ omc account list
 
 ### Current Implementation
 
-- **Tokens stored in plaintext** in SurrealDB
+- **Tokens stored in plaintext** in SQLite
 - **No encryption** at rest
 - **Tokens transmitted** over HTTPS to OMC server
 
@@ -357,9 +360,9 @@ omc account list
 
 This implementation was migrated from the legacy TypeScript codebase (`oh-my-codes-legacy`). Key differences:
 
-1. **Storage**: Migrated from SQLite to SurrealDB
+1. **Storage**: Migrated from SurrealDB to SQLite
 2. **Architecture**: CLI no longer accesses DB directly; all operations go through daemon
-3. **Token Storage**: Currently plaintext (legacy used SQLite); future: OS keychain
+3. **Token Storage**: Currently plaintext; future: OS keychain
 4. **Error Handling**: Uses Rust's `thiserror` instead of Effect-TS typed errors
 5. **Type Safety**: Rust's type system provides compile-time guarantees vs runtime validation
 

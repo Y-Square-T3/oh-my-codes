@@ -41,7 +41,7 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 axum-test = "17"
 dirs = "6"
 libc = "0.2"
-surrealdb = { version = "2", features = ["kv-mem", "kv-rocksdb"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
 ulid = { version = "1", features = ["serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 url = "2"

@@ -10,9 +10,9 @@ use omc_server::server_client::OmcServerClient;
 use omc_server::token_usage_service::TokenUsageService;
 use omc_storage::account_store::AccountStore;
 use omc_storage::memory::MemoryStorage;
-use omc_storage::surreal::{
-    SurrealAccountStore, SurrealModelStore, SurrealStorage, SurrealTokenUsageStore,
-    SurrealWorkspaceStore,
+use omc_storage::sqlite::{
+    SqliteAccountStore, SqliteModelStore, SqliteStorage, SqliteTokenUsageStore,
+    SqliteWorkspaceStore,
 };
 use omc_storage::token_usage_store::TokenUsageStore;
 use omc_storage::workspace_store::WorkspaceStore;
@@ -99,16 +99,17 @@ pub(crate) async fn run_daemon(
 
     let data_path = PathBuf::from(&resolved.data_dir);
     std::fs::create_dir_all(&data_path)?;
-    let surreal = SurrealStorage::new_rocksdb(&data_path.join("omc.db")).await?;
-    let db = surreal.db();
-    let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(surreal);
+    let sqlite = SqliteStorage::new(&data_path.join("omc.db")).await?;
+    let pool = sqlite.pool();
+    let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(sqlite);
     let storage = Arc::new(MemoryStorage::new());
 
-    let account_store: Arc<dyn AccountStore> = Arc::new(SurrealAccountStore::new(db.clone()));
-    let workspace_store: Arc<dyn WorkspaceStore> = Arc::new(SurrealWorkspaceStore::new(db.clone()));
+    let account_store: Arc<dyn AccountStore> = Arc::new(SqliteAccountStore::new(pool.clone()));
+    let workspace_store: Arc<dyn WorkspaceStore> =
+        Arc::new(SqliteWorkspaceStore::new(pool.clone()));
     let model_store: Arc<dyn omc_storage::model_store::ModelStore> =
-        Arc::new(SurrealModelStore::new(db.clone()));
-    let token_usage_store: Arc<dyn TokenUsageStore> = Arc::new(SurrealTokenUsageStore::new(db));
+        Arc::new(SqliteModelStore::new(pool.clone()));
+    let token_usage_store: Arc<dyn TokenUsageStore> = Arc::new(SqliteTokenUsageStore::new(pool));
     let server_client = OmcServerClient::new();
     let account_service = Arc::new(AccountService::new(
         account_store,
