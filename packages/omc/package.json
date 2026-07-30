@@ -12,7 +12,7 @@
     "bin/omcd.js"
   ],
   "scripts": {
-    "build": "./scripts/build-binary.sh",
+    "build": "node scripts/build-binary.mjs",
     "dev": "cargo run -p omc --",
     "dev:daemon": "cargo run -p omcd --",
     "test": "cargo test --workspace",

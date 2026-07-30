@@ -125,7 +125,7 @@ jobs:
       - name: Build binaries
         run: |
           for target in ${{ join(matrix.targets, ' ') }}; do
-            ./packages/omc/scripts/build-binary.sh "$target"
+            node packages/omc/scripts/build-binary.mjs "$target"
           done
 
       - name: Upload artifacts
