@@ -16,9 +16,11 @@ pub async fn run(
         TokenUsageAction::Push { json } => token_usage_push_effect(client, json).await,
         TokenUsageAction::List {
             limit,
-            offset,
+            page,
+            all,
+            detail,
             json,
-        } => token_usage_list_effect(client, limit, offset, json).await,
+        } => token_usage_list_effect(client, limit, page, all, detail, json).await,
         TokenUsageAction::Summary { days, json } => {
             token_usage_summary_effect(client, days, json).await
         }
@@ -97,11 +99,17 @@ async fn token_usage_push_effect(
 
 async fn token_usage_list_effect(
     client: &OmcClient,
-    limit: Option<usize>,
-    offset: Option<usize>,
+    limit: usize,
+    page: usize,
+    all: bool,
+    detail: bool,
     json: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let resp = client.token_usage_list(limit, offset).await?;
+    let pushed_filter = if all { None } else { Some(false) };
+    let offset = (page.saturating_sub(1)) * limit;
+    let resp = client
+        .token_usage_list(Some(limit), Some(offset), pushed_filter)
+        .await?;
 
     if json {
         println!("{}", serde_json::to_string_pretty(&resp)?);
@@ -109,27 +117,44 @@ async fn token_usage_list_effect(
     }
 
     if resp.records.is_empty() {
-        ui::print_warning("No token usage records found.");
+        if all {
+            ui::print_warning("No token usage records found.");
+        } else {
+            ui::print_warning("No pending records found. Use --all to show all records.");
+        }
         return Ok(());
     }
 
-    let effective_offset = offset.unwrap_or(0);
-    let page_start = effective_offset + 1;
-    let page_end = effective_offset + resp.records.len();
+    let total_pages = resp.total.div_ceil(limit);
 
     let mut table = Table::new();
-    table
-        .set_header(vec![
-            Cell::new("").set_alignment(CellAlignment::Center),
-            Cell::new("Client"),
-            Cell::new("Agent"),
-            Cell::new("Model"),
-            Cell::new("Input"),
-            Cell::new("Output"),
-            Cell::new("Reason"),
-            Cell::new("Time"),
-        ])
-        .set_width(100);
+    let mut headers = vec![
+        Cell::new("").set_alignment(CellAlignment::Center),
+        Cell::new("Client"),
+        Cell::new("Agent"),
+        Cell::new("Model"),
+    ];
+    if detail {
+        headers.push(Cell::new("Provider"));
+    }
+    headers.push(Cell::new("Input").set_alignment(CellAlignment::Right));
+    headers.push(Cell::new("Output").set_alignment(CellAlignment::Right));
+    headers.push(Cell::new("Reason").set_alignment(CellAlignment::Right));
+    if detail {
+        headers.push(Cell::new("CacheR").set_alignment(CellAlignment::Right));
+        headers.push(Cell::new("CacheW").set_alignment(CellAlignment::Right));
+    }
+    headers.push(Cell::new("Time"));
+    table.set_header(headers);
+
+    let table_width = if detail { 140 } else { 100 };
+    table.set_width(table_width);
+
+    let mut total_input: i64 = 0;
+    let mut total_output: i64 = 0;
+    let mut total_reasoning: i64 = 0;
+    let mut total_cache_read: i64 = 0;
+    let mut total_cache_write: i64 = 0;
 
     for r in &resp.records {
         let status_cell = if r.pushed {
@@ -145,18 +170,40 @@ async fn token_usage_list_effect(
             .map(|dt| dt.format("%m-%d %H:%M").to_string())
             .unwrap_or_else(|| "-".to_string());
 
-        table.add_row(vec![
+        let mut row = vec![
             status_cell,
             Cell::new(&r.client),
             Cell::new(agent_display),
             ui::cyan_cell(&model_display),
-            Cell::new(r.input_tokens),
-            Cell::new(r.output_tokens),
-            Cell::new(r.reasoning_tokens),
-            ui::dim_cell(&time_display),
-        ]);
+        ];
+        if detail {
+            row.push(Cell::new(&r.provider_id));
+        }
+        row.push(Cell::new(r.input_tokens).set_alignment(CellAlignment::Right));
+        row.push(Cell::new(r.output_tokens).set_alignment(CellAlignment::Right));
+        row.push(Cell::new(r.reasoning_tokens).set_alignment(CellAlignment::Right));
+        if detail {
+            row.push(Cell::new(r.cache_read_tokens).set_alignment(CellAlignment::Right));
+            row.push(Cell::new(r.cache_write_tokens).set_alignment(CellAlignment::Right));
+        }
+        row.push(ui::dim_cell(&time_display));
+
+        table.add_row(row);
+
+        total_input += r.input_tokens;
+        total_output += r.output_tokens;
+        total_reasoning += r.reasoning_tokens;
+        total_cache_read += r.cache_read_tokens;
+        total_cache_write += r.cache_write_tokens;
     }
 
+    let filter_label = if all { "all" } else { "pending" };
+    println!();
+    println!(
+        "  {} {}",
+        style("Token Usage").bold().underlined(),
+        style(format!("— showing {filter_label}")).dim()
+    );
     println!();
     println!("{table}");
     println!(
@@ -166,18 +213,44 @@ async fn token_usage_list_effect(
         style("○").dim(),
         style("pending").dim()
     );
-    println!(
-        "  {} {}–{} of {} records",
-        style("Showing").dim(),
-        style(page_start).cyan(),
-        style(page_end).cyan(),
-        style(resp.total).cyan()
+
+    let mut totals = format!(
+        "  {} {} {} {} {} {}",
+        style("Total:").bold(),
+        style(total_input).cyan().bold(),
+        style("in,").dim(),
+        style(total_output).cyan().bold(),
+        style("out,").dim(),
+        style(total_reasoning).cyan().bold(),
     );
-    if page_end < resp.total {
+    if detail {
+        totals = format!(
+            "{totals} {} {} {}, {} {} {}",
+            style("reason,").dim(),
+            style(total_cache_read).cyan().bold(),
+            style("cacheR,").dim(),
+            style(total_cache_write).cyan().bold(),
+            style("cacheW").dim(),
+            "",
+        );
+    } else {
+        totals = format!("{totals} {}", style("reason").dim());
+    }
+    println!("{totals}");
+
+    println!(
+        "  {} {} of {} ({} {})",
+        style("Page").dim(),
+        style(page).cyan(),
+        style(total_pages).cyan(),
+        style(resp.total).cyan(),
+        style(format!("{filter_label} records")).dim()
+    );
+    if page < total_pages {
         println!(
             "  {} {}",
             style("Hint:").dim(),
-            style(format!("use --offset {page_end} to see more")).dim()
+            style(format!("use --page {} to see next page", page + 1)).dim()
         );
     }
     println!();

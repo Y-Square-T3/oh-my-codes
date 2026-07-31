@@ -292,6 +292,7 @@ impl OmcClient {
         &self,
         limit: Option<usize>,
         offset: Option<usize>,
+        pushed: Option<bool>,
     ) -> Result<TokenUsageListResponse> {
         let mut query = Vec::new();
         if let Some(l) = limit {
@@ -299,6 +300,9 @@ impl OmcClient {
         }
         if let Some(o) = offset {
             query.push(format!("offset={o}"));
+        }
+        if let Some(p) = pushed {
+            query.push(format!("pushed={p}"));
         }
         let qs = if query.is_empty() {
             String::new()

@@ -763,21 +763,37 @@ impl TokenUsageStore for SqliteTokenUsageStore {
         Ok(())
     }
 
-    async fn list_recent(&self, limit: usize, offset: usize) -> Result<Vec<TokenUsage>> {
-        let rows: Vec<TokenUsageRow> = sqlx::query_as(
+    async fn list_recent(
+        &self,
+        limit: usize,
+        offset: usize,
+        pushed: Option<bool>,
+    ) -> Result<Vec<TokenUsage>> {
+        let where_clause = match pushed {
+            Some(true) => " WHERE pushed = 1",
+            Some(false) => " WHERE pushed = 0",
+            None => "",
+        };
+        let sql = format!(
             "SELECT id, client, session_id, message_id, agent, provider_id, model_id, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, pushed, recorded_at, created_at
-             FROM token_usage ORDER BY recorded_at DESC LIMIT ? OFFSET ?",
-        )
-        .bind(limit as i64)
-        .bind(offset as i64)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(map_err)?;
+             FROM token_usage{where_clause} ORDER BY recorded_at DESC LIMIT ? OFFSET ?",
+        );
+        let rows: Vec<TokenUsageRow> = sqlx::query_as(&sql)
+            .bind(limit as i64)
+            .bind(offset as i64)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(map_err)?;
         Ok(rows.into_iter().map(row_to_token_usage).collect())
     }
 
-    async fn count_all(&self) -> Result<usize> {
-        let row: SqliteRow = sqlx::query("SELECT COUNT(*) as count FROM token_usage")
+    async fn count_all(&self, pushed: Option<bool>) -> Result<usize> {
+        let sql = match pushed {
+            Some(true) => "SELECT COUNT(*) as count FROM token_usage WHERE pushed = 1",
+            Some(false) => "SELECT COUNT(*) as count FROM token_usage WHERE pushed = 0",
+            None => "SELECT COUNT(*) as count FROM token_usage",
+        };
+        let row: SqliteRow = sqlx::query(sql)
             .fetch_one(&self.pool)
             .await
             .map_err(map_err)?;

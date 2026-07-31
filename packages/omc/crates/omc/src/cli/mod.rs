@@ -125,10 +125,14 @@ pub enum TokenUsageAction {
         json: bool,
     },
     List {
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+        #[arg(long, default_value_t = 1)]
+        page: usize,
         #[arg(long)]
-        limit: Option<usize>,
+        all: bool,
         #[arg(long)]
-        offset: Option<usize>,
+        detail: bool,
         #[arg(long)]
         json: bool,
     },

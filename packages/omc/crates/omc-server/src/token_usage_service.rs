@@ -140,12 +140,17 @@ impl TokenUsageService {
         })
     }
 
-    pub async fn list_recent(&self, limit: usize, offset: usize) -> Result<Vec<TokenUsage>> {
-        self.store.list_recent(limit, offset).await
+    pub async fn list_recent(
+        &self,
+        limit: usize,
+        offset: usize,
+        pushed: Option<bool>,
+    ) -> Result<Vec<TokenUsage>> {
+        self.store.list_recent(limit, offset, pushed).await
     }
 
-    pub async fn count_all(&self) -> Result<usize> {
-        self.store.count_all().await
+    pub async fn count_all(&self, pushed: Option<bool>) -> Result<usize> {
+        self.store.count_all(pushed).await
     }
 
     pub async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>> {

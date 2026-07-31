@@ -96,6 +96,7 @@ pub struct TokenUsageSummaryResponse {
 pub struct ListQuery {
     pub limit: Option<usize>,
     pub offset: Option<usize>,
+    pub pushed: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -157,8 +158,12 @@ pub async fn list_handler(
 ) -> std::result::Result<Json<TokenUsageListResponse>, AppError> {
     let limit = query.limit.unwrap_or(50);
     let offset = query.offset.unwrap_or(0);
-    let records = state.token_usage_service.list_recent(limit, offset).await?;
-    let total = state.token_usage_service.count_all().await?;
+    let pushed = query.pushed;
+    let records = state
+        .token_usage_service
+        .list_recent(limit, offset, pushed)
+        .await?;
+    let total = state.token_usage_service.count_all(pushed).await?;
     let response_records = records.into_iter().map(to_record_response).collect();
     Ok(Json(TokenUsageListResponse {
         records: response_records,
