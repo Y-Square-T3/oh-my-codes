@@ -1,4 +1,5 @@
 use super::{DaemonAction, DaemonCommand};
+use omc_api::client::OmcClient;
 use omc_service::{create_service_manager, find_omcd_binary};
 
 #[cfg(target_os = "windows")]
@@ -154,7 +155,7 @@ fn elevate_and_rerun() -> Result<(), Box<dyn std::error::Error>> {
     std::process::exit(0);
 }
 
-pub fn run(cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn run(client: &OmcClient, cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
     let manager = create_service_manager();
 
     #[cfg(target_os = "windows")]
@@ -209,10 +210,17 @@ pub fn run(cmd: DaemonCommand) -> Result<(), Box<dyn std::error::Error>> {
         DaemonAction::Status => {
             let status = manager.status().map_err(|e| e.to_string())?;
             match status {
-                omc_service::ServiceStatus::Running { pid } => match pid {
-                    Some(p) => println!("Daemon is running (pid: {p})"),
-                    None => println!("Daemon is running"),
-                },
+                omc_service::ServiceStatus::Running { pid } => {
+                    let version = client.health().await.map(|h| h.version).ok();
+                    match (pid, version) {
+                        (Some(p), Some(v)) => {
+                            println!("Daemon is running (pid: {p}, version: {v})")
+                        }
+                        (Some(p), None) => println!("Daemon is running (pid: {p})"),
+                        (None, Some(v)) => println!("Daemon is running (version: {v})"),
+                        (None, None) => println!("Daemon is running"),
+                    }
+                }
                 omc_service::ServiceStatus::Stopped => println!("Daemon is stopped"),
                 omc_service::ServiceStatus::NotInstalled => {
                     println!("Daemon is not installed")

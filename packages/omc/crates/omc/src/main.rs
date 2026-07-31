@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::Account(cmd)) => omc::cli::account::run(&client, cmd).await?,
         Some(Commands::Model(cmd)) => omc::cli::model::run(&client, cmd).await?,
         Some(Commands::TokenUsage(cmd)) => omc::cli::token_usage::run(&client, cmd).await?,
-        Some(Commands::Daemon(cmd)) => omc::cli::daemon::run(cmd)?,
+        Some(Commands::Daemon(cmd)) => omc::cli::daemon::run(&client, cmd).await?,
         Some(Commands::Opencode(cmd)) => omc::cli::opencode::run(cmd)?,
         Some(Commands::SelfCmd(cmd)) => omc::cli::self_cmd::run(cmd).await?,
     }
