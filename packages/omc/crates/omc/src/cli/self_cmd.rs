@@ -6,6 +6,7 @@ use std::process::Command;
 
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
+use omc_service::{ServiceStatus, create_service_manager};
 use serde::Deserialize;
 
 use super::{SelfAction, SelfCmd};
@@ -22,6 +23,16 @@ enum InstallMethod {
     Npm,
     ShellScript,
     Source,
+}
+
+enum InstallLocation {
+    Local(PathBuf),
+    Global,
+}
+
+struct PackageManagerInfo {
+    name: String,
+    location: InstallLocation,
 }
 
 pub async fn run(cmd: SelfCmd) -> Result<(), Box<dyn std::error::Error>> {
@@ -114,18 +125,56 @@ fn is_up_to_date(current: &str, latest: &str) -> bool {
     current == latest
 }
 
+fn restart_daemon() {
+    let manager = create_service_manager();
+    if let Ok(ServiceStatus::Running { .. }) = manager.status() {
+        println!("  {} Restarting daemon...", style("→").blue().bold());
+        match manager.restart() {
+            Ok(()) => {
+                println!("  {} Daemon restarted", style("✓").green().bold());
+            }
+            Err(e) => {
+                print_warning(&format!("Failed to restart daemon: {}", e));
+                println!("    Run 'omc daemon restart' manually");
+            }
+        }
+    }
+}
+
 async fn upgrade_npm() -> Result<(), Box<dyn std::error::Error>> {
-    let package_manager = detect_package_manager()?;
+    let package_info = detect_package_manager()?;
     println!(
         "  {} Detected package manager: {}",
         style("ℹ").blue().bold(),
-        style(&package_manager).cyan()
+        style(&package_info.name).cyan()
     );
 
-    let install_cmd = match package_manager.as_str() {
-        "yarn" => vec!["yarn", "add", "oh-my-codes@latest"],
-        "pnpm" => vec!["pnpm", "add", "oh-my-codes@latest"],
-        _ => vec!["npm", "install", "oh-my-codes@latest"],
+    let (install_cmd, working_dir) = match package_info.location {
+        InstallLocation::Local(ref dir) => {
+            println!(
+                "  {} Local installation detected at: {}",
+                style("ℹ").blue().bold(),
+                style(dir.display()).cyan()
+            );
+            let cmd = match package_info.name.as_str() {
+                "yarn" => vec!["yarn", "add", "oh-my-codes@latest"],
+                "pnpm" => vec!["pnpm", "add", "oh-my-codes@latest"],
+                _ => vec!["npm", "install", "oh-my-codes@latest"],
+            };
+            (cmd, Some(dir.clone()))
+        }
+        InstallLocation::Global => {
+            println!(
+                "  {} Global installation detected",
+                style("ℹ").blue().bold()
+            );
+            let cmd = match package_info.name.as_str() {
+                "yarn" => vec!["yarn", "global", "add", "oh-my-codes@latest"],
+                "pnpm" => vec!["pnpm", "add", "-g", "oh-my-codes@latest"],
+                _ => vec!["npm", "install", "-g", "oh-my-codes@latest"],
+            };
+            (cmd, None)
+        }
     };
 
     println!(
@@ -134,40 +183,55 @@ async fn upgrade_npm() -> Result<(), Box<dyn std::error::Error>> {
         install_cmd.join(" ")
     );
 
-    let status = Command::new(install_cmd[0])
-        .args(&install_cmd[1..])
-        .status()?;
+    let mut cmd = Command::new(install_cmd[0]);
+    cmd.args(&install_cmd[1..]);
+
+    if let Some(dir) = working_dir {
+        cmd.current_dir(&dir);
+    }
+
+    let status = cmd.status()?;
 
     if !status.success() {
         print_error("Upgrade failed");
         return Err("Package manager command failed".into());
     }
 
-    println!(
-        "  {} Upgrade complete! Restart your shell to use the new version.",
-        style("✓").green().bold()
-    );
+    println!("  {} Upgrade complete!", style("✓").green().bold());
+    restart_daemon();
     Ok(())
 }
 
-fn detect_package_manager() -> Result<String, Box<dyn std::error::Error>> {
+fn detect_package_manager() -> Result<PackageManagerInfo, Box<dyn std::error::Error>> {
     let exe_path = env::current_exe()?;
     let mut dir = exe_path.parent();
 
     while let Some(d) = dir {
         if d.join("yarn.lock").exists() {
-            return Ok("yarn".to_string());
+            return Ok(PackageManagerInfo {
+                name: "yarn".to_string(),
+                location: InstallLocation::Local(d.to_path_buf()),
+            });
         }
         if d.join("pnpm-lock.yaml").exists() {
-            return Ok("pnpm".to_string());
+            return Ok(PackageManagerInfo {
+                name: "pnpm".to_string(),
+                location: InstallLocation::Local(d.to_path_buf()),
+            });
         }
         if d.join("package-lock.json").exists() {
-            return Ok("npm".to_string());
+            return Ok(PackageManagerInfo {
+                name: "npm".to_string(),
+                location: InstallLocation::Local(d.to_path_buf()),
+            });
         }
         dir = d.parent();
     }
 
-    Ok("npm".to_string())
+    Ok(PackageManagerInfo {
+        name: "npm".to_string(),
+        location: InstallLocation::Global,
+    })
 }
 
 async fn upgrade_binary(latest_version: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -208,6 +272,7 @@ async fn upgrade_binary(latest_version: &str) -> Result<(), Box<dyn std::error::
     fs::remove_dir_all(&temp_dir)?;
 
     println!("  {} Upgrade complete!", style("✓").green().bold());
+    restart_daemon();
     Ok(())
 }
 

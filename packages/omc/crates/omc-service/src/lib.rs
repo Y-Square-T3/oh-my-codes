@@ -39,6 +39,11 @@ pub trait ServiceManager {
     fn start(&self) -> Result<()>;
     fn stop(&self) -> Result<()>;
     fn status(&self) -> Result<ServiceStatus>;
+    fn restart(&self) -> Result<()> {
+        self.stop()?;
+        self.start()?;
+        Ok(())
+    }
 }
 
 pub fn create_service_manager() -> Box<dyn ServiceManager> {

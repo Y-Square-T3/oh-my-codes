@@ -4,12 +4,11 @@ use omc_service::{create_service_manager, find_omcd_binary};
 #[cfg(target_os = "windows")]
 fn is_running_as_admin() -> bool {
     use windows_sys::Win32::Foundation::{BOOL, CloseHandle, HANDLE};
+    use windows_sys::Win32::Security::TOKEN_QUERY;
     use windows_sys::Win32::Security::{
-        AllocateAndInitializeSid, CheckTokenMembership, FreeSid, IsValidSid,
-        SECURITY_NT_AUTHORITY,
+        AllocateAndInitializeSid, CheckTokenMembership, FreeSid, IsValidSid, SECURITY_NT_AUTHORITY,
     };
     use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
-    use windows_sys::Win32::Security::TOKEN_QUERY;
 
     unsafe {
         let mut admin_sid: *mut std::ffi::c_void = std::ptr::null_mut();
