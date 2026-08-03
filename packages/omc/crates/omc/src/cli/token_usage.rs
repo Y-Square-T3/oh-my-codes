@@ -302,20 +302,6 @@ async fn token_usage_summary_effect(
             .bold()
     );
     println!(
-        "    {} {}",
-        style("Cache read:").dim(),
-        style(ui::format_human(overview.headline.cache_read_tokens))
-            .cyan()
-            .bold()
-    );
-    println!(
-        "    {} {}",
-        style("Cache write:").dim(),
-        style(ui::format_human(overview.headline.cache_write_tokens))
-            .cyan()
-            .bold()
-    );
-    println!(
         "    {} {} {} / {} {}",
         style("Unpushed:").dim(),
         style(overview.headline.unpushed_records).cyan().bold(),
