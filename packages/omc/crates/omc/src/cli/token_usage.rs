@@ -270,19 +270,9 @@ async fn token_usage_summary_effect(
         return Ok(());
     }
 
-    let period = days
-        .map(|d| format!("Last {} days", d))
-        .unwrap_or_else(|| "All time".to_string());
-
-    println!();
-    println!(
-        "  {} {}",
-        style("Local Agent Coding Overview").bold().underlined(),
-        style(format!("— {period}")).dim()
-    );
     println!();
 
-    println!("  {}", style("Headline").bold());
+    println!("  {}", style("Summary").bold());
     println!(
         "    {} {}",
         style("Requests:").dim(),
