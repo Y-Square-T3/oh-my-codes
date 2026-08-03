@@ -4,7 +4,7 @@ use axum::Json;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use omc_core::token_usage::{TokenUsage, UsageSummary};
+use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -180,6 +180,14 @@ pub async fn summary_handler(
     Ok(Json(TokenUsageSummaryResponse {
         items: response_items,
     }))
+}
+
+pub async fn overview_handler(
+    State(state): State<Arc<DaemonState>>,
+    Query(query): Query<SummaryQuery>,
+) -> std::result::Result<Json<TokenUsageOverview>, AppError> {
+    let overview = state.token_usage_service.overview(query.days).await?;
+    Ok(Json(overview))
 }
 
 fn to_record_response(u: TokenUsage) -> TokenUsageRecordResponse {

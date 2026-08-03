@@ -8,10 +8,10 @@ pub async fn run(
     client: &OmcClient,
     cmd: TokenUsageCommand,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    match cmd
-        .action
-        .unwrap_or(TokenUsageAction::Status { json: false })
-    {
+    match cmd.action.unwrap_or(TokenUsageAction::Summary {
+        days: None,
+        json: false,
+    }) {
         TokenUsageAction::Status { json } => token_usage_status_effect(client, json).await,
         TokenUsageAction::Push { json } => token_usage_push_effect(client, json).await,
         TokenUsageAction::List {
@@ -263,15 +263,10 @@ async fn token_usage_summary_effect(
     days: Option<i64>,
     json: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let resp = client.token_usage_summary(days).await?;
+    let overview = client.token_usage_overview(days).await?;
 
     if json {
-        println!("{}", serde_json::to_string_pretty(&resp)?);
-        return Ok(());
-    }
-
-    if resp.items.is_empty() {
-        ui::print_warning("No usage data found.");
+        println!("{}", serde_json::to_string_pretty(&overview)?);
         return Ok(());
     }
 
@@ -279,59 +274,194 @@ async fn token_usage_summary_effect(
         .map(|d| format!("Last {} days", d))
         .unwrap_or_else(|| "All time".to_string());
 
-    let mut table = Table::new();
-    table
-        .set_header(vec![
-            Cell::new("Provider"),
-            Cell::new("Model"),
-            Cell::new("Requests").set_alignment(CellAlignment::Right),
-            Cell::new("Input").set_alignment(CellAlignment::Right),
-            Cell::new("Output").set_alignment(CellAlignment::Right),
-            Cell::new("Reasoning").set_alignment(CellAlignment::Right),
-        ])
-        .set_width(90);
-
-    let mut grand_requests: i64 = 0;
-    let mut grand_input: i64 = 0;
-    let mut grand_output: i64 = 0;
-
-    for item in &resp.items {
-        let model_display = ui::truncate_model(&item.model_id, 20);
-
-        table.add_row(vec![
-            Cell::new(&item.provider_id),
-            ui::cyan_cell(&model_display),
-            Cell::new(item.request_count).fg(TColor::Green),
-            Cell::new(item.total_input),
-            Cell::new(item.total_output),
-            Cell::new(item.total_reasoning),
-        ]);
-
-        grand_requests += item.request_count;
-        grand_input += item.total_input;
-        grand_output += item.total_output;
-    }
-
     println!();
     println!(
         "  {} {}",
-        style("Token Usage Summary").bold().underlined(),
+        style("Local Agent Coding Overview").bold().underlined(),
         style(format!("— {period}")).dim()
     );
     println!();
-    println!("{table}");
-    println!();
+
+    println!("  {}", style("Headline").bold());
     println!(
-        "  {} {} {} {} {} {} {}",
-        style("Total:").bold(),
-        style(grand_requests).cyan().bold(),
-        style("requests,").dim(),
-        style(grand_input).bold(),
-        style("in,").dim(),
-        style(grand_output).bold(),
-        style("out").dim()
+        "    {} {}",
+        style("Requests:").dim(),
+        style(ui::format_human(overview.headline.requests))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {}",
+        style("Input:").dim(),
+        style(ui::format_human(overview.headline.input_tokens))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {}",
+        style("Output:").dim(),
+        style(ui::format_human(overview.headline.output_tokens))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {}",
+        style("Reasoning:").dim(),
+        style(ui::format_human(overview.headline.reasoning_tokens))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {}",
+        style("Cache read:").dim(),
+        style(ui::format_human(overview.headline.cache_read_tokens))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {}",
+        style("Cache write:").dim(),
+        style(ui::format_human(overview.headline.cache_write_tokens))
+            .cyan()
+            .bold()
+    );
+    println!(
+        "    {} {} {} / {} {}",
+        style("Unpushed:").dim(),
+        style(overview.headline.unpushed_records).cyan().bold(),
+        style("records").dim(),
+        style(ui::format_human(overview.headline.unpushed_tokens))
+            .cyan()
+            .bold(),
+        style("tokens").dim()
     );
     println!();
+
+    if !overview.top_models.is_empty() {
+        println!("  {}", style("Top models").bold());
+        let mut table = Table::new();
+        table
+            .set_header(vec![
+                Cell::new(""),
+                Cell::new("Model"),
+                Cell::new("Requests").set_alignment(CellAlignment::Right),
+                Cell::new("Input").set_alignment(CellAlignment::Right),
+                Cell::new("Output").set_alignment(CellAlignment::Right),
+            ])
+            .set_width(70);
+
+        for (i, m) in overview.top_models.iter().enumerate() {
+            let model_display = ui::truncate_model(&m.model_id, 20);
+            table.add_row(vec![
+                Cell::new(i + 1).fg(TColor::DarkGrey),
+                ui::cyan_cell(&model_display),
+                Cell::new(ui::format_human(m.request_count)).fg(TColor::Green),
+                Cell::new(ui::format_human(m.total_input)),
+                Cell::new(ui::format_human(m.total_output)),
+            ]);
+        }
+        println!("{table}");
+        println!();
+    }
+
+    if !overview.top_agents.is_empty() {
+        println!("  {}", style("Top agents").bold());
+        let mut table = Table::new();
+        table
+            .set_header(vec![
+                Cell::new(""),
+                Cell::new("Agent"),
+                Cell::new("Requests").set_alignment(CellAlignment::Right),
+                Cell::new("Input").set_alignment(CellAlignment::Right),
+                Cell::new("Output").set_alignment(CellAlignment::Right),
+            ])
+            .set_width(70);
+
+        for (i, a) in overview.top_agents.iter().enumerate() {
+            table.add_row(vec![
+                Cell::new(i + 1).fg(TColor::DarkGrey),
+                ui::cyan_cell(&a.label),
+                Cell::new(ui::format_human(a.request_count)).fg(TColor::Green),
+                Cell::new(ui::format_human(a.total_input)),
+                Cell::new(ui::format_human(a.total_output)),
+            ]);
+        }
+        println!("{table}");
+        println!();
+    }
+
+    if !overview.top_clients.is_empty() {
+        println!("  {}", style("Top clients").bold());
+        let mut table = Table::new();
+        table
+            .set_header(vec![
+                Cell::new(""),
+                Cell::new("Client"),
+                Cell::new("Requests").set_alignment(CellAlignment::Right),
+                Cell::new("Input").set_alignment(CellAlignment::Right),
+                Cell::new("Output").set_alignment(CellAlignment::Right),
+            ])
+            .set_width(70);
+
+        for (i, c) in overview.top_clients.iter().enumerate() {
+            table.add_row(vec![
+                Cell::new(i + 1).fg(TColor::DarkGrey),
+                ui::cyan_cell(&c.label),
+                Cell::new(ui::format_human(c.request_count)).fg(TColor::Green),
+                Cell::new(ui::format_human(c.total_input)),
+                Cell::new(ui::format_human(c.total_output)),
+            ]);
+        }
+        println!("{table}");
+        println!();
+    }
+
+    if !overview.trend.is_empty() {
+        println!("  {}", style("7-day trend").bold());
+        let max_tokens = overview
+            .trend
+            .iter()
+            .map(|d| d.total_tokens)
+            .max()
+            .unwrap_or(1);
+        let bar_width = 20usize;
+
+        let mut table = Table::new();
+        table
+            .set_header(vec![
+                Cell::new("Date"),
+                Cell::new("Requests").set_alignment(CellAlignment::Right),
+                Cell::new("Tokens").set_alignment(CellAlignment::Right),
+                Cell::new("Activity"),
+            ])
+            .set_width(70);
+
+        for d in &overview.trend {
+            let bar_len = if max_tokens > 0 {
+                ((d.total_tokens as f64 / max_tokens as f64) * bar_width as f64).round() as usize
+            } else {
+                0
+            };
+            let bar = "█".repeat(bar_len);
+            table.add_row(vec![
+                Cell::new(&d.date),
+                Cell::new(ui::format_human(d.requests)).fg(TColor::Green),
+                Cell::new(ui::format_human(d.total_tokens)),
+                Cell::new(bar).fg(TColor::Cyan),
+            ]);
+        }
+        println!("{table}");
+        println!();
+    }
+
+    if overview.headline.unpushed_records > 0 {
+        println!(
+            "  {} {}",
+            style("Hint:").dim(),
+            style("run `omc tu push` to upload unpushed records").dim()
+        );
+        println!();
+    }
 
     Ok(())
 }

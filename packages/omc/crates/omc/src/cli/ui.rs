@@ -50,3 +50,29 @@ pub fn format_context(limit: Option<i64>) -> String {
         .map(|c| format!("{}k", c / 1000))
         .unwrap_or_else(|| "-".to_string())
 }
+
+pub fn format_human(n: i64) -> String {
+    if n == 0 {
+        return "0".to_string();
+    }
+    let abs = n.unsigned_abs();
+    if abs < 1_000 {
+        n.to_string()
+    } else if abs < 1_000_000 {
+        let whole = abs / 1_000;
+        let frac = (abs % 1_000) / 100;
+        if frac == 0 {
+            format!("{whole}.0k")
+        } else {
+            format!("{whole}.{frac}k")
+        }
+    } else {
+        let whole = abs / 1_000_000;
+        let frac = (abs % 1_000_000) / 100_000;
+        if frac == 0 {
+            format!("{whole}.0m")
+        } else {
+            format!("{whole}.{frac}m")
+        }
+    }
+}

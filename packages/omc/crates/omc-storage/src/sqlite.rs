@@ -7,7 +7,9 @@ use async_trait::async_trait;
 use omc_core::account::{Account, Workspace};
 use omc_core::error::{OmcError, Result};
 use omc_core::model::Provider;
-use omc_core::token_usage::{TokenUsage, UsageSummary};
+use omc_core::token_usage::{
+    DailyUsage, HeadlineStats, TokenUsage, TokenUsageOverview, UsageGroup, UsageSummary,
+};
 use omc_core::types::{Channel, Message};
 use sqlx::sqlite::{SqlitePool, SqlitePoolOptions, SqliteRow};
 use sqlx::{FromRow, Row};
@@ -871,6 +873,275 @@ impl TokenUsageStore for SqliteTokenUsageStore {
                 total_cache_read: r.get("total_cache_read"),
                 total_cache_write: r.get("total_cache_write"),
                 request_count: r.get("request_count"),
+            })
+            .collect())
+    }
+
+    async fn overview(&self, days: Option<i64>) -> Result<TokenUsageOverview> {
+        let cutoff = days.map(|d| chrono::Utc::now().timestamp_millis() - (d * 86_400_000));
+        let seven_days_ago = chrono::Utc::now().timestamp_millis() - (7 * 86_400_000);
+
+        let headline = self.headline_stats(cutoff).await?;
+        let top_models = self.top_models(cutoff).await?;
+        let top_agents = self.top_agents(cutoff).await?;
+        let top_clients = self.top_clients(cutoff).await?;
+        let trend = self.daily_trend(seven_days_ago).await?;
+
+        Ok(TokenUsageOverview {
+            headline,
+            top_models,
+            top_agents,
+            top_clients,
+            trend,
+        })
+    }
+}
+
+impl SqliteTokenUsageStore {
+    async fn headline_stats(&self, cutoff: Option<i64>) -> Result<HeadlineStats> {
+        let (query, bind_cutoff) = if cutoff.is_some() {
+            (
+                "SELECT
+                    COUNT(*) as requests,
+                    SUM(input_tokens) as input_tokens,
+                    SUM(output_tokens) as output_tokens,
+                    SUM(reasoning_tokens) as reasoning_tokens,
+                    SUM(cache_read_tokens) as cache_read_tokens,
+                    SUM(cache_write_tokens) as cache_write_tokens
+                 FROM token_usage WHERE recorded_at >= ?",
+                true,
+            )
+        } else {
+            (
+                "SELECT
+                    COUNT(*) as requests,
+                    SUM(input_tokens) as input_tokens,
+                    SUM(output_tokens) as output_tokens,
+                    SUM(reasoning_tokens) as reasoning_tokens,
+                    SUM(cache_read_tokens) as cache_read_tokens,
+                    SUM(cache_write_tokens) as cache_write_tokens
+                 FROM token_usage",
+                false,
+            )
+        };
+
+        let row: SqliteRow = if bind_cutoff {
+            sqlx::query(query)
+                .bind(cutoff.unwrap())
+                .fetch_one(&self.pool)
+                .await
+                .map_err(map_err)?
+        } else {
+            sqlx::query(query)
+                .fetch_one(&self.pool)
+                .await
+                .map_err(map_err)?
+        };
+
+        let unpushed_row: SqliteRow = sqlx::query(
+            "SELECT COUNT(*) as count, SUM(input_tokens + output_tokens + reasoning_tokens) as tokens FROM token_usage WHERE pushed = 0",
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(map_err)?;
+
+        Ok(HeadlineStats {
+            requests: row.get("requests"),
+            input_tokens: row.get("input_tokens"),
+            output_tokens: row.get("output_tokens"),
+            reasoning_tokens: row.get("reasoning_tokens"),
+            cache_read_tokens: row.get("cache_read_tokens"),
+            cache_write_tokens: row.get("cache_write_tokens"),
+            unpushed_records: unpushed_row.get::<i64, _>("count") as usize,
+            unpushed_tokens: unpushed_row.get::<Option<i64>, _>("tokens").unwrap_or(0),
+        })
+    }
+
+    async fn top_models(&self, cutoff: Option<i64>) -> Result<Vec<UsageSummary>> {
+        let query = if cutoff.is_some() {
+            "SELECT provider_id, model_id,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage WHERE recorded_at >= ?
+             GROUP BY provider_id, model_id
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        } else {
+            "SELECT provider_id, model_id,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage
+             GROUP BY provider_id, model_id
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        };
+
+        let rows: Vec<SqliteRow> = if let Some(c) = cutoff {
+            sqlx::query(query)
+                .bind(c)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        } else {
+            sqlx::query(query)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        };
+
+        Ok(rows
+            .into_iter()
+            .map(|r| UsageSummary {
+                provider_id: r.get("provider_id"),
+                model_id: r.get("model_id"),
+                total_input: r.get("total_input"),
+                total_output: r.get("total_output"),
+                total_reasoning: r.get("total_reasoning"),
+                total_cache_read: r.get("total_cache_read"),
+                total_cache_write: r.get("total_cache_write"),
+                request_count: r.get("request_count"),
+            })
+            .collect())
+    }
+
+    async fn top_agents(&self, cutoff: Option<i64>) -> Result<Vec<UsageGroup>> {
+        let query = if cutoff.is_some() {
+            "SELECT COALESCE(agent, 'unknown') as label,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage WHERE recorded_at >= ?
+             GROUP BY label
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        } else {
+            "SELECT COALESCE(agent, 'unknown') as label,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage
+             GROUP BY label
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        };
+
+        let rows: Vec<SqliteRow> = if let Some(c) = cutoff {
+            sqlx::query(query)
+                .bind(c)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        } else {
+            sqlx::query(query)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        };
+
+        Ok(rows
+            .into_iter()
+            .map(|r| UsageGroup {
+                label: r.get("label"),
+                total_input: r.get("total_input"),
+                total_output: r.get("total_output"),
+                total_reasoning: r.get("total_reasoning"),
+                total_cache_read: r.get("total_cache_read"),
+                total_cache_write: r.get("total_cache_write"),
+                request_count: r.get("request_count"),
+            })
+            .collect())
+    }
+
+    async fn top_clients(&self, cutoff: Option<i64>) -> Result<Vec<UsageGroup>> {
+        let query = if cutoff.is_some() {
+            "SELECT client as label,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage WHERE recorded_at >= ?
+             GROUP BY client
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        } else {
+            "SELECT client as label,
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(reasoning_tokens) as total_reasoning,
+                SUM(cache_read_tokens) as total_cache_read,
+                SUM(cache_write_tokens) as total_cache_write,
+                COUNT(*) as request_count
+             FROM token_usage
+             GROUP BY client
+             ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+             LIMIT 3"
+        };
+
+        let rows: Vec<SqliteRow> = if let Some(c) = cutoff {
+            sqlx::query(query)
+                .bind(c)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        } else {
+            sqlx::query(query)
+                .fetch_all(&self.pool)
+                .await
+                .map_err(map_err)?
+        };
+
+        Ok(rows
+            .into_iter()
+            .map(|r| UsageGroup {
+                label: r.get("label"),
+                total_input: r.get("total_input"),
+                total_output: r.get("total_output"),
+                total_reasoning: r.get("total_reasoning"),
+                total_cache_read: r.get("total_cache_read"),
+                total_cache_write: r.get("total_cache_write"),
+                request_count: r.get("request_count"),
+            })
+            .collect())
+    }
+
+    async fn daily_trend(&self, cutoff: i64) -> Result<Vec<DailyUsage>> {
+        let rows: Vec<SqliteRow> = sqlx::query(
+            "SELECT
+                DATE(recorded_at / 1000, 'unixepoch') as date,
+                COUNT(*) as requests,
+                SUM(input_tokens + output_tokens + reasoning_tokens) as total_tokens
+             FROM token_usage
+             WHERE recorded_at >= ?
+             GROUP BY date
+             ORDER BY date",
+        )
+        .bind(cutoff)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(map_err)?;
+
+        Ok(rows
+            .into_iter()
+            .map(|r| DailyUsage {
+                date: r.get("date"),
+                requests: r.get("requests"),
+                total_tokens: r.get("total_tokens"),
             })
             .collect())
     }

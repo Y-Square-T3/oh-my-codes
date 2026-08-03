@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use omc_core::error::Result;
-use omc_core::token_usage::{TokenUsage, UsageSummary};
+use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
 
 #[async_trait]
 pub trait TokenUsageStore: Send + Sync {
@@ -17,4 +17,5 @@ pub trait TokenUsageStore: Send + Sync {
     async fn count_all(&self, pushed: Option<bool>) -> Result<usize>;
     async fn cleanup_old_pushed(&self, retention_days: i64) -> Result<usize>;
     async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>>;
+    async fn overview(&self, days: Option<i64>) -> Result<TokenUsageOverview>;
 }

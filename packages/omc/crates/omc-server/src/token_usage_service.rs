@@ -1,7 +1,7 @@
 use crate::account_service::AccountService;
 use crate::server_client::{OmcServerClient, TokenUsagePayload};
 use omc_core::error::{OmcError, Result};
-use omc_core::token_usage::{TokenUsage, UsageSummary};
+use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
 use omc_storage::token_usage_store::TokenUsageStore;
 use std::sync::Arc;
 use tokio::sync::Notify;
@@ -155,6 +155,10 @@ impl TokenUsageService {
 
     pub async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>> {
         self.store.summary(days).await
+    }
+
+    pub async fn overview(&self, days: Option<i64>) -> Result<TokenUsageOverview> {
+        self.store.overview(days).await
     }
 
     pub fn start_auto_push(self: Arc<Self>, interval_secs: u64, batch_size: usize) -> Arc<Notify> {

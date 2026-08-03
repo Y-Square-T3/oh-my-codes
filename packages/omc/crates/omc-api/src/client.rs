@@ -321,4 +321,13 @@ impl OmcClient {
         self.request("GET", &format!("/token-usage/summary{qs}"), None)
             .await
     }
+
+    pub async fn token_usage_overview(
+        &self,
+        days: Option<i64>,
+    ) -> Result<omc_core::token_usage::TokenUsageOverview> {
+        let qs = days.map(|d| format!("?days={d}")).unwrap_or_default();
+        self.request("GET", &format!("/token-usage/overview{qs}"), None)
+            .await
+    }
 }
