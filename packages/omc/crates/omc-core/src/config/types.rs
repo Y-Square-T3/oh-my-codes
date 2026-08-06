@@ -6,4 +6,5 @@ pub struct DaemonConfig {
     pub bind_port: Option<u16>,
     pub socket_path: Option<String>,
     pub data_dir: Option<String>,
+    pub database_url: Option<String>,
 }

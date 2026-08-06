@@ -15,6 +15,7 @@ pub struct ResolvedDaemonConfig {
     pub bind_port: u16,
     pub socket_path: String,
     pub data_dir: String,
+    pub database_url: String,
 }
 
 impl OmcConfig {
@@ -79,6 +80,9 @@ impl OmcConfig {
         if other.daemon.data_dir.is_some() {
             self.daemon.data_dir = other.daemon.data_dir.clone();
         }
+        if other.daemon.database_url.is_some() {
+            self.daemon.database_url = other.daemon.database_url.clone();
+        }
     }
 
     pub fn save_to_file(&self, path: &Path) -> Result<(), OmcError> {
@@ -93,6 +97,16 @@ impl OmcConfig {
     }
 
     pub fn resolve_daemon_with_mode(&self, service_mode: bool) -> ResolvedDaemonConfig {
+        let data_dir = self.daemon.data_dir.clone().unwrap_or_else(|| {
+            paths::default_data_dir_with_mode(service_mode)
+                .to_string_lossy()
+                .to_string()
+        });
+        let database_url = self
+            .daemon
+            .database_url
+            .clone()
+            .unwrap_or_else(|| format!("sqlite:{}/omc.db", data_dir));
         ResolvedDaemonConfig {
             bind_addr: self
                 .daemon
@@ -105,11 +119,8 @@ impl OmcConfig {
                 .socket_path
                 .clone()
                 .unwrap_or_else(paths::default_socket_path),
-            data_dir: self.daemon.data_dir.clone().unwrap_or_else(|| {
-                paths::default_data_dir_with_mode(service_mode)
-                    .to_string_lossy()
-                    .to_string()
-            }),
+            data_dir,
+            database_url,
         }
     }
 

@@ -1,0 +1,11 @@
+DROP INDEX IF EXISTS idx_token_usage_pushed;
+DROP TABLE IF EXISTS token_usage;
+DROP INDEX IF EXISTS idx_provider_account;
+DROP TABLE IF EXISTS provider;
+DROP TABLE IF EXISTS active_account;
+DROP INDEX IF EXISTS idx_workspace_account;
+DROP TABLE IF EXISTS workspace;
+DROP TABLE IF EXISTS account;
+DROP INDEX IF EXISTS idx_message_channel_ts;
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS channel;

@@ -1,5 +1,6 @@
 use crate::account_store::AccountStore;
 use crate::message_store::MessageStore;
+use crate::migrations::{MigrationRunner, registry};
 use crate::model_store::ModelStore;
 use crate::token_usage_store::TokenUsageStore;
 use crate::workspace_store::WorkspaceStore;
@@ -20,6 +21,10 @@ fn map_err(e: sqlx::Error) -> OmcError {
     OmcError::Storage(format!("SQLite error: {e}"))
 }
 
+fn map_migration_err(e: crate::migrations::MigrationError) -> OmcError {
+    OmcError::Storage(format!("Migration error: {e}"))
+}
+
 pub struct SqliteStorage {
     pool: SqlitePool,
 }
@@ -32,7 +37,9 @@ impl SqliteStorage {
             .connect(&url)
             .await
             .map_err(map_err)?;
-        Self::init_schema(&pool).await?;
+        MigrationRunner::run_sqlite(&pool, &registry::sqlite_migrations())
+            .await
+            .map_err(map_migration_err)?;
         Ok(Self { pool })
     }
 
@@ -42,144 +49,10 @@ impl SqliteStorage {
             .connect("sqlite::memory:")
             .await
             .map_err(map_err)?;
-        Self::init_schema(&pool).await?;
+        MigrationRunner::run_sqlite(&pool, &registry::sqlite_migrations())
+            .await
+            .map_err(map_migration_err)?;
         Ok(Self { pool })
-    }
-
-    async fn init_schema(pool: &SqlitePool) -> Result<()> {
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS channel (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                topic TEXT,
-                created_at INTEGER NOT NULL
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS message (
-                id TEXT PRIMARY KEY,
-                channel_id TEXT NOT NULL,
-                author_id TEXT NOT NULL,
-                content TEXT NOT NULL,
-                timestamp INTEGER NOT NULL,
-                edited_at INTEGER,
-                reply_to TEXT
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS idx_message_channel_ts ON message(channel_id, timestamp)",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS account (
-                id TEXT PRIMARY KEY,
-                email TEXT NOT NULL,
-                url TEXT NOT NULL,
-                access_token TEXT NOT NULL,
-                refresh_token TEXT NOT NULL,
-                token_expiry INTEGER NOT NULL,
-                active_workspace_id TEXT
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS workspace (
-                id TEXT PRIMARY KEY,
-                account_id TEXT NOT NULL,
-                name TEXT NOT NULL,
-                is_admin INTEGER NOT NULL,
-                FOREIGN KEY (account_id) REFERENCES account(id)
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query("CREATE INDEX IF NOT EXISTS idx_workspace_account ON workspace(account_id)")
-            .execute(pool)
-            .await
-            .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS active_account (
-                id INTEGER PRIMARY KEY CHECK (id = 1),
-                account_id TEXT,
-                FOREIGN KEY (account_id) REFERENCES account(id)
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS provider (
-                id TEXT PRIMARY KEY,
-                provider_id TEXT NOT NULL,
-                name TEXT NOT NULL,
-                env TEXT NOT NULL,
-                api TEXT,
-                npm TEXT,
-                doc TEXT,
-                models TEXT NOT NULL,
-                account_id TEXT NOT NULL,
-                last_fetched_at INTEGER NOT NULL,
-                FOREIGN KEY (account_id) REFERENCES account(id)
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query("CREATE INDEX IF NOT EXISTS idx_provider_account ON provider(account_id)")
-            .execute(pool)
-            .await
-            .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE TABLE IF NOT EXISTS token_usage (
-                id TEXT PRIMARY KEY,
-                client TEXT NOT NULL,
-                session_id TEXT NOT NULL,
-                message_id TEXT NOT NULL UNIQUE,
-                agent TEXT,
-                provider_id TEXT NOT NULL,
-                model_id TEXT NOT NULL,
-                input_tokens INTEGER NOT NULL,
-                output_tokens INTEGER NOT NULL,
-                reasoning_tokens INTEGER NOT NULL,
-                cache_read_tokens INTEGER NOT NULL,
-                cache_write_tokens INTEGER NOT NULL,
-                pushed INTEGER NOT NULL DEFAULT 0,
-                recorded_at INTEGER NOT NULL,
-                created_at INTEGER NOT NULL
-            )",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS idx_token_usage_pushed ON token_usage(pushed, recorded_at)",
-        )
-        .execute(pool)
-        .await
-        .map_err(map_err)?;
-
-        Ok(())
     }
 
     pub fn pool(&self) -> Arc<SqlitePool> {

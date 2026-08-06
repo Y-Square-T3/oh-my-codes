@@ -16,6 +16,7 @@ use omc_storage::sqlite::{
 };
 use omc_storage::token_usage_store::TokenUsageStore;
 use omc_storage::workspace_store::WorkspaceStore;
+use sqlx::PgPool;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::watch;
@@ -28,6 +29,9 @@ pub(crate) struct Args {
 
     #[arg(long)]
     pub(crate) data_dir: Option<String>,
+
+    #[arg(long)]
+    pub(crate) database_url: Option<String>,
 
     #[arg(long)]
     pub(crate) bind_addr: Option<String>,
@@ -91,6 +95,7 @@ pub(crate) async fn run_daemon(
             bind_port: args.bind_port,
             socket_path: args.socket_path,
             data_dir: args.data_dir,
+            database_url: args.database_url,
         },
     };
     config.merge(&overrides);
@@ -99,7 +104,30 @@ pub(crate) async fn run_daemon(
 
     let data_path = PathBuf::from(&resolved.data_dir);
     std::fs::create_dir_all(&data_path)?;
-    let sqlite = SqliteStorage::new(&data_path.join("omc.db")).await?;
+
+    let db_url = omc_storage::database_url::DatabaseUrl::parse(&resolved.database_url);
+
+    let (sqlite, pg_pool) = match db_url {
+        omc_storage::database_url::DatabaseUrl::Sqlite(url) => {
+            let path = url.strip_prefix("sqlite:").unwrap_or(&url);
+            let sqlite = SqliteStorage::new(std::path::Path::new(path)).await?;
+            (Some(sqlite), None)
+        }
+        omc_storage::database_url::DatabaseUrl::Postgres(url) => {
+            let pool = PgPool::connect(&url).await?;
+            omc_storage::migrations::MigrationRunner::run_postgres(
+                &pool,
+                &omc_storage::migrations::registry::postgres_migrations(),
+            )
+            .await
+            .map_err(|e| format!("PostgreSQL migration error: {e}"))?;
+            tracing::info!("PostgreSQL migrations applied successfully");
+            (None, Some(pool))
+        }
+    };
+
+    let sqlite =
+        sqlite.ok_or("PostgreSQL backend is not yet fully supported. Use SQLite for now.")?;
     let pool = sqlite.pool();
     let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(sqlite);
     let storage = Arc::new(MemoryStorage::new());
@@ -110,6 +138,8 @@ pub(crate) async fn run_daemon(
     let model_store: Arc<dyn omc_storage::model_store::ModelStore> =
         Arc::new(SqliteModelStore::new(pool.clone()));
     let token_usage_store: Arc<dyn TokenUsageStore> = Arc::new(SqliteTokenUsageStore::new(pool));
+
+    drop(pg_pool);
     let server_client = OmcServerClient::new();
     let account_service = Arc::new(AccountService::new(
         account_store,
