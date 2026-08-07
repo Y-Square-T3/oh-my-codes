@@ -1490,7 +1490,6 @@ dependencies = [
  "chrono",
  "hex",
  "omc-core",
- "serde",
  "serde_json",
  "sha2",
  "sqlx",
