@@ -1,7 +1,7 @@
 use crate::server_client::OmcServerClient;
 use omc_core::error::{OmcError, Result};
 use omc_core::model::{Model, Provider};
-use omc_storage::model_store::ModelStore;
+use omc_storage::StorageBackend;
 use std::sync::Arc;
 
 pub struct ModelInfo {
@@ -45,19 +45,19 @@ pub struct SyncResult {
 }
 
 pub struct ModelService {
-    model_store: Arc<dyn ModelStore>,
+    backend: Arc<dyn StorageBackend>,
     account_service: Arc<crate::account_service::AccountService>,
     server_client: OmcServerClient,
 }
 
 impl ModelService {
     pub fn new(
-        model_store: Arc<dyn ModelStore>,
+        backend: Arc<dyn StorageBackend>,
         account_service: Arc<crate::account_service::AccountService>,
         server_client: OmcServerClient,
     ) -> Self {
         Self {
-            model_store,
+            backend,
             account_service,
             server_client,
         }
@@ -75,7 +75,7 @@ impl ModelService {
             });
         };
 
-        let providers = self.model_store.list_providers(&account.id).await?;
+        let providers = self.backend.list_providers(&account.id).await?;
 
         let filtered_providers = if let Some(pid) = provider_id {
             providers
@@ -159,7 +159,7 @@ impl ModelService {
             .collect();
 
         let providers_count = providers.len();
-        self.model_store
+        self.backend
             .replace_providers(&account.id, providers)
             .await?;
 

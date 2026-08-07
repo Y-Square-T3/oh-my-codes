@@ -18,7 +18,7 @@ pub async fn list_handler(
     Query(query): Query<MessagesQuery>,
 ) -> Json<MessagesResponse> {
     let messages = state
-        .message_store
+        .backend
         .get_messages(&channel_id, query.limit.unwrap_or(50), query.before)
         .await
         .unwrap_or_default();
@@ -31,7 +31,7 @@ pub async fn send_handler(
     Json(req): Json<SendMessageRequest>,
 ) -> Json<SendMessageResponse> {
     let message = state
-        .message_store
+        .backend
         .send_message(&channel_id, "anonymous", &req.content)
         .await
         .unwrap_or(omc_core::types::Message {

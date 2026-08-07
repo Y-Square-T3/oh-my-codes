@@ -1508,7 +1508,6 @@ dependencies = [
  "omc-core",
  "omc-server",
  "omc-storage",
- "sqlx",
  "tokio",
  "tracing",
  "tracing-subscriber",

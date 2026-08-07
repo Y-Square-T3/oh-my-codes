@@ -41,7 +41,7 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 axum-test = "17"
 dirs = "6"
 libc = "0.2"
-sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "postgres"] }
+sqlx = { version = "0.8", features = ["runtime-tokio"] }
 sha2 = "0.10"
 hex = "0.4"
 ulid = { version = "1", features = ["serde"] }

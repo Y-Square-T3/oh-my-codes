@@ -2,7 +2,7 @@ use crate::account_service::AccountService;
 use crate::server_client::{OmcServerClient, TokenUsagePayload};
 use omc_core::error::{OmcError, Result};
 use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
-use omc_storage::token_usage_store::TokenUsageStore;
+use omc_storage::StorageBackend;
 use std::sync::Arc;
 use tokio::sync::Notify;
 
@@ -22,30 +22,30 @@ pub struct PushResult {
 }
 
 pub struct TokenUsageService {
-    store: Arc<dyn TokenUsageStore>,
+    backend: Arc<dyn StorageBackend>,
     account_service: Arc<AccountService>,
     server_client: OmcServerClient,
 }
 
 impl TokenUsageService {
     pub fn new(
-        store: Arc<dyn TokenUsageStore>,
+        backend: Arc<dyn StorageBackend>,
         account_service: Arc<AccountService>,
         server_client: OmcServerClient,
     ) -> Self {
         Self {
-            store,
+            backend,
             account_service,
             server_client,
         }
     }
 
     pub async fn record(&self, usage: &TokenUsage) -> Result<()> {
-        self.store.upsert(usage).await
+        self.backend.upsert_usage(usage).await
     }
 
     pub async fn status(&self) -> Result<StatusResult> {
-        let unpushed_count = self.store.count_unpushed().await?;
+        let unpushed_count = self.backend.count_unpushed().await?;
         let has_active_account = self.account_service.active().await?.is_some();
         Ok(StatusResult {
             unpushed_count,
@@ -78,7 +78,7 @@ impl TokenUsageService {
                 break;
             }
 
-            let unpushed = self.store.find_unpushed(batch_size).await?;
+            let unpushed = self.backend.find_unpushed(batch_size).await?;
             if unpushed.is_empty() {
                 break;
             }
@@ -110,7 +110,7 @@ impl TokenUsageService {
             {
                 Ok(()) => {
                     let ids: Vec<String> = unpushed.iter().map(|u| u.id.clone()).collect();
-                    self.store.mark_pushed(&ids).await?;
+                    self.backend.mark_pushed(&ids).await?;
                     total_pushed += unpushed.len();
                 }
                 Err(e) => {
@@ -120,7 +120,7 @@ impl TokenUsageService {
                             "Batch contains duplicates on remote, marking as pushed: {e}"
                         );
                         let ids: Vec<String> = unpushed.iter().map(|u| u.id.clone()).collect();
-                        self.store.mark_pushed(&ids).await?;
+                        self.backend.mark_pushed(&ids).await?;
                         total_pushed += unpushed.len();
                     } else {
                         tracing::error!("Failed to push batch: {e}");
@@ -131,7 +131,10 @@ impl TokenUsageService {
             }
         }
 
-        let _ = self.store.cleanup_old_pushed(DEFAULT_RETENTION_DAYS).await;
+        let _ = self
+            .backend
+            .cleanup_old_pushed(DEFAULT_RETENTION_DAYS)
+            .await;
 
         Ok(PushResult {
             pushed_count: total_pushed,
@@ -146,19 +149,19 @@ impl TokenUsageService {
         offset: usize,
         pushed: Option<bool>,
     ) -> Result<Vec<TokenUsage>> {
-        self.store.list_recent(limit, offset, pushed).await
+        self.backend.list_recent(limit, offset, pushed).await
     }
 
     pub async fn count_all(&self, pushed: Option<bool>) -> Result<usize> {
-        self.store.count_all(pushed).await
+        self.backend.count_all(pushed).await
     }
 
     pub async fn summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>> {
-        self.store.summary(days).await
+        self.backend.usage_summary(days).await
     }
 
     pub async fn overview(&self, days: Option<i64>) -> Result<TokenUsageOverview> {
-        self.store.overview(days).await
+        self.backend.usage_overview(days).await
     }
 
     pub fn start_auto_push(self: Arc<Self>, interval_secs: u64, batch_size: usize) -> Arc<Notify> {
@@ -170,7 +173,7 @@ impl TokenUsageService {
             loop {
                 tokio::select! {
                     _ = interval.tick() => {
-                        match self.store.count_unpushed().await {
+                        match self.backend.count_unpushed().await {
                             Ok(0) => {}
                             Ok(count) => {
                                 tracing::debug!("Auto-push: {} unpushed records found", count);

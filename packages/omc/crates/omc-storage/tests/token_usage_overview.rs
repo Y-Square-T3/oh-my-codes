@@ -1,6 +1,6 @@
 use omc_core::token_usage::TokenUsage;
-use omc_storage::sqlite::{SqliteStorage, SqliteTokenUsageStore};
-use omc_storage::token_usage_store::TokenUsageStore;
+use omc_storage::StorageBackend;
+use omc_storage::backend::sqlite::SqliteBackend;
 
 #[allow(clippy::too_many_arguments)]
 fn make_usage(
@@ -36,9 +36,8 @@ fn make_usage(
 
 #[tokio::test]
 async fn test_overview_empty() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let store = SqliteTokenUsageStore::new(storage.pool());
-    let overview = store.overview(None).await.unwrap();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let overview = backend.usage_overview(None).await.unwrap();
 
     assert_eq!(overview.headline.requests, 0);
     assert_eq!(overview.headline.input_tokens, 0);
@@ -49,8 +48,7 @@ async fn test_overview_empty() {
 
 #[tokio::test]
 async fn test_overview_with_data() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let store = SqliteTokenUsageStore::new(storage.pool());
+    let backend = SqliteBackend::new_memory().await.unwrap();
 
     let usages = vec![
         make_usage(
@@ -90,10 +88,10 @@ async fn test_overview_with_data() {
     ];
 
     for u in &usages {
-        store.upsert(u).await.unwrap();
+        backend.upsert_usage(u).await.unwrap();
     }
 
-    let overview = store.overview(None).await.unwrap();
+    let overview = backend.usage_overview(None).await.unwrap();
 
     assert_eq!(overview.headline.requests, 4);
     assert_eq!(overview.headline.input_tokens, 6500);
@@ -120,8 +118,7 @@ async fn test_overview_with_data() {
 
 #[tokio::test]
 async fn test_overview_with_days_filter() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let store = SqliteTokenUsageStore::new(storage.pool());
+    let backend = SqliteBackend::new_memory().await.unwrap();
 
     let now = chrono::Utc::now().timestamp_millis();
     let old = now - (10 * 86_400_000);
@@ -138,7 +135,7 @@ async fn test_overview_with_days_filter() {
         false,
     );
     usage.recorded_at = old;
-    store.upsert(&usage).await.unwrap();
+    backend.upsert_usage(&usage).await.unwrap();
 
     let usage2 = make_usage(
         "2",
@@ -151,9 +148,9 @@ async fn test_overview_with_days_filter() {
         200,
         false,
     );
-    store.upsert(&usage2).await.unwrap();
+    backend.upsert_usage(&usage2).await.unwrap();
 
-    let overview = store.overview(Some(7)).await.unwrap();
+    let overview = backend.usage_overview(Some(7)).await.unwrap();
 
     assert_eq!(overview.headline.requests, 1);
     assert_eq!(overview.headline.input_tokens, 2000);

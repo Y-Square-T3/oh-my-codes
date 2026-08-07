@@ -86,5 +86,8 @@ fn derives_partial_eq() {
 fn parses_postgres_with_query_params() {
     let url = DatabaseUrl::parse("postgres://user:pass@localhost:5432/db?sslmode=require");
     assert!(url.is_postgres());
-    assert_eq!(url.as_str(), "postgres://user:pass@localhost:5432/db?sslmode=require");
+    assert_eq!(
+        url.as_str(),
+        "postgres://user:pass@localhost:5432/db?sslmode=require"
+    );
 }

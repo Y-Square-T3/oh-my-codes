@@ -1,8 +1,7 @@
 use crate::server_client::{DeviceCodeResponse, OmcServerClient, PollResult};
 use omc_core::account::{Account, AccountInfo, Workspace};
 use omc_core::error::{OmcError, Result};
-use omc_storage::account_store::AccountStore;
-use omc_storage::workspace_store::WorkspaceStore;
+use omc_storage::StorageBackend;
 use std::sync::Arc;
 
 const EAGER_REFRESH_SECS: i64 = 300;
@@ -18,20 +17,14 @@ pub struct LoginSession {
 }
 
 pub struct AccountService {
-    account_store: Arc<dyn AccountStore>,
-    workspace_store: Arc<dyn WorkspaceStore>,
+    backend: Arc<dyn StorageBackend>,
     server_client: OmcServerClient,
 }
 
 impl AccountService {
-    pub fn new(
-        account_store: Arc<dyn AccountStore>,
-        workspace_store: Arc<dyn WorkspaceStore>,
-        server_client: OmcServerClient,
-    ) -> Self {
+    pub fn new(backend: Arc<dyn StorageBackend>, server_client: OmcServerClient) -> Self {
         Self {
-            account_store,
-            workspace_store,
+            backend,
             server_client,
         }
     }
@@ -77,7 +70,7 @@ impl AccountService {
                 token_expiry: now + expires_in,
                 active_workspace_id: None,
             };
-            self.account_store.upsert_account(&account).await?;
+            self.backend.upsert_account(&account).await?;
             let mut workspaces = self
                 .server_client
                 .fetch_workspaces(&session.server_url, access_token)
@@ -85,20 +78,20 @@ impl AccountService {
             for w in &mut workspaces {
                 w.account_id = account.id.clone();
             }
-            self.workspace_store.upsert_workspaces(&workspaces).await?;
+            self.backend.upsert_workspaces(&workspaces).await?;
             if workspaces.len() == 1 {
-                self.account_store
+                self.backend
                     .set_active_workspace(&account.id, &workspaces[0].id)
                     .await?;
             }
-            self.account_store.set_active_account(&account.id).await?;
+            self.backend.set_active_account(&account.id).await?;
         }
         Ok(result)
     }
 
     pub async fn refresh_token(&self, account_id: &str) -> Result<String> {
         let account = self
-            .account_store
+            .backend
             .get_account(account_id)
             .await?
             .ok_or_else(|| OmcError::NotFound(format!("Account {account_id} not found")))?;
@@ -116,13 +109,13 @@ impl AccountService {
             token_expiry: now + resp.expires_in,
             active_workspace_id: account.active_workspace_id,
         };
-        self.account_store.upsert_account(&updated).await?;
+        self.backend.upsert_account(&updated).await?;
         Ok(resp.access_token)
     }
 
     pub async fn resolve_token(&self, account_id: &str) -> Result<String> {
         let account = self
-            .account_store
+            .backend
             .get_account(account_id)
             .await?
             .ok_or_else(|| OmcError::NotFound(format!("Account {account_id} not found")))?;
@@ -134,19 +127,19 @@ impl AccountService {
     }
 
     pub async fn active(&self) -> Result<Option<AccountInfo>> {
-        let Some(id) = self.account_store.get_active_account_id().await? else {
+        let Some(id) = self.backend.get_active_account_id().await? else {
             return Ok(None);
         };
-        let account = self.account_store.get_account(&id).await?;
+        let account = self.backend.get_account(&id).await?;
         Ok(account.map(|a| a.to_info()))
     }
 
     pub async fn active_with_token(&self) -> Result<Option<(AccountInfo, String)>> {
-        let Some(id) = self.account_store.get_active_account_id().await? else {
+        let Some(id) = self.backend.get_active_account_id().await? else {
             return Ok(None);
         };
         let account = self
-            .account_store
+            .backend
             .get_account(&id)
             .await?
             .ok_or_else(|| OmcError::NotFound(format!("Account {id} not found")))?;
@@ -160,10 +153,10 @@ impl AccountService {
     }
 
     pub async fn list(&self) -> Result<Vec<(AccountInfo, Vec<Workspace>)>> {
-        let accounts = self.account_store.list_accounts().await?;
+        let accounts = self.backend.list_accounts().await?;
         let mut result = Vec::new();
         for account in accounts {
-            let workspaces = self.workspace_store.list_workspaces(&account.id).await?;
+            let workspaces = self.backend.list_workspaces(&account.id).await?;
             result.push((account.to_info(), workspaces));
         }
         Ok(result)
@@ -171,12 +164,12 @@ impl AccountService {
 
     pub async fn switch(&self, account_id: &str, workspace_id: &str) -> Result<()> {
         let account = self
-            .account_store
+            .backend
             .get_account(account_id)
             .await?
             .ok_or_else(|| OmcError::NotFound(format!("Account '{account_id}' not found")))?;
 
-        let workspaces = self.workspace_store.list_workspaces(account_id).await?;
+        let workspaces = self.backend.list_workspaces(account_id).await?;
         let workspace_exists = workspaces.iter().any(|w| w.id == workspace_id);
         if !workspace_exists {
             return Err(OmcError::NotFound(format!(
@@ -185,24 +178,24 @@ impl AccountService {
             )));
         }
 
-        self.account_store
+        self.backend
             .set_active_workspace(account_id, workspace_id)
             .await?;
-        self.account_store.set_active_account(account_id).await?;
+        self.backend.set_active_account(account_id).await?;
         Ok(())
     }
 
     pub async fn remove(&self, account_id: &str) -> Result<()> {
-        let active_id = self.account_store.get_active_account_id().await?;
-        self.workspace_store.clear_workspaces(account_id).await?;
-        self.account_store.delete_account(account_id).await?;
+        let active_id = self.backend.get_active_account_id().await?;
+        self.backend.clear_workspaces(account_id).await?;
+        self.backend.delete_account(account_id).await?;
         if active_id.as_deref() == Some(account_id) {
-            self.account_store.clear_active_account().await?;
+            self.backend.clear_active_account().await?;
         }
         Ok(())
     }
 
     pub async fn workspaces(&self, account_id: &str) -> Result<Vec<Workspace>> {
-        self.workspace_store.list_workspaces(account_id).await
+        self.backend.list_workspaces(account_id).await
     }
 }

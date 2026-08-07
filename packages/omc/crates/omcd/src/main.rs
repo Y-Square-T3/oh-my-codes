@@ -8,15 +8,7 @@ use omc_server::account_service::AccountService;
 use omc_server::model_service::ModelService;
 use omc_server::server_client::OmcServerClient;
 use omc_server::token_usage_service::TokenUsageService;
-use omc_storage::account_store::AccountStore;
-use omc_storage::memory::MemoryStorage;
-use omc_storage::sqlite::{
-    SqliteAccountStore, SqliteModelStore, SqliteStorage, SqliteTokenUsageStore,
-    SqliteWorkspaceStore,
-};
-use omc_storage::token_usage_store::TokenUsageStore;
-use omc_storage::workspace_store::WorkspaceStore;
-use sqlx::PgPool;
+use omc_storage::create_backend;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::watch;
@@ -106,61 +98,24 @@ pub(crate) async fn run_daemon(
     std::fs::create_dir_all(&data_path)?;
 
     let db_url = omc_storage::database_url::DatabaseUrl::parse(&resolved.database_url);
+    let backend = create_backend(&db_url).await?;
 
-    let (sqlite, pg_pool) = match db_url {
-        omc_storage::database_url::DatabaseUrl::Sqlite(url) => {
-            let path = url.strip_prefix("sqlite:").unwrap_or(&url);
-            let sqlite = SqliteStorage::new(std::path::Path::new(path)).await?;
-            (Some(sqlite), None)
-        }
-        omc_storage::database_url::DatabaseUrl::Postgres(url) => {
-            let pool = PgPool::connect(&url).await?;
-            omc_storage::migrations::MigrationRunner::run_postgres(
-                &pool,
-                &omc_storage::migrations::registry::postgres_migrations(),
-            )
-            .await
-            .map_err(|e| format!("PostgreSQL migration error: {e}"))?;
-            tracing::info!("PostgreSQL migrations applied successfully");
-            (None, Some(pool))
-        }
-    };
-
-    let sqlite =
-        sqlite.ok_or("PostgreSQL backend is not yet fully supported. Use SQLite for now.")?;
-    let pool = sqlite.pool();
-    let message_store: Arc<dyn omc_storage::message_store::MessageStore> = Arc::new(sqlite);
-    let storage = Arc::new(MemoryStorage::new());
-
-    let account_store: Arc<dyn AccountStore> = Arc::new(SqliteAccountStore::new(pool.clone()));
-    let workspace_store: Arc<dyn WorkspaceStore> =
-        Arc::new(SqliteWorkspaceStore::new(pool.clone()));
-    let model_store: Arc<dyn omc_storage::model_store::ModelStore> =
-        Arc::new(SqliteModelStore::new(pool.clone()));
-    let token_usage_store: Arc<dyn TokenUsageStore> = Arc::new(SqliteTokenUsageStore::new(pool));
-
-    drop(pg_pool);
     let server_client = OmcServerClient::new();
-    let account_service = Arc::new(AccountService::new(
-        account_store,
-        workspace_store,
-        server_client.clone(),
-    ));
+    let account_service = Arc::new(AccountService::new(backend.clone(), server_client.clone()));
     let model_service = Arc::new(ModelService::new(
-        model_store,
+        backend.clone(),
         account_service.clone(),
         server_client.clone(),
     ));
     let token_usage_service = Arc::new(TokenUsageService::new(
-        token_usage_store,
+        backend.clone(),
         account_service.clone(),
         server_client,
     ));
 
     let state = Arc::new(DaemonState::new(
         config,
-        storage,
-        message_store,
+        backend,
         account_service,
         model_service,
         token_usage_service.clone(),

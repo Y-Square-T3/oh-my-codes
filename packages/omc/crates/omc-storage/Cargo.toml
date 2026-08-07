@@ -3,6 +3,11 @@ name = "omc-storage"
 version.workspace = true
 edition.workspace = true
 
+[features]
+default = ["sqlite"]
+sqlite = ["sqlx/sqlite"]
+postgres = ["sqlx/postgres"]
+
 [dependencies]
 omc-core = { workspace = true }
 async-trait = { workspace = true }
@@ -18,3 +23,4 @@ hex = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+sqlx = { workspace = true, features = ["sqlite"] }

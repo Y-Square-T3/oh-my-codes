@@ -9,8 +9,7 @@ use crate::account_service::AccountService;
 use crate::model_service::ModelService;
 use crate::token_usage_service::TokenUsageService;
 use omc_core::config::OmcConfig;
-use omc_storage::Storage;
-use omc_storage::message_store::MessageStore;
+use omc_storage::StorageBackend;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 #[cfg(unix)]
@@ -19,8 +18,7 @@ use tokio::sync::watch;
 
 pub struct DaemonState {
     config: tokio::sync::RwLock<OmcConfig>,
-    pub storage: Arc<dyn Storage>,
-    pub message_store: Arc<dyn MessageStore>,
+    pub backend: Arc<dyn StorageBackend>,
     pub account_service: Arc<AccountService>,
     pub model_service: Arc<ModelService>,
     pub token_usage_service: Arc<TokenUsageService>,
@@ -29,16 +27,14 @@ pub struct DaemonState {
 impl DaemonState {
     pub fn new(
         config: OmcConfig,
-        storage: Arc<dyn Storage>,
-        message_store: Arc<dyn MessageStore>,
+        backend: Arc<dyn StorageBackend>,
         account_service: Arc<AccountService>,
         model_service: Arc<ModelService>,
         token_usage_service: Arc<TokenUsageService>,
     ) -> Self {
         Self {
             config: tokio::sync::RwLock::new(config),
-            storage,
-            message_store,
+            backend,
             account_service,
             model_service,
             token_usage_service,
@@ -79,30 +75,26 @@ pub async fn start_server(
                     let _ = unix_rx.changed().await;
                 })
                 .await
-                .ok();
         });
 
-        let mut tcp_rx = shutdown_rx;
+        let mut tcp_rx = shutdown_rx.clone();
+        let app_clone = router.clone();
         let tcp_handle = tokio::spawn(async move {
-            axum::serve(tcp_listener, router)
+            axum::serve(tcp_listener, app_clone)
                 .with_graceful_shutdown(async move {
                     let _ = tcp_rx.changed().await;
                 })
                 .await
-                .ok();
         });
 
-        let _ = tokio::join!(tcp_handle, unix_handle);
+        let _ = tokio::join!(unix_handle, tcp_handle);
     }
 
     #[cfg(not(unix))]
     {
-        axum::serve(tcp_listener, router)
-            .with_graceful_shutdown(async move {
-                let _ = shutdown_rx.changed().await;
-            })
-            .await?;
+        let _ = shutdown_rx.changed().await;
     }
 
+    tracing::info!("omcd shutting down");
     Ok(())
 }

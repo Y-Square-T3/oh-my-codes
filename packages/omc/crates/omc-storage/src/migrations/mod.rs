@@ -126,6 +126,7 @@ impl MigrationRunner {
         Self::apply_pending_sqlite(pool, migrations, &applied).await
     }
 
+    #[cfg(feature = "postgres")]
     pub async fn run_postgres(
         pool: &sqlx::PgPool,
         migrations: &[Migration],
@@ -144,6 +145,7 @@ impl MigrationRunner {
         Self::rollback_sqlite(pool, migrations, &applied, target).await
     }
 
+    #[cfg(feature = "postgres")]
     pub async fn down_postgres(
         pool: &sqlx::PgPool,
         migrations: &[Migration],
@@ -168,6 +170,7 @@ impl MigrationRunner {
         Ok(())
     }
 
+    #[cfg(feature = "postgres")]
     async fn ensure_migrations_table_postgres(pool: &sqlx::PgPool) -> Result<(), MigrationError> {
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS _migrations (
@@ -206,6 +209,7 @@ impl MigrationRunner {
             .collect())
     }
 
+    #[cfg(feature = "postgres")]
     async fn load_applied_postgres(
         pool: &sqlx::PgPool,
     ) -> Result<Vec<AppliedMigration>, MigrationError> {
@@ -279,6 +283,7 @@ impl MigrationRunner {
         Ok(())
     }
 
+    #[cfg(feature = "postgres")]
     async fn apply_pending_postgres(
         pool: &sqlx::PgPool,
         migrations: &[Migration],
@@ -386,6 +391,7 @@ impl MigrationRunner {
         Ok(())
     }
 
+    #[cfg(feature = "postgres")]
     async fn rollback_postgres(
         pool: &sqlx::PgPool,
         migrations: &[Migration],

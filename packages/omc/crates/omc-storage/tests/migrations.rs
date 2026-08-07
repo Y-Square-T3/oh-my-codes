@@ -1,13 +1,13 @@
+use omc_storage::backend::sqlite::SqliteBackend;
 use omc_storage::migrations::{MigrationError, MigrationRunner, registry};
-use omc_storage::sqlite::SqliteStorage;
 
 #[tokio::test]
 async fn test_sqlite_migrations_run_successfully() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let pool = storage.pool();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let pool = backend.pool();
 
     let row: Option<(i64,)> = sqlx::query_as("SELECT COUNT(*) FROM _migrations WHERE version = 1")
-        .fetch_optional(&*pool)
+        .fetch_optional(pool)
         .await
         .unwrap();
 
@@ -17,13 +17,13 @@ async fn test_sqlite_migrations_run_successfully() {
 
 #[tokio::test]
 async fn test_sqlite_migrations_create_tables() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let pool = storage.pool();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let pool = backend.pool();
 
     let tables: Vec<(String,)> = sqlx::query_as(
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
     )
-    .fetch_all(&*pool)
+    .fetch_all(pool)
     .await
     .unwrap();
 
@@ -40,15 +40,15 @@ async fn test_sqlite_migrations_create_tables() {
 
 #[tokio::test]
 async fn test_sqlite_migrations_idempotent() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let pool = storage.pool();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let pool = backend.pool();
 
-    MigrationRunner::run_sqlite(&pool, &registry::sqlite_migrations())
+    MigrationRunner::run_sqlite(pool, &registry::sqlite_migrations())
         .await
         .unwrap();
 
     let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM _migrations")
-        .fetch_one(&*pool)
+        .fetch_one(pool)
         .await
         .unwrap();
 
@@ -57,15 +57,15 @@ async fn test_sqlite_migrations_idempotent() {
 
 #[tokio::test]
 async fn test_sqlite_down_migration() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let pool = storage.pool();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let pool = backend.pool();
 
-    MigrationRunner::down_sqlite(&pool, &registry::sqlite_migrations(), 0)
+    MigrationRunner::down_sqlite(pool, &registry::sqlite_migrations(), 0)
         .await
         .unwrap();
 
     let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM _migrations")
-        .fetch_one(&*pool)
+        .fetch_one(pool)
         .await
         .unwrap();
 
@@ -74,7 +74,7 @@ async fn test_sqlite_down_migration() {
     let tables: Vec<(String,)> = sqlx::query_as(
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != '_migrations'",
     )
-    .fetch_all(&*pool)
+    .fetch_all(pool)
     .await
     .unwrap();
 
@@ -83,13 +83,13 @@ async fn test_sqlite_down_migration() {
 
 #[tokio::test]
 async fn test_sqlite_checksum_mismatch() {
-    let storage = SqliteStorage::new_memory().await.unwrap();
-    let pool = storage.pool();
+    let backend = SqliteBackend::new_memory().await.unwrap();
+    let pool = backend.pool();
 
     let mut migrations = registry::sqlite_migrations();
     migrations[0].up_sql.sqlite = "SELECT 1";
 
-    let result = MigrationRunner::run_sqlite(&pool, &migrations).await;
+    let result = MigrationRunner::run_sqlite(pool, &migrations).await;
 
     assert!(matches!(
         result,
