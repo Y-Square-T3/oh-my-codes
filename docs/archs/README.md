@@ -91,11 +91,17 @@ Configuration is loaded from:
 
 ## Storage
 
-- **SQLite**: Embedded database
-- Data stored in `~/.local/share/omc/data/omc.db`
+- **SQLite**: Embedded database (default)
+- **PostgreSQL**: Remote/local database (future)
+- Data stored in `~/.local/share/omc/data/omc.db` (SQLite)
 - Tables:
+  - `_migrations` - Migration tracking and versioning
   - `channel` - Chat channels
   - `message` - Chat messages
   - `account` - User accounts with OAuth tokens
   - `workspace` - Cached workspace data per account
   - `active_account` - Singleton tracking active account
+  - `provider` - AI model providers
+  - `token_usage` - Token usage tracking
+
+See [Storage System Architecture](./storage-system.md) for detailed documentation on the migration system and database support.
