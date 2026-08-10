@@ -90,17 +90,17 @@ pub async fn test_get_messages_with_before_cursor<B: StorageBackend>(backend: &B
         .send_message(&channel.id, "author-1", "Message 1")
         .await
         .unwrap();
-    
-    // Sleep for 1 second to ensure different timestamps (timestamp has second precision)
-    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-    
+
+    // Small delay to ensure distinct millisecond timestamps
+    tokio::time::sleep(tokio::time::Duration::from_millis(2)).await;
+
     let msg2 = backend
         .send_message(&channel.id, "author-1", "Message 2")
         .await
         .unwrap();
-    
-    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-    
+
+    tokio::time::sleep(tokio::time::Duration::from_millis(2)).await;
+
     let msg3 = backend
         .send_message(&channel.id, "author-1", "Message 3")
         .await

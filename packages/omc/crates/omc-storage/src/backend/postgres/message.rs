@@ -27,7 +27,7 @@ fn map_err(e: sqlx::Error) -> OmcError {
 }
 
 pub(crate) async fn create_channel(pool: &PgPool, name: &str) -> Result<Channel> {
-    let now = chrono::Utc::now().timestamp();
+    let now = chrono::Utc::now().timestamp_millis();
     let id = ulid::Ulid::new().to_string();
     sqlx::query("INSERT INTO channel (id, name, topic, created_at) VALUES ($1, $2, NULL, $3)")
         .bind(&id)
@@ -67,7 +67,7 @@ pub(crate) async fn send_message(
     author_id: &str,
     content: &str,
 ) -> Result<Message> {
-    let now = chrono::Utc::now().timestamp();
+    let now = chrono::Utc::now().timestamp_millis();
     let id = ulid::Ulid::new().to_string();
     sqlx::query(
         "INSERT INTO message (id, channel_id, author_id, content, timestamp, edited_at, reply_to) VALUES ($1, $2, $3, $4, $5, NULL, NULL)",

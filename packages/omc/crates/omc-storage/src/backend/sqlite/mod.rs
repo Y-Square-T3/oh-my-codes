@@ -184,3 +184,25 @@ impl StorageBackend for SqliteBackend {
         token_usage::usage_overview(&self.pool, days).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn map_migration_err_wraps_migration_error() {
+        let migration_err = crate::migrations::MigrationError::MissingDownMigration {
+            version: 1,
+            name: "test_migration".to_string(),
+        };
+        let omc_err = map_migration_err(migration_err);
+
+        match omc_err {
+            OmcError::Storage(msg) => {
+                assert!(msg.contains("Migration error"));
+                assert!(msg.contains("test_migration"));
+            }
+            _ => panic!("Expected OmcError::Storage"),
+        }
+    }
+}

@@ -409,3 +409,127 @@ async fn daily_trend(pool: &SqlitePool, cutoff: i64) -> Result<Vec<DailyUsage>> 
         })
         .collect())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn row_to_token_usage_maps_all_fields() {
+        let row = TokenUsageRow {
+            id: "test-id".to_string(),
+            client: "vscode".to_string(),
+            session_id: "session-123".to_string(),
+            message_id: "msg-456".to_string(),
+            agent: Some("agent-a".to_string()),
+            provider_id: "openai".to_string(),
+            model_id: "gpt-4o".to_string(),
+            input_tokens: 1000,
+            output_tokens: 500,
+            reasoning_tokens: 100,
+            cache_read_tokens: 50,
+            cache_write_tokens: 25,
+            pushed: 1,
+            recorded_at: 1234567890,
+            created_at: 1234567800,
+        };
+
+        let usage = row_to_token_usage(row);
+
+        assert_eq!(usage.id, "test-id");
+        assert_eq!(usage.client, "vscode");
+        assert_eq!(usage.session_id, "session-123");
+        assert_eq!(usage.message_id, "msg-456");
+        assert_eq!(usage.agent, Some("agent-a".to_string()));
+        assert_eq!(usage.provider_id, "openai");
+        assert_eq!(usage.model_id, "gpt-4o");
+        assert_eq!(usage.input_tokens, 1000);
+        assert_eq!(usage.output_tokens, 500);
+        assert_eq!(usage.reasoning_tokens, 100);
+        assert_eq!(usage.cache_read_tokens, 50);
+        assert_eq!(usage.cache_write_tokens, 25);
+        assert!(usage.pushed);
+        assert_eq!(usage.recorded_at, 1234567890);
+        assert_eq!(usage.created_at, 1234567800);
+    }
+
+    #[test]
+    fn row_to_token_usage_handles_null_agent() {
+        let row = TokenUsageRow {
+            id: "test-id".to_string(),
+            client: "vscode".to_string(),
+            session_id: "session-123".to_string(),
+            message_id: "msg-456".to_string(),
+            agent: None,
+            provider_id: "openai".to_string(),
+            model_id: "gpt-4o".to_string(),
+            input_tokens: 1000,
+            output_tokens: 500,
+            reasoning_tokens: 100,
+            cache_read_tokens: 0,
+            cache_write_tokens: 0,
+            pushed: 0,
+            recorded_at: 1234567890,
+            created_at: 1234567800,
+        };
+
+        let usage = row_to_token_usage(row);
+
+        assert_eq!(usage.agent, None);
+        assert!(!usage.pushed);
+    }
+
+    #[test]
+    fn row_to_token_usage_converts_pushed_integer_to_bool() {
+        let row_pushed = TokenUsageRow {
+            id: "test-id".to_string(),
+            client: "vscode".to_string(),
+            session_id: "session-123".to_string(),
+            message_id: "msg-456".to_string(),
+            agent: None,
+            provider_id: "openai".to_string(),
+            model_id: "gpt-4o".to_string(),
+            input_tokens: 1000,
+            output_tokens: 500,
+            reasoning_tokens: 100,
+            cache_read_tokens: 0,
+            cache_write_tokens: 0,
+            pushed: 1,
+            recorded_at: 1234567890,
+            created_at: 1234567800,
+        };
+
+        let row_not_pushed = TokenUsageRow {
+            pushed: 0,
+            ..row_pushed.clone()
+        };
+
+        assert!(row_to_token_usage(row_pushed).pushed);
+        assert!(!row_to_token_usage(row_not_pushed).pushed);
+    }
+
+    #[test]
+    fn cutoff_clause_with_cutoff() {
+        let clause = cutoff_clause(Some(1234567890));
+        assert_eq!(clause, " WHERE recorded_at >= ?");
+    }
+
+    #[test]
+    fn cutoff_clause_without_cutoff() {
+        let clause = cutoff_clause(None);
+        assert_eq!(clause, "");
+    }
+
+    #[test]
+    fn map_err_wraps_sqlx_error() {
+        let sqlx_err = sqlx::Error::PoolTimedOut;
+        let omc_err = map_err(sqlx_err);
+
+        match omc_err {
+            OmcError::Storage(msg) => {
+                assert!(msg.contains("SQLite error"));
+            }
+            _ => panic!("Expected OmcError::Storage"),
+        }
+    }
+}
