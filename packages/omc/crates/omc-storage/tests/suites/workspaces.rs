@@ -39,11 +39,17 @@ pub async fn test_upsert_workspaces_updates_existing<B: StorageBackend>(backend:
     backend.upsert_account(&account).await.unwrap();
 
     let mut workspace = make_workspace(&account.id);
-    backend.upsert_workspaces(&[workspace.clone()]).await.unwrap();
+    backend
+        .upsert_workspaces(&[workspace.clone()])
+        .await
+        .unwrap();
 
     workspace.name = "updated-name".to_string();
     workspace.is_admin = true;
-    backend.upsert_workspaces(&[workspace.clone()]).await.unwrap();
+    backend
+        .upsert_workspaces(&[workspace.clone()])
+        .await
+        .unwrap();
 
     let workspaces = backend.list_workspaces(&account.id).await.unwrap();
     assert_eq!(workspaces.len(), 1);

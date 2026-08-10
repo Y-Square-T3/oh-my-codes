@@ -124,10 +124,15 @@ pub async fn test_set_active_workspace<B: StorageBackend>(backend: &B) {
         .unwrap();
 
     let retrieved = backend.get_account(&account.id).await.unwrap().unwrap();
-    assert_eq!(retrieved.active_workspace_id, Some("workspace-123".to_string()));
+    assert_eq!(
+        retrieved.active_workspace_id,
+        Some("workspace-123".to_string())
+    );
 }
 
 pub async fn test_set_active_workspace_nonexistent_account<B: StorageBackend>(backend: &B) {
-    let result = backend.set_active_workspace("nonexistent", "workspace-123").await;
+    let result = backend
+        .set_active_workspace("nonexistent", "workspace-123")
+        .await;
     assert!(result.is_err());
 }

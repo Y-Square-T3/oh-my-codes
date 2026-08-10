@@ -156,7 +156,10 @@ mod tests {
         assert_eq!(account.access_token, "access-token");
         assert_eq!(account.refresh_token, "refresh-token");
         assert_eq!(account.token_expiry, 1234567890);
-        assert_eq!(account.active_workspace_id, Some("workspace-id".to_string()));
+        assert_eq!(
+            account.active_workspace_id,
+            Some("workspace-id".to_string())
+        );
     }
 
     #[test]

@@ -3,7 +3,16 @@ use omc_storage::StorageBackend;
 use crate::common::builders::make_usage;
 
 pub async fn test_upsert_usage<B: StorageBackend>(backend: &B) {
-    let usage = make_usage("vscode", Some("agent"), "openai", "gpt-4o", 1000, 500, 100, false);
+    let usage = make_usage(
+        "vscode",
+        Some("agent"),
+        "openai",
+        "gpt-4o",
+        1000,
+        500,
+        100,
+        false,
+    );
     backend.upsert_usage(&usage).await.unwrap();
 
     let recent = backend.list_recent(10, 0, None).await.unwrap();
@@ -18,7 +27,16 @@ pub async fn test_upsert_usage<B: StorageBackend>(backend: &B) {
 }
 
 pub async fn test_upsert_usage_conflict_updates<B: StorageBackend>(backend: &B) {
-    let mut usage = make_usage("vscode", Some("agent"), "openai", "gpt-4o", 1000, 500, 100, false);
+    let mut usage = make_usage(
+        "vscode",
+        Some("agent"),
+        "openai",
+        "gpt-4o",
+        1000,
+        500,
+        100,
+        false,
+    );
     backend.upsert_usage(&usage).await.unwrap();
 
     usage.input_tokens = 2000;
@@ -84,7 +102,10 @@ pub async fn test_mark_pushed<B: StorageBackend>(backend: &B) {
     backend.upsert_usage(&usage1).await.unwrap();
     backend.upsert_usage(&usage2).await.unwrap();
 
-    backend.mark_pushed(std::slice::from_ref(&usage1.id)).await.unwrap();
+    backend
+        .mark_pushed(std::slice::from_ref(&usage1.id))
+        .await
+        .unwrap();
 
     let unpushed = backend.find_unpushed(10).await.unwrap();
     assert_eq!(unpushed.len(), 1);
@@ -182,8 +203,26 @@ pub async fn test_usage_summary_empty<B: StorageBackend>(backend: &B) {
 }
 
 pub async fn test_usage_summary<B: StorageBackend>(backend: &B) {
-    let usage1 = make_usage("vscode", Some("agent"), "openai", "gpt-4o", 1000, 500, 100, false);
-    let usage2 = make_usage("cursor", Some("agent"), "openai", "gpt-4o", 2000, 1000, 200, false);
+    let usage1 = make_usage(
+        "vscode",
+        Some("agent"),
+        "openai",
+        "gpt-4o",
+        1000,
+        500,
+        100,
+        false,
+    );
+    let usage2 = make_usage(
+        "cursor",
+        Some("agent"),
+        "openai",
+        "gpt-4o",
+        2000,
+        1000,
+        200,
+        false,
+    );
     let usage3 = make_usage("vim", None, "anthropic", "claude", 3000, 1500, 300, false);
 
     backend.upsert_usage(&usage1).await.unwrap();
