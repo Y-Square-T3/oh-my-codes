@@ -79,3 +79,17 @@
   - Internal API types in `omc-api/src/types.rs` (CLI ↔ daemon communication)
   - Route request/response types in `omc-server/src/routes/`
   - Core types in `omc-core/src/types.rs` and `omc-core/src/account.rs` that cross API boundaries
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` at repo root, `docs/adr/` for decisions. See `docs/agents/domain.md`.
