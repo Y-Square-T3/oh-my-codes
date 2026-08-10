@@ -1,6 +1,7 @@
 mod account;
 mod message;
 mod model;
+mod token_cost;
 mod token_usage;
 mod workspace;
 
@@ -10,7 +11,7 @@ use async_trait::async_trait;
 use omc_core::account::{Account, Workspace};
 use omc_core::error::{OmcError, Result};
 use omc_core::model::Provider;
-use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
+use omc_core::token_usage::{TokenCost, TokenUsage, TokenUsageOverview, UsageSummary};
 use omc_core::types::{Channel, Message};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 
@@ -168,5 +169,13 @@ impl StorageBackend for PgBackend {
 
     async fn usage_overview(&self, days: Option<i64>) -> Result<TokenUsageOverview> {
         token_usage::usage_overview(&self.pool, days).await
+    }
+
+    async fn upsert_token_cost(&self, cost: &TokenCost) -> Result<()> {
+        token_cost::upsert_token_cost(&self.pool, cost).await
+    }
+
+    async fn get_token_cost(&self, usage_id: &str) -> Result<Option<TokenCost>> {
+        token_cost::get_token_cost(&self.pool, usage_id).await
     }
 }

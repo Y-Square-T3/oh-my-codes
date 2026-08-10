@@ -4,7 +4,7 @@ use axum::Json;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary, generate_id};
+use omc_core::token_usage::{TokenCost, TokenUsage, TokenUsageOverview, UsageSummary, generate_id};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -54,6 +54,21 @@ pub struct TokenUsagePushResponse {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct TokenCostRecordResponse {
+    pub usage_id: String,
+    pub input_cost_micros: i64,
+    pub output_cost_micros: i64,
+    pub reasoning_cost_micros: i64,
+    pub cache_read_cost_micros: i64,
+    pub cache_write_cost_micros: i64,
+    pub audio_input_cost_micros: i64,
+    pub video_input_cost_micros: i64,
+    pub image_input_cost_micros: i64,
+    pub total_cost_micros: i64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenUsageRecordResponse {
     pub id: String,
     pub workspace_id: Option<String>,
@@ -73,6 +88,8 @@ pub struct TokenUsageRecordResponse {
     pub pushed: bool,
     pub recorded_at: i64,
     pub created_at: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cost: Option<TokenCostRecordResponse>,
 }
 
 #[derive(Debug, Serialize)]
@@ -188,7 +205,11 @@ pub async fn list_handler(
         .list_recent(limit, offset, pushed)
         .await?;
     let total = state.token_usage_service.count_all(pushed).await?;
-    let response_records = records.into_iter().map(to_record_response).collect();
+    let mut response_records = Vec::with_capacity(records.len());
+    for usage in records {
+        let cost = state.token_usage_service.get_cost(&usage.id).await?;
+        response_records.push(to_record_response(usage, cost));
+    }
     Ok(Json(TokenUsageListResponse {
         records: response_records,
         total,
@@ -214,7 +235,7 @@ pub async fn overview_handler(
     Ok(Json(overview))
 }
 
-fn to_record_response(u: TokenUsage) -> TokenUsageRecordResponse {
+fn to_record_response(u: TokenUsage, cost: Option<TokenCost>) -> TokenUsageRecordResponse {
     TokenUsageRecordResponse {
         id: u.id,
         workspace_id: u.workspace_id,
@@ -234,6 +255,18 @@ fn to_record_response(u: TokenUsage) -> TokenUsageRecordResponse {
         pushed: u.pushed,
         recorded_at: u.recorded_at,
         created_at: u.created_at,
+        cost: cost.map(|c| TokenCostRecordResponse {
+            usage_id: c.usage_id,
+            input_cost_micros: c.input_cost_micros,
+            output_cost_micros: c.output_cost_micros,
+            reasoning_cost_micros: c.reasoning_cost_micros,
+            cache_read_cost_micros: c.cache_read_cost_micros,
+            cache_write_cost_micros: c.cache_write_cost_micros,
+            audio_input_cost_micros: c.audio_input_cost_micros,
+            video_input_cost_micros: c.video_input_cost_micros,
+            image_input_cost_micros: c.image_input_cost_micros,
+            total_cost_micros: c.total_cost_micros,
+        }),
     }
 }
 

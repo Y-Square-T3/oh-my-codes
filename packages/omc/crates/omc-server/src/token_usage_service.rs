@@ -1,7 +1,10 @@
 use crate::account_service::AccountService;
 use crate::server_client::{OmcServerClient, TokenUsagePayload};
 use omc_core::error::{OmcError, Result};
-use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
+use omc_core::model::ModelCost;
+use omc_core::token_usage::{
+    TokenCost, TokenUsage, TokenUsageOverview, UsageSummary, calculate_cost,
+};
 use omc_storage::StorageBackend;
 use std::sync::Arc;
 use tokio::sync::Notify;
@@ -41,7 +44,32 @@ impl TokenUsageService {
     }
 
     pub async fn record(&self, usage: &TokenUsage) -> Result<()> {
-        self.backend.upsert_usage(usage).await
+        self.backend.upsert_usage(usage).await?;
+        if let Some(model_cost) = self.find_model_cost(&usage.model).await? {
+            let cost = calculate_cost(usage, &model_cost);
+            self.backend.upsert_token_cost(&cost).await?;
+        }
+        Ok(())
+    }
+
+    async fn find_model_cost(&self, model_name: &str) -> Result<Option<ModelCost>> {
+        let account_id = match self.account_service.active().await? {
+            Some(account) => account.id,
+            None => return Ok(None),
+        };
+        let providers = self.backend.list_providers(&account_id).await?;
+        for provider in &providers {
+            for model in &provider.models {
+                if model.id == model_name {
+                    return Ok(model.cost.clone());
+                }
+            }
+        }
+        Ok(None)
+    }
+
+    pub async fn get_cost(&self, usage_id: &str) -> Result<Option<TokenCost>> {
+        self.backend.get_token_cost(usage_id).await
     }
 
     pub async fn status(&self) -> Result<StatusResult> {

@@ -21,6 +21,14 @@ async fn test_sqlite_migrations_run_successfully() {
 
     assert!(row2.is_some());
     assert_eq!(row2.unwrap().0, 1);
+
+    let row3: Option<(i64,)> = sqlx::query_as("SELECT COUNT(*) FROM _migrations WHERE version = 3")
+        .fetch_optional(pool)
+        .await
+        .unwrap();
+
+    assert!(row3.is_some());
+    assert_eq!(row3.unwrap().0, 1);
 }
 
 #[tokio::test]
@@ -44,6 +52,7 @@ async fn test_sqlite_migrations_create_tables() {
     assert!(table_names.contains(&"active_account".to_string()));
     assert!(table_names.contains(&"provider".to_string()));
     assert!(table_names.contains(&"token_usage".to_string()));
+    assert!(table_names.contains(&"token_cost".to_string()));
 }
 
 #[tokio::test]
@@ -60,7 +69,7 @@ async fn test_sqlite_migrations_idempotent() {
         .await
         .unwrap();
 
-    assert_eq!(row.0, 2);
+    assert_eq!(row.0, 3);
 }
 
 #[tokio::test]

@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use omc_core::account::{Account, Workspace};
 use omc_core::error::Result;
 use omc_core::model::Provider;
-use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
+use omc_core::token_usage::{TokenCost, TokenUsage, TokenUsageOverview, UsageSummary};
 use omc_core::types::{Channel, Message};
 
 #[async_trait]
@@ -53,4 +53,7 @@ pub trait StorageBackend: Send + Sync {
     async fn cleanup_old_pushed(&self, retention_days: i64) -> Result<usize>;
     async fn usage_summary(&self, days: Option<i64>) -> Result<Vec<UsageSummary>>;
     async fn usage_overview(&self, days: Option<i64>) -> Result<TokenUsageOverview>;
+
+    async fn upsert_token_cost(&self, cost: &TokenCost) -> Result<()>;
+    async fn get_token_cost(&self, usage_id: &str) -> Result<Option<TokenCost>>;
 }

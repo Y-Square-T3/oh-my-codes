@@ -254,6 +254,21 @@ pub struct TokenUsagePushResponse {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct TokenCostRecordResponse {
+    pub usage_id: String,
+    pub input_cost_micros: i64,
+    pub output_cost_micros: i64,
+    pub reasoning_cost_micros: i64,
+    pub cache_read_cost_micros: i64,
+    pub cache_write_cost_micros: i64,
+    pub audio_input_cost_micros: i64,
+    pub video_input_cost_micros: i64,
+    pub image_input_cost_micros: i64,
+    pub total_cost_micros: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TokenUsageRecordResponse {
     pub id: String,
     pub workspace_id: Option<String>,
@@ -273,6 +288,8 @@ pub struct TokenUsageRecordResponse {
     pub pushed: bool,
     pub recorded_at: i64,
     pub created_at: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cost: Option<TokenCostRecordResponse>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
