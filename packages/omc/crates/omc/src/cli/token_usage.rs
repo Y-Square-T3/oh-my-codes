@@ -130,12 +130,11 @@ async fn token_usage_list_effect(
     let mut table = Table::new();
     let mut headers = vec![
         Cell::new("").set_alignment(CellAlignment::Center),
-        Cell::new("Client"),
         Cell::new("Agent"),
         Cell::new("Model"),
     ];
     if detail {
-        headers.push(Cell::new("Provider"));
+        headers.push(Cell::new("Workspace"));
     }
     headers.push(Cell::new("Input").set_alignment(CellAlignment::Right));
     headers.push(Cell::new("Output").set_alignment(CellAlignment::Right));
@@ -163,8 +162,7 @@ async fn token_usage_list_effect(
             ui::inactive_cell()
         };
 
-        let agent_display = r.agent.as_deref().unwrap_or("-");
-        let model_display = ui::truncate_model(&r.model_id, 20);
+        let model_display = ui::truncate_model(&r.model, 20);
 
         let time_display = chrono::DateTime::from_timestamp_millis(r.recorded_at)
             .map(|dt| dt.format("%m-%d %H:%M").to_string())
@@ -172,12 +170,11 @@ async fn token_usage_list_effect(
 
         let mut row = vec![
             status_cell,
-            Cell::new(&r.client),
-            Cell::new(agent_display),
+            Cell::new(&r.agent),
             ui::cyan_cell(&model_display),
         ];
         if detail {
-            row.push(Cell::new(&r.provider_id));
+            row.push(Cell::new(r.workspace_id.as_deref().unwrap_or("-")));
         }
         row.push(Cell::new(r.input_tokens).set_alignment(CellAlignment::Right));
         row.push(Cell::new(r.output_tokens).set_alignment(CellAlignment::Right));
@@ -327,7 +324,7 @@ async fn token_usage_summary_effect(
             .set_width(70);
 
         for (i, m) in overview.top_models.iter().enumerate() {
-            let model_display = ui::truncate_model(&m.model_id, 20);
+            let model_display = ui::truncate_model(&m.model, 20);
             table.add_row(vec![
                 Cell::new(i + 1).fg(TColor::DarkGrey),
                 ui::cyan_cell(&model_display),
@@ -360,32 +357,6 @@ async fn token_usage_summary_effect(
                 Cell::new(ui::format_human(a.request_count)).fg(TColor::Green),
                 Cell::new(ui::format_human(a.total_input)),
                 Cell::new(ui::format_human(a.total_output)),
-            ]);
-        }
-        println!("{table}");
-        println!();
-    }
-
-    if !overview.top_clients.is_empty() {
-        println!("  {}", style("Top clients").bold());
-        let mut table = Table::new();
-        table
-            .set_header(vec![
-                Cell::new(""),
-                Cell::new("Client"),
-                Cell::new("Requests").set_alignment(CellAlignment::Right),
-                Cell::new("Input").set_alignment(CellAlignment::Right),
-                Cell::new("Output").set_alignment(CellAlignment::Right),
-            ])
-            .set_width(70);
-
-        for (i, c) in overview.top_clients.iter().enumerate() {
-            table.add_row(vec![
-                Cell::new(i + 1).fg(TColor::DarkGrey),
-                ui::cyan_cell(&c.label),
-                Cell::new(ui::format_human(c.request_count)).fg(TColor::Green),
-                Cell::new(ui::format_human(c.total_input)),
-                Cell::new(ui::format_human(c.total_output)),
             ]);
         }
         println!("{table}");

@@ -1,5 +1,6 @@
 pub mod registry;
 mod v1_initial_schema;
+mod v2_token_usage_schema;
 
 use sha2::{Digest, Sha256};
 use std::fmt;

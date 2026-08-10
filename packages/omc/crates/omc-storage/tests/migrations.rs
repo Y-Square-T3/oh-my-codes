@@ -13,6 +13,14 @@ async fn test_sqlite_migrations_run_successfully() {
 
     assert!(row.is_some());
     assert_eq!(row.unwrap().0, 1);
+
+    let row2: Option<(i64,)> = sqlx::query_as("SELECT COUNT(*) FROM _migrations WHERE version = 2")
+        .fetch_optional(pool)
+        .await
+        .unwrap();
+
+    assert!(row2.is_some());
+    assert_eq!(row2.unwrap().0, 1);
 }
 
 #[tokio::test]
@@ -52,7 +60,7 @@ async fn test_sqlite_migrations_idempotent() {
         .await
         .unwrap();
 
-    assert_eq!(row.0, 1);
+    assert_eq!(row.0, 2);
 }
 
 #[tokio::test]

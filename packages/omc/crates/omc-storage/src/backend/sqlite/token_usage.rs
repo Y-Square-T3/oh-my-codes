@@ -8,17 +8,20 @@ use sqlx::{FromRow, Row, SqlitePool};
 #[derive(Debug, Clone, FromRow)]
 struct TokenUsageRow {
     id: String,
-    client: String,
+    workspace_id: Option<String>,
     session_id: String,
-    message_id: String,
-    agent: Option<String>,
-    provider_id: String,
-    model_id: String,
+    agent: String,
+    model: String,
+    metadata: Option<String>,
     input_tokens: i64,
     output_tokens: i64,
     reasoning_tokens: i64,
     cache_read_tokens: i64,
     cache_write_tokens: i64,
+    audio_input_tokens: i64,
+    video_input_tokens: i64,
+    image_input_tokens: i64,
+    total_tokens: i64,
     pushed: i32,
     recorded_at: i64,
     created_at: i64,
@@ -31,17 +34,20 @@ fn map_err(e: sqlx::Error) -> OmcError {
 fn row_to_token_usage(r: TokenUsageRow) -> TokenUsage {
     TokenUsage {
         id: r.id,
-        client: r.client,
+        workspace_id: r.workspace_id,
         session_id: r.session_id,
-        message_id: r.message_id,
         agent: r.agent,
-        provider_id: r.provider_id,
-        model_id: r.model_id,
+        model: r.model,
+        metadata: r.metadata,
         input_tokens: r.input_tokens,
         output_tokens: r.output_tokens,
         reasoning_tokens: r.reasoning_tokens,
         cache_read_tokens: r.cache_read_tokens,
         cache_write_tokens: r.cache_write_tokens,
+        audio_input_tokens: r.audio_input_tokens,
+        video_input_tokens: r.video_input_tokens,
+        image_input_tokens: r.image_input_tokens,
+        total_tokens: r.total_tokens,
         pushed: r.pushed != 0,
         recorded_at: r.recorded_at,
         created_at: r.created_at,
@@ -68,38 +74,47 @@ async fn fetch_with_optional_cutoff(
     }
 }
 
+const ALL_COLUMNS: &str = "id, workspace_id, session_id, agent, model, metadata, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, audio_input_tokens, video_input_tokens, image_input_tokens, total_tokens, pushed, recorded_at, created_at";
+
 pub(crate) async fn upsert_usage(pool: &SqlitePool, usage: &TokenUsage) -> Result<()> {
     let pushed = if usage.pushed { 1 } else { 0 };
     sqlx::query(
-        "INSERT INTO token_usage (id, client, session_id, message_id, agent, provider_id, model_id, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, pushed, recorded_at, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(message_id) DO UPDATE SET
-            client = excluded.client,
+        "INSERT INTO token_usage (id, workspace_id, session_id, agent, model, metadata, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, audio_input_tokens, video_input_tokens, image_input_tokens, total_tokens, pushed, recorded_at, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+            workspace_id = excluded.workspace_id,
             session_id = excluded.session_id,
             agent = excluded.agent,
-            provider_id = excluded.provider_id,
-            model_id = excluded.model_id,
+            model = excluded.model,
+            metadata = excluded.metadata,
             input_tokens = excluded.input_tokens,
             output_tokens = excluded.output_tokens,
             reasoning_tokens = excluded.reasoning_tokens,
             cache_read_tokens = excluded.cache_read_tokens,
             cache_write_tokens = excluded.cache_write_tokens,
+            audio_input_tokens = excluded.audio_input_tokens,
+            video_input_tokens = excluded.video_input_tokens,
+            image_input_tokens = excluded.image_input_tokens,
+            total_tokens = excluded.total_tokens,
             pushed = excluded.pushed,
             recorded_at = excluded.recorded_at,
             created_at = excluded.created_at",
     )
     .bind(&usage.id)
-    .bind(&usage.client)
+    .bind(&usage.workspace_id)
     .bind(&usage.session_id)
-    .bind(&usage.message_id)
     .bind(&usage.agent)
-    .bind(&usage.provider_id)
-    .bind(&usage.model_id)
+    .bind(&usage.model)
+    .bind(&usage.metadata)
     .bind(usage.input_tokens)
     .bind(usage.output_tokens)
     .bind(usage.reasoning_tokens)
     .bind(usage.cache_read_tokens)
     .bind(usage.cache_write_tokens)
+    .bind(usage.audio_input_tokens)
+    .bind(usage.video_input_tokens)
+    .bind(usage.image_input_tokens)
+    .bind(usage.total_tokens)
     .bind(pushed)
     .bind(usage.recorded_at)
     .bind(usage.created_at)
@@ -110,14 +125,14 @@ pub(crate) async fn upsert_usage(pool: &SqlitePool, usage: &TokenUsage) -> Resul
 }
 
 pub(crate) async fn find_unpushed(pool: &SqlitePool, limit: usize) -> Result<Vec<TokenUsage>> {
-    let rows: Vec<TokenUsageRow> = sqlx::query_as(
-        "SELECT id, client, session_id, message_id, agent, provider_id, model_id, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, pushed, recorded_at, created_at
-         FROM token_usage WHERE pushed = 0 ORDER BY recorded_at ASC LIMIT ?",
-    )
-    .bind(limit as i64)
-    .fetch_all(pool)
-    .await
-    .map_err(map_err)?;
+    let sql = format!(
+        "SELECT {ALL_COLUMNS} FROM token_usage WHERE pushed = 0 ORDER BY recorded_at ASC LIMIT ?"
+    );
+    let rows: Vec<TokenUsageRow> = sqlx::query_as(&sql)
+        .bind(limit as i64)
+        .fetch_all(pool)
+        .await
+        .map_err(map_err)?;
     Ok(rows.into_iter().map(row_to_token_usage).collect())
 }
 
@@ -159,8 +174,7 @@ pub(crate) async fn list_recent(
         None => "",
     };
     let sql = format!(
-        "SELECT id, client, session_id, message_id, agent, provider_id, model_id, input_tokens, output_tokens, reasoning_tokens, cache_read_tokens, cache_write_tokens, pushed, recorded_at, created_at
-         FROM token_usage{where_clause} ORDER BY recorded_at DESC LIMIT ? OFFSET ?",
+        "SELECT {ALL_COLUMNS} FROM token_usage{where_clause} ORDER BY recorded_at DESC LIMIT ? OFFSET ?",
     );
     let rows: Vec<TokenUsageRow> = sqlx::query_as(&sql)
         .bind(limit as i64)
@@ -198,15 +212,15 @@ pub(crate) async fn usage_summary(
 ) -> Result<Vec<UsageSummary>> {
     let cutoff = days.map(|d| chrono::Utc::now().timestamp_millis() - (d * 86_400_000));
     let sql = format!(
-        "SELECT provider_id, model_id,
+        "SELECT model,
             SUM(input_tokens) as total_input,
             SUM(output_tokens) as total_output,
             SUM(reasoning_tokens) as total_reasoning,
             SUM(cache_read_tokens) as total_cache_read,
             SUM(cache_write_tokens) as total_cache_write,
             COUNT(*) as request_count
-         FROM token_usage{}
-         GROUP BY provider_id, model_id",
+          FROM token_usage{}
+          GROUP BY model",
         cutoff_clause(cutoff)
     );
     let rows = fetch_with_optional_cutoff(pool, &sql, cutoff)
@@ -215,8 +229,7 @@ pub(crate) async fn usage_summary(
     Ok(rows
         .into_iter()
         .map(|r| UsageSummary {
-            provider_id: r.get("provider_id"),
-            model_id: r.get("model_id"),
+            model: r.get("model"),
             total_input: r.get("total_input"),
             total_output: r.get("total_output"),
             total_reasoning: r.get("total_reasoning"),
@@ -237,14 +250,12 @@ pub(crate) async fn usage_overview(
     let headline = headline_stats(pool, cutoff).await?;
     let top_models = top_models(pool, cutoff).await?;
     let top_agents = top_agents(pool, cutoff).await?;
-    let top_clients = top_clients(pool, cutoff).await?;
     let trend = daily_trend(pool, seven_days_ago).await?;
 
     Ok(TokenUsageOverview {
         headline,
         top_models,
         top_agents,
-        top_clients,
         trend,
     })
 }
@@ -258,7 +269,7 @@ async fn headline_stats(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Headli
             SUM(reasoning_tokens) as reasoning_tokens,
             SUM(cache_read_tokens) as cache_read_tokens,
             SUM(cache_write_tokens) as cache_write_tokens
-         FROM token_usage{}",
+          FROM token_usage{}",
         cutoff_clause(cutoff)
     );
     let row: SqliteRow = fetch_with_optional_cutoff(pool, &sql, cutoff)
@@ -289,17 +300,17 @@ async fn headline_stats(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Headli
 
 async fn top_models(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageSummary>> {
     let sql = format!(
-        "SELECT provider_id, model_id,
+        "SELECT model,
             SUM(input_tokens) as total_input,
             SUM(output_tokens) as total_output,
             SUM(reasoning_tokens) as total_reasoning,
             SUM(cache_read_tokens) as total_cache_read,
             SUM(cache_write_tokens) as total_cache_write,
             COUNT(*) as request_count
-         FROM token_usage{}
-         GROUP BY provider_id, model_id
-         ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
-         LIMIT 3",
+          FROM token_usage{}
+          GROUP BY model
+          ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+          LIMIT 3",
         cutoff_clause(cutoff)
     );
     let rows = fetch_with_optional_cutoff(pool, &sql, cutoff)
@@ -308,8 +319,7 @@ async fn top_models(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageS
     Ok(rows
         .into_iter()
         .map(|r| UsageSummary {
-            provider_id: r.get("provider_id"),
-            model_id: r.get("model_id"),
+            model: r.get("model"),
             total_input: r.get("total_input"),
             total_output: r.get("total_output"),
             total_reasoning: r.get("total_reasoning"),
@@ -322,49 +332,17 @@ async fn top_models(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageS
 
 async fn top_agents(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageGroup>> {
     let sql = format!(
-        "SELECT COALESCE(agent, 'unknown') as label,
+        "SELECT agent as label,
             SUM(input_tokens) as total_input,
             SUM(output_tokens) as total_output,
             SUM(reasoning_tokens) as total_reasoning,
             SUM(cache_read_tokens) as total_cache_read,
             SUM(cache_write_tokens) as total_cache_write,
             COUNT(*) as request_count
-         FROM token_usage{}
-         GROUP BY label
-         ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
-         LIMIT 3",
-        cutoff_clause(cutoff)
-    );
-    let rows = fetch_with_optional_cutoff(pool, &sql, cutoff)
-        .await
-        .map_err(map_err)?;
-    Ok(rows
-        .into_iter()
-        .map(|r| UsageGroup {
-            label: r.get("label"),
-            total_input: r.get("total_input"),
-            total_output: r.get("total_output"),
-            total_reasoning: r.get("total_reasoning"),
-            total_cache_read: r.get("total_cache_read"),
-            total_cache_write: r.get("total_cache_write"),
-            request_count: r.get("request_count"),
-        })
-        .collect())
-}
-
-async fn top_clients(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageGroup>> {
-    let sql = format!(
-        "SELECT client as label,
-            SUM(input_tokens) as total_input,
-            SUM(output_tokens) as total_output,
-            SUM(reasoning_tokens) as total_reasoning,
-            SUM(cache_read_tokens) as total_cache_read,
-            SUM(cache_write_tokens) as total_cache_write,
-            COUNT(*) as request_count
-         FROM token_usage{}
-         GROUP BY client
-         ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
-         LIMIT 3",
+          FROM token_usage{}
+          GROUP BY agent
+          ORDER BY (SUM(input_tokens) + SUM(output_tokens) + SUM(reasoning_tokens)) DESC
+          LIMIT 3",
         cutoff_clause(cutoff)
     );
     let rows = fetch_with_optional_cutoff(pool, &sql, cutoff)
@@ -389,11 +367,11 @@ async fn daily_trend(pool: &SqlitePool, cutoff: i64) -> Result<Vec<DailyUsage>> 
         "SELECT
             DATE(recorded_at / 1000, 'unixepoch') as date,
             COUNT(*) as requests,
-            SUM(input_tokens + output_tokens + reasoning_tokens) as total_tokens
-         FROM token_usage
-         WHERE recorded_at >= ?
-         GROUP BY date
-         ORDER BY date",
+            SUM(total_tokens) as total_tokens
+          FROM token_usage
+          WHERE recorded_at >= ?
+          GROUP BY date
+          ORDER BY date",
     )
     .bind(cutoff)
     .fetch_all(pool)
@@ -418,17 +396,20 @@ mod tests {
     fn row_to_token_usage_maps_all_fields() {
         let row = TokenUsageRow {
             id: "test-id".to_string(),
-            client: "vscode".to_string(),
+            workspace_id: Some("ws-1".to_string()),
             session_id: "session-123".to_string(),
-            message_id: "msg-456".to_string(),
-            agent: Some("agent-a".to_string()),
-            provider_id: "openai".to_string(),
-            model_id: "gpt-4o".to_string(),
+            agent: "vscode/agent-a".to_string(),
+            model: "openai/gpt-4o".to_string(),
+            metadata: Some(r#"{"messageId":"msg-456"}"#.to_string()),
             input_tokens: 1000,
             output_tokens: 500,
             reasoning_tokens: 100,
             cache_read_tokens: 50,
             cache_write_tokens: 25,
+            audio_input_tokens: 0,
+            video_input_tokens: 0,
+            image_input_tokens: 10,
+            total_tokens: 1685,
             pushed: 1,
             recorded_at: 1234567890,
             created_at: 1234567800,
@@ -437,37 +418,46 @@ mod tests {
         let usage = row_to_token_usage(row);
 
         assert_eq!(usage.id, "test-id");
-        assert_eq!(usage.client, "vscode");
+        assert_eq!(usage.workspace_id, Some("ws-1".to_string()));
         assert_eq!(usage.session_id, "session-123");
-        assert_eq!(usage.message_id, "msg-456");
-        assert_eq!(usage.agent, Some("agent-a".to_string()));
-        assert_eq!(usage.provider_id, "openai");
-        assert_eq!(usage.model_id, "gpt-4o");
+        assert_eq!(usage.agent, "vscode/agent-a");
+        assert_eq!(usage.model, "openai/gpt-4o");
+        assert_eq!(
+            usage.metadata,
+            Some(r#"{"messageId":"msg-456"}"#.to_string())
+        );
         assert_eq!(usage.input_tokens, 1000);
         assert_eq!(usage.output_tokens, 500);
         assert_eq!(usage.reasoning_tokens, 100);
         assert_eq!(usage.cache_read_tokens, 50);
         assert_eq!(usage.cache_write_tokens, 25);
+        assert_eq!(usage.audio_input_tokens, 0);
+        assert_eq!(usage.video_input_tokens, 0);
+        assert_eq!(usage.image_input_tokens, 10);
+        assert_eq!(usage.total_tokens, 1685);
         assert!(usage.pushed);
         assert_eq!(usage.recorded_at, 1234567890);
         assert_eq!(usage.created_at, 1234567800);
     }
 
     #[test]
-    fn row_to_token_usage_handles_null_agent() {
+    fn row_to_token_usage_handles_null_workspace_and_metadata() {
         let row = TokenUsageRow {
             id: "test-id".to_string(),
-            client: "vscode".to_string(),
+            workspace_id: None,
             session_id: "session-123".to_string(),
-            message_id: "msg-456".to_string(),
-            agent: None,
-            provider_id: "openai".to_string(),
-            model_id: "gpt-4o".to_string(),
+            agent: "vscode/agent-a".to_string(),
+            model: "openai/gpt-4o".to_string(),
+            metadata: None,
             input_tokens: 1000,
             output_tokens: 500,
             reasoning_tokens: 100,
             cache_read_tokens: 0,
             cache_write_tokens: 0,
+            audio_input_tokens: 0,
+            video_input_tokens: 0,
+            image_input_tokens: 0,
+            total_tokens: 1600,
             pushed: 0,
             recorded_at: 1234567890,
             created_at: 1234567800,
@@ -475,7 +465,8 @@ mod tests {
 
         let usage = row_to_token_usage(row);
 
-        assert_eq!(usage.agent, None);
+        assert_eq!(usage.workspace_id, None);
+        assert_eq!(usage.metadata, None);
         assert!(!usage.pushed);
     }
 
@@ -483,17 +474,20 @@ mod tests {
     fn row_to_token_usage_converts_pushed_integer_to_bool() {
         let row_pushed = TokenUsageRow {
             id: "test-id".to_string(),
-            client: "vscode".to_string(),
+            workspace_id: None,
             session_id: "session-123".to_string(),
-            message_id: "msg-456".to_string(),
-            agent: None,
-            provider_id: "openai".to_string(),
-            model_id: "gpt-4o".to_string(),
+            agent: "vscode/agent-a".to_string(),
+            model: "openai/gpt-4o".to_string(),
+            metadata: None,
             input_tokens: 1000,
             output_tokens: 500,
             reasoning_tokens: 100,
             cache_read_tokens: 0,
             cache_write_tokens: 0,
+            audio_input_tokens: 0,
+            video_input_tokens: 0,
+            image_input_tokens: 0,
+            total_tokens: 1600,
             pushed: 1,
             recorded_at: 1234567890,
             created_at: 1234567800,

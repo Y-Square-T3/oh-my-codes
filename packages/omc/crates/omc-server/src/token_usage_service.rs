@@ -85,19 +85,32 @@ impl TokenUsageService {
 
             let payload: Vec<TokenUsagePayload> = unpushed
                 .iter()
-                .map(|u| TokenUsagePayload {
-                    model: format!("{}/{}", u.provider_id, u.model_id),
-                    prompt_tokens: u.input_tokens,
-                    completion_tokens: u.output_tokens,
-                    reasoning_tokens: u.reasoning_tokens,
-                    cache_read_tokens: u.cache_read_tokens,
-                    cache_write_tokens: u.cache_write_tokens,
-                    request_id: u.message_id.clone(),
-                    session_id: u.session_id.clone(),
-                    agent: u.agent.clone(),
-                    created_at: chrono::DateTime::from_timestamp_millis(u.recorded_at)
-                        .map(|dt| dt.to_rfc3339())
-                        .unwrap_or_default(),
+                .map(|u| {
+                    let request_id = u
+                        .metadata
+                        .as_ref()
+                        .and_then(|m| serde_json::from_str::<serde_json::Value>(m).ok())
+                        .and_then(|v| v.get("messageId")?.as_str().map(String::from))
+                        .unwrap_or_default();
+                    TokenUsagePayload {
+                        model: u.model.clone(),
+                        prompt_tokens: u.input_tokens,
+                        completion_tokens: u.output_tokens,
+                        reasoning_tokens: u.reasoning_tokens,
+                        cache_read_tokens: u.cache_read_tokens,
+                        cache_write_tokens: u.cache_write_tokens,
+                        audio_input_tokens: u.audio_input_tokens,
+                        video_input_tokens: u.video_input_tokens,
+                        image_input_tokens: u.image_input_tokens,
+                        total_tokens: u.total_tokens,
+                        request_id,
+                        session_id: u.session_id.clone(),
+                        agent: u.agent.clone(),
+                        workspace_id: u.workspace_id.clone(),
+                        created_at: chrono::DateTime::from_timestamp_millis(u.recorded_at)
+                            .map(|dt| dt.to_rfc3339())
+                            .unwrap_or_default(),
+                    }
                 })
                 .collect();
 

@@ -4,20 +4,21 @@ use axum::Json;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary};
+use omc_core::token_usage::{TokenUsage, TokenUsageOverview, UsageSummary, generate_id};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RecordTokenUsageRequest {
-    pub client: String,
+    pub agent: String,
+    pub model: String,
     pub session_id: String,
     pub message_id: String,
     #[serde(default)]
-    pub agent: Option<String>,
-    pub provider_id: String,
-    pub model_id: String,
+    pub workspace_id: Option<String>,
+    #[serde(default)]
+    pub metadata: Option<String>,
     pub input_tokens: i64,
     pub output_tokens: i64,
     #[serde(default)]
@@ -26,6 +27,12 @@ pub struct RecordTokenUsageRequest {
     pub cache_read_tokens: i64,
     #[serde(default)]
     pub cache_write_tokens: i64,
+    #[serde(default)]
+    pub audio_input_tokens: i64,
+    #[serde(default)]
+    pub video_input_tokens: i64,
+    #[serde(default)]
+    pub image_input_tokens: i64,
     #[serde(default)]
     pub recorded_at: Option<i64>,
 }
@@ -49,17 +56,20 @@ pub struct TokenUsagePushResponse {
 #[serde(rename_all = "camelCase")]
 pub struct TokenUsageRecordResponse {
     pub id: String,
-    pub client: String,
+    pub workspace_id: Option<String>,
     pub session_id: String,
-    pub message_id: String,
-    pub agent: Option<String>,
-    pub provider_id: String,
-    pub model_id: String,
+    pub agent: String,
+    pub model: String,
+    pub metadata: Option<String>,
     pub input_tokens: i64,
     pub output_tokens: i64,
     pub reasoning_tokens: i64,
     pub cache_read_tokens: i64,
     pub cache_write_tokens: i64,
+    pub audio_input_tokens: i64,
+    pub video_input_tokens: i64,
+    pub image_input_tokens: i64,
+    pub total_tokens: i64,
     pub pushed: bool,
     pub recorded_at: i64,
     pub created_at: i64,
@@ -75,8 +85,7 @@ pub struct TokenUsageListResponse {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UsageSummaryResponse {
-    pub provider_id: String,
-    pub model_id: String,
+    pub model: String,
     pub total_input: i64,
     pub total_output: i64,
     pub total_reasoning: i64,
@@ -110,19 +119,34 @@ pub async fn record_handler(
     Json(body): Json<RecordTokenUsageRequest>,
 ) -> std::result::Result<impl IntoResponse, AppError> {
     let now_ms = chrono::Utc::now().timestamp_millis();
+    let id = generate_id(&body.agent, &body.message_id);
+    let total_tokens = body.input_tokens
+        + body.output_tokens
+        + body.reasoning_tokens
+        + body.cache_read_tokens
+        + body.cache_write_tokens
+        + body.audio_input_tokens
+        + body.video_input_tokens
+        + body.image_input_tokens;
+    let metadata = body
+        .metadata
+        .unwrap_or_else(|| serde_json::json!({ "messageId": body.message_id }).to_string());
     let usage = TokenUsage {
-        id: ulid::Ulid::new().to_string(),
-        client: body.client,
+        id,
+        workspace_id: body.workspace_id,
         session_id: body.session_id,
-        message_id: body.message_id,
         agent: body.agent,
-        provider_id: body.provider_id,
-        model_id: body.model_id,
+        model: body.model,
+        metadata: Some(metadata),
         input_tokens: body.input_tokens,
         output_tokens: body.output_tokens,
         reasoning_tokens: body.reasoning_tokens,
         cache_read_tokens: body.cache_read_tokens,
         cache_write_tokens: body.cache_write_tokens,
+        audio_input_tokens: body.audio_input_tokens,
+        video_input_tokens: body.video_input_tokens,
+        image_input_tokens: body.image_input_tokens,
+        total_tokens,
         pushed: false,
         recorded_at: body.recorded_at.unwrap_or(now_ms),
         created_at: now_ms,
@@ -193,17 +217,20 @@ pub async fn overview_handler(
 fn to_record_response(u: TokenUsage) -> TokenUsageRecordResponse {
     TokenUsageRecordResponse {
         id: u.id,
-        client: u.client,
+        workspace_id: u.workspace_id,
         session_id: u.session_id,
-        message_id: u.message_id,
         agent: u.agent,
-        provider_id: u.provider_id,
-        model_id: u.model_id,
+        model: u.model,
+        metadata: u.metadata,
         input_tokens: u.input_tokens,
         output_tokens: u.output_tokens,
         reasoning_tokens: u.reasoning_tokens,
         cache_read_tokens: u.cache_read_tokens,
         cache_write_tokens: u.cache_write_tokens,
+        audio_input_tokens: u.audio_input_tokens,
+        video_input_tokens: u.video_input_tokens,
+        image_input_tokens: u.image_input_tokens,
+        total_tokens: u.total_tokens,
         pushed: u.pushed,
         recorded_at: u.recorded_at,
         created_at: u.created_at,
@@ -212,8 +239,7 @@ fn to_record_response(u: TokenUsage) -> TokenUsageRecordResponse {
 
 fn to_summary_response(s: UsageSummary) -> UsageSummaryResponse {
     UsageSummaryResponse {
-        provider_id: s.provider_id,
-        model_id: s.model_id,
+        model: s.model,
         total_input: s.total_input,
         total_output: s.total_output,
         total_reasoning: s.total_reasoning,

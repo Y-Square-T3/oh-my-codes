@@ -211,13 +211,14 @@ pub struct ModelsSyncResponse {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TokenUsageRecordRequest {
-    pub client: String,
+    pub agent: String,
+    pub model: String,
     pub session_id: String,
     pub message_id: String,
     #[serde(default)]
-    pub agent: Option<String>,
-    pub provider_id: String,
-    pub model_id: String,
+    pub workspace_id: Option<String>,
+    #[serde(default)]
+    pub metadata: Option<String>,
     pub input_tokens: i64,
     pub output_tokens: i64,
     #[serde(default)]
@@ -226,6 +227,12 @@ pub struct TokenUsageRecordRequest {
     pub cache_read_tokens: i64,
     #[serde(default)]
     pub cache_write_tokens: i64,
+    #[serde(default)]
+    pub audio_input_tokens: i64,
+    #[serde(default)]
+    pub video_input_tokens: i64,
+    #[serde(default)]
+    pub image_input_tokens: i64,
     #[serde(default)]
     pub recorded_at: Option<i64>,
 }
@@ -249,17 +256,20 @@ pub struct TokenUsagePushResponse {
 #[serde(rename_all = "camelCase")]
 pub struct TokenUsageRecordResponse {
     pub id: String,
-    pub client: String,
+    pub workspace_id: Option<String>,
     pub session_id: String,
-    pub message_id: String,
-    pub agent: Option<String>,
-    pub provider_id: String,
-    pub model_id: String,
+    pub agent: String,
+    pub model: String,
+    pub metadata: Option<String>,
     pub input_tokens: i64,
     pub output_tokens: i64,
     pub reasoning_tokens: i64,
     pub cache_read_tokens: i64,
     pub cache_write_tokens: i64,
+    pub audio_input_tokens: i64,
+    pub video_input_tokens: i64,
+    pub image_input_tokens: i64,
+    pub total_tokens: i64,
     pub pushed: bool,
     pub recorded_at: i64,
     pub created_at: i64,
@@ -275,8 +285,7 @@ pub struct TokenUsageListResponse {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UsageSummaryResponse {
-    pub provider_id: String,
-    pub model_id: String,
+    pub model: String,
     pub total_input: i64,
     pub total_output: i64,
     pub total_reasoning: i64,

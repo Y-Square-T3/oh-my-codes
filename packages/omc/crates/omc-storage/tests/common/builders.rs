@@ -2,7 +2,7 @@
 
 use omc_core::account::{Account, Workspace};
 use omc_core::model::{Model, ModelLimit, Provider};
-use omc_core::token_usage::TokenUsage;
+use omc_core::token_usage::{TokenUsage, generate_id};
 use omc_core::types::{Channel, Message};
 use ulid::Ulid;
 
@@ -102,30 +102,33 @@ pub fn make_model() -> Model {
 
 #[allow(clippy::too_many_arguments)]
 pub fn make_usage(
-    client: &str,
-    agent: Option<&str>,
-    provider_id: &str,
-    model_id: &str,
+    agent: &str,
+    model: &str,
     input_tokens: i64,
     output_tokens: i64,
     reasoning_tokens: i64,
     pushed: bool,
 ) -> TokenUsage {
-    let id = Ulid::new().to_string();
+    let message_id = format!("msg-{}", Ulid::new());
+    let id = generate_id(agent, &message_id);
     let now = chrono::Utc::now().timestamp_millis();
+    let total_tokens = input_tokens + output_tokens + reasoning_tokens;
     TokenUsage {
-        id: id.clone(),
-        client: client.to_string(),
-        session_id: format!("session-{id}"),
-        message_id: format!("msg-{id}"),
-        agent: agent.map(|s| s.to_string()),
-        provider_id: provider_id.to_string(),
-        model_id: model_id.to_string(),
+        id,
+        workspace_id: None,
+        session_id: format!("session-{message_id}"),
+        agent: agent.to_string(),
+        model: model.to_string(),
+        metadata: Some(format!(r#"{{"messageId":"{message_id}"}}"#)),
         input_tokens,
         output_tokens,
         reasoning_tokens,
         cache_read_tokens: 0,
         cache_write_tokens: 0,
+        audio_input_tokens: 0,
+        video_input_tokens: 0,
+        image_input_tokens: 0,
+        total_tokens,
         pushed,
         recorded_at: now,
         created_at: now,
