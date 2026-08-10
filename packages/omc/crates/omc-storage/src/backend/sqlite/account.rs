@@ -131,3 +131,61 @@ pub(crate) async fn set_active_workspace(
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn row_to_account_maps_all_fields() {
+        let row = AccountRow {
+            id: "test-id".to_string(),
+            email: "test@example.com".to_string(),
+            url: "https://api.example.com".to_string(),
+            access_token: "access-token".to_string(),
+            refresh_token: "refresh-token".to_string(),
+            token_expiry: 1234567890,
+            active_workspace_id: Some("workspace-id".to_string()),
+        };
+
+        let account = row_to_account(row);
+
+        assert_eq!(account.id, "test-id");
+        assert_eq!(account.email, "test@example.com");
+        assert_eq!(account.url, "https://api.example.com");
+        assert_eq!(account.access_token, "access-token");
+        assert_eq!(account.refresh_token, "refresh-token");
+        assert_eq!(account.token_expiry, 1234567890);
+        assert_eq!(account.active_workspace_id, Some("workspace-id".to_string()));
+    }
+
+    #[test]
+    fn row_to_account_handles_null_workspace() {
+        let row = AccountRow {
+            id: "test-id".to_string(),
+            email: "test@example.com".to_string(),
+            url: "https://api.example.com".to_string(),
+            access_token: "access-token".to_string(),
+            refresh_token: "refresh-token".to_string(),
+            token_expiry: 1234567890,
+            active_workspace_id: None,
+        };
+
+        let account = row_to_account(row);
+
+        assert_eq!(account.active_workspace_id, None);
+    }
+
+    #[test]
+    fn map_err_wraps_sqlx_error() {
+        let sqlx_err = sqlx::Error::PoolTimedOut;
+        let omc_err = map_err(sqlx_err);
+
+        match omc_err {
+            OmcError::Storage(msg) => {
+                assert!(msg.contains("SQLite error"));
+            }
+            _ => panic!("Expected OmcError::Storage"),
+        }
+    }
+}

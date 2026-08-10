@@ -449,3 +449,138 @@ impl MigrationRunner {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dialect_sql_for_sqlite() {
+        let sql = DialectSql {
+            sqlite: "SELECT 1",
+            postgres: "SELECT 2",
+        };
+        assert_eq!(sql.for_sqlite(), "SELECT 1");
+    }
+
+    #[test]
+    fn dialect_sql_for_postgres() {
+        let sql = DialectSql {
+            sqlite: "SELECT 1",
+            postgres: "SELECT 2",
+        };
+        assert_eq!(sql.for_postgres(), "SELECT 2");
+    }
+
+    #[test]
+    fn migration_checksum_is_deterministic() {
+        let migration = Migration {
+            version: 1,
+            name: "test",
+            up_sql: DialectSql {
+                sqlite: "CREATE TABLE test (id INT)",
+                postgres: "CREATE TABLE test (id INT)",
+            },
+            down_sql: None,
+        };
+        let checksum1 = migration.checksum();
+        let checksum2 = migration.checksum();
+        assert_eq!(checksum1, checksum2);
+    }
+
+    #[test]
+    fn migration_checksum_differs_for_different_sql() {
+        let migration1 = Migration {
+            version: 1,
+            name: "test",
+            up_sql: DialectSql {
+                sqlite: "CREATE TABLE test1 (id INT)",
+                postgres: "CREATE TABLE test1 (id INT)",
+            },
+            down_sql: None,
+        };
+        let migration2 = Migration {
+            version: 1,
+            name: "test",
+            up_sql: DialectSql {
+                sqlite: "CREATE TABLE test2 (id INT)",
+                postgres: "CREATE TABLE test2 (id INT)",
+            },
+            down_sql: None,
+        };
+        assert_ne!(migration1.checksum(), migration2.checksum());
+    }
+
+    #[test]
+    fn migration_checksum_is_hex_encoded() {
+        let migration = Migration {
+            version: 1,
+            name: "test",
+            up_sql: DialectSql {
+                sqlite: "SELECT 1",
+                postgres: "SELECT 1",
+            },
+            down_sql: None,
+        };
+        let checksum = migration.checksum();
+        assert_eq!(checksum.len(), 64);
+        assert!(checksum.chars().all(|c| c.is_ascii_hexdigit()));
+    }
+
+    #[test]
+    fn dialect_as_str_sqlite() {
+        assert_eq!(Dialect::Sqlite.as_str(), "sqlite");
+    }
+
+    #[test]
+    fn dialect_as_str_postgres() {
+        assert_eq!(Dialect::Postgres.as_str(), "postgres");
+    }
+
+    #[test]
+    fn migration_error_display_sqlx() {
+        let error = MigrationError::Sqlx(sqlx::Error::PoolTimedOut);
+        let display = format!("{error}");
+        assert!(display.contains("SQLx error"));
+    }
+
+    #[test]
+    fn migration_error_display_checksum_mismatch() {
+        let error = MigrationError::ChecksumMismatch {
+            version: 1,
+            name: "test_migration".to_string(),
+            stored_checksum: "abc123".to_string(),
+            current_checksum: "def456".to_string(),
+        };
+        let display = format!("{error}");
+        assert!(display.contains("Checksum mismatch"));
+        assert!(display.contains("v1"));
+        assert!(display.contains("test_migration"));
+        assert!(display.contains("abc123"));
+        assert!(display.contains("def456"));
+    }
+
+    #[test]
+    fn migration_error_display_missing_down_migration() {
+        let error = MigrationError::MissingDownMigration {
+            version: 2,
+            name: "add_feature".to_string(),
+        };
+        let display = format!("{error}");
+        assert!(display.contains("Down migration missing"));
+        assert!(display.contains("v2"));
+        assert!(display.contains("add_feature"));
+    }
+
+    #[test]
+    fn migration_error_display_invalid_target_version() {
+        let error = MigrationError::InvalidTargetVersion {
+            current: 3,
+            target: 5,
+        };
+        let display = format!("{error}");
+        assert!(display.contains("Invalid target version"));
+        assert!(display.contains("5"));
+        assert!(display.contains("3"));
+    }
+}

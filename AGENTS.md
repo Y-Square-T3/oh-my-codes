@@ -73,7 +73,30 @@
 - **Formatter**: `cargo fmt` (rustfmt)
 - **Linter**: `cargo clippy --workspace --all-targets -- -D warnings`
 - CI enforces both on push to `main`.
-- **Tests**: Place all tests in `tests/` directory as integration tests. Do not use inline `#[cfg(test)] mod tests` in `src/` files. This ensures tests exercise the crate's public API and keeps source files focused on implementation.
+- **Tests**: Follow Rust standard testing conventions.
+  - **Unit tests**: Place inline `#[cfg(test)] mod tests` at the bottom of `src/` files. Use for testing private functions, internal logic, and pure computations. Separate code and tests with a blank line. Example structure:
+    ```rust
+    pub fn some_function() -> Result<()> {
+        // implementation
+    }
+
+    fn helper_function() -> String {
+        // private helper
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_helper_function() {
+            // test private helper
+        }
+    }
+    ```
+  - **Integration tests**: Place in `tests/` directory at crate root. Use for testing the crate's public API, complex workflows, and interactions between components. Integration tests can only access public items.
+  - **Test organization**: Group related tests in the same file. For integration tests, organize by domain (e.g., `accounts.rs`, `workspaces.rs`, `token_usage.rs`). Use shared test fixtures and builders in `tests/common/` when needed.
+  - **Coverage priority**: Focus on testing behavior, not implementation details. Prioritize edge cases, error paths, and invariants over exhaustive line coverage.
 - **API Serialization**: All types that cross API boundaries (HTTP JSON) must use `camelCase` field names. Add `#[serde(rename_all = "camelCase")]` to all `Serialize`/`Deserialize` structs that are sent to or received from external APIs or the daemon API. Rust field names remain `snake_case`; serde handles the conversion. This applies to:
   - External API types in `omc-server/src/server_client.rs` (communication with remote OMC server)
   - Internal API types in `omc-api/src/types.rs` (CLI ↔ daemon communication)

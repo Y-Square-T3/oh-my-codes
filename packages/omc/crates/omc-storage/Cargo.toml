@@ -22,4 +22,4 @@ hex = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
-sqlx = { workspace = true, features = ["sqlite"] }
+sqlx = { workspace = true, features = ["sqlite", "postgres"] }
