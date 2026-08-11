@@ -15,6 +15,7 @@ impl IntoResponse for AppError {
             OmcError::Auth(msg) => (StatusCode::BAD_REQUEST, msg.clone()),
             OmcError::TokenExpired => (StatusCode::UNAUTHORIZED, "Token expired".to_string()),
             OmcError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg.clone()),
+            OmcError::PortInUse { .. } => (StatusCode::SERVICE_UNAVAILABLE, self.0.to_string()),
         };
 
         let body = serde_json::json!({ "error": message });

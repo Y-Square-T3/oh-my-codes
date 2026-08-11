@@ -128,7 +128,6 @@ pub(crate) async fn run_daemon(
 
     tracing::info!("oh-my-codes daemon starting");
     tracing::info!("Data directory: {}", resolved.data_dir);
-    tracing::info!("Listening on {}:{}", resolved.bind_addr, resolved.bind_port);
 
     let shutdown_rx = match external_shutdown {
         Some(rx) => rx,

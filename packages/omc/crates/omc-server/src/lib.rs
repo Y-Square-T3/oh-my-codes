@@ -9,6 +9,7 @@ use crate::account_service::AccountService;
 use crate::model_service::ModelService;
 use crate::token_usage_service::TokenUsageService;
 use omc_core::config::OmcConfig;
+use omc_core::error::OmcError;
 use omc_storage::StorageBackend;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -55,7 +56,17 @@ pub async fn start_server(
     let router = routes::create_router(daemon_state);
 
     let tcp_addr = format!("{}:{}", resolved.bind_addr, resolved.bind_port);
-    let tcp_listener = TcpListener::bind(&tcp_addr).await?;
+    let tcp_listener = match TcpListener::bind(&tcp_addr).await {
+        Ok(listener) => listener,
+        Err(e) if e.kind() == std::io::ErrorKind::AddrInUse => {
+            let config_path = omc_core::config::paths::default_config_path();
+            return Err(Box::new(OmcError::PortInUse {
+                address: tcp_addr,
+                config_path: config_path.to_string_lossy().to_string(),
+            }));
+        }
+        Err(e) => return Err(Box::new(e)),
+    };
     tracing::info!("omcd listening on http://{}", tcp_addr);
 
     #[cfg(unix)]
