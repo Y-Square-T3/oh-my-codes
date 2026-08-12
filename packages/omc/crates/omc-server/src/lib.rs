@@ -5,9 +5,9 @@ pub mod routes;
 pub mod server_client;
 pub mod token_usage_service;
 
-use crate::account_service::AccountService;
-use crate::model_service::ModelService;
-use crate::token_usage_service::TokenUsageService;
+pub use crate::account_service::AccountService;
+pub use crate::model_service::ModelService;
+pub use crate::token_usage_service::TokenUsageService;
 use omc_core::config::OmcConfig;
 use omc_core::error::OmcError;
 use omc_storage::StorageBackend;
@@ -103,7 +103,11 @@ pub async fn start_server(
 
     #[cfg(not(unix))]
     {
-        let _ = shutdown_rx.changed().await;
+        axum::serve(tcp_listener, router)
+            .with_graceful_shutdown(async move {
+                let _ = shutdown_rx.changed().await;
+            })
+            .await?;
     }
 
     tracing::info!("omcd shutting down");
