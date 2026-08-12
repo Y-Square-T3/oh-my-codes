@@ -44,7 +44,7 @@ impl OmcClient {
         method: &str,
         path: &str,
         body: &[u8],
-        _content_type: &str,
+        content_type: &str,
     ) -> Result<T> {
         let response_bytes = match &self.endpoint {
             #[cfg(unix)]
@@ -87,7 +87,7 @@ impl OmcClient {
                     .method(method)
                     .uri(uri)
                     .header(HOST, "localhost")
-                    .header(CONTENT_TYPE, _content_type)
+                    .header(CONTENT_TYPE, content_type)
                     .header(CONTENT_LENGTH, body.len())
                     .body(http_body_util::Full::new(Bytes::copy_from_slice(body)))
                     .map_err(|e| OmcError::Api(format!("Request build error: {e}")))?;
@@ -121,7 +121,14 @@ impl OmcClient {
 
                 let resp = match method {
                     "GET" => client.get(&url).send().await,
-                    "POST" => client.post(&url).body(body.to_vec()).send().await,
+                    "POST" => {
+                        client
+                            .post(&url)
+                            .header("Content-Type", content_type)
+                            .body(body.to_vec())
+                            .send()
+                            .await
+                    }
                     "DELETE" => client.delete(&url).send().await,
                     _ => return Err(OmcError::Api(format!("Unsupported method: {method}"))),
                 }
