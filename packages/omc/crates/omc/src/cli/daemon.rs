@@ -4,50 +4,29 @@ use omc_service::{create_service_manager, find_omcd_binary};
 
 #[cfg(target_os = "windows")]
 fn is_running_as_admin() -> bool {
-    use windows_sys::Win32::Foundation::{BOOL, CloseHandle, HANDLE};
-    use windows_sys::Win32::Security::TOKEN_QUERY;
-    use windows_sys::Win32::Security::{
-        AllocateAndInitializeSid, CheckTokenMembership, FreeSid, IsValidSid, SECURITY_NT_AUTHORITY,
-    };
+    use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
+    use windows_sys::Win32::Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY};
     use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
 
     unsafe {
-        let mut admin_sid: *mut std::ffi::c_void = std::ptr::null_mut();
-        let result = AllocateAndInitializeSid(
-            &SECURITY_NT_AUTHORITY,
-            2,
-            5,
-            32,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            &mut admin_sid,
-        );
-
-        if result == 0 || admin_sid.is_null() {
-            return false;
-        }
-
-        if IsValidSid(admin_sid) == 0 {
-            FreeSid(admin_sid);
-            return false;
-        }
-
         let mut token: HANDLE = std::ptr::null_mut();
         if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) == 0 {
-            FreeSid(admin_sid);
             return false;
         }
 
-        let mut is_admin: BOOL = 0;
-        let check_result = CheckTokenMembership(token, admin_sid, &mut is_admin);
-        CloseHandle(token);
-        FreeSid(admin_sid);
+        let mut elevation = TOKEN_ELEVATION { TokenIsElevated: 0 };
+        let mut returned_length = 0u32;
+        let result = GetTokenInformation(
+            token,
+            TokenElevation,
+            &mut elevation as *mut _ as *mut _,
+            std::mem::size_of::<TOKEN_ELEVATION>() as u32,
+            &mut returned_length,
+        );
 
-        check_result != 0 && is_admin != 0
+        CloseHandle(token);
+
+        result != 0 && elevation.TokenIsElevated != 0
     }
 }
 
