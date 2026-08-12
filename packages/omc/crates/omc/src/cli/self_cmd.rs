@@ -94,9 +94,13 @@ fn detect_install_method() -> InstallMethod {
     let exe_path = env::current_exe().unwrap_or_default();
     let path_str = exe_path.to_string_lossy();
 
-    if path_str.contains("node_modules") && path_str.contains("@y-square-t3/oh-my-codes-") {
+    let is_npm_package = path_str.contains("node_modules")
+        && (path_str.contains("@y-square-t3/oh-my-codes-")
+            || path_str.contains("@y-square-t3\\oh-my-codes-"));
+
+    if is_npm_package {
         InstallMethod::Npm
-    } else if path_str.contains("target/") {
+    } else if path_str.contains("target/") || path_str.contains("target\\") {
         InstallMethod::Source
     } else {
         InstallMethod::ShellScript
@@ -343,9 +347,15 @@ fn extract_archive(archive: &Path, dest: &Path) -> Result<(), Box<dyn std::error
             return Err("Failed to extract tar.gz".into());
         }
     } else if archive_str.ends_with(".zip") {
-        let status = Command::new("unzip")
-            .args(["-o", &archive_str, "-d", &dest.to_string_lossy()])
-            .status()?;
+        let status = if cfg!(windows) {
+            Command::new("tar")
+                .args(["-xf", &archive_str, "-C", &dest.to_string_lossy()])
+                .status()?
+        } else {
+            Command::new("unzip")
+                .args(["-o", &archive_str, "-d", &dest.to_string_lossy()])
+                .status()?
+        };
 
         if !status.success() {
             return Err("Failed to extract zip".into());
