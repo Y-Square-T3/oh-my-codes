@@ -903,9 +903,9 @@ dependencies = [
 
 [[package]]
 name = "http-body-util"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9f41fd6a08e4d4ec69df65976da761afd5ad5e58a9d4acb46bd1c953a9e3ff2"
+checksum = "23169fe34a5fbcdd3f3862e78fb9b6fccd5f02a6dc6f732547005d45631ce71c"
 dependencies = [
  "bytes",
  "futures-core",
@@ -1224,7 +1224,7 @@ dependencies = [
  "bitflags",
  "libc",
  "plain",
- "redox_syscall 0.9.1",
+ "redox_syscall 0.9.2",
 ]
 
 [[package]]
@@ -1393,7 +1393,7 @@ checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 
 [[package]]
 name = "omc"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "chrono",
  "clap",
@@ -1416,7 +1416,7 @@ dependencies = [
 
 [[package]]
 name = "omc-api"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "axum-test",
  "http",
@@ -1435,7 +1435,7 @@ dependencies = [
 
 [[package]]
 name = "omc-core"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "dirs",
  "hex",
@@ -1451,7 +1451,7 @@ dependencies = [
 
 [[package]]
 name = "omc-server"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "axum",
  "axum-test",
@@ -1473,7 +1473,7 @@ dependencies = [
 
 [[package]]
 name = "omc-service"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "dirs",
  "libc",
@@ -1486,7 +1486,7 @@ dependencies = [
 
 [[package]]
 name = "omc-storage"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1502,7 +1502,7 @@ dependencies = [
 
 [[package]]
 name = "omcd"
-version = "4.7.10"
+version = "4.7.11"
 dependencies = [
  "clap",
  "omc-api",
@@ -1848,9 +1848,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.9.1"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07507be7b4a5f9f26eeb41eeaebb1f5a7ff29dfb29739facc21d35bf8b11c21e"
+checksum = "f1c93da5bb2c5d4e6c0ef7abeead62c89169a0a4882bfb83ac892f2423aea2fe"
 dependencies = [
  "bitflags",
 ]
