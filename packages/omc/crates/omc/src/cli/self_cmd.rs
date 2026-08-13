@@ -187,14 +187,21 @@ async fn upgrade_npm() -> Result<(), Box<dyn std::error::Error>> {
         install_cmd.join(" ")
     );
 
-    let mut cmd = Command::new(install_cmd[0]);
-    cmd.args(&install_cmd[1..]);
-
-    if let Some(dir) = working_dir {
-        cmd.current_dir(&dir);
-    }
-
-    let status = cmd.status()?;
+    let status = if cfg!(windows) {
+        let mut cmd = Command::new("cmd");
+        cmd.args(["/C", &install_cmd.join(" ")]);
+        if let Some(dir) = working_dir {
+            cmd.current_dir(&dir);
+        }
+        cmd.status()?
+    } else {
+        let mut cmd = Command::new(install_cmd[0]);
+        cmd.args(&install_cmd[1..]);
+        if let Some(dir) = working_dir {
+            cmd.current_dir(&dir);
+        }
+        cmd.status()?
+    };
 
     if !status.success() {
         print_error("Upgrade failed");
