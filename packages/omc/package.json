@@ -1,6 +1,6 @@
 {
   "name": "oh-my-codes",
-  "version": "4.7.12",
+  "version": "4.7.13",
   "type": "module",
   "bin": {
     "oh-my-codes": "bin/omc.js",
