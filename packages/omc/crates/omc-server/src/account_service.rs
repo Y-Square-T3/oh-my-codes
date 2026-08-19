@@ -188,6 +188,7 @@ impl AccountService {
     pub async fn remove(&self, account_id: &str) -> Result<()> {
         let active_id = self.backend.get_active_account_id().await?;
         self.backend.clear_workspaces(account_id).await?;
+        self.backend.delete_providers(account_id).await?;
         self.backend.delete_account(account_id).await?;
         if active_id.as_deref() == Some(account_id) {
             self.backend.clear_active_account().await?;

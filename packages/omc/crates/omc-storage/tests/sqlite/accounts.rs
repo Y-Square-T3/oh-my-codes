@@ -84,3 +84,9 @@ async fn sqlite_set_active_workspace_nonexistent_account() {
     let backend = setup().await;
     suite::test_set_active_workspace_nonexistent_account(&backend).await;
 }
+
+#[tokio::test]
+async fn sqlite_delete_account_with_providers() {
+    let backend = setup().await;
+    suite::test_delete_account_with_providers(&backend).await;
+}

@@ -1,6 +1,6 @@
 use omc_storage::StorageBackend;
 
-use crate::common::builders::make_account;
+use crate::common::builders::{make_account, make_provider};
 
 pub async fn test_get_account_empty<B: StorageBackend>(backend: &B) {
     let result = backend.get_account("nonexistent").await.unwrap();
@@ -135,4 +135,24 @@ pub async fn test_set_active_workspace_nonexistent_account<B: StorageBackend>(ba
         .set_active_workspace("nonexistent", "workspace-123")
         .await;
     assert!(result.is_err());
+}
+
+pub async fn test_delete_account_with_providers<B: StorageBackend>(backend: &B) {
+    let account = make_account();
+    backend.upsert_account(&account).await.unwrap();
+
+    let provider = make_provider(&account.id);
+    backend
+        .replace_providers(&account.id, vec![provider])
+        .await
+        .unwrap();
+
+    backend.delete_providers(&account.id).await.unwrap();
+    backend.delete_account(&account.id).await.unwrap();
+
+    let result = backend.get_account(&account.id).await.unwrap();
+    assert!(result.is_none());
+
+    let providers = backend.list_providers(&account.id).await.unwrap();
+    assert!(providers.is_empty());
 }
