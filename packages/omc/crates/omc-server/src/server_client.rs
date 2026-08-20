@@ -36,7 +36,6 @@ struct DeviceTokenRequest {
 struct RefreshTokenRequest {
     grant_type: String,
     refresh_token: String,
-    client_id: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -206,11 +205,10 @@ impl OmcServerClient {
         server_url: &str,
         refresh_token: &str,
     ) -> Result<DeviceTokenSuccess> {
-        let url = format!("{server_url}/auth/device/token");
+        let url = format!("{server_url}/auth/device/token/refresh");
         let body = RefreshTokenRequest {
             grant_type: "refresh_token".to_string(),
             refresh_token: refresh_token.to_string(),
-            client_id: CLIENT_ID.to_string(),
         };
         let resp = self
             .client
