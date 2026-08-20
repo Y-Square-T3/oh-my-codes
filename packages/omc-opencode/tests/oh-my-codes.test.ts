@@ -75,12 +75,10 @@ describe("OhMyCodesPlugin", () => {
       expect(url).toContain("/token-usage")
       const body = JSON.parse(opts.body)
       expect(body).toMatchObject({
-        client: "opencode",
         sessionId: "sess-1",
         messageId: "msg-1",
         agent: "coder",
-        providerId: "anthropic",
-        modelId: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-20250514",
         inputTokens: 100,
         outputTokens: 200,
         reasoningTokens: 10,
@@ -166,11 +164,9 @@ describe("OhMyCodesPlugin", () => {
       expect(fetchMock).toHaveBeenCalledOnce()
       const body = JSON.parse(fetchMock.mock.calls[0]![1].body)
       expect(body).toMatchObject({
-        client: "opencode",
         sessionId: "sess-2",
         messageId: "msg-2",
-        providerId: "openai",
-        modelId: "gpt-4o",
+        model: "gpt-4o",
         inputTokens: 500,
         outputTokens: 300,
       })

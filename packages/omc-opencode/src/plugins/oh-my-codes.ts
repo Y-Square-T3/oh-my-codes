@@ -48,12 +48,10 @@ function extractV1(event: V1MessageUpdatedEvent): TokenUsageRecord | null {
   if (isCompactionAgent(info.agent)) return null
 
   return {
-    client: "opencode",
     sessionId: info.sessionID,
     messageId: info.id ?? info.messageID ?? "",
-    agent: info.agent ?? null,
-    providerId: info.providerID ?? "unknown",
-    modelId: info.modelID ?? "unknown",
+    agent: info.agent ?? "",
+    model: info.modelID ?? "unknown",
     inputTokens: info.tokens.input ?? 0,
     outputTokens: info.tokens.output ?? 0,
     reasoningTokens: info.tokens.reasoning ?? 0,
@@ -70,12 +68,10 @@ function extractV2(event: V2StepEndedEvent): TokenUsageRecord | null {
   if (isCompactionAgent(p.agent)) return null
 
   return {
-    client: "opencode",
     sessionId: p.sessionID,
     messageId: p.assistantMessageID ?? "",
-    agent: p.agent ?? null,
-    providerId: p.providerID ?? "unknown",
-    modelId: p.modelID ?? "unknown",
+    agent: p.agent ?? "",
+    model: p.modelID ?? "unknown",
     inputTokens: p.tokens.input ?? 0,
     outputTokens: p.tokens.output ?? 0,
     reasoningTokens: p.tokens.reasoning ?? 0,

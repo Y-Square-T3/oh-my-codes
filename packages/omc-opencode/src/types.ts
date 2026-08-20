@@ -1,10 +1,8 @@
 export interface TokenUsageRecord {
-  client: string
+  agent: string
+  model: string
   sessionId: string
   messageId: string
-  agent?: string | null
-  providerId: string
-  modelId: string
   inputTokens: number
   outputTokens: number
   reasoningTokens: number
