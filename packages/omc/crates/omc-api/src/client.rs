@@ -259,12 +259,9 @@ impl OmcClient {
         Ok(())
     }
 
-    pub async fn account_refresh_token(
-        &self,
-        account_id: Option<&str>,
-    ) -> Result<RefreshTokenResponse> {
+    pub async fn account_refresh_token(&self, email: Option<&str>) -> Result<RefreshTokenResponse> {
         let body = serde_json::to_vec(&RefreshTokenRequest {
-            account_id: account_id.map(|s| s.to_string()),
+            email: email.map(|s| s.to_string()),
         })
         .map_err(|e| OmcError::Api(format!("Serialize error: {e}")))?;
         self.request("POST", "/account/refresh-token", Some(&body))

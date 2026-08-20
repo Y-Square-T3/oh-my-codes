@@ -455,26 +455,13 @@ async fn refresh_token_effect(
     client: &OmcClient,
     email: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let account_id: Option<String> = if let Some(email) = email {
-        let list = client.account_list().await?;
-        match list.accounts.iter().find(|a| a.account.email == email) {
-            Some(a) => Some(a.account.id.clone()),
-            None => {
-                ui::print_error(&format!("Account with email '{email}' not found."));
-                return Err(format!("Account with email '{email}' not found.").into());
-            }
-        }
-    } else {
-        None
-    };
-
-    match client.account_refresh_token(account_id.as_deref()).await {
+    match client.account_refresh_token(email).await {
         Ok(resp) => {
             let expiry = chrono::DateTime::from_timestamp(resp.token_expiry, 0)
                 .map(|dt| dt.to_rfc3339())
                 .unwrap_or_else(|| resp.token_expiry.to_string());
             println!(
-                "  {} {} {} {} {}",
+                "  {} {} {}. {} {}",
                 style("✓").green().bold(),
                 style("Token refreshed for"),
                 style(&resp.email).cyan(),

@@ -222,25 +222,23 @@ pub async fn workspaces_handler(
     }))
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RefreshTokenRequest {
-    pub account_id: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RefreshTokenResponse {
-    pub email: String,
-    pub token_expiry: i64,
-}
-
 pub async fn refresh_token_handler(
     State(state): State<Arc<DaemonState>>,
-    Json(req): Json<RefreshTokenRequest>,
-) -> std::result::Result<Json<RefreshTokenResponse>, AppError> {
-    let account_id = match req.account_id {
-        Some(id) => id,
+    Json(req): Json<omc_api::types::RefreshTokenRequest>,
+) -> std::result::Result<Json<omc_api::types::RefreshTokenResponse>, AppError> {
+    let account_id = match req.email {
+        Some(email) => {
+            let accounts = state.backend.list_accounts().await?;
+            accounts
+                .into_iter()
+                .find(|a| a.email == email)
+                .map(|a| a.id)
+                .ok_or_else(|| {
+                    omc_core::error::OmcError::NotFound(format!(
+                        "Account with email '{email}' not found"
+                    ))
+                })?
+        }
         None => state
             .backend
             .get_active_account_id()
@@ -252,7 +250,7 @@ pub async fn refresh_token_handler(
             })?,
     };
     let updated = state.account_service.refresh_token(&account_id).await?;
-    Ok(Json(RefreshTokenResponse {
+    Ok(Json(omc_api::types::RefreshTokenResponse {
         email: updated.email,
         token_expiry: updated.token_expiry,
     }))
