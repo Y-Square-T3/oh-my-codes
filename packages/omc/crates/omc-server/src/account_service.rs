@@ -89,7 +89,7 @@ impl AccountService {
         Ok(result)
     }
 
-    pub async fn refresh_token(&self, account_id: &str) -> Result<String> {
+    pub async fn refresh_token(&self, account_id: &str) -> Result<Account> {
         let account = self
             .backend
             .get_account(account_id)
@@ -110,7 +110,7 @@ impl AccountService {
             active_workspace_id: account.active_workspace_id,
         };
         self.backend.upsert_account(&updated).await?;
-        Ok(resp.access_token)
+        Ok(updated)
     }
 
     pub async fn resolve_token(&self, account_id: &str) -> Result<String> {
@@ -121,7 +121,8 @@ impl AccountService {
             .ok_or_else(|| OmcError::NotFound(format!("Account {account_id} not found")))?;
         let now = chrono::Utc::now().timestamp();
         if account.token_expiry - now < EAGER_REFRESH_SECS {
-            return self.refresh_token(account_id).await;
+            let updated = self.refresh_token(account_id).await?;
+            return Ok(updated.access_token);
         }
         Ok(account.access_token)
     }
@@ -145,7 +146,7 @@ impl AccountService {
             .ok_or_else(|| OmcError::NotFound(format!("Account {id} not found")))?;
         let now = chrono::Utc::now().timestamp();
         let token = if account.token_expiry - now < EAGER_REFRESH_SECS {
-            self.refresh_token(&id).await?
+            self.refresh_token(&id).await?.access_token
         } else {
             account.access_token.clone()
         };

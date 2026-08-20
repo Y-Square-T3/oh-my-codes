@@ -81,11 +81,19 @@ pub struct AccountCommand {
 
 #[derive(Subcommand)]
 pub enum AccountAction {
-    Login { url: String },
-    Logout { email: Option<String> },
+    Login {
+        url: String,
+    },
+    Logout {
+        email: Option<String>,
+    },
     Switch,
     List,
     Show,
+    RefreshToken {
+        #[arg(long)]
+        email: Option<String>,
+    },
 }
 
 #[derive(Parser)]

@@ -301,6 +301,19 @@ pub struct TokenUsageListResponse {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct RefreshTokenRequest {
+    pub account_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RefreshTokenResponse {
+    pub email: String,
+    pub token_expiry: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UsageSummaryResponse {
     pub model: String,
     pub total_input: i64,

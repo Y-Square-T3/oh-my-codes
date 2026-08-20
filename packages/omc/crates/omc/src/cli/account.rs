@@ -18,6 +18,9 @@ pub async fn run(
         AccountAction::Switch => switch_effect(client).await,
         AccountAction::List => list_effect(client).await,
         AccountAction::Show => show_effect(client).await,
+        AccountAction::RefreshToken { email } => {
+            refresh_token_effect(client, email.as_deref()).await
+        }
     }
 }
 
@@ -446,4 +449,44 @@ async fn show_effect(client: &OmcClient) -> Result<(), Box<dyn std::error::Error
 
     println!();
     Ok(())
+}
+
+async fn refresh_token_effect(
+    client: &OmcClient,
+    email: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let account_id: Option<String> = if let Some(email) = email {
+        let list = client.account_list().await?;
+        match list.accounts.iter().find(|a| a.account.email == email) {
+            Some(a) => Some(a.account.id.clone()),
+            None => {
+                ui::print_error(&format!("Account with email '{email}' not found."));
+                return Err(format!("Account with email '{email}' not found.").into());
+            }
+        }
+    } else {
+        None
+    };
+
+    match client.account_refresh_token(account_id.as_deref()).await {
+        Ok(resp) => {
+            let expiry = chrono::DateTime::from_timestamp(resp.token_expiry, 0)
+                .map(|dt| dt.to_rfc3339())
+                .unwrap_or_else(|| resp.token_expiry.to_string());
+            println!(
+                "  {} {} {} {} {}",
+                style("✓").green().bold(),
+                style("Token refreshed for"),
+                style(&resp.email).cyan(),
+                style("Expires at"),
+                style(&expiry).dim(),
+            );
+            Ok(())
+        }
+        Err(e) => {
+            ui::print_error(&format!("Failed to refresh token: {e}"));
+            ui::print_dim("Try re-authenticating with `omc account login <url>`.");
+            Err(e.into())
+        }
+    }
 }
