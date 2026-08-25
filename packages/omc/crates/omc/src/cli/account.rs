@@ -457,9 +457,7 @@ async fn refresh_token_effect(
 ) -> Result<(), Box<dyn std::error::Error>> {
     match client.account_refresh_token(email).await {
         Ok(resp) => {
-            let expiry = chrono::DateTime::from_timestamp(resp.token_expiry, 0)
-                .map(|dt| dt.to_rfc3339())
-                .unwrap_or_else(|| resp.token_expiry.to_string());
+            let expiry = ui::format_timestamp_rfc3339(resp.token_expiry);
             println!(
                 "  {} {} {}. {} {}",
                 style("✓").green().bold(),

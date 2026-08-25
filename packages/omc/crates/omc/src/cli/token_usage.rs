@@ -164,9 +164,7 @@ async fn token_usage_list_effect(
 
         let model_display = ui::truncate_model(&r.model, 20);
 
-        let time_display = chrono::DateTime::from_timestamp_millis(r.recorded_at)
-            .map(|dt| dt.format("%m-%d %H:%M").to_string())
-            .unwrap_or_else(|| "-".to_string());
+        let time_display = ui::format_timestamp_millis(r.recorded_at, "%m-%d %H:%M");
 
         let mut row = vec![
             status_cell,

@@ -370,7 +370,7 @@ async fn top_agents(pool: &PgPool, cutoff: Option<i64>) -> Result<Vec<UsageGroup
 async fn daily_trend(pool: &PgPool, cutoff: i64) -> Result<Vec<DailyUsage>> {
     let rows: Vec<PgRow> = sqlx::query(
         "SELECT
-            TO_CHAR(TO_TIMESTAMP($1 / 1000), 'YYYY-MM-DD') as date,
+            TO_CHAR(TO_TIMESTAMP(recorded_at / 1000.0), 'YYYY-MM-DD') as date,
             COUNT(*) as requests,
             SUM(total_tokens) as total_tokens
           FROM token_usage

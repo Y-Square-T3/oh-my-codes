@@ -76,3 +76,49 @@ pub fn format_human(n: i64) -> String {
         }
     }
 }
+
+pub fn format_timestamp_millis(millis: i64, fmt: &str) -> String {
+    chrono::DateTime::from_timestamp_millis(millis)
+        .map(|dt| dt.with_timezone(&chrono::Local).format(fmt).to_string())
+        .unwrap_or_else(|| "-".to_string())
+}
+
+pub fn format_timestamp_rfc3339(secs: i64) -> String {
+    chrono::DateTime::from_timestamp(secs, 0)
+        .map(|dt| dt.with_timezone(&chrono::Local).to_rfc3339())
+        .unwrap_or_else(|| secs.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_timestamp_millis_valid() {
+        let result = format_timestamp_millis(1_700_000_000_000, "%Y-%m-%d %H:%M");
+        assert!(!result.is_empty());
+        assert!(result.contains('-'));
+        assert!(result.contains(':'));
+    }
+
+    #[test]
+    fn test_format_timestamp_millis_epoch() {
+        let result = format_timestamp_millis(0, "%Y-%m-%d");
+        assert!(!result.is_empty());
+        assert!(result.contains("1969") || result.contains("1970"));
+    }
+
+    #[test]
+    fn test_format_timestamp_rfc3339_valid() {
+        let result = format_timestamp_rfc3339(1_700_000_000);
+        assert!(!result.is_empty());
+        assert!(result.contains('T'));
+    }
+
+    #[test]
+    fn test_format_timestamp_rfc3339_epoch() {
+        let result = format_timestamp_rfc3339(0);
+        assert!(!result.is_empty());
+        assert!(result.contains("1969") || result.contains("1970"));
+    }
+}

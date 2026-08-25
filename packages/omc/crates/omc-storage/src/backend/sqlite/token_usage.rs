@@ -365,7 +365,7 @@ async fn top_agents(pool: &SqlitePool, cutoff: Option<i64>) -> Result<Vec<UsageG
 async fn daily_trend(pool: &SqlitePool, cutoff: i64) -> Result<Vec<DailyUsage>> {
     let rows: Vec<SqliteRow> = sqlx::query(
         "SELECT
-            DATE(recorded_at / 1000, 'unixepoch') as date,
+            strftime('%Y-%m-%d', recorded_at / 1000, 'unixepoch', 'localtime') as date,
             COUNT(*) as requests,
             SUM(total_tokens) as total_tokens
           FROM token_usage
