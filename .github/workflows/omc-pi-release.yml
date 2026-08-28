@@ -112,7 +112,7 @@ jobs:
 
       - name: Build
         if: steps.check.outputs.skip != 'true'
-        run: yarn oc build
+        run: yarn op build
 
       - name: Copy README
         if: steps.check.outputs.skip != 'true'
