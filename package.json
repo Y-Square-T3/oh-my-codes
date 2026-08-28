@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "omc": "yarn workspace oh-my-codes",
-    "oc": "yarn workspace oh-my-codes-opencode"
+    "oc": "yarn workspace oh-my-codes-opencode",
+    "op": "yarn workspace oh-my-codes-pi"
   }
 }
