@@ -12,11 +12,12 @@
   },
   "omp": {
     "extensions": [
-      "./src/index.ts"
+      "./dist/index.js"
     ]
   },
   "files": [
     "dist",
+    "package.json",
     "README.md"
   ],
   "scripts": {
