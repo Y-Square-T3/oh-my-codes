@@ -24,8 +24,14 @@
     "fmt:check": "prettier --check .",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@opencode-ai/plugin": "latest"
+  "dependencies": {},
+  "peerDependencies": {
+    "@oh-my-pi/pi-coding-agent": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@oh-my-pi/pi-coding-agent": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

@@ -1,95 +1,39 @@
-export interface TokenUsageRecord {
-  agent: string
-  model: string
-  sessionId: string
-  messageId: string
-  inputTokens: number
-  outputTokens: number
-  reasoningTokens: number
-  cacheReadTokens: number
-  cacheWriteTokens: number
-  recordedAt?: number
-}
-
-export interface V1MessageUpdatedEvent {
-  type: "message.updated"
-  properties?: {
-    info?: {
-      role?: string
-      sessionID?: string
-      id?: string
-      messageID?: string
-      agent?: string
-      providerID?: string
-      modelID?: string
-      finish?: boolean
-      tokens?: {
-        total?: number
-        input?: number
-        output?: number
-        reasoning?: number
-        cache?: { read?: number; write?: number }
-      }
-    }
+export interface AgentMessage {
+  role: string
+  model?: string
+  id?: string
+  usage?: {
+    input?: number
+    output?: number
+    cacheRead?: number
+    cacheWrite?: number
   }
 }
 
-export interface V2StepEndedEvent {
-  type: "session.next.step.ended"
-  properties?: {
-    sessionID?: string
-    assistantMessageID?: string
-    agent?: string
-    providerID?: string
-    modelID?: string
-    finish?: string
-    cost?: number
-    tokens?: {
-      input?: number
-      output?: number
-      reasoning?: number
-      cache?: { read?: number; write?: number }
-    }
-  }
+export interface MessageEndEvent {
+  type: "message_end"
+  message: AgentMessage
 }
 
-export interface DaemonProviderInfo {
-  id: string
-  name: string
-  api?: string
-  npm?: string
-  env: string[]
-  modelCount: number
+export interface SessionManager {
+  getSessionId(): string
 }
 
-export interface DaemonModelInfo {
-  id: string
-  providerId: string
-  name: string
-  family?: string
-  reasoning?: boolean
-  toolCall?: boolean
-  attachment?: boolean
-  temperature?: boolean
-  openWeights?: boolean
-  modalitiesInput: string[]
-  modalitiesOutput: string[]
-  costInput: number
-  costOutput: number
-  limitContext?: number
-  limitOutput?: number
-  releaseDate?: string
+export interface ExtensionContext {
+  sessionManager: SessionManager
 }
 
-export interface DaemonModelsListResponse {
-  providers: DaemonProviderInfo[]
-  models: DaemonModelInfo[]
-  accountEmail?: string
-  accountUrl?: string
+export interface Logger {
+  info(...args: unknown[]): void
+  warn(...args: unknown[]): void
+  error(...args: unknown[]): void
+  debug(...args: unknown[]): void
 }
 
-export interface DaemonCredentialsResponse {
-  apiKey: string
-  baseUrl: string
-  workspaceId?: string
+export interface ExtensionAPI {
+  on(
+    event: "message_end",
+    handler: (event: MessageEndEvent, ctx: ExtensionContext) => void,
+  ): void
+  logger: Logger
 }
