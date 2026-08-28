@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/omc",
     "packages/omc/dist/*",
-    "packages/omc-opencode"
+    "packages/omc-opencode",
+    "packages/omc-pi"
   ],
   "scripts": {
     "omc": "yarn workspace oh-my-codes",
