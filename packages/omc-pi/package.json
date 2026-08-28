@@ -24,7 +24,6 @@
     "fmt:check": "prettier --check .",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
   "peerDependencies": {
     "@oh-my-pi/pi-coding-agent": ">=18.0.0"
   },

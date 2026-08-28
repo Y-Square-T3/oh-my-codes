@@ -2685,7 +2685,6 @@ __metadata:
   resolution: "oh-my-codes-pi@workspace:packages/omc-pi"
   dependencies:
     "@eslint/js": "npm:^9.0.0"
-    "@opencode-ai/plugin": "npm:latest"
     "@types/node": "npm:^26.1.1"
     "@typescript-eslint/eslint-plugin": "npm:^8.0.0"
     "@typescript-eslint/parser": "npm:^8.0.0"
@@ -2695,6 +2694,11 @@ __metadata:
     vite: "npm:^6.0.0"
     vite-plugin-dts: "npm:^4.0.0"
     vitest: "npm:^3.0.0"
+  peerDependencies:
+    "@oh-my-pi/pi-coding-agent": ">=18.0.0"
+  peerDependenciesMeta:
+    "@oh-my-pi/pi-coding-agent":
+      optional: true
   languageName: unknown
   linkType: soft
 
