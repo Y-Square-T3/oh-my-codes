@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["@opencode-ai/plugin"],
+      external: ["@oh-my-pi/pi-coding-agent/extensibility/extensions"],
     },
   },
   plugins: [dts({ rollupTypes: true })],
