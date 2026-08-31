@@ -197,6 +197,7 @@ describe("omc-pi extension", () => {
         expect.objectContaining({
           baseUrl: "https://api.omc.example.com",
           apiKey: "omc-test-key-123",
+          api: "openai-completions",
         }),
       )
     })
@@ -237,6 +238,22 @@ describe("omc-pi extension", () => {
         unknown
       >
       expect(config.headers).toBeUndefined()
+    })
+
+    it("should include static models as fallback alongside fetchDynamicModels", async () => {
+      const { models, credentials } = mockDaemonResponse()
+      fetchMock = setupFetchMock({
+        "/models": models,
+        "/account/credentials": credentials,
+      })
+      vi.stubGlobal("fetch", fetchMock)
+
+      await extension(pi)
+
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
+      expect(Array.isArray(config.models)).toBe(true)
+      expect(config.models).toHaveLength(2)
+      expect(typeof config.fetchDynamicModels).toBe("function")
     })
 
     it("should use fetchDynamicModels to return transformed models", async () => {

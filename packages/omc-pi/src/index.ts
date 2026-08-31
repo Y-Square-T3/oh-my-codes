@@ -103,11 +103,14 @@ function buildProviderConfig(
   credentials: DaemonCredentialsResponse,
 ): ProviderConfig {
   const providerModels = models.filter((m) => m.providerId === provider.id)
+  const staticModels = providerModels.map(transformModel)
 
   const config: ProviderConfig = {
     baseUrl: credentials.baseUrl,
     apiKey: credentials.apiKey,
-    fetchDynamicModels: async () => providerModels.map(transformModel),
+    api: "openai-completions",
+    models: staticModels,
+    fetchDynamicModels: async () => staticModels,
   }
 
   if (credentials.workspaceId) {
