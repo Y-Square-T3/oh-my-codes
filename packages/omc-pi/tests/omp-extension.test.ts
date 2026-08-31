@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import type { ExtensionAPI, ExtensionContext, MessageEndEvent } from "@oh-my-pi/pi-coding-agent/extensibility/extensions"
+import type {
+  ExtensionAPI,
+  ExtensionContext,
+  MessageEndEvent,
+} from "@oh-my-pi/pi-coding-agent/extensibility/extensions"
 import type {
   DaemonModelsListResponse,
   DaemonCredentialsResponse,
@@ -171,9 +175,7 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        "http://127.0.0.1:9823/models",
-      )
+      expect(fetchMock).toHaveBeenCalledWith("http://127.0.0.1:9823/models")
       expect(fetchMock).toHaveBeenCalledWith(
         "http://127.0.0.1:9823/account/credentials",
       )
@@ -209,7 +211,10 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
       expect(config.headers).toEqual({ "x-workspace-id": "ws-abc" })
     })
 
@@ -227,7 +232,10 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
       expect(config.headers).toBeUndefined()
     })
 
@@ -241,10 +249,17 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
       expect(typeof config.fetchDynamicModels).toBe("function")
 
-      const dynamicModels = await (config.fetchDynamicModels as (key: string | undefined) => Promise<unknown[]>)("test-key")
+      const dynamicModels = await (
+        config.fetchDynamicModels as (
+          key: string | undefined,
+        ) => Promise<unknown[]>
+      )("test-key")
       expect(dynamicModels).toHaveLength(2)
       expect(dynamicModels[0]).toMatchObject({
         id: "claude-sonnet-4-20250514",
@@ -309,10 +324,19 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
-      const dynamicModels = await (config.fetchDynamicModels as (key: string | undefined) => Promise<Record<string, unknown>[]>)("test-key")
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
+      const dynamicModels = await (
+        config.fetchDynamicModels as (
+          key: string | undefined,
+        ) => Promise<Record<string, unknown>[]>
+      )("test-key")
 
-      const sonnet = dynamicModels.find((m) => m.id === "claude-sonnet-4-20250514")
+      const sonnet = dynamicModels.find(
+        (m) => m.id === "claude-sonnet-4-20250514",
+      )
       expect(sonnet).toMatchObject({
         id: "claude-sonnet-4-20250514",
         name: "Claude Sonnet 4",
@@ -323,7 +347,9 @@ describe("omc-pi extension", () => {
         maxTokens: 8192,
       })
 
-      const haiku = dynamicModels.find((m) => m.id === "claude-haiku-4-20250414")
+      const haiku = dynamicModels.find(
+        (m) => m.id === "claude-haiku-4-20250414",
+      )
       expect(haiku).toMatchObject({
         id: "claude-haiku-4-20250414",
         name: "Claude Haiku 4",
@@ -348,10 +374,24 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
-      const dynamicModels = await (config.fetchDynamicModels as (key: string | undefined) => Promise<Record<string, unknown>[]>)("test-key")
-      const sonnet = dynamicModels.find((m) => m.id === "claude-sonnet-4-20250514")
-      expect(sonnet?.cost).toEqual({ input: 3, output: 15, cacheRead: 0, cacheWrite: 0 })
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
+      const dynamicModels = await (
+        config.fetchDynamicModels as (
+          key: string | undefined,
+        ) => Promise<Record<string, unknown>[]>
+      )("test-key")
+      const sonnet = dynamicModels.find(
+        (m) => m.id === "claude-sonnet-4-20250514",
+      )
+      expect(sonnet?.cost).toEqual({
+        input: 3,
+        output: 15,
+        cacheRead: 0,
+        cacheWrite: 0,
+      })
     })
 
     it("should default missing limit fields to 0", async () => {
@@ -367,9 +407,18 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
-      const dynamicModels = await (config.fetchDynamicModels as (key: string | undefined) => Promise<Record<string, unknown>[]>)("test-key")
-      const sonnet = dynamicModels.find((m) => m.id === "claude-sonnet-4-20250514")
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
+      const dynamicModels = await (
+        config.fetchDynamicModels as (
+          key: string | undefined,
+        ) => Promise<Record<string, unknown>[]>
+      )("test-key")
+      const sonnet = dynamicModels.find(
+        (m) => m.id === "claude-sonnet-4-20250514",
+      )
       expect(sonnet?.contextWindow).toBe(0)
       expect(sonnet?.maxTokens).toBe(0)
     })
@@ -386,9 +435,18 @@ describe("omc-pi extension", () => {
 
       await extension(pi)
 
-      const config = pi._registeredProviders.get("omc-anthropic") as Record<string, unknown>
-      const dynamicModels = await (config.fetchDynamicModels as (key: string | undefined) => Promise<Record<string, unknown>[]>)("test-key")
-      const sonnet = dynamicModels.find((m) => m.id === "claude-sonnet-4-20250514")
+      const config = pi._registeredProviders.get("omc-anthropic") as Record<
+        string,
+        unknown
+      >
+      const dynamicModels = await (
+        config.fetchDynamicModels as (
+          key: string | undefined,
+        ) => Promise<Record<string, unknown>[]>
+      )("test-key")
+      const sonnet = dynamicModels.find(
+        (m) => m.id === "claude-sonnet-4-20250514",
+      )
       expect(sonnet?.input).toEqual(["text", "image"])
     })
   })
@@ -427,7 +485,8 @@ describe("omc-pi extension", () => {
       )
 
       const tokenUsageCalls = fetchMock.mock.calls.filter(
-        (call) => typeof call[0] === "string" && call[0].includes("/token-usage"),
+        (call) =>
+          typeof call[0] === "string" && call[0].includes("/token-usage"),
       )
       expect(tokenUsageCalls).toHaveLength(1)
       const [url, opts] = tokenUsageCalls[0]
@@ -468,7 +527,8 @@ describe("omc-pi extension", () => {
       )
 
       const tokenUsageCalls = fetchMock.mock.calls.filter(
-        (call) => typeof call[0] === "string" && call[0].includes("/token-usage"),
+        (call) =>
+          typeof call[0] === "string" && call[0].includes("/token-usage"),
       )
       expect(tokenUsageCalls).toHaveLength(0)
     })
@@ -534,7 +594,9 @@ describe("omc-pi extension", () => {
       await extension(pi)
 
       expect(fetchMock).toHaveBeenCalledWith("http://custom:9999/models")
-      expect(fetchMock).toHaveBeenCalledWith("http://custom:9999/account/credentials")
+      expect(fetchMock).toHaveBeenCalledWith(
+        "http://custom:9999/account/credentials",
+      )
     })
   })
 })

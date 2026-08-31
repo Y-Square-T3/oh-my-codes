@@ -130,7 +130,9 @@ export default async function extension(pi: ExtensionAPI): Promise<void> {
       "Failed to fetch models or credentials from omcd, skipping provider injection",
     )
   } else if (modelsData.providers.length === 0) {
-    pi.logger.warn("No providers available from omcd, skipping provider injection")
+    pi.logger.warn(
+      "No providers available from omcd, skipping provider injection",
+    )
   } else {
     for (const provider of modelsData.providers) {
       const config = buildProviderConfig(
