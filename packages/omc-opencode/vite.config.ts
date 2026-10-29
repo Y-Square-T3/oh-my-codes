@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: "index",
     },
     rollupOptions: {
-      external: ["@opencode-ai/plugin"],
+      external: ["@opencode-ai/plugin", "@opencode/plugin"],
     },
   },
   plugins: [dts({ rollupTypes: true })],

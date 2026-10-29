@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { OhMyCodesPlugin } from "../src/index.js"
+import OhMyCodesPluginDefault from "../src/index.js"
 
 function mockClient() {
   return {
@@ -19,7 +20,25 @@ function mockInput() {
   }
 }
 
-describe("OhMyCodesPlugin", () => {
+function finishedAssistantEvent(overrides: Record<string, unknown> = {}) {
+  return {
+    event: {
+      type: "message.updated",
+      properties: {
+        info: {
+          role: "assistant",
+          finish: true,
+          sessionID: "s",
+          id: "m",
+          tokens: { input: 1, output: 2 },
+          ...overrides,
+        },
+      },
+    },
+  }
+}
+
+describe("OhMyCodesPlugin (V1 server)", () => {
   let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
@@ -36,6 +55,13 @@ describe("OhMyCodesPlugin", () => {
     expect(typeof OhMyCodesPlugin).toBe("function")
   })
 
+  it("should have a dual-shape default export for V1/V2 hosts", () => {
+    expect(OhMyCodesPluginDefault).toMatchObject({ id: "oh-my-codes" })
+    expect(typeof OhMyCodesPluginDefault.setup).toBe("function")
+    expect(typeof OhMyCodesPluginDefault.server).toBe("function")
+    expect(OhMyCodesPluginDefault.server).toBe(OhMyCodesPlugin)
+  })
+
   it("should return hooks with event and config handlers", async () => {
     const hooks = await OhMyCodesPlugin(mockInput())
     expect(hooks).toHaveProperty("event")
@@ -44,7 +70,7 @@ describe("OhMyCodesPlugin", () => {
     expect(typeof hooks.config).toBe("function")
   })
 
-  describe("V1 message.updated", () => {
+  describe("message.updated", () => {
     it("should send record for finished assistant message", async () => {
       const hooks = await OhMyCodesPlugin(mockInput())
       await hooks.event!({
@@ -137,54 +163,11 @@ describe("OhMyCodesPlugin", () => {
       } as never)
       expect(fetchMock).not.toHaveBeenCalled()
     })
-  })
 
-  describe("V2 session.next.step.ended", () => {
-    it("should send record for step ended event", async () => {
+    it("should ignore events from other versions", async () => {
       const hooks = await OhMyCodesPlugin(mockInput())
-      await hooks.event!({
-        event: {
-          type: "session.next.step.ended",
-          properties: {
-            sessionID: "sess-2",
-            assistantMessageID: "msg-2",
-            agent: "coder",
-            providerID: "openai",
-            modelID: "gpt-4o",
-            tokens: {
-              input: 500,
-              output: 300,
-              reasoning: 0,
-              cache: { read: 200, write: 100 },
-            },
-          },
-        },
-      } as never)
-
-      expect(fetchMock).toHaveBeenCalledOnce()
-      const body = JSON.parse(fetchMock.mock.calls[0]![1].body)
-      expect(body).toMatchObject({
-        sessionId: "sess-2",
-        messageId: "msg-2",
-        model: "gpt-4o",
-        inputTokens: 500,
-        outputTokens: 300,
-      })
-    })
-
-    it("should ignore compaction agent steps", async () => {
-      const hooks = await OhMyCodesPlugin(mockInput())
-      await hooks.event!({
-        event: {
-          type: "session.next.step.ended",
-          properties: {
-            sessionID: "s",
-            assistantMessageID: "m",
-            agent: "summarize",
-            tokens: { input: 1, output: 2 },
-          },
-        },
-      } as never)
+      await hooks.event!({ event: { type: "session.step.ended" } } as never)
+      await hooks.event!({ event: { type: "session.step.started" } } as never)
       expect(fetchMock).not.toHaveBeenCalled()
     })
   })
@@ -193,32 +176,14 @@ describe("OhMyCodesPlugin", () => {
     it("should use OMC_DAEMON_URL env var", async () => {
       process.env.OMC_DAEMON_URL = "http://custom:9999"
       const hooks = await OhMyCodesPlugin(mockInput())
-      await hooks.event!({
-        event: {
-          type: "session.next.step.ended",
-          properties: {
-            sessionID: "s",
-            assistantMessageID: "m",
-            tokens: { input: 1, output: 2 },
-          },
-        },
-      } as never)
+      await hooks.event!(finishedAssistantEvent() as never)
 
       expect(fetchMock.mock.calls[0]![0]).toBe("http://custom:9999/token-usage")
     })
 
     it("should default to localhost:9823", async () => {
       const hooks = await OhMyCodesPlugin(mockInput())
-      await hooks.event!({
-        event: {
-          type: "session.next.step.ended",
-          properties: {
-            sessionID: "s",
-            assistantMessageID: "m",
-            tokens: { input: 1, output: 2 },
-          },
-        },
-      } as never)
+      await hooks.event!(finishedAssistantEvent() as never)
 
       expect(fetchMock.mock.calls[0]![0]).toBe(
         "http://127.0.0.1:9823/token-usage",
@@ -232,16 +197,7 @@ describe("OhMyCodesPlugin", () => {
       const hooks = await OhMyCodesPlugin(mockInput())
 
       await expect(
-        hooks.event!({
-          event: {
-            type: "session.next.step.ended",
-            properties: {
-              sessionID: "s",
-              assistantMessageID: "m",
-              tokens: { input: 1, output: 2 },
-            },
-          },
-        } as never),
+        hooks.event!(finishedAssistantEvent() as never),
       ).resolves.toBeUndefined()
     })
 
@@ -250,16 +206,7 @@ describe("OhMyCodesPlugin", () => {
       const input = mockInput()
       const hooks = await OhMyCodesPlugin(input)
 
-      await hooks.event!({
-        event: {
-          type: "session.next.step.ended",
-          properties: {
-            sessionID: "s",
-            assistantMessageID: "m",
-            tokens: { input: 1, output: 2 },
-          },
-        },
-      } as never)
+      await hooks.event!(finishedAssistantEvent() as never)
 
       expect(input.client.app.log).toHaveBeenCalled()
     })

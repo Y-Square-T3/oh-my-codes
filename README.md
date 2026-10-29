@@ -108,6 +108,8 @@ omc token-usage summary
 | `omc daemon stop` | Stop daemon |
 | `omc daemon status` | Check daemon status |
 | `omc health` | Health check |
+| `omc opencode install [--v1\|--v2]` | Register the OpenCode plugin (auto-detects v1/v2 config) |
+| `omc opencode uninstall` | Remove the OpenCode plugin from both config keys |
 
 ## Configuration
 
@@ -117,6 +119,34 @@ Configuration is resolved in the following priority (highest to lowest):
 2. Environment variables
 3. Project config (`.omc/omc.json`)
 4. User config (`~/.config/omc/omc.json`)
+
+## OpenCode Integration
+
+The [`oh-my-codes-opencode`](./packages/omc-opencode) plugin connects [OpenCode](https://opencode.ai) to your OMC account: it injects your OMC providers/models and reports token usage back to the `omcd` daemon.
+
+**Supported hosts:** OpenCode **v2** and OpenCode **v1 ≥ 1.18.29** from a single package.
+
+```bash
+omc opencode install    # auto-detects the installed OpenCode version
+omc opencode uninstall
+```
+
+- On OpenCode 2.x it writes the `plugins` config key; on 1.x it writes `plugin`. On V2, an entry left in the legacy `plugin` key by an older install is moved to `plugins` automatically.
+- Use `--v1` or `--v2` to force the config key when the version cannot be detected. If `opencode` is not on `PATH`, install defaults to the V2 key and says so.
+
+Manual configuration (global `~/.config/opencode/opencode.json(c)`):
+
+```jsonc
+// OpenCode v2
+{ "plugins": ["oh-my-codes-opencode"] }
+```
+
+```jsonc
+// OpenCode v1 (>= 1.18.29)
+{ "plugin": ["oh-my-codes-opencode"] }
+```
+
+The daemon URL is taken from `OMC_DAEMON_URL` (default `http://127.0.0.1:9823`). Providers you configure yourself are never overridden by injected ones.
 
 ## Development
 
@@ -163,7 +193,7 @@ oh-my-codes/
 │   │   │   └── omc-service/    # OS service management
 │   │   ├── dist/               # Platform-specific packages
 │   │   └── scripts/            # Build scripts
-│   └── omc-opencode/           # OpenCode plugin
+│   └── omc-opencode/           # OpenCode plugin (supports OpenCode v1 ≥1.18.29 and v2)
 ├── docs/                       # Architecture documentation
 └── AGENTS.md                   # AI agent instructions
 ```

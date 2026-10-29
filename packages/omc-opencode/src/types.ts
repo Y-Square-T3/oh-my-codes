@@ -34,23 +34,27 @@ export interface V1MessageUpdatedEvent {
   }
 }
 
-export interface V2StepEndedEvent {
-  type: "session.next.step.ended"
-  properties?: {
-    sessionID?: string
-    assistantMessageID?: string
-    agent?: string
-    providerID?: string
-    modelID?: string
-    finish?: string
-    cost?: number
-    tokens?: {
-      input?: number
-      output?: number
-      reasoning?: number
-      cache?: { read?: number; write?: number }
-    }
-  }
+export interface V2StepTokens {
+  input?: number
+  output?: number
+  reasoning?: number
+  cache?: { read?: number; write?: number }
+}
+
+export interface V2StepStartedData {
+  sessionID?: string
+  assistantMessageID?: string
+  agent?: string
+  model?: { id?: string; providerID?: string; variant?: string }
+}
+
+export interface V2StepEndedData {
+  sessionID?: string
+  assistantMessageID?: string
+  finish?: string
+  rawFinish?: string
+  cost?: number
+  tokens?: V2StepTokens
 }
 
 export interface DaemonProviderInfo {

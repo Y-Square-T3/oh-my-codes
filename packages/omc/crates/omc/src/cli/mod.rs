@@ -160,7 +160,14 @@ pub struct OpencodeCommand {
 
 #[derive(Subcommand)]
 pub enum OpencodeAction {
-    Install,
+    Install {
+        /// Force writing the OpenCode 1.x `plugin` config key
+        #[arg(long, conflicts_with = "v2")]
+        v1: bool,
+        /// Force writing the OpenCode 2.x `plugins` config key
+        #[arg(long)]
+        v2: bool,
+    },
     Uninstall,
 }
 
